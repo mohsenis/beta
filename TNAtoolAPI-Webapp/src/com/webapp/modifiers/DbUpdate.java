@@ -1,5 +1,6 @@
 package com.webapp.modifiers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.examples.GtfsHibernateReaderExampleMain;
+import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
 
 @Path("/dbupdate")
 @XmlRootElement
@@ -79,5 +81,18 @@ public class DbUpdate {
 		}
 		return response;
     }
-
+	@GET
+    @Path("/addfeed")
+   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object addfeed(@QueryParam("feedname") String feedname) throws IOException{
+		String [] args = new String[5];
+		args[0] = "--driverClass=\"org.postgresql.Driver\"";
+		args[1] = "--url=\"jdbc:postgresql://localhost:5432/gtfsdb\"";
+		args[2] = "--username=\"postgres\"";
+		args[3] = "--password=\"123123\"";
+		args[4] = "D:/feeds/"+feedname;
+		GtfsDatabaseLoaderMain.main(args);		
+		return new TransitError(feedname +"Has been added to the database");
+	}
+	
 }

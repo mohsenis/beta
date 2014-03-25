@@ -16,15 +16,17 @@
  */
 package org.onebusaway.gtfs.model;
 
+import org.onebusaway.csv_entities.schema.annotations.CsvField;
 import org.onebusaway.gtfs.model.Stop;
 
 //@CsvFields(filename = "agency.txt", prefix = "agency_")
-public final class StopServiceMap extends IdentityBean<String> {
+public final class StopServiceMap extends IdentityBean<Integer> {
 
   private static final long serialVersionUID = 1L;
 
   //@CsvField(optional = true, mapping = AgencyIdTranslationFieldMappingFactory.class)
-  private String id;
+  @CsvField(ignore = true)
+  private Integer id;
 
   private String agencyId;
   
@@ -50,7 +52,7 @@ public final class StopServiceMap extends IdentityBean<String> {
     this.stopId = a.stopId;    
   }
 
-  public String getId() {
+  public Integer getId() {
     return id;
   }
   
@@ -58,7 +60,7 @@ public final class StopServiceMap extends IdentityBean<String> {
 	  return stop;
   }
 
-  public void setId(String id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 
