@@ -72,6 +72,14 @@ public interface GtfsRelationalDao extends GtfsDao {
   public List<Stop> getStopsForStation(Stop station);
 
   /****
+   * Stop Methods
+   * Alireza: 
+   ****/
+  public List<ServiceCalendar> getCalendarForAgency(String agency);
+  public List<ServiceCalendarDate> getCalendarDatesForAgency(String agency);
+  
+  
+  /****
    * {@link Trip} Methods
    ****/
 

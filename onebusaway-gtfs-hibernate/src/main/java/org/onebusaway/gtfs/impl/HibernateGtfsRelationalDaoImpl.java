@@ -27,6 +27,7 @@ import java.util.Set;
 import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.CensusData;
 import org.onebusaway.gtfs.model.FareAttribute;
 import org.onebusaway.gtfs.model.FareRule;
 import org.onebusaway.gtfs.model.FeedInfo;
@@ -368,6 +369,26 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
 
     throw new MultipleCalendarsForServiceIdException(serviceId);
   }
+  
+  @Override
+  public List<ServiceCalendarDate> getCalendarDatesForAgency(
+      String agency) {
+    return _ops.findByNamedQueryAndNamedParam("calendarDatesForAgency",
+        "agency", agency);
+  }
+  
+  @Override
+  public List<ServiceCalendar> getCalendarForAgency(String agency) {
+	    List<ServiceCalendar> calendars = _ops.findByNamedQueryAndNamedParam(
+	        "calendarForAgency", "agency", agency);
+
+	    switch (calendars.size()) {
+	      case 0:
+	        return null;
+	      default:
+	        return calendars;
+	    }
+  }
 
   @Override
   public List<FareRule> getFareRulesForFareAttribute(FareAttribute fareAttribute) {
@@ -419,4 +440,10 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   public <T> void clearAllEntitiesForType(Class<T> type) {
     _ops.clearAllEntitiesForType(type);
   }
+
+@Override
+public List<CensusData> getAllCensusData() {
+	// TODO Auto-generated method stub
+	return null;
+}
 }

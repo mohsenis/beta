@@ -27,6 +27,7 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
+import org.onebusaway.gtfs.model.ServiceCalendarDate;
 import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
@@ -114,6 +115,22 @@ public class GtfsHibernateReaderExampleMain {
   public static ServiceCalendar  QueryCalendarforTrip(Trip trip){
 	  GtfsMutableRelationalDao dao = factory.getDao();
 	  return dao.getCalendarForServiceId(trip.getServiceId());
+  }
+  
+  public static List<ServiceCalendarDate>  QueryCalendarDatesforTrip(Trip trip){
+	  GtfsMutableRelationalDao dao = factory.getDao();
+	  return dao.getCalendarDatesForServiceId(trip.getServiceId());
+  }
+  
+  //Alireza
+  public static List<ServiceCalendar>  QueryCalendarforAgency(String agency){
+	  GtfsMutableRelationalDao dao = factory.getDao();
+	  return dao.getCalendarForAgency(agency);
+  }
+  
+  public static List<ServiceCalendarDate>  QueryCalendarDatesforAgency(String agency){
+	  GtfsMutableRelationalDao dao = factory.getDao();
+	  return dao.getCalendarDatesForAgency(agency);
   }
   
   public static List<ShapePoint> Queryshapebytrip(AgencyAndId trip){
