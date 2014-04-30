@@ -320,7 +320,7 @@
         <property name="directionId" />
         <property name="blockId" index="blockId" />
         <property name="wheelchairAccessible"/>
-        <property name="shape"/>
+        <property name="shape" type="org.hibernate.type.TextType"/>
         <property name="length"/>
         <property name="estlength"/>
         <property name="stopscount"/>

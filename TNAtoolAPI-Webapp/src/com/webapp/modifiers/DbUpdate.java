@@ -34,12 +34,12 @@ public class DbUpdate {
     	ShapeList response = new ShapeList();
 		List<Trip> triplist = GtfsHibernateReaderExampleMain.QueryTripsforAgency(agency);
 		String shapeId = "";
+		String pe = "";	    		    	
+    	double length = 0;
+    	double estlength = 0;
+    	String Desc = "";
 		for (Trip trip: triplist){
-			AgencyAndId agencyandtrip = trip.getId();	    	
-	    	String pe = "";	    		    	
-	    	double length = 0;
-	    	double estlength = 0;
-	    	String Desc = "";
+			AgencyAndId agencyandtrip = trip.getId();    	
 	    	Trip tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip);
 	    	List<ShapePoint> shapes = GtfsHibernateReaderExampleMain.Queryshapebytrip(agencyandtrip);
 	    	

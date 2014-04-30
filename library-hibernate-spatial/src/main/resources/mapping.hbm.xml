@@ -1,0 +1,25 @@
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.library.model">
+    <class name="Census" table="gtfs_census_data_spatial">
+
+        <id name="id" column="block_id" type="string" length="50" />
+        <property name="population" type="integer" column="population"/>       
+        <property name="latitude" type="double" column="lat" />
+        <property name="longitude" type="double" column="lon"/>
+        <property name="location" type="org.hibernatespatial.GeometryUserType"  column="location"/>
+        <property name="poptype" type="string" />
+        <property name="landarea" type="integer" />
+        <property name="waterarea" type="integer" />
+    </class>
+    
+    	
+    <query name = "POP_BY_COORDINATES">
+    <![CDATA[select sum(population) from Census where distance(:point,location)<:radius]]>
+	</query>
+	<query name = "CENSUS_BY_COORDINATES">
+    <![CDATA[from Census where distance(:point,location)<:radius]]>
+	</query>
+	   
+</hibernate-mapping>
