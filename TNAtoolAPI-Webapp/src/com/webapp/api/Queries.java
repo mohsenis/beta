@@ -518,7 +518,6 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     	if (routeid != null){    		
     		AgencyAndId route = new AgencyAndId(agency,routeid);
     		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(route);
-<<<<<<< HEAD
     		List <Coordinate> points = new ArrayList <Coordinate>();
     		for (Stop s : stops){    			
     			points.add(new Coordinate(s.getLat(), s.getLon()));
@@ -531,11 +530,8 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     			} catch (TransformException e) {    				
     				e.printStackTrace();
     			} 
-    		int k = 0;
-=======
-    		
+    		int k = 0;    		
     		int totalLoad = stops.size();
->>>>>>> branch 'master' of https://github.com/tnatool/test.git
     		for (Stop instance: stops){
     			index++;
     			StopR each = new StopR();
@@ -552,11 +548,8 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     			//}    			
     			each.Routes = GtfsHibernateReaderExampleMain.QueryRouteIdsforStop(instance).toString();
     			response.StopR.add(each);
-<<<<<<< HEAD
     			k++;
-=======
     			setprogVal(key, (int) Math.round(index*100/totalLoad));
->>>>>>> branch 'master' of https://github.com/tnatool/test.git
     		}
     	} else{
     		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency);
@@ -643,15 +636,6 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 		RouteR each = new RouteR();
 		double length = 0;
 		double ServiceMiles = 0;
-<<<<<<< HEAD
-	    double Stopportunity = 0;
-	    //double PopStopportunity = 0;		
-		for (Trip trip: alltrips){
-			if (trip.getRoute().getId().getId().equals(instance.getId().getId())){
-			int frequency = 0;	
-			int stops = GtfsHibernateReaderExampleMain.Querystoptimebytrip(trip.getId()).size();			
-			double TL = Math.max(trip.getlength(),trip.getestlength());
-=======
 	    double Stopportunity = 0;       
 		each.RouteId = routeId+"";
 		each.RouteSName = thisroute.getShortName();
@@ -698,7 +682,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 				
 			}
 			double TL = Math.max(instance.getlength(),instance.getestlength());			
->>>>>>> branch 'master' of https://github.com/tnatool/test.git
+
 			if (TL > length) 
 				length = TL;
 			
