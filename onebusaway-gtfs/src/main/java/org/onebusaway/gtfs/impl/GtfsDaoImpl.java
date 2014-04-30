@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.CensusData;
 import org.onebusaway.gtfs.model.FareAttribute;
 import org.onebusaway.gtfs.model.FareRule;
 import org.onebusaway.gtfs.model.FeedInfo;
@@ -290,5 +291,11 @@ public class GtfsDaoImpl extends GenericDaoImpl implements GtfsMutableDao {
       throw new UnsupportedOperationException();
     }
   }
+
+@Override
+public java.util.List<CensusData> getAllCensusData() {
+	// TODO Auto-generated method stub
+	return null;
+}
 
 }

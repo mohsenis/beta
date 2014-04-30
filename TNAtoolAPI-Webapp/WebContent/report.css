@@ -1,3 +1,8 @@
+div{
+	margin:0px;
+	padding:0px
+}
+
 body {
 	font-family: sans-serif;	
 	line-height: 16px;
@@ -7,9 +12,8 @@ body {
 	/* do not add scroll bars unless overridden on sub-elements */
 	overflow-y: auto;
 	overflow-x: hidden;
-	
-	
 }
+
 em{
 	font-size: 10px;
 	color:  #99FF33;
@@ -26,7 +30,6 @@ em{
 }
 
 .tbox {
-	
 	height: 30px;	
 	width: 45px;		
 	padding-top:0px;
@@ -34,14 +37,23 @@ em{
 	padding-right:5px;
 	padding-left:5px;
 }
-table {
+
+.ui-tooltip {
+	font-size:80%;
+	padding: 5px 5px;
+}
+
+#datepicker {
+	margin-left:20px;
+}
+
+#RT{
 	border: 1px solid black;	
 	border-collapse:collapse;
 	max-width: 99%;
-		
-}
+} 
 
-th
+#RT th
 {
 	border: 1px solid black;
 	background-color:grey;
@@ -51,7 +63,8 @@ th
 	padding:5px;
 	color: white;
 }
-td
+
+#RT td
 {
 	border: 1px solid black;
 	vertical-align:middle;
@@ -59,13 +72,13 @@ td
 	padding:5px;
 }
 
-tr:nth-child(odd) {
+#RT tr:nth-child(odd) {
   	background-color: #eee;
 }
-tr:nth-child(even) {
+#RT tr:nth-child(even) {
   	background-color: #fff;
 }
-tr:hover { 
+#RT tr:hover { 
 	background: #def; 
 }
 div#map {
@@ -92,8 +105,6 @@ img#legend {
 	margin-right: auto;
 }
 
-
-
 h2 {
 	font-size: 100%;
 	float: left;
@@ -119,21 +130,75 @@ div.container {
 	width: 100%;
 	background: #888;
 }
-div.controls {
+#controls {
 	height: 30px;
-	width: 100%;	
+	width: 100%;
+	font-size:100%;
+	padding: 0px;
+	margin: 0px;
+	
 }
+#td1{
+	width:20%;
+	padding-top: 8px;
+	margin: 3px;
+	vertical-align:top;
+	text-align:left;
+}
+#td2{
+	width:40%;
+	padding-top: 8px;
+	margin: 1px;
+	vertical-align:top;
+	text-align:center;
+}
+#td3{
+	width:25%;
+	padding-top: 8px;
+	margin: 1px;
+	vertical-align:top;
+	text-align:right;
+}
+#accordionItems{
+	text-align:left;
+	width:50%;
+	padding-left:10px
+}
+
+.ui-accordion .ui-accordion-header {
+	display: block;
+	cursor: pointer;
+	position: relative;
+	margin-top: 2px;
+	padding: .1em .1em .1em .2em;
+	min-height: 0; /* support: IE7 */
+}
+#accordionItems {  }
+#accordionItems ul { list-style:none; }
+
+.ui-progressbar {
+    width:50%;
+    margin:auto
+}
+
+.progress-label {
+    /* position: absolute; */
+    left: 50%;
+    top: 4px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}
+ 
 div.headerL {
 	float: left;
-	width: 38%;
+	width: 25%;
 	margin: 0px;
 	height: 35px;
-	
-	
 }
+
 div.headerR {
 	float: right;
-	width: 58%;
+	width: 45%;
 	margin: 1px;
 	height: 35px;
 	text-align:right;
@@ -151,14 +216,11 @@ form {
 }
 
 form span {
-	/* group labels and their buttons together on a single line */
 	width: 100%;
 	display: block;
 	overflow: hidden;
 	margin: 0px;
-	padding: 0px;
-	/* can we keep rows of buttons from wrapping when vertical scroll bar appears ? */
- 	/* white-space: */  
+	padding: 0px; 
 }
 
 

@@ -25,6 +25,12 @@
      
      <query name="updatedTripShpaeLength" read-only="false">
         update Trip set length = :length, estlength = :estlength, shape = :shape WHERE id = :tripid    
+    </query>
+    <query name="calendarForAgency" read-only="true">
+       FROM ServiceCalendar d WHERE d.serviceId.agencyId = :agency
+    </query>
+    <query name="calendarDatesForAgency" read-only="true">
+        FROM ServiceCalendarDate d WHERE d.serviceId.agencyId = :agency
     </query>    
     <query name="stopsForAgency" read-only="true">
        SELECT ssm.stop FROM StopServiceMap ssm WHERE ssm.agencyId = :agency

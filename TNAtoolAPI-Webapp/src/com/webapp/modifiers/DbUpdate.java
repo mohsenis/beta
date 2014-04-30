@@ -33,13 +33,14 @@ public class DbUpdate {
     public Object dbshapesforagency(@QueryParam("agency") String agency){
     	ShapeList response = new ShapeList();
 		List<Trip> triplist = GtfsHibernateReaderExampleMain.QueryTripsforAgency(agency);
-		String shapeId = "";
-		String pe = "";	    		    	
+		String shapeId = "";		    	
+    	String pe = "";
     	double length = 0;
     	double estlength = 0;
     	String Desc = "";
 		for (Trip trip: triplist){
-			AgencyAndId agencyandtrip = trip.getId();    	
+			AgencyAndId agencyandtrip = trip.getId();	
+
 	    	Trip tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip);
 	    	List<ShapePoint> shapes = GtfsHibernateReaderExampleMain.Queryshapebytrip(agencyandtrip);
 	    	
@@ -90,7 +91,7 @@ public class DbUpdate {
 		args[1] = "--url=\"jdbc:postgresql://localhost:5432/gtfsdb\"";
 		args[2] = "--username=\"postgres\"";
 		args[3] = "--password=\"123123\"";
-		args[4] = "D:/feeds/"+feedname;
+		args[4] = "C:/feeds/"+feedname;
 		GtfsDatabaseLoaderMain.main(args);		
 		return new TransitError(feedname +"Has been added to the database");
 	}
