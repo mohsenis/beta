@@ -32,7 +32,7 @@ $(document).ready(function(){
 	$( "#progressbar" ).progressbar({
 	    value: false,
 	}); 
-	
+	var prog = false;
 	function progress() {
 		$.ajax({
 			type: 'GET',
@@ -41,7 +41,14 @@ $(document).ready(function(){
 			async: true,
 			success: function(item){
 				progVal = parseInt(item.progVal);
-				if(progVal==0){progVal=false;}
+				if(progVal==0){
+					progVal=false;
+					if(prog){
+						clearTimeout(timeVar);
+					}
+				}else{
+					prog=true;
+				}
 				$( "#progressbar" ).progressbar( "value", progVal );	
 			}			
 		});	
@@ -54,7 +61,7 @@ $(document).ready(function(){
 		type: 'GET',
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?&agency='+window.opener.qstring+'&x='+window.opener.qstringx+'&key='+ key,
-		async: false,
+		async: true,
 		success: function(d){
 			$('h2').append(d.AgencyName+' Stops Report<br><hr>');
 			$.each(d.StopR, function(i,item){
@@ -70,6 +77,8 @@ $(document).ready(function(){
 			html = html + '</table>'
 			$('#displayReport').append($(html));	
 			progressbar.remove();
+			sorttable.makeSortable(document.getElementById('RT'));
+			sorttable.innerSortFunction.apply(document.getElementById('sn'), []);
     }});
 	
 	/* $('a').click(function(e){
@@ -86,9 +95,7 @@ function reload(){
 	location.reload();
 }
 
-$(window).load(function () {
-	sorttable.innerSortFunction.apply(document.getElementById('sn'), []);
-});
+
 </script>
 </head>
 <body>

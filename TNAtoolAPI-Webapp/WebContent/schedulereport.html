@@ -1,0 +1,169 @@
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Transit Agency Stops Report</title>
+	<script src="js/lib/jquery-1.9.1.min.js"></script>
+	<script src="js/lib/jquery-ui.js"></script>
+	<script src="js/lib/date.js"></script>
+	<script src="js/jQueryContent.js"></script>
+	<script src="js/lib/sorttable.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
+	<link rel="stylesheet" type="text/css" href="report.css" />
+	
+<script type="text/javascript">
+//var csvfile ='StopID, StopName, RoutesStopBelongsTo, Population \n';
+var qstring = '';
+var dateID;
+var progVal = 0; 
+var html;
+var key = Math.random();
+
+$(document).ready(function(){		
+	$( "#datepicker" ).datepicker({
+		altField: "#alternate",
+	    altFormat: "DD, d MM, yy",
+		onSelect: function (date) {
+			window.opener.qstringd = date;
+			reload();
+	    }
+	});
+	$( "#datepicker" ).datepicker( "setDate", window.opener.qstringd );
+	$( "#progressbar" ).progressbar({
+	    value: false,
+	}); 
+	var prog = false;
+	function progress() {
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/PorgVal?&key='+key,
+			async: true,
+			success: function(item){
+				progVal = parseInt(item.progVal);
+				if(progVal==0){
+					progVal=false;
+					if(prog){
+						clearTimeout(timeVar);
+					}
+				}else{
+					prog=true;
+				}
+				
+				$( "#progressbar" ).progressbar( "value", progVal );	
+			}			
+		});	
+	    if ( progVal == 100 ) {
+			clearTimeout(timeVar);
+	  	}
+	} 
+	timeVar = setInterval(progress, 100);		
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/ScheduleR?&agency='+window.opener.qstring+'&day='+window.opener.qstringd+'&key='+ key,
+		async: true,
+		success: function(d){
+			//var headerArray;
+			$('h2').append(d.Agency+': Route '+d.Route+' schedule<br><br>Fare Price: $'+d.Fare+'<hr>');
+			
+			$.each(d.directions, function(k, ktem){
+				//alert(ktem.schedules.length);
+				if(ktem.stops.length!=0){
+					var headerArray = new Array();
+					html = '<table id="RT'+k+'" class="sortable" align="center"><tr>';
+					$.each(ktem.stops, function(i, item){
+						if(i==0){
+							html += '<th id="sn'+k+'">'+item.StopName+'</th>';	
+						}else{
+							html += '<th>'+item.StopName+'</th>';
+						}
+						headerArray.push(item.StopId);
+					});
+					html += '</tr>';
+					$.each(ktem.schedules, function(j, jtem){
+						html += '<tr>';
+						var io=0;
+						$.each(jtem.stoptimes, function(i, item){
+							while(io<headerArray.length && item.StopId!=headerArray[io]){
+								//alert(io);
+								html += '<td>__</td>';
+								io++;
+								//alert(io);
+							}
+							if(io<headerArray.length){
+								html += '<td>'+item.StopTime+'</td>';
+								io++;
+							}
+							
+						});
+						while(io<headerArray.length){
+							html += '<td>__</td>';
+							io++;
+						}
+						html += '</tr>';
+					});
+									
+					html = html + '</table><br><br><br>';
+					$('#displayReport'+k).append($(html));
+					sorttable.makeSortable(document.getElementById('RT'+k));
+					sorttable.innerSortFunction.apply(document.getElementById('sn'+k), []);	
+				}
+				
+			});
+			progressbar.remove();
+    }});
+});	
+function reload(){	
+	
+	location.reload();
+}
+
+
+
+</script>
+</head>
+<body>
+		<div class="container">
+			<div class="headerL">
+				<h1>Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">
+				<input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
+				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" />
+				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+			</div>
+		</div>	
+		
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  <td id="td2"> 
+			  	<!-- <div id="datepicker"></div> -->
+			  </td> 
+			  <td id="td3" style="width:0.2%">
+			  	<div class="headerBR" > 
+			    	<!-- <input type="button" onclick="reload()" title="Refresh Report"  value="Submit" class="button" /> -->
+		    	    <div id="datepicker" style="text-align:center"></div>
+		    	    <p ><input type="text" id="alternate" style="text-align:left;border:none; width:70%" ></input></p>
+		    	</div>
+			  </td>
+			</tr>
+		</table>
+		
+		<p id="displayReport0" style="overflow:auto"><br></p>
+		<p id="displayReport1" style="overflow:auto"><br></p>
+		<br>
+		<br>
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>
+		
+</body>
+</html>

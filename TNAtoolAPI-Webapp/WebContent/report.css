@@ -258,3 +258,72 @@ form span.timeEntry select {
 	width: 100%;
 }
 
+#RT0{
+	border: 1px solid black;	
+	border-collapse:collapse;
+	max-width: 99%;
+} 
+
+#RT0 th
+{
+	border: 1px solid black;
+	background-color:grey;
+	border-collapse:collapse;
+	vertical-align:middle;
+	text-align:center;
+	padding:5px;
+	color: white;
+}
+
+#RT0 td
+{
+	border: 1px solid black;
+	vertical-align:middle;
+	text-align:center;
+	padding:5px;
+}
+
+#RT0 tr:nth-child(odd) {
+  	background-color: #eee;
+}
+#RT0 tr:nth-child(even) {
+  	background-color: #fff;
+}
+#RT0 tr:hover { 
+	background: #def; 
+}
+
+#RT1{
+	border: 1px solid black;	
+	border-collapse:collapse;
+	max-width: 99%;
+} 
+
+#RT1 th
+{
+	border: 1px solid black;
+	background-color:grey;
+	border-collapse:collapse;
+	vertical-align:middle;
+	text-align:center;
+	padding:5px;
+	color: white;
+}
+
+#RT1 td
+{
+	border: 1px solid black;
+	vertical-align:middle;
+	text-align:center;
+	padding:5px;
+}
+
+#RT1 tr:nth-child(odd) {
+  	background-color: #eee;
+}
+#RT1 tr:nth-child(even) {
+  	background-color: #fff;
+}
+#RT1 tr:hover { 
+	background: #def; 
+}

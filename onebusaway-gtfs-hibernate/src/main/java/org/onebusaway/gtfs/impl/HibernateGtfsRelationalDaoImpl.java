@@ -319,6 +319,11 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   public List<StopTime> getStopTimesForStop(Stop stop) {
     return _ops.findByNamedQueryAndNamedParam("stopTimesByStop", "stop", stop);
   }
+  
+  @Override
+  public List<FareRule> getFareRuleForRoute(Route route) {
+    return _ops.findByNamedQueryAndNamedParam("fareRuleForRoute", "route", route);
+  }
 
   @Override
   public List<AgencyAndId> getAllShapeIds() {

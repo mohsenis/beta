@@ -23,6 +23,7 @@ import com.webapp.api.utils.PolylineEncoder;
 
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.FareRule;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.ServiceCalendarDate;
@@ -413,6 +414,12 @@ daysLoop:   for (int i=0; i<dates.length; i++){
         else 
         	response.StopPerRouteMile = "NA";
         
+        try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+        
         progVal.remove(key);
                 
     	return response;
@@ -465,6 +472,13 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     			setprogVal(key, (int) Math.round(index*100/totalLoad));
     		}
     	}           
+    	
+    	try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    	
     	progVal.remove(key);
         return response;
     }
@@ -500,6 +514,11 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	        response.agencySR.add(each);
 	        setprogVal(key, (int) Math.round(index*100/totalLoad));
 	    }
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	    progVal.remove(key);
 	    return response;
 	}
@@ -521,7 +540,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 		
 		List <Trip> alltrips = GtfsHibernateReaderExampleMain.QueryTripsforAgency_RouteSorted(agency);	
 		RouteListR response = new RouteListR();
-		response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency).getName();
+		response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency).getName()+"";
 		Route thisroute =  alltrips.get(0).getRoute();
 		String routeId =thisroute.getId().getId();
 		RouteR each = new RouteR();
@@ -529,9 +548,9 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 		double ServiceMiles = 0;
 	    double Stopportunity = 0;       
 		each.RouteId = routeId+"";
-		each.RouteSName = thisroute.getShortName();
-		each.RouteLName = thisroute.getLongName();
-		each.RouteDesc = thisroute.getDesc();
+		each.RouteSName = thisroute.getShortName()+"";
+		each.RouteLName = thisroute.getLongName()+"";
+		each.RouteDesc = thisroute.getDesc()+"";
 		each.RouteType = String.valueOf(thisroute.getType());
 		each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyRoute(thisroute.getId()).size());	 
 		int index =0;
@@ -565,9 +584,9 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 				ServiceMiles = 0;
 			    Stopportunity = 0;		        
 				each.RouteId = routeId+"";			
-				each.RouteSName = thisroute.getShortName();
-				each.RouteLName = thisroute.getLongName();
-				each.RouteDesc = thisroute.getDesc();
+				each.RouteSName = thisroute.getShortName()+"";
+				each.RouteLName = thisroute.getLongName()+"";
+				each.RouteDesc = thisroute.getDesc()+"";
 				each.RouteType = String.valueOf(thisroute.getType());
 				each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyRoute(thisroute.getId()).size());
 				
@@ -658,9 +677,184 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    each.Stopportunity = String.valueOf(Math.round(Stopportunity))+"";
 	    each.PopStopportunity = String.valueOf(0);
 	    each.PopWithinX = String.valueOf(0);
-		response.RouteR.add(each);	
+		response.RouteR.add(each);
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
 		progVal.remove(key);
 		return response;    
 	}
+	
+	/**
+     * Generates The Route Schedule/Fare report
+     */
+    @GET
+    @Path("/ScheduleR")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getSchedule(@QueryParam("agency") String agency, @QueryParam("route") String routeid, @QueryParam("day") String date, @QueryParam("key") double key) throws JSONException {
+    	
+    	ScheduleList response = new ScheduleList();
+    	String[] dates = date.split(",");
+		int[][] days = daysOfWeek(dates);
+		//System.out.println(days[0][0]);
+    	AgencyAndId routeId = new AgencyAndId(agency,routeid);
+    	response.Agency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency).getName()+"";
+    	Route route = GtfsHibernateReaderExampleMain.QueryRoutebyid(routeId);
+    	response.Route = route.getId().getId()+"";
+    	List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route);
+    	if(fareRules.size()==0){
+    		response.Fare = "N/A";
+    	}else{
+    		response.Fare = fareRules.get(0).getFare().getPrice()+"";
+    	}
+    	List <Trip> routeTrips = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(route);
+    	int totalLoad = routeTrips.size();
+    	/*Schedule[] schedules = new Schedule[2]; 
+    	schedules[0] = new Schedule();
+    	schedules[1] = new Schedule();*/
+    	response.directions[0]= new Schedule();
+    	response.directions[1]= new Schedule();
+    	Stoptime stoptime;
+    	int[] maxSize={0,0};
+    	int index =0;
+    	String serviceAgency = routeTrips.get(0).getServiceId().getAgencyId();
+	    int startDate;
+	    int endDate;
+		List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(serviceAgency);
+	    List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(serviceAgency);
+Loop:  	for (Trip trip: routeTrips){
+    		index++;
+    		boolean isIn = false;
+    		ServiceCalendar sc = null;
+			if(agencyServiceCalendar!=null){
+				for(ServiceCalendar scs: agencyServiceCalendar){
+					if(scs.getServiceId().getId().equals(trip.getServiceId().getId())){
+						sc = scs;
+						break;
+					}
+				}  
+			}
+			List <ServiceCalendarDate> scds = new ArrayList<ServiceCalendarDate>();
+			for(ServiceCalendarDate scdss: agencyServiceCalendarDates){
+				if(scdss.getServiceId().getId().equals(trip.getServiceId().getId())){
+					scds.add(scdss);
+				}
+			}
+			
+			for(ServiceCalendarDate scd: scds){
+				if(days[0][0]==Integer.parseInt(scd.getDate().getAsString())){
+					if(scd.getExceptionType()==1){
+						isIn = true;
+						break;
+					}
+					continue Loop;
+				}
+			}
+			if (sc!=null && !isIn){
+				startDate = Integer.parseInt(sc.getStartDate().getAsString());
+        		endDate = Integer.parseInt(sc.getEndDate().getAsString());
+        		if(!(days[0][0]>=startDate && days[0][0]<=endDate)){
+					continue;
+				}
+        		switch (days[1][0]){
+					case 1:
+						if (sc.getSunday()==1){
+							isIn = true;											
+						}
+						break;
+					case 2:
+						if (sc.getMonday()==1){
+							isIn = true;
+						}
+						break;
+					case 3:
+						if (sc.getTuesday()==1){
+							isIn = true;
+						}
+						break;
+					case 4:
+						if (sc.getWednesday()==1){
+							isIn = true;
+						}
+						break;
+					case 5:
+						if (sc.getThursday()==1){
+							isIn = true;
+						}
+						break;
+					case 6:
+						if (sc.getFriday()==1){
+							isIn = true;
+						}
+						break;
+					case 7:
+						if (sc.getSaturday()==1){
+							isIn = true;
+						}
+						break;
+				}
+			}
+			if(isIn){
+				//System.out.println("yes");
+	    		AgencyAndId agencyandtrip = trip.getId();
+	    		List <StopTime> stopTimes = GtfsHibernateReaderExampleMain.Querystoptimebytrip(agencyandtrip);
+	    		TripSchedule ts = new TripSchedule();
+	    		for (StopTime st: stopTimes){
+	    			if(st.isArrivalTimeSet()){
+	    				stoptime = new Stoptime();
+	    				stoptime.StopTime = intArrivalTime(st.getArrivalTime());
+	    				stoptime.StopName = st.getStop().getName()+"";
+	    				stoptime.StopId = st.getStop().getId().getId();
+	    				ts.stoptimes.add(stoptime);
+	    			}
+	    		}
+	    		if(trip.getDirectionId()!=null && trip.getDirectionId().equals("1")){
+		    		if(ts.stoptimes.size()>maxSize[1]){
+		    			response.directions[1].stops = ts.stoptimes;
+		    			//System.out.println(response.stops.get(0).StopId);
+		    			maxSize[1]=ts.stoptimes.size();
+		    		}
+		    		response.directions[1].schedules.add(ts);
+				}else{
+					if(ts.stoptimes.size()>maxSize[0]){
+						//System.out.println(ts.stoptimes.size());
+						response.directions[0].stops = ts.stoptimes;
+		    			//System.out.println(response.stops.get(0).StopId);
+		    			maxSize[0]=ts.stoptimes.size();
+		    		}
+					response.directions[0].schedules.add(ts);
+				}
+			}
+			setprogVal(key, (int) Math.round(index*100/totalLoad));
+    	}
+	    
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    
+    	progVal.remove(key);
+        return response;
+    }
+    
+    public String intArrivalTime(int arrivalTime){
+    	int hour = arrivalTime/3600;
+    	int minute = (arrivalTime % 3600)/60;
+    	String arrivalTimeSTR = zeroStartValue(hour)+":"+zeroStartValue(minute);
+    	
+    	return arrivalTimeSTR;
+    }
 
+    public String zeroStartValue(int value){
+    	if(value<10){
+    		return "0"+value;
+    	}else{
+    		return ""+value;
+    	}
+    }
 }

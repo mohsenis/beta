@@ -46,18 +46,26 @@ $(document).ready(function(){
 		success: function(d){
 			$('h2').append(d.AgencyName+' Routes Report<br><hr>');
 			$.each(d.RouteR, function(i,item){
-				html = html + '<tr><td>' + item.RouteId + '</td><td>' + item.RouteSName + '</td><td>' + item.RouteLName +'</td><td>'+ item.RouteType +'</td><td>'+item.RouteLength +'</td><td><a href="#" class="routeStops" id="'+ item.RouteId+'">'+item.StopsCount+'</a></td><td>'+ numberconv(item.PopWithinX)+'</td><td>'+numberconv(item.Stopportunity)+'</td><td>'+numberconv(item.PopStopportunity)+'</td><td>'+numberconv(item.ServiceMiles)+'</td><td>'+item.RouteDesc+'</td></tr>';
+				html = html + '<tr><td><a href="#" class="schedulereport" id="'+ item.RouteId+'">'+item.RouteId+'</a></td><td>' + item.RouteSName + '</td><td>' + item.RouteLName +'</td><td>'+ item.RouteType +'</td><td>'+item.RouteLength +'</td><td><a href="#" class="stopreport" id="'+ item.RouteId+'">'+item.StopsCount+'</a></td><td>'+ numberconv(item.PopWithinX)+'</td><td>'+numberconv(item.Stopportunity)+'</td><td>'+numberconv(item.PopStopportunity)+'</td><td>'+numberconv(item.ServiceMiles)+'</td><td>'+item.RouteDesc+'</td></tr>';
 				csvfile = csvfile +item.RouteId+', '+item.RouteSName+', '+item.RouteLName+', '+item.RouteType +', '+item.RouteLength+', '+item.StopsCount +', '+item.PopWithinX+', '+item.Stopportunity+', '+item.PopStopportunity+', '+item.ServiceMiles+', '+item.RouteDesc+' \n';						    
 			});		
 			html = html + '</table>'
 			$('#displayReport').append($(html));	
 			progressbar.remove();
-			$('.routeStops').click(function(e){
+			$('.stopreport').click(function(e){
 				if ($(this).attr('id')!==undefined){
 				    qstring = window.opener.qstring + '&route=' + $(this).attr('id');	    
 				    window.open('/TNAtoolAPI-Webapp/stopreport.html');
 			}});
-			
+			$('.schedulereport').click(function(e){
+				if ($(this).attr('id')!==undefined){
+				    qstring = window.opener.qstring + '&route=' + $(this).attr('id');
+				    var d = new Date();
+				    qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+				    window.open('/TNAtoolAPI-Webapp/schedulereport.html');
+			}});
+			sorttable.makeSortable(document.getElementById('RT'));
+			sorttable.innerSortFunction.apply(document.getElementById('rn'), []);
     }});
 	
 	/* $('.routeStops').click(function(e){
@@ -70,9 +78,9 @@ $(document).ready(function(){
 });	
 	
 
-$(window).load(function () {	
+/* $(window).load(function () {	
 	sorttable.innerSortFunction.apply(document.getElementById('rn'), []);
-});
+}); */
 </script>
 
 

@@ -48,6 +48,8 @@ function exportbutton(){
 	window.open(uri);
 }
 
+function pad(s) { return (s < 10) ? '0' + s : s; }
+
 function go(key){
 	$(document).tooltip({
 		position: {
@@ -59,7 +61,7 @@ function go(key){
 	$( "#progressbar" ).progressbar({
 	    value: false,
 	}); 
-	
+	var prog=false;
 	function progress() {
 		$.ajax({
 			type: 'GET',
@@ -68,7 +70,15 @@ function go(key){
 			async: true,
 			success: function(item){
 				progVal = parseInt(item.progVal);
-				if(progVal==0){progVal=false;}
+				if(progVal==0){
+					progVal=false;
+					if(prog){
+						clearTimeout(timeVar);
+					}
+				}else{
+					prog=true;
+				}
+				
 				$( "#progressbar" ).progressbar( "value", progVal );	
 			}			
 		});	
@@ -76,6 +86,7 @@ function go(key){
 			clearTimeout(timeVar);
 	  	}
 	} 
+	
 	timeVar = setInterval(progress, 100);
 	
 	$( "#datepicker" ).multiDatesPicker({
