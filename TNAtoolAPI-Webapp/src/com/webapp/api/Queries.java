@@ -17,10 +17,8 @@ import javax.ws.rs.QueryParam;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jettison.json.JSONException;
-import org.geotools.geometry.jts.JTSFactoryFinder;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.webapp.api.model.*;
 import com.webapp.api.utils.PolylineEncoder;
 import com.library.samples.*;
@@ -139,8 +137,7 @@ public class Queries {
     @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public Object getmenu() throws JSONException {    
     	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies();
-    	
-    	if (menuResponse==null || menuResponse.data.size()!=allagencies.size()){
+    	if (menuResponse==null || menuResponse.data.size()!=allagencies.size() ){
     		menuResponse = new AgencyRouteList();
 	    	for (Agency instance : allagencies){    		
 	    		AgencyRoute each = new AgencyRoute();

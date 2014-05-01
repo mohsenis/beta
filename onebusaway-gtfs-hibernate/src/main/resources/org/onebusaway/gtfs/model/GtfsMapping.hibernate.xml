@@ -233,6 +233,7 @@
         <property name="vehicleType" />
         <property name="wheelchairBoarding" />
         <property name="platformCode" />
+        <property name="blockId" />
     </class>
 
     <class name="org.onebusaway.gtfs.model.StopTime" table="gtfs_stop_times">

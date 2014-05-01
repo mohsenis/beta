@@ -39,8 +39,5 @@
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/onebusaway-gtfs-hibernate-cli"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/library-hibernate-spatial"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/onebusaway-gtfs-hibernate-cli"/>
-	<classpathentry exported="true" kind="lib" path="/onebusaway-gtfs-modules-master"/>
-
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

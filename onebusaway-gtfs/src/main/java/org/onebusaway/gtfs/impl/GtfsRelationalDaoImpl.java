@@ -57,9 +57,7 @@ public class GtfsRelationalDaoImpl extends GtfsDaoImpl implements
 
   private Map<AgencyAndId, List<String>> _tripAgencyIdsByServiceId = null;
 
-  private Map<Agency, List<Route>> _routesByAgency = null;
-  
-  private Map<List<CensusData>> _censusData = null;
+  private Map<Agency, List<Route>> _routesByAgency = null; 
 
   private Map<Stop, List<Stop>> _stopsByStation = null;
   
@@ -148,12 +146,6 @@ public class GtfsRelationalDaoImpl extends GtfsDaoImpl implements
     return list(_routesByAgency.get(agency));
   }
   
-  @Override
-  public List<CensusData> getAllCensusData() {
-    if (_censusData == null)
-    	_censusData = mapToValueList(getAllCensusData());
-    return List<CensusData>(_censusData.keySet());
-  }
 
   @Override
   public List<Stop> getStopsForStation(Stop station) {
