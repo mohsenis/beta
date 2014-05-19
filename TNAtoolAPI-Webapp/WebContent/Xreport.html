@@ -8,19 +8,23 @@
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="js/lib/date.js"></script>
 	<script src="js/jQueryContent.js"></script>
+	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	 
 <script type="text/javascript">
-var csvfile ='AgencyID, AgencyName, RouteMiles, Route Stops, Stops Per Route Mile, Population Served (Unduplicated), Service Miles, Service Stops, Population Served By Service\n';
 var qstring = '';
 var qstringx = '0.1';
 var dateID;
 var gg = 1.0/1.1;
 var progVal = 0; 
-var html = '<table id="RT" class="sortable" align="center"><tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed.">?</em></th>'+
+var html = '<table id="RT" class="display" align="center">';
+var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed.">?</em></th>'+
 '<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed.">?</em></th>'+
 '<th>Route Miles <em title="Summation of the lengths of the longest route variant for all routes that the transit agency serves.">?</em></th>'+
 '<th>Route Stops <em title="Total number of stops served by the transit agency.">?</em></th>'+
@@ -29,6 +33,8 @@ var html = '<table id="RT" class="sortable" align="center"><tr><th id="aid">Agen
 '<th>Service Miles <em title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific day of the week, a combination of days of the week (e.g., Monday and Wednesday) or for a seven day week.">?</em></th>'+
 '<th>Service Stops <em title="The number of trips scheduled at a stop in a route. The service stops for a route is calculated as its stop count multiplied by the number of visits per stop.">?</em></th>'+
 '<th>Population Served By Service <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops on trips served by the transit agency. Population served by service is calculated as service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops for every trip.">?</em></th></tr>';
+html += '<thead>'+tmp+'</thead><tbody>';
+
 var key = Math.random();
 
 $(document).ready(function(){
@@ -41,24 +47,45 @@ $(document).ready(function(){
 		async: true,
 		success: function(item){			
 			$('h2').append('Transit Agency Extended Report <br><hr>');				
-			html = html + '<tr><td>' + item.AgencyId +'</td><td>' + item.AgencyName +'</td><td>' + numberconv(item.RouteMiles) +'</td><td>' + numberconv(item.StopCount) +'</td><td>' + numberconv(item.StopPerRouteMile) +'</td><td>' + numberconv(item.PopServed) +'</td><td>'+numberconv(item.ServiceMiles)+'</td><td>'+ numberconv(item.ServiceStops) +'</td><td>'+numberconv(item.PopServedByService)+'</td></tr>';
-			csvfile = csvfile +item.AgencyId+', '+item.AgencyName+', '+ item.RouteMiles +', '+item.StopCount+', '+item.StopPerRouteMile+', '+item.PopServed+', '+item.ServiceMiles+', '+item.ServiceStops+', '+item.PopServedByService+' \n';						    
-			html = html + '</table>'
+			html = html + '<tr><td>' + item.AgencyId +'</td><td>' + item.AgencyName +'</td><td>' + numberconv(item.RouteMiles) +'</td><td><a href="#" class="stopreport" id="'+ item.RouteId+'">' + numberconv(item.StopCount) +'</a></td><td>' + numberconv(item.StopPerRouteMile) +'</td><td>' + numberconv(item.PopServed) +'</td><td>'+numberconv(item.ServiceMiles)+'</td><td>'+ numberconv(item.ServiceStops) +'</td><td>'+numberconv(item.PopServedByService)+'</td></tr>';
+							    
+			html = html + '</tbody></table>';
 			$('#displayReport').append($(html));	
 			progressbar.remove();
+			
+			
+			var table = $('#RT').DataTable( {
+				"paging": false,
+				"dom": 'T<"clear">lfrtip',
+		        "tableTools": {
+		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+		            "aButtons": [
+							
+						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false},
+		                {
+		                    "sExtends":    "collection",
+		                    "sButtonText": "Export Report",
+		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "bFooter": false},
+		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false},
+		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false}, ]
+		                } 
+		            ]
+		        }
+			});
+			$('#RT_wrapper').css("width", $('#RT').css("width"));
+		    $('#RT_wrapper').css("margin", "auto");
+			$("#RT_length").remove();
+			$("#RT_filter").remove();
+			$("#RT_info").remove();
+			
+			$('.stopreport').click(function(e){
+				qstring = item.AgencyId;
+				qstringx = '0.1';
+				window.open('/TNAtoolAPI-Webapp/stopreport.html');
+			});
+		   
     }});
 	
-	$('a').click(function(e){
-	    if ($(this).attr('type')=="RC"){
-	    	qstring = $(this).attr('id');
-	    	qstringx = '0.1';
-	    	window.open('/TNA-tool-NI/routereport.html');
-	    	}else if($(this).attr('type')=="SC"){
-	    		qstring = $(this).attr('id');
-	    		qstringx = '0.1';
-	    		window.open('/TNA-tool-NI/stopreport.html');	    		
-	    	};    
-	});
 });
 
 
@@ -72,8 +99,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
-				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" />
+				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
+				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

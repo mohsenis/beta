@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -507,8 +508,24 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    	each.AgencyId = instance.getId();
 	    	each.Phone = instance.getPhone();
 	    	each.URL = instance.getUrl();
-	    	each.FareURL = instance.getFareUrl();    	
-			each.RoutesCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance).size()) ;
+	    	each.FareURL = instance.getFareUrl(); 
+	    	//changed/////////////////////////////////////////////////////////////////////////////////
+	    	List<Route> routes = GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance);
+	    	each.RoutesCount = String.valueOf(routes.size());
+	    	float sumFare=0; 
+	    	List<Float> fares = new ArrayList<Float>();
+	    	for(Route route: routes){
+	    		List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route);
+	    		if(fareRules.size()!=0){
+	    			sumFare+=fareRules.get(0).getFare().getPrice();
+	    			fares.add(fareRules.get(0).getFare().getPrice());
+	    		}
+	    	}
+	    	Collections.sort(fares);
+	    	each.AverageFare = String.valueOf(sumFare/fares.size());
+	    	each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
+	    	////////////////////////////////////////////////////////////////////////////////////////////
+			//each.RoutesCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance).size()) ;
 	        each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyAgency(instance.getId()).size());        
 	        each.PopServed = "0";
 	        response.agencySR.add(each);
@@ -806,7 +823,7 @@ Loop:  	for (Trip trip: routeTrips){
 	    		for (StopTime st: stopTimes){
 	    			if(st.isArrivalTimeSet()){
 	    				stoptime = new Stoptime();
-	    				stoptime.StopTime = intArrivalTime(st.getArrivalTime());
+	    				stoptime.StopTime = strArrivalTime(st.getArrivalTime());
 	    				stoptime.StopName = st.getStop().getName()+"";
 	    				stoptime.StopId = st.getStop().getId().getId();
 	    				ts.stoptimes.add(stoptime);
@@ -842,7 +859,7 @@ Loop:  	for (Trip trip: routeTrips){
         return response;
     }
     
-    public String intArrivalTime(int arrivalTime){
+    public String strArrivalTime(int arrivalTime){
     	int hour = arrivalTime/3600;
     	int minute = (arrivalTime % 3600)/60;
     	String arrivalTimeSTR = zeroStartValue(hour)+":"+zeroStartValue(minute);

@@ -8,23 +8,29 @@
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="js/lib/date.js"></script>
 	<script src="js/jQueryContent.js"></script>
-	<script src="js/lib/sorttable.js"></script> 
+	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	
 <script type="text/javascript">
-var csvfile ='StopID, StopName, RoutesStopBelongsTo, Population \n';
 var qstring = '';
 var qstringx = '0.1';
 var dateID;
 var gg = 1.0/1.1;
 var progVal = 0; 
-var html = '<table id="RT" class="sortable" align="center"><tr><th>Stop ID <em title="Unique stop identification number reported in the transit agency GTFS feed.">?</em></th>'+
+var html = '<table id="RT" class="display" align="center">';
+var tmp = '<tr><th>Stop ID <em title="Unique stop identification number reported in the transit agency GTFS feed.">?</em></th>'+
 '<th id="sn">Stop Name <em title="Name of a stop reported in the transit agency GTFS feed.">?</em></th>'+
 '<th>Routes Stop Belongs To <em title="Unique route ID (or IDs) that the stop belongs to.">?</em></th>'+
-'<th>Population <em title="Unduplicated population count within an X-mile radius (i.e., stop distance) of a stop. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">?</em></th></th>';	
+'<th>Population <em title="Unduplicated population count within an X-mile radius (i.e., stop distance) of a stop. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">?</em></th></tr>';	
+html += '<thead>'+tmp+'</thead><tbody>';
+var html2 = '<tfoot>'+tmp+'</tfoot>';
+
 var key = Math.random();
 
 $(document).ready(function(){	
@@ -71,23 +77,44 @@ $(document).ready(function(){
 				} else {
 					html = html + '<td>'+item.StopName+'</td>';
 					};
-			html = html+ '<td>' + item.Routes +'</td><td>'+ numberconv(item.PopWithinX)+'</td></tr>';
-			csvfile = csvfile +item.StopId+', '+item.StopName+', '+item.Routes+', '+item.PopWithinX +', '+ item.URL +' \n';						   			
+			html = html+ '<td>' + item.Routes +'</td><td>'+ numberconv(item.PopWithinX)+'</td></tr>';					   			
 			});					
-			html = html + '</table>'
+			html = html + '</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));	
 			progressbar.remove();
-			sorttable.makeSortable(document.getElementById('RT'));
-			sorttable.innerSortFunction.apply(document.getElementById('sn'), []);
+			
+			var table = $('#RT').DataTable( {
+				"paging": true,
+				"iDisplayLength": 14,
+				
+				"dom": 'T<"clear">lfrtip',
+		        "tableTools": {
+		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+		        	"sRowSelect": "multi",
+		            "aButtons": [
+						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false},
+		                {
+		                    "sExtends":    "collection",
+		                    "sButtonText": "Export Report",
+		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true},
+		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false},
+		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false}, ]
+		                } 
+		            ]
+		        }
+				
+			} );
+			
+			$('#RT_wrapper').css("width", $('#RT').css("width"));
+		    $('#RT_wrapper').css("margin", "auto");
+			$("#RT_length").remove();
+		    $("#RT_filter").insertBefore("#RT_info");
+		    $( ".dataTables_filter" ).css( "float", "left");
+		    $( ".dataTables_filter" ).before( "<br>" );
     }});
 	
-	/* $('a').click(function(e){
-	    if ($(this).attr('type')=="RC"){
-	    	window.open('/TNA-tool-NI/routreport.html');
-	    	}else if($(this).attr('type')=="SC"){
-	    		window.open('/TNA-tool-NI/stopreport.html');
-	    	};
-	}); */
+	
+	
 });	
 
 function reload(){	
@@ -105,8 +132,8 @@ function reload(){
 			</div>
 			
 			<div class="headerR">
-				<input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
-				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" />
+				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
+				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	
