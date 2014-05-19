@@ -19,8 +19,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jettison.json.JSONException;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.webapp.api.model.*;
 import com.webapp.api.utils.PolylineEncoder;
+import com.library.samples.*;
+import com.library.model.*;
 
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -33,6 +36,8 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.examples.GtfsHibernateReaderExampleMain;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 
 @Path("/transit")
@@ -50,6 +55,81 @@ public class Queries {
         return new TransitError("This is a test. You entered: "+ routerId);
     }
 	
+	@GET
+    @Path("/censustest")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object census(@QueryParam("radius") double x,@QueryParam("agency") String agency){
+		if (Double.isNaN(x) || x <= 0) {
+            x = STOP_SEARCH_RADIUS;
+        }
+    	x = x * 1609.34;
+		//List <Census> centroids = new ArrayList <Census> ();
+		long pop = 0;
+		List <Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency);
+		List <Coordinate> stopcoords = new ArrayList<Coordinate>();
+		for (Stop stop: stops){
+			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
+		}
+        try {
+			pop =EventManager.getunduppopbatch(x, stopcoords);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        List <Census> centroids = new ArrayList <Census> ();
+        try {
+        	centroids =EventManager.getundupcentbatch(x, stopcoords);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        //CensusList response = new CensusList();
+        long popsum=0;
+        for (Census c:centroids){
+        	popsum+=c.getPopulation();
+        }
+        return new TransitError("Unduplicated Population for agency "+agency+" is: "+ String.valueOf(pop)+" The sum based on centroid list is: "+String.valueOf(popsum));
+    }
+	@GET
+    @Path("/poparound")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getpop(@QueryParam("radius") double x,@QueryParam("lat") double lat,@QueryParam("lon") double lon){
+		if (Double.isNaN(x) || x <= 0) {
+            x = STOP_SEARCH_RADIUS;
+        }
+    	x = x * 1609.34;
+		long response = 0;
+        try {
+			response =EventManager.getpop(x, lat, lon);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        List <Census> centroids = new ArrayList<Census>(); 
+        try {
+        	centroids =EventManager.getcentroids(x, lat, lon);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+        long sum = 0;
+        for (Census centroid: centroids){
+        	sum+=centroid.getPopulation();
+        }
+        return new TransitError("Sum of Population is: "+ response+" Som of centroids is: "+sum);
+    }
 	/**
      * Generates a sorted by agency id list of routes for the LHS menu
      * , 
@@ -59,8 +139,7 @@ public class Queries {
     @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public Object getmenu() throws JSONException {    
     	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies();
-    	
-    	if (menuResponse==null || menuResponse.data.size()!=allagencies.size()){
+    	if (menuResponse==null || menuResponse.data.size()!=allagencies.size() ){
     		menuResponse = new AgencyRouteList();
 	    	for (Agency instance : allagencies){    		
 	    		AgencyRoute each = new AgencyRoute();
@@ -444,7 +523,19 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     	if (routeid != null){    		
     		AgencyAndId route = new AgencyAndId(agency,routeid);
     		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(route);
-    		
+    		List <Coordinate> points = new ArrayList <Coordinate>();
+    		for (Stop s : stops){    			
+    			points.add(new Coordinate(s.getLat(), s.getLon()));
+    		}
+    		List <Long> pops = new ArrayList<Long>();
+    		try{
+    			pops = EventManager.getpopbatch(x, points);
+    			} catch (FactoryException e) {    				
+    				e.printStackTrace();
+    			} catch (TransformException e) {    				
+    				e.printStackTrace();
+    			} 
+    		int k = 0;    		
     		int totalLoad = stops.size();
     		for (Stop instance: stops){
     			index++;
@@ -452,9 +543,17 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     			each.StopId = instance.getId().getId();
     			each.StopName = instance.getName();
     			each.URL = instance.getUrl();
-    			each.PopWithinX = "0";
+    			each.PopWithinX = String.valueOf(pops.get(k));
+    			//try{
+    			//each.PopWithinX = String.valueOf(EventManager.getpop(x, instance.getLat(), instance.getLon()));
+    			//} catch (FactoryException e) {    				
+    			//	e.printStackTrace();
+    			//} catch (TransformException e) {    				
+    			//	e.printStackTrace();
+    			//}    			
     			each.Routes = GtfsHibernateReaderExampleMain.QueryRouteIdsforStop(instance).toString();
     			response.StopR.add(each);
+    			k++;
     			setprogVal(key, (int) Math.round(index*100/totalLoad));
     		}
     	} else{
@@ -467,7 +566,14 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     			each.StopId = instance.getId().getId();
     			each.StopName = instance.getName();
     			each.URL = instance.getUrl();
-    			each.PopWithinX = "0";    			
+    			each.PopWithinX = "";
+    			try{
+    			each.PopWithinX = String.valueOf(EventManager.getpop(x, instance.getLat(), instance.getLon()));
+    			} catch (FactoryException e) {    				
+    				e.printStackTrace();
+    			} catch (TransformException e) {    				
+    				e.printStackTrace();
+    			}
     			each.Routes = GtfsHibernateReaderExampleMain.QueryRouteIdsforStop(instance).toString();
     			response.StopR.add(each);
     			setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -609,6 +715,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 				
 			}
 			double TL = Math.max(instance.getlength(),instance.getestlength());			
+
 			if (TL > length) 
 				length = TL;
 			

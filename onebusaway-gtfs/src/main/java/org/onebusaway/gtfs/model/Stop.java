@@ -71,6 +71,9 @@ public final class Stop extends IdentityBean<AgencyAndId> {
 
   @CsvField(name="platform_code", optional = true)
   private String platformCode;
+  
+  @CsvField(optional = true)
+  private String blockId;
 
   public Stop() {
 
@@ -92,6 +95,7 @@ public final class Stop extends IdentityBean<AgencyAndId> {
     this.timezone = obj.timezone;
     this.vehicleType = obj.vehicleType;
     this.platformCode = obj.platformCode;
+    this.blockId = obj.blockId;
   }
 
   public AgencyAndId getId() {
@@ -168,6 +172,14 @@ public final class Stop extends IdentityBean<AgencyAndId> {
 
   public String getParentStation() {
     return parentStation;
+  }
+  
+  public void setBlockId(String blockId) {
+    this.blockId = blockId;
+  }
+
+  public String getBlockId() {
+    return blockId;
   }
 
   public void setParentStation(String parentStation) {

@@ -1,0 +1,34 @@
+package com.webapp.api.model;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.library.model.Census;
+
+@XmlRootElement(name = "Centroid")
+public class Centroid {
+	
+	@XmlAttribute
+    @JsonSerialize
+	private String id;
+	
+	@XmlAttribute
+    @JsonSerialize
+	private int population;
+	
+	@XmlAttribute
+    @JsonSerialize
+	private double latitude;
+	
+	@XmlAttribute
+    @JsonSerialize
+	private double longitude;
+        
+    public void setcentroid(Census census) {
+        this.id = census.getId();
+        this.population = census.getPopulation();
+        this.latitude = census.getLatitude();
+        this.longitude = census.getLongitude();
+    }
+}

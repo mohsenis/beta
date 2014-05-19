@@ -57,9 +57,7 @@ public class GtfsRelationalDaoImpl extends GtfsDaoImpl implements
 
   private Map<AgencyAndId, List<String>> _tripAgencyIdsByServiceId = null;
 
-  private Map<Agency, List<Route>> _routesByAgency = null;
-  
-  private Map<List<CensusData>> _censusData = null;
+  private Map<Agency, List<Route>> _routesByAgency = null; 
 
   private Map<Stop, List<Stop>> _stopsByStation = null;
   
@@ -148,12 +146,6 @@ public class GtfsRelationalDaoImpl extends GtfsDaoImpl implements
     return list(_routesByAgency.get(agency));
   }
   
-  @Override
-  public List<CensusData> getAllCensusData() {
-    if (_censusData == null)
-    	_censusData = mapToValueList(getAllCensusData());
-    return List<CensusData>(_censusData.keySet());
-  }
 
   @Override
   public List<Stop> getStopsForStation(Stop station) {
@@ -402,45 +394,63 @@ public class GtfsRelationalDaoImpl extends GtfsDaoImpl implements
       return value;
     }
   }
+  
+  @Override
+  public List<String> getRouteIdsForStop(Stop stop) {
+  	// TODO Auto-generated method stub
+  	return null;
+  }
+
+  @Override
+  public List<Stop> getStopsForAgency(String agency) {
+  	// TODO Auto-generated method stub
+  	return null;
+  }
+
+  @Override
+  public List<Stop> getStopsForRoute(AgencyAndId route) {
+  	// TODO Auto-generated method stub
+  	return null;
+  }
+
+  @Override
+  public List<Trip> getTripsForAgency(String agencyId) {
+  	// TODO Auto-generated method stub
+  	return null;
+  }
+
+  @Override
+  public List<Trip> getTripsForAgency_RouteSorted(String agencyId) {
+  	// TODO Auto-generated method stub
+  	return null;
+  }
+
+  @Override
+  public void updateTrip(Trip trip) {
+  	// TODO Auto-generated method stub
+  	
+  }
+
+  @Override
+  public List<ServiceCalendar> getServiceCalendarsForRoute(Route route) {
+  	// TODO Auto-generated method stub
+  	return null;
+  }
 
 @Override
-public List<String> getRouteIdsForStop(Stop stop) {
+public List<ServiceCalendar> getCalendarForAgency(String agency) {
 	// TODO Auto-generated method stub
 	return null;
 }
 
 @Override
-public List<Stop> getStopsForAgency(String agency) {
+public List<ServiceCalendarDate> getCalendarDatesForAgency(String agency) {
 	// TODO Auto-generated method stub
 	return null;
 }
 
 @Override
-public List<Stop> getStopsForRoute(AgencyAndId route) {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-@Override
-public List<Trip> getTripsForAgency(String agencyId) {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-@Override
-public List<Trip> getTripsForAgency_RouteSorted(String agencyId) {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-@Override
-public void updateTrip(Trip trip) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public List<ServiceCalendar> getServiceCalendarsForRoute(Route route) {
+public List<FareRule> getFareRuleForRoute(Route route) {
 	// TODO Auto-generated method stub
 	return null;
 }

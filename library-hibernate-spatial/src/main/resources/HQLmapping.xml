@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <query name="agencyIdsReferencingServiceId" read-only="true">
+        SELECT trip.id.agencyId FROM Trip trip WHERE trip.serviceId = :serviceId GROUP BY trip.id.agencyId
+    </query>
+     
+     <query name="updatedTripShpaeLength" read-only="false">
+        update Trip set length = :length, estlength = :estlength, shape = :shape WHERE id = :tripid    
+    </query> 
+    </hibernate-mapping>

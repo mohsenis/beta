@@ -22,7 +22,7 @@
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>3.3.1.GA</version>
-    </dependency>
+    </dependency>    
     <dependency>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-csv-entities</artifactId>
@@ -36,6 +36,11 @@
       <version>2.0.0-rc9</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.1-901.jdbc4</version>
+        </dependency>
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
