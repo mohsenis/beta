@@ -306,7 +306,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   @Override
   public void updateTrip(Trip trip) {
     String[] names = {"length", "estlength", "shape", "tripid"};
-    Object[] values = {trip.getlength(), trip.getestlength(), trip.getshape(), trip.getId()};
+    Object[] values = {trip.getLength(), trip.getEstlength(), trip.getEpshape(), trip.getId()};
     _ops.updateByNamedQueryAndNamedParams("updatedTripShpaeLength", names, values);
   }
 

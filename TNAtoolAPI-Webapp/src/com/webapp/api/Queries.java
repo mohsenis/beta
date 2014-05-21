@@ -628,8 +628,13 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    		}
 	    	}
 	    	Collections.sort(fares);
-	    	each.AverageFare = String.valueOf(sumFare/fares.size());
-	    	each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
+	    	if (fares.size()>0){
+	    		each.AverageFare = String.valueOf(sumFare/fares.size());
+	    		each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
+	    	} else {
+	    		each.AverageFare = "NA";
+		    	each.MedianFare =  "NA";
+	    	}
 	    	////////////////////////////////////////////////////////////////////////////////////////////
 			//each.RoutesCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance).size()) ;
 	        each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyAgency(instance.getId()).size());        
