@@ -576,8 +576,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     	}
         
         response.ServiceStops = String.valueOf(Math.round(Stopportunity));
-        ServiceMiles*=0.000621371;
-        RouteMiles*=0.000621371;
+        
         response.ServiceMiles = String.valueOf(Math.round(ServiceMiles*100.0)/100.0); 
         response.RouteMiles = String.valueOf(Math.round(RouteMiles*100.0)/100.0);
         response.PopServed = String.valueOf(0);
