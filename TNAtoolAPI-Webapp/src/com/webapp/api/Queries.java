@@ -1,5 +1,8 @@
 package com.webapp.api;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,6 +21,8 @@ import javax.ws.rs.QueryParam;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jettison.json.JSONException;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.webapp.api.model.*;
@@ -46,6 +51,90 @@ public class Queries {
 	
 	private static final double STOP_SEARCH_RADIUS = 0.1;
 	static AgencyRouteList menuResponse;
+	
+	static final int CENSUS_LENGTH = 196621;
+	//static double[][] censusArray = new double[CENSUS_LENGTH][4];
+	static List<Census> censusArray = new ArrayList<Census>();
+	
+	public void fillArray(){
+		if(censusArray.size()==0){
+			CSVReader reader;
+			Census c; 
+			String [] nextLine;
+			//int i =0;
+			try {
+				reader = new CSVReader(new FileReader("C:\\Users\\Administrator\\OR_2010_Block_Data\\OR_2010_Block_Data.txt"));
+				reader.readNext();
+				while ((nextLine = reader.readNext()) != null) {
+					c = new Census();
+					c.setId(nextLine[8]);
+					c.setLatitude(Double.parseDouble(nextLine[12]));
+					c.setLongitude(Double.parseDouble(nextLine[13]));
+					c.setPopulation(Integer.parseInt(nextLine[16]));
+					/*censusArray[i][0]= Double.parseDouble(nextLine[8]);
+					censusArray[i][1]= Double.parseDouble(nextLine[12]);
+					censusArray[i][2]= Double.parseDouble(nextLine[13]);
+					censusArray[i][3]= Double.parseDouble(nextLine[16]);
+					i++;*/
+					censusArray.add(c);
+			    }
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			/*System.out.println(censusArray.get(1).getId());
+			System.out.println(censusArray.get(2).getId());
+			System.out.println(censusArray.get(3).getId());
+			System.out.println(censusArray.get(4).getId());*/
+		}
+		
+	}
+	
+	@GET
+    @Path("/NearBlocks")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getNearBlocks(@QueryParam("lat") String lat,@QueryParam("x") String x, @QueryParam("lon") String lon) throws JSONException {
+		fillArray();
+		CensusList response = new CensusList();
+		double r = Double.parseDouble(x);
+		double latitude = Double.parseDouble(lat);
+		double longitude = Double.parseDouble(lon);
+		Centroid c;
+		int pop=0;
+		//Census C;
+		for(Census C: censusArray){
+			if(ddistance(latitude,longitude,C.getLatitude(),C.getLongitude())<=r){
+				c = new Centroid();
+				c.setcentroid(C);
+				response.centroids.add(c);
+				pop+= C.getPopulation();
+			}
+		}
+		System.out.println(pop);
+		return response;
+	}
+	
+	private double ddistance(double lat1, double lon1, double lat2, double lon2) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+        if (dist>1) dist =1;
+        if (dist<-1) dist = -1;
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;      
+        return (dist);
+      }
+    
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+      }
+    
+    private double rad2deg(double rad) {
+        return (rad * 180.0 / Math.PI);
+    }
 	
 	@GET
     @Path("/saeed")
@@ -138,6 +227,7 @@ public class Queries {
     @Path("/menu")
     @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public Object getmenu() throws JSONException {    
+    	
     	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies();
     	if (menuResponse==null || menuResponse.data.size()!=allagencies.size() ){
     		menuResponse = new AgencyRouteList();
@@ -358,7 +448,8 @@ public class Queries {
     @Path("/AgencyXR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object getAXR(@QueryParam("agency") String agency, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key) throws JSONException {
-    	if (Double.isNaN(x) || x <= 0) {
+    	
+       	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
     	    	
@@ -485,6 +576,8 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     	}
         
         response.ServiceStops = String.valueOf(Math.round(Stopportunity));
+        ServiceMiles*=0.000621371;
+        RouteMiles*=0.000621371;
         response.ServiceMiles = String.valueOf(Math.round(ServiceMiles*100.0)/100.0); 
         response.RouteMiles = String.valueOf(Math.round(RouteMiles*100.0)/100.0);
         response.PopServed = String.valueOf(0);
@@ -506,7 +599,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     }
     	
     /**
-     * Generates The Routes report
+     * Generates The Stops report
      */
     @GET
     @Path("/StopsR")
@@ -535,7 +628,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     			} catch (TransformException e) {    				
     				e.printStackTrace();
     			} 
-    		int k = 0;    		
+    		int k = 0;   		
     		int totalLoad = stops.size();
     		for (Stop instance: stops){
     			index++;
@@ -543,14 +636,15 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     			each.StopId = instance.getId().getId();
     			each.StopName = instance.getName();
     			each.URL = instance.getUrl();
+    			each.PopWithinX ="0";
     			each.PopWithinX = String.valueOf(pops.get(k));
-    			//try{
-    			//each.PopWithinX = String.valueOf(EventManager.getpop(x, instance.getLat(), instance.getLon()));
-    			//} catch (FactoryException e) {    				
-    			//	e.printStackTrace();
-    			//} catch (TransformException e) {    				
-    			//	e.printStackTrace();
-    			//}    			
+    			try{
+    				each.PopWithinX = String.valueOf(EventManager.getpop(x, instance.getLat(), instance.getLon()));
+    			} catch (FactoryException e) {    				
+    				e.printStackTrace();
+    			} catch (TransformException e) {    				
+    				e.printStackTrace();
+    			}    			
     			each.Routes = GtfsHibernateReaderExampleMain.QueryRouteIdsforStop(instance).toString();
     			response.StopR.add(each);
     			k++;
@@ -628,9 +722,14 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    		}
 	    	}
 	    	Collections.sort(fares);
-	    	each.AverageFare = String.valueOf(sumFare/fares.size());
-	    	each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
-	    	////////////////////////////////////////////////////////////////////////////////////////////
+	    	if(fares.size()==0){
+	    		each.AverageFare = "N/A";
+	    		each.MedianFare = "N/A";
+	    	}else{
+		    	each.AverageFare = String.valueOf(sumFare/fares.size());
+		     	each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
+	    	}
+	     	////////////////////////////////////////////////////////////////////////////////////////////
 			//each.RoutesCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance).size()) ;
 	        each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyAgency(instance.getId()).size());        
 	        each.PopServed = "0";

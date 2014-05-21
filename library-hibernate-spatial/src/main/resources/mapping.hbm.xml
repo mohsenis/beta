@@ -2,7 +2,7 @@
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="com.library.model">
-    <class name="Census" table="gtfs_census_data_spatial">
+    <class name="Census" table="census_blocks">
 
         <id name="id" column="block_id" type="string" length="50" />
         <property name="population" type="integer" column="population"/>       
