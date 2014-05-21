@@ -56,6 +56,9 @@
     <query name="tripsByShapeId" read-only="true">
         FROM Trip trip WHERE trip.shapeId = :shapeId
     </query>
+    <query name="fareRuleForRoute" read-only="true">
+        FROM FareRule fr WHERE fr.route = :route
+    </query>
     <query name="tripsByServiceId" read-only="true">
         FROM Trip trip WHERE trip.serviceId = :serviceId
     </query>

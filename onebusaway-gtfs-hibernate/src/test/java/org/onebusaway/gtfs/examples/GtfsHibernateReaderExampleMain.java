@@ -25,6 +25,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.FareAttribute;
+import org.onebusaway.gtfs.model.FareRule;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.ServiceCalendarDate;
@@ -92,6 +94,11 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getAgencyForId(id);
   }
   
+  public static Route QueryRoutebyid(AgencyAndId route){
+	  GtfsMutableRelationalDao dao = factory.getDao();	  
+	  return dao.getRouteForId(route);
+  }
+  
   public static List<Trip> QueryTripsforAgency(String agencyId){
 	  GtfsMutableRelationalDao dao = factory.getDao();	  
 	  return dao.getTripsForAgency(agencyId);
@@ -145,6 +152,11 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getStopTimesForTrip(trp);
   }
   
+  public static List<FareRule> QueryFareRuleByRoute(Route route){
+	  GtfsMutableRelationalDao dao = factory.getDao();	  	  
+	  return dao.getFareRuleForRoute(route);
+  }
+  
   public static void updateTrip(Trip trip){
 	GtfsMutableRelationalDao dao = factory.getDao();
 	dao.updateTrip(trip);
@@ -184,6 +196,7 @@ public class GtfsHibernateReaderExampleMain {
 	  
 	  return dao.getStopsForRoute(route);
   }
+ 
   private static ServiceDate min(ServiceDate a, ServiceDate b) {
     if (a == null)
       return b;

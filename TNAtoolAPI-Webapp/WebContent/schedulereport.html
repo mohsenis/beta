@@ -1,0 +1,364 @@
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Transit Agency Stops Report</title>
+	<script src="js/lib/jquery-1.9.1.min.js"></script>
+	<script src="js/lib/jquery-ui.js"></script>
+	<script src="js/lib/date.js"></script>
+	<script src="js/jQueryContent.js"></script>
+	<script src="js/lib/sorttable.js"></script>
+	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.colVis.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.colVis.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
+	
+	
+	
+<script type="text/javascript">
+var qstring = '';
+var dateID;
+var progVal = 0; 
+var html;
+var key = Math.random();
+
+$(document).ready(function(){		
+	$("#accordion").accordion({
+		collapsible: true,
+		active: false,
+		heightStyle: "content"
+	});
+	$("#accordion").accordion("refresh");
+	$("#accordion > h3").html(window.opener.qstringd);
+	
+	$( "#datepicker" ).datepicker({
+		altField: "#alternate",
+	    altFormat: "DD, d MM, yy",
+		onSelect: function (date) {
+			window.opener.qstringd = date;
+			reload();
+	    }
+	});
+	$( "#datepicker" ).datepicker( "setDate", window.opener.qstringd );
+	$('.ui-datepicker').css("margin", "auto");
+	$( "#progressbar" ).progressbar({
+	    value: false,
+	}); 
+	var prog = false;
+	function progress() {
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/PorgVal?&key='+key,
+			async: true,
+			success: function(item){
+				progVal = parseInt(item.progVal);
+				if(progVal==0){
+					progVal=false;
+					if(prog){
+						clearTimeout(timeVar);
+					}
+				}else{
+					prog=true;
+				}
+				
+				$( "#progressbar" ).progressbar( "value", progVal );	
+			}			
+		});	
+	    if ( progVal == 100 ) {
+			clearTimeout(timeVar);
+	  	}
+	} 
+	timeVar = setInterval(progress, 100);		
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/ScheduleR?&agency='+window.opener.qstring+'&day='+window.opener.qstringd+'&key='+ key,
+		async: true,
+		success: function(d){
+			//var headerArray;
+			$('h2').append(d.Agency+': Route '+d.Route+' schedule<br><br>Fare Price: $'+d.Fare+'<hr>');
+			var dCount=0;
+			$.each(d.directions, function(k, ktem){
+				//alert(ktem.schedules.length);
+				if(ktem.stops.length!=0){
+					dCount++;
+					var headerArray = new Array();
+					var headerName = new Array();
+					html = '<table id="RT'+k+'" class="display" align="center">';
+					tmp='<tr>';
+					$.each(ktem.stops, function(i, item){
+					
+						tmp += '<th class="'+k+i+'">'+item.StopName+'</th>';
+						headerArray.push(item.StopId);
+						headerName.push(item.StopName);
+					});
+					tmp += '</tr>';
+					html += '<thead>'+tmp+'</thead><tbody>';
+					var html2 = '<tfoot>'+tmp+'</tfoot>';
+					$.each(ktem.schedules, function(j, jtem){
+						html += '<tr>';
+						var io=0;
+						$.each(jtem.stoptimes, function(i, item){
+							while(io<headerArray.length && item.StopId!=headerArray[io]){
+								//alert(io);
+								html += '<td class="'+k+io+'">__</td>';
+								io++;
+								//alert(io);
+							}
+							if(io<headerArray.length){
+								html += '<td class="'+k+io+'">'+item.StopTime+'</td>';
+								io++;
+							}
+							
+						});
+						while(io<headerArray.length){
+							html += '<td class="'+k+io+'">__</td>';
+							io++;
+						}
+						html += '</tr>';
+					});
+									
+					html = html + html2 + '</table><br><br><br>';
+					$('#displayReport'+k).append($(html));
+					
+				    var columns;
+loop: 				for (var jj = 0; jj < headerArray.length; jj++){
+						columns = $('.'+k+jj);
+					    for (var ii = 1; ii < columns.length; ii++) {
+					    	//alert(rows[ii][jj]);
+					        if(columns[ii].innerHTML=="__"){
+					        	continue loop;
+					        }
+					    }
+					    //alert(columns[0].innerHTML);
+					    columns[0].id='sn'+k;
+					    var orderBy = jj;
+					    break;
+					} 
+				   
+				    
+				    var gr= new Array();
+				    c = Math.ceil(headerArray.length/10);
+				    if(c>1){
+				    	var tar = new Array();
+					    for(var d = 0; d<headerArray.length; d++){
+					    	if(d%10!=0){
+					    		tar.push(d);
+					    	}
+					    }
+				    	var col;
+				    	for(var cc=0; cc<c; cc++){
+				    		col = new Array();
+				    		var ti;
+				    		
+				    		if(cc==c-1){
+				    			for(var ccc=1; ccc<(headerArray.length%10); ccc++){
+					    			col.push(ccc+cc*10);
+					    		}
+			    				ti = "<b>From:</b> "+headerName[cc*10]+"<br><br>"+"<b>To:</b>&nbsp&nbsp&nbsp&nbsp "+headerName[headerArray.length-1];
+			    			}else{
+			    				for(var ccc=1; ccc<=9; ccc++){
+					    			col.push(ccc+cc*10);
+					    		}
+			    				ti = "<b>From:</b> "+headerName[cc*10]+"<br><br>"+"<b>To:</b>&nbsp&nbsp&nbsp&nbsp "+headerName[(cc+1)*10];
+			    			}
+				    		
+				    		gr.push({
+			                    title: ti,
+			                    columns: col,
+			                });
+				    	}
+				    }
+				    
+				    
+				    var table = $('#RT'+k).DataTable( {
+				    	
+						"scrollY": "40%",
+						"width": "auto",
+						"sScrollX": "100%",
+						"bScrollCollapse": true,
+						"autoWidth": true,
+						//"iDisplayLength": 15,
+						"paging": false,
+						"order": [[ orderBy, "asc" ]],
+						//"bSort": false,
+						
+						"columnDefs": [
+				            {
+				                "targets": tar,
+				                "visible": false,
+				            }
+				        ],
+						
+						dom: 'TC<"clear">lfrtip',
+				        colVis: {
+				            exclude: [ 'all' ],
+				            groups: gr
+				        },
+						
+						//"dom1": 'T<"clear">lfrtip',
+				        "tableTools": {
+				        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+				        	"sRowSelect": "multi",
+				            "aButtons": [
+								
+								{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "mColumns": "all"},
+				                //"print",
+				                {
+				                    "sExtends":    "collection",
+				                    "sButtonText": "Export Report",
+				                    "aButtons":    [
+			                    					{	"sExtends": "copy",
+				                    					"sButtonText": "Copy", 
+				                    					"bSelectedOnly": true, 
+				                    					"mColumns": "all"},
+			                    					{	"sExtends": "copy",
+				                    					"sButtonText": "Copy - Visible Columns Only", 
+				                    					"bSelectedOnly": true, 
+				                    					"mColumns": "visible"},
+			                    					
+			                    					{	"sExtends": "csv",
+				                    					"sButtonText": "CSV", 
+				                    					"bSelectedOnly": true, 
+				                    					"mColumns": "all",
+				                    					"bFooter": false},
+			                    					{	"sExtends": "csv",
+				                    					"sButtonText": "CSV - Visible Columns Only", 
+				                    					"bSelectedOnly": true, 
+				                    					"mColumns": "visible",
+				                    					"bFooter": false},
+			                    					
+			                    					{	"sExtends": "pdf",
+				                    					"sButtonText": "PDF", 
+				                    					"bSelectedOnly": true, 
+				                    					"mColumns": "all",
+				                    					"bFooter": false},
+			                    					{	"sExtends": "pdf",
+				                    					"sButtonText": "PDF - Visible Columns Only", 
+				                    					"bSelectedOnly": true, 
+				                    					"mColumns": "visible",
+				                    					"bFooter": false}]
+				                }
+				            ]
+				        },
+				        
+				        
+						
+					} );
+				   
+				    $('#RT_wrapper').css("width", $('#RT').css("width"));
+				    $('.dataTables_scroll').css("width", "auto");
+				    $('.ColVis').css("float", "left");
+				    if(gr.length==0){
+				    	//alert();
+				    	$('.ColVis_Button').remove();
+				    	$('#ToolTables_RT0_3').remove();
+				    	$('#ToolTables_RT0_5').remove();
+				    	$('#ToolTables_RT0_7').remove();
+				    }else{
+				    	/* for(var d = 0; d<headerArray.length; d++){
+					    	if(d%10!=0){
+					    		table.column( d ).visible( false );
+					    	}
+					    } */
+				    }
+				    
+			
+				    $('#RT'+k+'_length').remove();
+				    $('#RT'+k+'_filter').insertBefore('#RT'+k+'_info');
+				    $( ".dataTables_filter" ).css( "float", "left");
+				    $( ".dataTables_filter" ).before( "<br>" );
+		
+					
+				}
+		
+			});
+			if(dCount==0){
+				html =  '<br><br><br><br><br><br><br><br><br>'+
+						'<span id="noTrip"><b><i>There is no Trip scheduled for the specified date in this Route</i></b></span><br>';
+				$('#displayReport0').append($(html));
+				$( "#displayReport0" ).css( "overflow", "visible");
+			}
+			//alert(d.directions[1].stops.length);
+			if(d.directions[1].stops.length==0){
+				$('#displayReport1').remove();
+				
+			}
+			progressbar.remove();
+    }});
+});	
+function reload(){	
+	
+	location.reload();
+}
+
+
+
+</script>
+</head>
+<body>
+		<div class="container">
+			<div class="headerL">
+				<h1>Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">
+				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
+				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
+				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+			</div>
+		</div>	
+		
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  <td id="td2" style="width:15%"> 
+			  	<div class="headerBC" id="accordion" >
+					<h3></h3>
+					<div>
+						<div id="datepicker" style="text-align:center;"></div>
+						<!-- <table style="width:100%;">
+							<tr>
+								<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+									<ul data-role="listview">
+							
+									</ul>
+								</td>
+								<td style="vertical-align:top;padding-top:15px">
+									<div id="datepicker" ></div>
+								</td>
+							</tr>
+						</table> -->
+						
+					</div>
+				</div>
+			  </td> 
+			  <td id="td3" >
+			  	<div class="headerBR" > 
+			    	<!-- <input type="button" onclick="reload()" title="Refresh Report"  value="Submit" class="button" /> -->
+		    	    <!-- <div id="datepicker" style="text-align:center"></div> -->
+		    	    <!-- <p ><input type="text" id="alternate" style="text-align:left;border:none; width:70%" ></input></p> -->
+		    	</div>
+			  </td>
+			</tr>
+		</table>
+		
+		<p id="displayReport0" class="displayReport" style="overflow:auto"><br></p>
+		<p id="displayReport1" class="displayReport" style="overflow:auto"><br></p>
+		
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>
+		
+</body>
+</html>

@@ -38,7 +38,9 @@ public class DbUpdate {
     	double length = 0;
     	double estlength = 0;
     	String Desc = "";
+
 		for (Trip trip: triplist){
+
 			AgencyAndId agencyandtrip = trip.getId();	
 
 	    	Trip tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip);
@@ -50,6 +52,7 @@ public class DbUpdate {
 		    		pe = PolylineEncoder.createEncodings(shapes, 1);
 			    	length = SphericalDistance.sLength(shapes);
 			    	shapeId = trip.getShapeId().getId();
+			    	//stopCount = GtfsHibernateReaderExampleMain.queryst
 		    	}	    		
 		    	Desc = "Trip" + tp.getId().getId() + "has shape data";
 	    	} else {
@@ -94,6 +97,21 @@ public class DbUpdate {
 		args[4] = "C:/feeds/"+feedname;
 		GtfsDatabaseLoaderMain.main(args);		
 		return new TransitError(feedname +"Has been added to the database");
+	}
+	
+	@GET
+    @Path("/test")
+   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object test(@QueryParam("agency") String agency) throws IOException{
+		List<Trip> triplist = GtfsHibernateReaderExampleMain.QueryTripsforAgency(agency);
+		for (Trip trip: triplist){
+			AgencyAndId agencyandtrip = trip.getId();
+			List<StopTime> st = GtfsHibernateReaderExampleMain.Querystoptimebytrip(agencyandtrip);	
+			for (StopTime stt: st){
+				System.out.println(stt.isArrivalTimeSet());
+			}
+		}
+		return new TransitError("Has been added to the database");
 	}
 	
 }

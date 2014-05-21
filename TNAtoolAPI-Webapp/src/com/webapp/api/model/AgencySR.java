@@ -69,6 +69,14 @@ public class AgencySR {
 	@XmlAttribute
     @JsonSerialize
     public String AreaServed;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String AverageFare;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String MedianFare;
     
     @XmlElementWrapper
     public List<RouteType> routes;

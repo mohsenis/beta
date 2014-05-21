@@ -77,8 +77,7 @@ public interface GtfsRelationalDao extends GtfsDao {
    ****/
   public List<ServiceCalendar> getCalendarForAgency(String agency);
   public List<ServiceCalendarDate> getCalendarDatesForAgency(String agency);
-  
-  
+  public List<FareRule> getFareRuleForRoute(Route route);
   /****
    * {@link Trip} Methods
    ****/
