@@ -253,7 +253,7 @@ function disponmap(layerid,k,points,popup){
 }
 
 function dispronmap(k,points,name){	
-	var polyline = L.Polyline.fromEncoded(points, {
+	var polyline = L.Polyline.fromEncoded(points, {	
 		weight: 5,
 		color: colorset[k],
 		//fillColor: colorset[k],
