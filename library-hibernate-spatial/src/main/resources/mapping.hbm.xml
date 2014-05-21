@@ -3,6 +3,7 @@
 
 <hibernate-mapping package="com.library.model">
     <class name="Census" table="census_blocks">
+
         <id name="id" column="block_id" type="string" length="50" />
         <property name="population" type="integer" column="population"/>       
         <property name="latitude" type="double" column="lat" />

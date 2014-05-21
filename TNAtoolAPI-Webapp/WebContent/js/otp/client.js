@@ -133,6 +133,7 @@ var shapes = L.geoJson(shapedata, {style: style, onEachFeature: onEachFeature});
 
 var colorset = ["#6ECC39","#FF33FF","#05FAFC","#FE0A0A", "#7A00F5", "#CC6600"];
 function disponmap2(layerid,k,points,popup){	
+	
 	//alert (points.length);
 	//alert (k);
 	var geojsonMarkerOptions = {
@@ -178,7 +179,6 @@ function disponmap2(layerid,k,points,popup){
 };
 
 function disponmap(layerid,k,points,popup){
-	//alert('test');
 	
 	//maxClusterRadius: 120,
 	//iconCreateFunction: function (cluster) {
@@ -244,14 +244,80 @@ function disponmap(layerid,k,points,popup){
 	for (var i = 0; i < points.length; i++) {
 		var p = points[i];
 		var marker = new L.Marker(p[0],{title:popup});
-		marker.bindPopup(p[1]);
+		marker.bindPopup('<b style="">'+p[1]+'</b><br><br><a class="expander" href="#"></a>'+
+							
+								'<div class="content">'+
+									'Population Search Radius (miles) <input type="text" id="x'+p[0].lat+p[0].lng+'" style="font-size:90%;width:30px;height:20px">'+
+									'<input type="button" value="Submit" style="font-size:90%;width:50px;height:22px" onclick="showPop('+p[0].lat+','+p[0].lng+')">'+
+									'<br><input type="text" id="p'+p[0].lat+p[0].lng+'" style="font-size:90%;width:60px;height:20px" disabled>&nbsp&nbsp'+
+									'<span style="margin-left:50px">Show on map</span>: <input type="checkbox" id="c'+p[0].lat+p[0].lng+'" onchange="triggerShow(this)">'+
+					            '</div>');
 		markers.addLayer(marker);
 	}
 	markers._leaflet_id = layerid;
 	stops.addLayer(markers);
+	$('.expander').simpleexpand();//remember ro delete simple expand js and link
+}
+/////////////////////////////////////////////////////////////////////////////////
+function triggerShow(e){
+	if(e.checked==false){
+		map.removeLayer(markersCentroids);
+	}else{
+		map.addLayer(markersCentroids);
+		map.fitBounds(markersCentroids.getBounds());
+	}
+}
+map.on('click', removeAllCentroids);
+var markersCentroids = new L.FeatureGroup();
+function showPop(lat,lon){
+	
+	var x = document.getElementById('x'+lat+lon).value;
+	var pop=0;
+	if(!isNaN(x)){
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/NearBlocks?&lat='+lat+'&lon='+lon+'&x='+x,
+			async: false,
+			success: function(d){
+				map.removeLayer(markersCentroids);
+				markersCentroids = new L.FeatureGroup();
+				var circle = L.circle([lat, lon], x*1609.34, {
+				    color: 'blue',
+				    fillColor: '#f03',
+				    fillOpacity: 0.3,
+				    draggable:'true'
+				});
+				
+				markersCentroids.addLayer(circle);
+				if(d.centroids.length>10000){
+					$.each(d.centroids, function(i, item){
+						pop += item.population;
+					});
+				}else{
+					$.each(d.centroids, function(i, item){
+						pop += item.population;
+						var marker = L.marker([item.latitude,item.longitude]);
+						marker.bindPopup('Block id: '+item.id+'<br>Population: '+item.population);
+						markersCentroids.addLayer(marker);
+					});
+				}
+				
+				if(document.getElementById('c'+lat+lon).checked==true){
+					map.addLayer(markersCentroids);
+					map.fitBounds(circle.getBounds());
+				}
+				
+			}
+		});
+		document.getElementById('p'+lat+lon).value = pop;
+	}
 	
 }
-
+function removeAllCentroids(){
+    map.removeLayer(markersCentroids);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 function dispronmap(k,points,name){	
 	var polyline = L.Polyline.fromEncoded(points, {	
 		weight: 5,

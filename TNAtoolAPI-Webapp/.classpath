@@ -37,8 +37,7 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/onebusaway-gtfs-hibernate-cli"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/library-hibernate-spatial"/>
-	<classpathentry kind="lib" path="lib/gt-opengis-12-SNAPSHOT.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/onebusaway-gtfs-hibernate-cli"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/library-hibernate-spatial"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
