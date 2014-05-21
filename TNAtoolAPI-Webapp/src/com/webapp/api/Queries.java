@@ -219,7 +219,7 @@ public class Queries {
         }
         return new TransitError("Sum of Population is: "+ response+" Som of centroids is: "+sum);
     }
-	/**
+		/**
      * Generates a sorted by agency id list of routes for the LHS menu
      * , 
      */
@@ -286,7 +286,7 @@ public class Queries {
 	        	            	eachO.children.add(eachV) ; 
 	                    	}
 	                	} else{
-	                		String shape = trip.getshape();
+	                		String shape = trip.getEpshape();
 	                		if (!(shapes.contains(shape))){
 	                    		shapes.add(shape);
 	                    		VariantListm eachV = new VariantListm();
@@ -352,9 +352,9 @@ public class Queries {
     	agencyandtrip.setId(trip);
     	Trip tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip);    	
     	Rshape shape = new Rshape();
-    	shape.points = tp.getshape();
-    	shape.length = tp.getlength();    	    	 
-    	shape.estlength = tp.getestlength();
+    	shape.points = tp.getEpshape();
+    	shape.length = tp.getLength();    	    	 
+    	shape.estlength = tp.getEstlength();
 		return shape;
     }
   
@@ -492,7 +492,7 @@ public class Queries {
     			routeId = thisroute.getId().getId();   			
     			length = 0;    						
     		}
-    		double TL = Math.max(instance.getlength(),instance.getestlength());			
+    		double TL = Math.max(instance.getLength(),instance.getEstlength());			
     		if (TL > length) 
     			length = TL;
     		    		   		
@@ -813,7 +813,8 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 				each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyRoute(thisroute.getId()).size());
 				
 			}
-			double TL = Math.max(instance.getlength(),instance.getestlength());			
+			double TL = Math.max(instance.getLength(),instance.getEstlength());			
+
 
 			if (TL > length) 
 				length = TL;

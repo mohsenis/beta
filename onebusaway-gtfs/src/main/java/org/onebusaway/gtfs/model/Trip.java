@@ -39,7 +39,7 @@ public final class Trip extends IdentityBean<AgencyAndId> {
   private String tripShortName;
   
   @CsvField(optional = true)
-  private String shape;
+  private String epshape;
   
   @CsvField(optional = true, defaultValue = "0")
   private double length = 0;
@@ -96,7 +96,7 @@ public final class Trip extends IdentityBean<AgencyAndId> {
     this.wheelchairAccessible = obj.wheelchairAccessible;
     this.tripBikesAllowed = obj.tripBikesAllowed;
     this.bikesAllowed = obj.bikesAllowed;
-    this.shape = obj.shape;
+    this.epshape = obj.epshape;
     this.length = obj.length;
     this.estlength = obj.estlength;
   }
@@ -133,27 +133,27 @@ public final class Trip extends IdentityBean<AgencyAndId> {
 	  return stopscount;
   }
 
-  public String getshape(){
-	  return shape;
+  public String getEpshape(){
+	  return epshape;
   }
   
-  public Double getlength(){
+  public Double getLength(){
 	  return length;
   }
   
-  public Double getestlength(){
+  public Double getEstlength(){
 	  return estlength;
   }
   
-  public void setshape(String shape){
-	  this.shape = shape;
+  public void setEpshape(String epshape){
+	  this.epshape = epshape;
   }
   
-  public void setlength(double length){
+  public void setLength(double length){
 	  this.length = length;
   }
   
- public void setestlength(double estlength){
+ public void setEstlength(double estlength){
 	 this.estlength = estlength;
  }
  

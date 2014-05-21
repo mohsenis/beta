@@ -55,15 +55,8 @@
             <column name="agencyId_def" />
             <column name="stopId" />                        
         </many-to-one>                
-    </class>
-    
-    <class name="org.onebusaway.gtfs.model.CensusData" table="gtfs_census_data">
-        <id name="id" column="block_id" type="string" length="50" />
-        <property name="population" />
-        <property name="lat" />
-        <property name="lon" />                        
-    </class>
-    
+    </class> 
+   
     <class name="org.onebusaway.gtfs.model.RouteServiceIdMap" table="gtfs_route_serviceid_map">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
@@ -233,7 +226,7 @@
         <property name="vehicleType" />
         <property name="wheelchairBoarding" />
         <property name="platformCode" />
-        <property name="blockId" />
+        <property name="blockId" />        
     </class>
 
     <class name="org.onebusaway.gtfs.model.StopTime" table="gtfs_stop_times">
@@ -321,7 +314,7 @@
         <property name="directionId" />
         <property name="blockId" index="blockId" />
         <property name="wheelchairAccessible"/>
-        <property name="shape" type="org.hibernate.type.TextType"/>
+        <property name="epshape" type="org.hibernate.type.TextType" column="epshape"/>
         <property name="length"/>
         <property name="estlength"/>
         <property name="stopscount"/>

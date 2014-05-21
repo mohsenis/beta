@@ -32,6 +32,20 @@ public class EventManager {
 //private SessionFactory factory;
 private	static Session session = Hutil.getSessionFactory().openSession();
 /**
+ * returns trip data and shape
+ */
+	public static TripData getTripData(String agencyId, String id) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("SHAPE_BY_TRIP");
+		q.setParameter("agencyId", agencyId);
+		q.setParameter("id", id);
+		@SuppressWarnings("unchecked")
+		List<TripData> results = (List<TripData>) q.list();
+        Hutil.getSessionFactory().close();
+        return results.get(0);
+    }
+
+/**
  * returns population centroids
  */
 	public static List<Census> getcentroids(double d, double lat, double lon) throws FactoryException, TransformException {			

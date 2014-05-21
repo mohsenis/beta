@@ -14,6 +14,46 @@
         <property name="waterarea" type="integer" />
     </class>
     
+    <class name="Tract" table="census_tracts">
+        <id name="id" column="id" type="long" />
+        <property name="population" type="long" column="population"/>       
+        <property name="latitude" type="double" column="lat" />
+        <property name="longitude" type="double" column="lon"/>        
+        <property name="housing" type="long" />
+        <property name="landarea" type="long" />
+        <property name="waterarea" type="long" />
+    </class>
+    
+    <class name="County" table="census_counties">
+        <id name="id" column="id" type="int" />
+        <property name="name" column="cname" type="string" length="50"/>
+        <property name="population" type="long" column="population"/>
+        <property name="housing" type="long" column="housing"/>       
+        <property name="latitude" type="double" column="lat" />
+        <property name="longitude" type="double" column="lon"/>        
+        <property name="landarea" type="long" />
+        <property name="waterarea" type="long" />
+    </class>
+    
+    <class name="Place" table="census_places">
+        <id name="id" column="id" type="integer" />
+        <property name="name" column="pname" type="string"/> 
+        <property name="population" type="long" column="population"/>       
+        <property name="latitude" type="double" column="lat" />
+        <property name="longitude" type="double" column="lon"/>        
+        <property name="housing" type="long" />
+        <property name="landarea" type="long" />
+        <property name="waterarea" type="long" />
+    </class>
+    <class name="TripData" table="temptrips">
+        <composite-id>
+            <key-property name="agencyId" column="agencyid" length="50" />
+            <key-property name="id" column="tripid" length="255" />
+        </composite-id>               
+        <property name="length" type="double"/>
+        <property name="estlength" type="double"/>       
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" />
+    </class>
     	
     <query name = "POP_BY_COORDINATES">
     <![CDATA[select sum(population) from Census where distance(:point,location)<:radius]]>
@@ -21,5 +61,7 @@
 	<query name = "CENSUS_BY_COORDINATES">
     <![CDATA[from Census where distance(:point,location)<:radius]]>
 	</query>
-	   
+	<query name = "SHAPE_BY_TRIP">
+    <![CDATA[from TripData where agencyid=:agencyId and tripid=:id]]>
+	</query>
 </hibernate-mapping>
