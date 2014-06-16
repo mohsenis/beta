@@ -214,8 +214,7 @@ $(document).ready(function(){
 });
 
 function reload(){	
-	w_qstringx = (parseFloat(document.getElementById("Sradius").value)).toString();
-	alert(w_qstringx);
+	window.opener.qstringx = (parseFloat(document.getElementById("Sradius").value)).toString();
 	location.reload();
 	
 }
@@ -230,12 +229,10 @@ function exportbutton(){
 }
 
 function pageLoad(){
-	alert(w_qstringx);
-	window.opener.qstringx = w_qstringx;
+	
+	
 }
-/* $(window).load(function () {	
-	sorttable.innerSortFunction.apply(document.getElementById('an'), []);
-}); */
+
 
 </script>
 

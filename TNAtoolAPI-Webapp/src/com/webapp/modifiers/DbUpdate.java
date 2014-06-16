@@ -78,9 +78,9 @@ public class DbUpdate {
     	response.shapelist.add(shape);
     	
     	// now setting the new values for the trip and updating the DB
-    	tp.setshape(pe);
-    	tp.setlength(length);
-    	tp.setestlength(estlength);
+    	tp.setEpshape(pe);
+    	tp.setLength(length);
+    	tp.setEstlength(estlength);
     	GtfsHibernateReaderExampleMain.updateTrip(tp);
 		}
 		return response;

@@ -18,9 +18,11 @@
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	
 <script type="text/javascript">
+
 var qstring = '';
+
 var qstringx = '0.1';
-var w_qstringx = window.opener.qstringx;
+
 var dateID;
 var gg = 1.0/1.1;
 var progVal = 0; 
@@ -182,13 +184,27 @@ $(document).ready(function(){
 
 function reload(){	
 	window.opener.qstringx = (parseFloat(document.getElementById("Sradius").value)).toString();
+	window.opener.qstring = qstring;
 	location.reload();
 }
 
+function pageLoad(){
+	//alert();
+	/* window.opener.qstringx = (parseFloat(document.getElementById("Sradius").value)).toString();
+	window.opener.qstring = qstring; */
+}
+
+function preloadFunc()
+{
+	alert(qstring);
+	window.opener.qstring = qstring;
+	alert(window.opener.qstring);
+}
+window.onpaint = preloadFunc(); 
 
 </script>
 </head>
-<body>
+<body onload="pageLoad()">
 		<div class="container">
 			<div class="headerL">
 				<h1>Transit Network Analysis Tool Reports</h1>
