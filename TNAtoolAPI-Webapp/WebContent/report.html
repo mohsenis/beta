@@ -19,6 +19,7 @@
 	
 <script type="text/javascript">
 var qstring = '';
+var w_qstringx = window.opener.qstringx;
 var qstringx = '0.1';
 var progVal = 0; 
 var qstringd = '';
@@ -77,12 +78,12 @@ $(document).ready(function(){
 	} 
 	timeVar = setInterval(progress, 100);
 	
-	document.getElementById("Sradius").value = window.opener.qstringx;
+	document.getElementById("Sradius").value = w_qstringx;
 	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ window.opener.qstringx+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key,
 		async: true,
 		success: function(d){			
 			$('h2').append('Transit Agency Summary Report <br><hr>');
@@ -141,21 +142,23 @@ $(document).ready(function(){
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
-		        	"sRowSelect": "multi",
+		        	"sRowSelect": "os",
 		            "aButtons": [
 						
 						/* { "sExtends": "print", 
 						"sMessage": "Your original message"
 						+ " <input type='button' value='Return' onclick='EscFunc()' />"
 						}, */
-						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false},
+						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+							"sMessage": "Your original message"
+								+ " <input type='button' value='Return' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
 		                //"print",
 		                {
 		                    "sExtends":    "collection",
 		                    "sButtonText": "Export Report",
-		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true},
-		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false},
-		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false}, ]
+		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
+		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
+		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
 		                } 
 		            ]
 		        }
@@ -211,8 +214,10 @@ $(document).ready(function(){
 });
 
 function reload(){	
-	window.opener.qstringx = (parseFloat(document.getElementById("Sradius").value)).toString();
+	w_qstringx = (parseFloat(document.getElementById("Sradius").value)).toString();
+	alert(w_qstringx);
 	location.reload();
+	
 }
 
 $(".export").on('click', function (event) {    
@@ -223,6 +228,11 @@ function exportbutton(){
 	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
 	window.open(uri, 'AgencySummaryReport.csv');
 }
+
+function pageLoad(){
+	alert(w_qstringx);
+	window.opener.qstringx = w_qstringx;
+}
 /* $(window).load(function () {	
 	sorttable.innerSortFunction.apply(document.getElementById('an'), []);
 }); */
@@ -232,7 +242,7 @@ function exportbutton(){
 
 
 </head>
-<body>
+<body onload="pageLoad()">
 		<div class="container">
 			<div class="headerL">
 				<h1>Transit Network Analysis Tool Reports</h1>

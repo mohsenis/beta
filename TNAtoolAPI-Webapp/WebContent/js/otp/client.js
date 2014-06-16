@@ -270,6 +270,13 @@ function triggerShow(e){
 map.on('click', removeAllCentroids);
 var markersCentroids = new L.FeatureGroup();
 function showPop(lat,lon){
+	var personIcon = L.icon({
+	    iconUrl: 'js/otp/person1.png',
+
+	    iconSize:     [40, 55], // size of the icon
+	    iconAnchor:   [20, 55], // point of the icon which will correspond to marker's location
+	    popupAnchor:  [-3, -46] // point from which the popup should open relative to the iconAnchor
+	});
 	
 	var x = document.getElementById('x'+lat+lon).value;
 	var pop=0;
@@ -297,7 +304,7 @@ function showPop(lat,lon){
 				}else{
 					$.each(d.centroids, function(i, item){
 						pop += item.population;
-						var marker = L.marker([item.latitude,item.longitude]);
+						var marker = L.marker([item.latitude,item.longitude], {icon: personIcon});
 						marker.bindPopup('Block id: '+item.id+'<br>Population: '+item.population);
 						markersCentroids.addLayer(marker);
 					});

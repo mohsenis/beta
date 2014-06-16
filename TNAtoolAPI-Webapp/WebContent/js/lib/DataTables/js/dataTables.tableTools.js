@@ -2255,6 +2255,7 @@ TableTools.prototype = {
 	 */
 	"_fnPrintStart": function ( oConfig )
 	{
+	  boo = true;
 	  var that = this;
 	  var oSetDT = this.s.dt;
 
@@ -2349,6 +2350,7 @@ TableTools.prototype = {
 	 */
 	"_fnPrintEnd": function ( e )
 	{
+		boo = false;
 		var that = this;
 		var oSetDT = this.s.dt;
 		var oSetPrint = this.s.print;

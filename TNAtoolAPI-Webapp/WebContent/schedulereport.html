@@ -139,7 +139,7 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 					        }
 					    }
 					    //alert(columns[0].innerHTML);
-					    columns[0].id='sn'+k;
+					    //columns[0].id='sn'+k;
 					    var orderBy = jj;
 					    break;
 					} 
@@ -185,7 +185,7 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 						"width": "auto",
 						"sScrollX": "100%",
 						"bScrollCollapse": true,
-						"autoWidth": true,
+						"autoWidth": false,
 						//"iDisplayLength": 15,
 						"paging": false,
 						"order": [[ orderBy, "asc" ]],
@@ -207,7 +207,7 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 						//"dom1": 'T<"clear">lfrtip',
 				        "tableTools": {
 				        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
-				        	"sRowSelect": "multi",
+				        	"sRowSelect": "os",
 				            "aButtons": [
 								
 								{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "mColumns": "all"},
@@ -249,13 +249,20 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 				                }
 				            ]
 				        },
-				        
+				        "fnDrawCallback": function( oSettings ) {
+				        	//$('#RT0_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th').css("padding-left","0px");
+				        	$('#RT'+k+'_wrapper').css("width", $('#RT'+k+'_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table').css("width"));
+				        	$('#RT'+k+'_wrapper').css("width", "+=17");
+						    
+						    $('#RT'+k+'_wrapper').css("margin","auto");
+						    //this.columns.adjust();
+						    
+				        },
 				        
 						
 					} );
-				   
-				    $('#RT_wrapper').css("width", $('#RT').css("width"));
-				    $('.dataTables_scroll').css("width", "auto");
+				    
+				    
 				    $('.ColVis').css("float", "left");
 				    if(gr.length==0){
 				    	//alert();
@@ -281,6 +288,7 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 				}
 		
 			});
+	
 			if(dCount==0){
 				html =  '<br><br><br><br><br><br><br><br><br>'+
 						'<span id="noTrip"><b><i>There is no Trip scheduled for the specified date in this Route</i></b></span><br>';
@@ -294,7 +302,9 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 			}
 			progressbar.remove();
     }});
+	
 });	
+
 function reload(){	
 	
 	location.reload();
@@ -347,7 +357,7 @@ function reload(){
 			  </td> 
 			  <td id="td3" >
 			  	<div class="headerBR" > 
-			    	<!-- <input type="button" onclick="reload()" title="Refresh Report"  value="Submit" class="button" /> -->
+			    	<input type="button" onclick="adjust()" title="Refresh Report"  value="Submit" class="button" />
 		    	    <!-- <div id="datepicker" style="text-align:center"></div> -->
 		    	    <!-- <p ><input type="text" id="alternate" style="text-align:left;border:none; width:70%" ></input></p> -->
 		    	</div>

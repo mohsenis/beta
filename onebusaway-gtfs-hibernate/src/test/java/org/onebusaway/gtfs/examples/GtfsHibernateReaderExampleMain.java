@@ -94,6 +94,11 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getAgencyForId(id);
   }
   
+  public static Stop QueryStopbyid(AgencyAndId id){
+	  GtfsMutableRelationalDao dao = factory.getDao();	  
+	  return dao.getStopForId(id);
+  }
+  
   public static Route QueryRoutebyid(AgencyAndId route){
 	  GtfsMutableRelationalDao dao = factory.getDao();	  
 	  return dao.getRouteForId(route);

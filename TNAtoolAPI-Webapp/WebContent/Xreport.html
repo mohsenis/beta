@@ -20,6 +20,9 @@
 <script type="text/javascript">
 var qstring = '';
 var qstringx = '0.1';
+var w_qstringx = window.opener.qstringx;
+var w_qstring = window.opener.qstring;
+var w_qstringd = window.opener.qstringd;
 var dateID;
 var gg = 1.0/1.1;
 var progVal = 0; 
@@ -43,7 +46,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?&agency='+window.opener.qstring+'&day='+window.opener.qstringd+'&x='+ window.opener.qstringx+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?&agency='+w_qstring+'&day='+w_qstringd+'&x='+ w_qstringx+'&key='+ key,
 		async: true,
 		success: function(item){			
 			$('h2').append('Transit Agency Extended Report <br><hr>');				
@@ -92,7 +95,7 @@ $(document).ready(function(){
 
 </script>
 </head>
-<body>
+<body >
 		<div class="container">
 			<div class="headerL">
 				<h1>Transit Network Analysis Tool Reports</h1>
