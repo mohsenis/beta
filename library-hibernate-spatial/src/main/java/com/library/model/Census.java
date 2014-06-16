@@ -3,7 +3,11 @@ package com.library.model;
 import com.vividsolutions.jts.geom.Point;
 
 public class Census {
-	private String id;
+	private String blockId;
+	private String placeId;
+	private String districtId;
+	private String regionId;
+	private String urbanId;	
     private int population;
     private double latitude;
     private double longitude;
@@ -11,17 +15,49 @@ public class Census {
     private int waterarea;
     private String poptype;
     private Point location;
-
+    
     public Census() {
     }
-
-    public String getId() {
-        return id;
+    
+    public void setBlockId(String blockId) {
+        this.blockId = blockId;
     }
+    
+    public String getBlockId() {
+        return blockId;
+    }  
+    
+    public void setPlaceId(String placeId) {
+		this.placeId = placeId;
+	}
+    
+    public String getPlaceId() {
+		return placeId;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public String getDistrictId() {
+		return districtId;
+	}
+
+	public void setDistrictId(String districtId) {
+		this.districtId = districtId;
+	}
+
+	public String getRegionId() {
+		return regionId;
+	}
+
+	public void setRegionId(String regionId) {
+		this.regionId = regionId;
+	}
+
+	public String getUrbanId() {
+		return urbanId;
+	}
+
+	public void setUrbanId(String urbanId) {
+		this.urbanId = urbanId;
+	}	    
 
     public Integer getPopulation() {
         return population;

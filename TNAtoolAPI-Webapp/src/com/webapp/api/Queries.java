@@ -1,7 +1,5 @@
 package com.webapp.api;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,8 +19,6 @@ import javax.ws.rs.QueryParam;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jettison.json.JSONException;
-
-import au.com.bytecode.opencsv.CSVReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.webapp.api.model.*;
@@ -56,7 +52,7 @@ public class Queries {
 	//static double[][] censusArray = new double[CENSUS_LENGTH][4];
 	static List<Census> censusArray = new ArrayList<Census>();
 	
-	public void fillArray(){
+/*	public void fillArray(){
 		if(censusArray.size()==0){
 			CSVReader reader;
 			Census c; 
@@ -71,11 +67,11 @@ public class Queries {
 					c.setLatitude(Double.parseDouble(nextLine[12]));
 					c.setLongitude(Double.parseDouble(nextLine[13]));
 					c.setPopulation(Integer.parseInt(nextLine[16]));
-					/*censusArray[i][0]= Double.parseDouble(nextLine[8]);
+					censusArray[i][0]= Double.parseDouble(nextLine[8]);
 					censusArray[i][1]= Double.parseDouble(nextLine[12]);
 					censusArray[i][2]= Double.parseDouble(nextLine[13]);
 					censusArray[i][3]= Double.parseDouble(nextLine[16]);
-					i++;*/
+					i++;
 					censusArray.add(c);
 			    }
 			} catch (FileNotFoundException e) {
@@ -85,15 +81,15 @@ public class Queries {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			/*System.out.println(censusArray.get(1).getId());
+			System.out.println(censusArray.get(1).getId());
 			System.out.println(censusArray.get(2).getId());
 			System.out.println(censusArray.get(3).getId());
-			System.out.println(censusArray.get(4).getId());*/
+			System.out.println(censusArray.get(4).getId());
 		}
 		
-	}
+	}*/
 	
-	@GET
+/*	@GET
     @Path("/NearBlocks")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object getNearBlocks(@QueryParam("lat") String lat,@QueryParam("x") String x, @QueryParam("lon") String lon) throws JSONException {
@@ -115,9 +111,37 @@ public class Queries {
 		}
 		System.out.println(pop);
 		return response;
-	}
+	}*/
 	
-	private double ddistance(double lat1, double lon1, double lat2, double lon2) {
+	@GET
+    @Path("/NearBlocks")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getNearBlocks(@QueryParam("lat") double lat,@QueryParam("x") double x, @QueryParam("lon") double lon) throws JSONException {
+		
+		if (Double.isNaN(x) || x <= 0) {
+            x = STOP_SEARCH_RADIUS;
+        }
+		x = x * 1609.34;
+		List <Census> centroids = new ArrayList<Census> ();
+        try {
+			centroids =EventManager.getcentroids(x, lat, lon);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        CensusList response = new CensusList();		
+		//Census C;
+        for (Census c : centroids){
+        	Centroid cntr = new Centroid();
+        	cntr.setcentroid(c);
+        	response.centroids.add(cntr);        	
+        }
+		return response;
+	}
+/*	private double ddistance(double lat1, double lon1, double lat2, double lon2) {
         double theta = lon1 - lon2;
         double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
         if (dist>1) dist =1;
@@ -126,15 +150,15 @@ public class Queries {
         dist = rad2deg(dist);
         dist = dist * 60 * 1.1515;      
         return (dist);
-      }
+      }*/
     
-    private double deg2rad(double deg) {
+    /*private double deg2rad(double deg) {
         return (deg * Math.PI / 180.0);
       }
     
     private double rad2deg(double rad) {
         return (rad * 180.0 / Math.PI);
-    }
+    }*/
 	
 	@GET
     @Path("/saeed")
@@ -1080,4 +1104,270 @@ Loop:  	for (Trip trip: routeTrips){
     		return ""+value;
     	}
     }
+
+    /**
+	 * Generates The counties Summary report
+	 */
+	    
+	@GET
+	@Path("/GeoCSR")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getGCSR(@QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+		List<County> allcounties = new ArrayList<County> ();
+		try {
+			allcounties = EventManager.getcounties();
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		GeoRList response = new GeoRList();
+		response.type = "County";
+	    int index =0;
+		int totalLoad = allcounties.size();
+	    for (County instance : allcounties){   
+	    	index++;
+	    	GeoR each = new GeoR();
+	    	each.Name = instance.getName();
+	    	each.id = instance.getCountyId();	    	
+	    	each.ODOTRegion = instance.getRegionId();
+	    	each.ODOTRegionName = instance.getRegionName();
+	    	each.waterArea = String.valueOf(Math.round(instance.getWaterarea()/2.58999e4)/100.0);
+	    	each.landArea = String.valueOf(Math.round(instance.getLandarea()/2.58999e4)/100.0);
+	    	each.population = String.valueOf(instance.getPopulation());
+	    	each.RoutesCount = String.valueOf(0);
+	    	each.TractsCount = "0";
+	    	try {
+	    		each.TractsCount = String.valueOf(EventManager.gettractscountbycounty(instance.getCountyId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}	    		    	
+	    	each.AverageFare = "0";
+	    	each.MedianFare = "0";
+	    	/*float sumFare=0; 
+	    	List<Float> fares = new ArrayList<Float>();
+	    	for(Route route: routes){
+	    		List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route);
+	    		if(fareRules.size()!=0){
+	    			sumFare+=fareRules.get(0).getFare().getPrice();
+	    			fares.add(fareRules.get(0).getFare().getPrice());
+	    		}
+	    	}
+	    	Collections.sort(fares);
+	    	if (fares.size()>0){
+	    		each.AverageFare = String.valueOf(sumFare/fares.size());
+	    		each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
+	    	} else {
+	    		each.AverageFare = "NA";
+		    	each.MedianFare =  "NA";
+	    	}*/
+	    	each.StopsCount = String.valueOf(0);
+	    	try {
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}	
+	    	each.RoutesCount = String.valueOf(0);
+	    	try {
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbycounty(instance.getCountyId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	        response.GeoR.add(each);
+	        setprogVal(key, (int) Math.round(index*100/totalLoad));
+	    }
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    progVal.remove(key);
+	    return response;
+	}
+    /**
+	 * Generates The Tracts (by county) Summary report
+	 */
+	    
+	@GET
+	@Path("/GeoCTSR")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getGCTSR(@QueryParam("county") String county, @QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+		List<Tract> alltracts = new ArrayList<Tract> ();
+		try {
+			alltracts = EventManager.gettractsbycounty(county);
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		GeoRList response = new GeoRList();
+		response.type = "Tract";
+	    int index =0;
+		int totalLoad = alltracts.size();
+	    for (Tract instance : alltracts){   
+	    	index++;
+	    	GeoR each = new GeoR();	    	
+	    	each.id = instance.getTractId();	    	
+	    	each.waterArea = String.valueOf(Math.round(instance.getWaterarea()/2.58999e4)/100.0);
+	    	each.landArea = String.valueOf(Math.round(instance.getLandarea()/2.58999e4)/100.0);
+	    	each.population = String.valueOf(instance.getPopulation());
+	    	each.RoutesCount = String.valueOf(0);
+	    	each.BlocksCount = "0";
+	    	try {
+	    		each.BlocksCount = String.valueOf(EventManager.getblockscountbytract(instance.getTractId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}	    		    	
+	    	each.AverageFare = "0";
+	    	each.MedianFare = "0";
+	    	/*float sumFare=0; 
+	    	List<Float> fares = new ArrayList<Float>();
+	    	for(Route route: routes){
+	    		List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route);
+	    		if(fareRules.size()!=0){
+	    			sumFare+=fareRules.get(0).getFare().getPrice();
+	    			fares.add(fareRules.get(0).getFare().getPrice());
+	    		}
+	    	}
+	    	Collections.sort(fares);
+	    	if (fares.size()>0){
+	    		each.AverageFare = String.valueOf(sumFare/fares.size());
+	    		each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
+	    	} else {
+	    		each.AverageFare = "NA";
+		    	each.MedianFare =  "NA";
+	    	}*/
+	    	each.StopsCount = String.valueOf(0);
+	    	try {
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbytract(instance.getTractId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}	
+	    	each.RoutesCount = String.valueOf(0);
+	    	try {
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbytract(instance.getTractId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	        response.GeoR.add(each);
+	        setprogVal(key, (int) Math.round(index*100/totalLoad));
+	    }
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    progVal.remove(key);
+	    return response;
+	}
+    /**
+	 * Generates The Census Places Summary report
+	 */
+	    
+	@GET
+	@Path("/GeoCPSR")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getGCPSR(@QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+		List<Place> allplaces = new ArrayList<Place> ();
+		try {
+			allplaces = EventManager.getplaces();
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		GeoRList response = new GeoRList();
+		response.type = "Place";
+	    int index =0;
+		int totalLoad = allplaces.size();
+	    for (Place instance : allplaces){   
+	    	index++;
+	    	GeoR each = new GeoR();
+	    	each.Name = instance.getName();
+	    	each.id = instance.getPlaceId();	    	
+	    	each.waterArea = String.valueOf(Math.round(instance.getWaterarea()/2.58999e4)/100.0);
+	    	each.landArea = String.valueOf(Math.round(instance.getLandarea()/2.58999e4)/100.0);
+	    	each.population = String.valueOf(instance.getPopulation());
+	    	each.RoutesCount = String.valueOf(0);	    		    		    	
+	    	each.AverageFare = "0";
+	    	each.MedianFare = "0";
+	    	/*float sumFare=0; 
+	    	List<Float> fares = new ArrayList<Float>();
+	    	for(Route route: routes){
+	    		List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route);
+	    		if(fareRules.size()!=0){
+	    			sumFare+=fareRules.get(0).getFare().getPrice();
+	    			fares.add(fareRules.get(0).getFare().getPrice());
+	    		}
+	    	}
+	    	Collections.sort(fares);
+	    	if (fares.size()>0){
+	    		each.AverageFare = String.valueOf(sumFare/fares.size());
+	    		each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
+	    	} else {
+	    		each.AverageFare = "NA";
+		    	each.MedianFare =  "NA";
+	    	}*/
+	    	each.StopsCount = String.valueOf(0);
+	    	try {
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbyplace(instance.getPlaceId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}	
+	    	each.RoutesCount = String.valueOf(0);
+	    	try {
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyplace(instance.getPlaceId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	        response.GeoR.add(each);
+	        setprogVal(key, (int) Math.round(index*100/totalLoad));
+	    }
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    progVal.remove(key);
+	    return response;
+	} 
+    
 }

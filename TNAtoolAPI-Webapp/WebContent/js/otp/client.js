@@ -492,14 +492,14 @@ $mylist
 		show: {
 		 effect: "blind",
 		 duration: 1000
-		 }
+		 }		 
 		})	
 	.dialogExtend({
-	  "maximizable" : false,
-	  "closable" : true,
+	  "closable" : false,
 	  "expandTitle":"test",
 	  "minimizable" : true,
 	  "collapsable" : true,
+	  "maximizable" : false,
 	  "dblclick" : "collapse",
 	  "titlebar" : "transparent",
 	  "icons" : { 
@@ -509,17 +509,29 @@ $mylist
 	    },
 	    //"events" : {
 	    "load" : function(evt, dlg) {
+	    	
+    	$(".ui-dialog-titlebar-buttonpane").css("right", 25 + "px");
+    	/*$(".ui-dialog-titlebar-maximize").css("right", 80+ "px");*/
+	    var titlebar = $(".ui-dialog-titlebar");
+	    var div = $("<div/>");
+	    div.addClass("dropdown");
+	    
+	    /*	    titlebar.append('<div class=dropdown><button class="dropdown-toggle" role="button" data-toggle="dropdown" text="reports"><img src="/path/to/ui-icon-document" alt="Submit"></button><ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="rep1" href="#">Transit Agnecy Summary Report</a></li><li role="presentation"><a id="rep2" href="#">Counties Summary Report</a></li><li role="presentation"><a id="rep2" href="#">ODOT Transit Regions Summary Report</a></li></ul><div>');*/
+		/*$('.dropdown-toggle').dropdown();*/
+				var button = $( "<button/>" ).text( "test" );
+        	/*right = titlebar.find( "[role='button']:last" )
+                             .css( "right" );*/
+	    button.button( { icons: { primary: "ui-icon-document" }, text: false } )
+            .addClass( "ui-dialog-titlebar-other" )
+            .css( "right", 5 + "px" )
+            /*.click( function( e ) {
+                $( "#dialog" ).html( "<p>Adding...</p>" );
+            } )*/
+            .appendTo(titlebar);
+	      /*$(".ui-dialog-titlebar-minimize").after('<span class="ui-icon ui-icon-plusthick">minus</span>');*/
 		  $mylist.dialogExtend("collapse");
 		  $("#minimize").attr("title", "Minimize");		  
-		  //$('button').eq(0).attr('title','Reports');
-		  //$('button').eq(1).attr('title','Extend');
-		  //$('ui-button-icon-only').attr('title','test');
-		  
-		 //alert('hey');
-		 //$('#collapse').attr('title','Minimize');
-		 //$(function() {
-		//	 $( document ).tooltip();
-		//	 });		  
+		  	  
 	    },
 	    "restore": function(evt,dlg){
 	    	$("#collapse").attr("title", "Collapse");
@@ -529,7 +541,16 @@ $mylist
 	    	//$('<div class="ui-dialog-titlebar-buttonpane"></div>').find('.ui-dialog-titlebar-restore').attr("title", "test");
 	    	//$("#b2").attr("title", "test");
 	    	//alert('minimized');
-	    }
+	    },
+	    iconButtons: [
+		                {
+		                    text: "Reports",
+		                    icon: "ui-icon-document",
+		                    click: function( e ) {
+		                        $( "#dialog" ).html( "<p>Searching...</p>" );
+		                    }
+		                 }
+		            ]
 	    
 	   //}
 	});        
@@ -670,3 +691,4 @@ $mylist
     	}    	
     };
 });
+

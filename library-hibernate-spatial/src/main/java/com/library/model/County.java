@@ -2,7 +2,7 @@ package com.library.model;
 
 
 public class County {
-	private int id;
+	private String countyId;
 	private String name;
 	private long population;
     private long housing;
@@ -10,16 +10,18 @@ public class County {
     private double longitude;
     private long landarea;
     private long waterarea;
+    private String regionId;
+    private String regionName;
     
 	public County() {		
 	}
 
-	public int getId() {
-		return id;
+	public String getCountyId() {
+		return countyId;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setCountyId(String countyId) {
+		this.countyId = countyId;
 	}
 
 	public String getName() {
@@ -76,6 +78,22 @@ public class County {
 
 	public void setWaterarea(long waterarea) {
 		this.waterarea = waterarea;
+	}
+
+	public String getRegionId() {
+		return regionId;
+	}
+
+	public void setRegionId(String regionId) {
+		this.regionId = regionId;
+	}
+
+	public String getRegionName() {
+		return regionName;
+	}
+
+	public void setRegionName(String regionName) {
+		this.regionName = regionName;
 	}
 	
 	  
