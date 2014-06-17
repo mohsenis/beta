@@ -31,18 +31,18 @@
         </dependency>
 
         <!-- the Postgis JDBC driver -->
-        <dependency>
+        <!-- <dependency>
             <groupId>org.postgis</groupId>
             <artifactId>postgis-jdbc</artifactId>
             <version>2.0.0</version>
         </dependency>
 
-        <!-- the postgresql driver -->
+        the postgresql driver
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>9.3-1101.jdbc3</version>
-        </dependency>
+        </dependency> -->
 
         <!-- Hibernate uses slf4j for logging, for our purposes here use the simple backend -->
                <dependency>

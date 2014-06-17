@@ -4,7 +4,6 @@ import org.hibernate.Session;
 import org.hibernate.Query;
 import org.hibernate.type.Type;
 import org.hibernatespatial.GeometryUserType;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -35,7 +34,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 
 /**
  * returns trip data and shape
- */
+ *//*
 	public static Geotrip getTripData(AgencyAndId id) throws FactoryException, TransformException {			
 		session.beginTransaction();
 		Query q = session.getNamedQuery("SHAPE_BY_TRIP");		
@@ -44,7 +43,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		List<Geotrip> results = (List<Geotrip>) q.list();
         Hutil.getSessionFactory().close();
         return results.get(0);
-    }
+    }*/
 
 /**
  * returns population centroids
