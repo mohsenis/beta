@@ -525,15 +525,15 @@ $mylist
 	    
 	    /*	    titlebar.append('<div class=dropdown><button class="dropdown-toggle" role="button" data-toggle="dropdown" text="reports"><img src="/path/to/ui-icon-document" alt="Submit"></button><ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="rep1" href="#">Transit Agnecy Summary Report</a></li><li role="presentation"><a id="rep2" href="#">Counties Summary Report</a></li><li role="presentation"><a id="rep2" href="#">ODOT Transit Regions Summary Report</a></li></ul><div>');*/
 		/*$('.dropdown-toggle').dropdown();*/
-				var button = $( "<button/>" ).text( "test" );
+				var button = $( "<button/>" ).text( "Reports" );
         	/*right = titlebar.find( "[role='button']:last" )
                              .css( "right" );*/
 	    button.button( { icons: { primary: "ui-icon-document" }, text: false } )
             .addClass( "ui-dialog-titlebar-other" )
             .css( "right", 5 + "px" )
-            /*.click( function( e ) {
-                $( "#dialog" ).html( "<p>Adding...</p>" );
-            } )*/
+            .click( function( e ) {
+                openrep();
+            } )
             .appendTo(titlebar);
 	      /*$(".ui-dialog-titlebar-minimize").after('<span class="ui-icon ui-icon-plusthick">minus</span>');*/
 		  $mylist.dialogExtend("collapse");
