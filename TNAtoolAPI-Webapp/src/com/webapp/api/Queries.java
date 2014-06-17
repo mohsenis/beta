@@ -88,7 +88,11 @@ public class Queries {
 		
 	}*/
 	
+
 	/*@GET
+=======
+/*	@GET
+>>>>>>> refs/remotes/origin/master
 =======
 /*	@GET
 >>>>>>> refs/remotes/origin/master
@@ -148,6 +152,37 @@ public class Queries {
 	}
 /*	private double ddistance(double lat1, double lon1, double lat2, double lon2) {
 >>>>>>> refs/remotes/origin/master
+=======
+	@GET
+    @Path("/NearBlocks")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getNearBlocks(@QueryParam("lat") double lat,@QueryParam("x") double x, @QueryParam("lon") double lon) throws JSONException {
+		
+		if (Double.isNaN(x) || x <= 0) {
+            x = STOP_SEARCH_RADIUS;
+        }
+		x = x * 1609.34;
+		List <Census> centroids = new ArrayList<Census> ();
+        try {
+			centroids =EventManager.getcentroids(x, lat, lon);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        CensusList response = new CensusList();		
+		//Census C;
+        for (Census c : centroids){
+        	Centroid cntr = new Centroid();
+        	cntr.setcentroid(c);
+        	response.centroids.add(cntr);        	
+        }
+		return response;
+	}
+/*	private double ddistance(double lat1, double lon1, double lat2, double lon2) {
+>>>>>>> refs/remotes/origin/master
         double theta = lon1 - lon2;
         double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
         if (dist>1) dist =1;
@@ -165,6 +200,7 @@ public class Queries {
     private double rad2deg(double rad) {
         return (rad * 180.0 / Math.PI);
     }*/
+
 
 	
 	@GET
@@ -195,6 +231,8 @@ public class Queries {
         }
         return response;
     }
+
+
 
 	
 	@GET
