@@ -2,7 +2,7 @@ package com.library.model;
 
 
 public class Place {
-	private int id;
+	private String placeId;
 	private String name;
     private long population;
     private long housing;
@@ -14,12 +14,12 @@ public class Place {
     public Place() {
     }
 
-	public int getId() {
-		return id;
+	public String getPlaceId() {
+		return placeId;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setPlaceId(String placeId) {
+		this.placeId = placeId;
 	}
 
 	public String getName() {

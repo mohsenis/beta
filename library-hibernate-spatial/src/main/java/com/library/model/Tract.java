@@ -1,7 +1,7 @@
 package com.library.model;
 
 public class Tract {
-	private long id;
+	private String tractId;
     private long population;
     private long housing;
     private double latitude;
@@ -13,13 +13,13 @@ public class Tract {
     }
 
 
-	public long getId() {
-		return id;
+	public String getTractId() {
+		return tractId;
 	}
 
 
-	public void setId(long id) {
-		this.id = id;
+	public void setTractId(String tractId) {
+		this.tractId = tractId;
 	}
 
 

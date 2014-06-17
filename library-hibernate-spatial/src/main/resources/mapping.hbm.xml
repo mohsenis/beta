@@ -2,9 +2,13 @@
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="com.library.model">
-    <class name="Census" table="census_blocks">
 
-        <id name="id" column="block_id" type="string" length="50" />
+    <class name="Census" table="census_blocks">
+        <id name="blockId" column="blockid" type="string" length="15" />
+        <property name="placeId" column="placeid" type="string" length="7" />
+        <property name="urbanId" column="urbanid" type="string" length="5" />
+        <property name="regionId" column="regionid" type="string" length="1" />
+        <property name="districtId" column="districtid" type="string" length="4" />        
         <property name="population" type="integer" column="population"/>       
         <property name="latitude" type="double" column="lat" />
         <property name="longitude" type="double" column="lon"/>
@@ -15,7 +19,7 @@
     </class>
     
     <class name="Tract" table="census_tracts">
-        <id name="id" column="id" type="long" />
+        <id name="tractId" column="tractid" type="string" length="11" />
         <property name="population" type="long" column="population"/>       
         <property name="latitude" type="double" column="lat" />
         <property name="longitude" type="double" column="lon"/>        
@@ -25,7 +29,7 @@
     </class>
     
     <class name="County" table="census_counties">
-        <id name="id" column="id" type="int" />
+        <id name="countyId" column="countyid" type="string" length="5"/>
         <property name="name" column="cname" type="string" length="50"/>
         <property name="population" type="long" column="population"/>
         <property name="housing" type="long" column="housing"/>       
@@ -33,10 +37,13 @@
         <property name="longitude" type="double" column="lon"/>        
         <property name="landarea" type="long" />
         <property name="waterarea" type="long" />
+        <property name="regionId" column="regionid" type="string" length="1" />
+        <property name="regionName" column="regionname" type="string" length="50" />
+        
     </class>
     
     <class name="Place" table="census_places">
-        <id name="id" column="id" type="integer" />
+        <id name="placeId" column="id" type="string" length="7" />
         <property name="name" column="pname" type="string"/> 
         <property name="population" type="long" column="population"/>       
         <property name="latitude" type="double" column="lat" />
@@ -45,23 +52,132 @@
         <property name="landarea" type="long" />
         <property name="waterarea" type="long" />
     </class>
-    <class name="TripData" table="temptrips">
+    
+    <class name="GeoStop" table="gtfs_stops">
         <composite-id>
             <key-property name="agencyId" column="agencyid" length="50" />
-            <key-property name="id" column="tripid" length="255" />
-        </composite-id>               
-        <property name="length" type="double"/>
-        <property name="estlength" type="double"/>       
-        <property name="shape" type="org.hibernatespatial.GeometryUserType" />
+            <key-property name="stopId" column="id"/>
+        </composite-id>
+        <property name="code" />
+        <property name="name" />
+        <property name="desc" column="description" />
+        <property name="direction" />
+        <property name="lat" />
+        <property name="lon" />
+        <property name="zoneId" />
+        <property name="url" />
+        <property name="locationType" />
+        <property name="parentStation" />
+        <property name="timezone" />
+        <property name="vehicleType" />
+        <property name="wheelchairBoarding" />
+        <property name="platformCode" />
+        <property name="blockId" column="blockid"/> 
+        <property name="placeId" column="placeid" /> 
+        <property name="regionId" column="regionid"/> 
+        <property name="urbanId" column="urbanid"/> 
+        <property name="location" type="org.hibernatespatial.GeometryUserType"  column="location"/>       
     </class>
-    	
+        
+   <class name="GeoStopRouteMap" table="gtfs_stop_route_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>        
+        <property name="agencyId" />
+        <property name="routeId" />       
+        <many-to-one name="stop" not-null="true">
+            <column name="agencyId_def" />
+            <column name="stopId" />                        
+        </many-to-one>                
+    </class> 
+    
+    <!-- <class name="Geotrip" table="gtfs_trips">
+
+        <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <key-property name="agencyId" length="50" />
+            <key-property name="id" />
+        </composite-id>
+
+        <component name="routeId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="route_agencyId" length="50" />
+            <property name="route_id" />
+        </component>
+
+        <component name="serviceId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="agencyId" column="serviceId_agencyId" index="serviceId" length="50" />
+            <property name="id" column="serviceId_id" index="serviceId" />
+        </component>
+
+        <component name="shapeId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="agencyId" column="shapeId_agencyId" length="50" />
+            <property name="id" column="shapeId_id" />
+        </component>
+
+        <property name="tripShortName" />
+        <property name="tripHeadsign" />
+        <property name="routeShortName" />
+        <property name="directionId" />
+        <property name="blockId" index="blockId" />
+        <property name="wheelchairAccessible"/>
+        <property name="epshape" type="org.hibernate.type.TextType" column="epshape"/>
+        <property name="length"/>
+        <property name="estlength"/>
+        <property name="stopscount"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType"/>
+    </class> -->
+    
     <query name = "POP_BY_COORDINATES">
     <![CDATA[select sum(population) from Census where distance(:point,location)<:radius]]>
 	</query>
 	<query name = "CENSUS_BY_COORDINATES">
     <![CDATA[from Census where distance(:point,location)<:radius]]>
 	</query>
-	<query name = "SHAPE_BY_TRIP">
-    <![CDATA[from TripData where agencyid=:agencyId and tripid=:id]]>
+	<!-- <query name = "SHAPE_BY_TRIP">
+    <![CDATA[from Geotrip where id=:id]]>
+	</query> -->
+	<query name = "All_COUNTIES">
+    <![CDATA[from County]]>
+	</query>
+	<query name = "All_TRACTS">
+    <![CDATA[from Tract]]>
+	</query>
+	<query name = "All_PLACES">
+    <![CDATA[from Place]]>
+	</query>
+	<!-- <query name = "TRIPS_BY_COUNTY">
+    <![CDATA[from Geotrip join County on ST_Intersects(County.shape, Geotrip.shape)=true where County.id=:id]]>
+	</query> -->
+	<query name = "TRACTS_BY_PLACE">
+    <![CDATA[from Tract where SUBSTRING(tractid,1,7)=:id]]>
+	</query>
+	<query name = "PLACES_BY_COUNTY">
+    <![CDATA[from Place where SUBSTRING(placeid,1,5)=:id]]>
+	</query>
+	<query name = "TRACTS_BY_COUNTY">
+    <![CDATA[from Tract where SUBSTRING(tractid,1,5)=:id]]>
+	</query>
+	<query name = "TRACTSNO_BY_COUNTY">
+    <![CDATA[select count(tractid) from Tract where SUBSTRING(tractid,1,5)=:id]]>
+	</query>	
+	<query name = "BLOCKSNO_BY_TRACT">
+    <![CDATA[select count(id) from Census where substring(blockid,1,11)=:id]]>
+	</query>
+	<query name = "STOPS_BY_COUNTY">
+    <![CDATA[select count(stopId) from GeoStop where substring(blockid,1,5)=:id]]>
+	</query>
+	<query name = "STOPS_BY_TRACT">
+    <![CDATA[select count(stopId) from GeoStop where substring(blockid,1,11)=:id]]>
+	</query>
+	<query name = "STOPS_BY_PLACE">
+    <![CDATA[select count(stopId) from GeoStop where placeId=:id]]>
+	</query>	
+	<query name = "ROUTES_BY_COUNTY">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_PLACE">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.placeId=:id group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_TRACT">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,11)=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
 </hibernate-mapping>

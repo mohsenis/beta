@@ -32,7 +32,7 @@
         <artifactId>onebusaway-csv-entities</artifactId>
         <version>1.0.3</version>
       </dependency>	  
-	       
+	
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
@@ -41,7 +41,7 @@
 	<dependency>
 	<groupId>postgresql</groupId>
 	<artifactId>postgresql</artifactId>
-	<version>9.1-901.jdbc3</version>
+	<version>9.3-1101.jdbc3</version>
 	</dependency>	
 	<dependency>
       <groupId>org.slf4j</groupId>

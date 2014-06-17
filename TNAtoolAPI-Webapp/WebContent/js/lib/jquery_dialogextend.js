@@ -85,13 +85,14 @@
 
       titlebar = $(this.element[0]).dialog("widget").find(".ui-dialog-titlebar");
       buttonPane = $('<div class="ui-dialog-titlebar-buttonpane"></div>').appendTo(titlebar);
+      
       buttonPane.css({
         "position": "absolute",
         "top": "50%",
         "right": "0.3em",
         "margin-top": "-10px",
         "height": "18px"
-      });
+      });      
       titlebar.find(".ui-dialog-titlebar-close").css({
         "position": "relative",
         "float": "right",
@@ -110,12 +111,14 @@
       }).end().find(".ui-dialog-titlebar-close").toggle(this.options.closable).end().find(".ui-dialog-titlebar-restore").hide().click(function(e) {
         e.preventDefault();
         return _this.restore();
-      }).end();
+      }).end(); 
+      
       _ref = this.modes;
+      
       for (name in _ref) {
         mode = _ref[name];
         this._initModuleButton(name, mode);
-      }
+      }      
       return titlebar.dblclick(function(evt) {
         if (_this.options.dblclick) {
           if (_this._state !== "normal") {
@@ -126,7 +129,7 @@
         }
       }).select(function() {
         return false;
-      });
+      });      
     },
     _initModuleButton: function(name, mode) {
       var buttonPane,
@@ -144,7 +147,7 @@
       }).end().find(".ui-dialog-titlebar-" + name).toggle(this.options[mode.option]).click(function(e) {
         e.preventDefault();
         return _this[name]();
-      }).end();
+      }).end();      
     },
     _initTitleBar: function() {
       var handle;
@@ -174,7 +177,7 @@
           });
         default:
           return $.error("jQuery.dialogExtend Error : Invalid <titlebar> value '" + this.options.titlebar + "'");
-      }
+      }      
     },
     state: function() {
       return this._state;

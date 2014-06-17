@@ -4,6 +4,7 @@ import org.hibernate.Session;
 import org.hibernate.Query;
 import org.hibernate.type.Type;
 import org.hibernatespatial.GeometryUserType;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -31,16 +32,16 @@ import com.library.model.*;
 public class EventManager {		
 //private SessionFactory factory;
 private	static Session session = Hutil.getSessionFactory().openSession();
+
 /**
  * returns trip data and shape
  */
-	public static TripData getTripData(String agencyId, String id) throws FactoryException, TransformException {			
+	public static Geotrip getTripData(AgencyAndId id) throws FactoryException, TransformException {			
 		session.beginTransaction();
-		Query q = session.getNamedQuery("SHAPE_BY_TRIP");
-		q.setParameter("agencyId", agencyId);
+		Query q = session.getNamedQuery("SHAPE_BY_TRIP");		
 		q.setParameter("id", id);
 		@SuppressWarnings("unchecked")
-		List<TripData> results = (List<TripData>) q.list();
+		List<Geotrip> results = (List<Geotrip>) q.list();
         Hutil.getSessionFactory().close();
         return results.get(0);
     }
@@ -69,6 +70,143 @@ private	static Session session = Hutil.getSessionFactory().openSession();
         return results;
     }
 	
+/**
+ * returns list of counties
+ */
+	public static List<County> getcounties() throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("All_COUNTIES");
+		@SuppressWarnings("unchecked")
+		List<County> results = (List<County>) q.list();
+        Hutil.getSessionFactory().close();
+        return results;
+    }
+	
+/**
+ * returns list of counties
+ */
+	public static List<Place> getplaces() throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("All_PLACES");
+		@SuppressWarnings("unchecked")
+		List<Place> results = (List<Place>) q.list();
+        Hutil.getSessionFactory().close();
+        return results;
+    }
+	
+/**
+ * returns number of tracts for a given county
+ */
+	public static long gettractscountbycounty(String countyId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("TRACTSNO_BY_COUNTY");
+		q.setParameter("id", countyId);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory().close();
+        return result;
+	    }
+
+/**
+ * returns number of census blocks for a given county
+ */
+	public static long getblockscountbytract(String tractId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("BLOCKSNO_BY_TRACT");
+		q.setParameter("id", tractId);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory().close();
+        return result;
+	    }
+	
+/**
+ * returns number of stops for a given county
+ */
+	public static long getstopscountbycounty(String countyId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("STOPS_BY_COUNTY");
+		q.setParameter("id", countyId);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory().close();
+        return result;
+	    }
+/**
+ * returns number of stops for a given census tract
+ */
+	public static long getstopscountbytract(String tractId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("STOPS_BY_TRACT");
+		q.setParameter("id", tractId);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory().close();
+        return result;
+	    }
+		
+/**
+ * returns number of stops for a given census place
+ */
+	public static long getstopscountbyplace(String placeId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("STOPS_BY_PLACE");
+		q.setParameter("id", placeId);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory().close();
+        return result;
+	    }	
+/**
+ * returns list of routes for a given county
+ */
+	public static int getroutescountsbycounty(String countyId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("ROUTES_BY_COUNTY");
+		q.setParameter("id", countyId);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+        Hutil.getSessionFactory().close();
+        return result.size();
+	    }
+/**
+ * returns list of routes for a given census place
+ */
+	public static int getroutescountsbyplace(String placeId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("ROUTES_BY_PLACE");
+		q.setParameter("id", placeId);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+        Hutil.getSessionFactory().close();
+        return result.size();
+	    }
+/**
+ * returns list of routes for a given census tract
+ */
+	public static int getroutescountsbytract(String tractId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("ROUTES_BY_TRACT");
+		q.setParameter("id", tractId);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+        Hutil.getSessionFactory().close();
+        return result.size();
+	    }
+	
+	
+/**
+ * returns list of tracts for a given county
+ */
+	public static List<Tract> gettractsbycounty(String countyId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("TRACTS_BY_COUNTY");
+		q.setParameter("id", countyId);
+		@SuppressWarnings("unchecked")
+		List<Tract> result = q.list();
+        Hutil.getSessionFactory().close();
+        return result;
+	    }
 /**
  * returns population number
  */
