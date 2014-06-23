@@ -27,7 +27,10 @@ var dateID;
 var progVal = 0; 
 var html;
 var key = Math.random();
-
+var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
+var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
+var w_qstringd = localStorage.getItem(keyName);
+var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 $(document).ready(function(){		
 	$("#accordion").accordion({
 		collapsible: true,
@@ -35,17 +38,18 @@ $(document).ready(function(){
 		heightStyle: "content"
 	});
 	$("#accordion").accordion("refresh");
-	$("#accordion > h3").html(window.opener.qstringd);
+	$("#accordion > h3").html(w_qstringd);
 	
 	$( "#datepicker" ).datepicker({
 		altField: "#alternate",
 	    altFormat: "DD, d MM, yy",
 		onSelect: function (date) {
-			window.opener.qstringd = date;
+			w_qstringd = date;
+			localStorage.setItem(keyName, w_qstringd);
 			reload();
 	    }
 	});
-	$( "#datepicker" ).datepicker( "setDate", window.opener.qstringd );
+	$( "#datepicker" ).datepicker( "setDate", w_qstringd );
 	$('.ui-datepicker').css("margin", "auto");
 	$( "#progressbar" ).progressbar({
 	    value: false,
@@ -80,7 +84,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/ScheduleR?&agency='+window.opener.qstring+'&day='+window.opener.qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/ScheduleR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
 		async: true,
 		success: function(d){
 			//var headerArray;

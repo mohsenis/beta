@@ -20,6 +20,7 @@
 <script type="text/javascript">
 var qstring = '';
 //var w_qstringx = window.opener.qstringx;
+var w_qstringx = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 var qstringx = '0.1';
 var progVal = 0; 
 var qstringd = '';
@@ -78,12 +79,12 @@ $(document).ready(function(){
 	} 
 	timeVar = setInterval(progress, 100);
 	
-	document.getElementById("Sradius").value = window.opener.qstringx;
+	document.getElementById("Sradius").value = w_qstringx;
 	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ window.opener.qstringx+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key,
 		async: true,
 		success: function(d){			
 			$('h2').append('Transit Agency Summary Report <br><hr>');
@@ -116,17 +117,22 @@ $(document).ready(function(){
 			    	qstring = $(this).attr('id');
 			    	qstringx = '0.1';
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    	window.open('/TNAtoolAPI-Webapp/routereport.html');
+			    	var keyName = Math.random();
+		    		localStorage.setItem(keyName, qstringd);
+			    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName);
 			    }else if($(this).attr('type')=="SC"){
-			    		qstring = $(this).attr('id');
-			    		qstringx = '0.1';
-			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		window.open('/TNAtoolAPI-Webapp/stopreport.html');	    		
+		    		qstring = $(this).attr('id');
+		    		qstringx = '0.1';
+		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+		    		
+		    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&x='+qstringx);	    		
 			    }else if($(this).attr('type')=="XR"){
-			    		qstring = $(this).attr('id');
-			    		qstringx = '0.1';
-			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		window.open('/TNAtoolAPI-Webapp/Xreport.html');	    		
+		    		qstring = $(this).attr('id');
+		    		qstringx = '0.1';
+		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+		    		var keyName = Math.random();
+		    		localStorage.setItem(keyName, qstringd);
+		    		window.open('/TNAtoolAPI-Webapp/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName);	    		
 			    };
 			});
 			
@@ -214,7 +220,8 @@ $(document).ready(function(){
 });
 
 function reload(){	
-	window.opener.qstringx = (parseFloat(document.getElementById("Sradius").value)).toString();
+	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
+	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	location.reload();
 	
 }

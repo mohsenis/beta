@@ -21,8 +21,8 @@ function numberconv(x) {
 }
 
 function reload(){		
-	window.opener.qstringx = (parseFloat(document.getElementById("Sradius").value)).toString();
-	
+	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
+	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	var dates = $('#datepicker').multiDatesPicker('getDates');
 	if(dates.length==0){
 		$( "#datepicker" ).multiDatesPicker({
@@ -30,8 +30,8 @@ function reload(){
 		});
 	}
 	dates = $('#datepicker').multiDatesPicker('getDates');
-	window.opener.qstringd = dates.join(",");
-
+	w_qstringd = dates.join(",");
+	localStorage.setItem(keyName, w_qstringd);
 	location.reload();	
 }
 
@@ -92,7 +92,7 @@ function go(key){
 	$( "#datepicker" ).multiDatesPicker({
 		changeMonth: true,
       	changeYear: true,
-		addDates: window.opener.qstringd.split(","),
+		addDates: w_qstringd.split(","),
 		onSelect: function (date) {
 			dateID = date.replace("/","").replace("/","");
 			if($("#"+dateID).length==0){
@@ -105,8 +105,8 @@ function go(key){
 	});
 	
 	var cdate;
-	for(var i=0; i<window.opener.qstringd.split(",").length; i++){
-		cdate = window.opener.qstringd.split(",")[i];
+	for(var i=0; i<w_qstringd.split(",").length; i++){
+		cdate = w_qstringd.split(",")[i];
 		dateID = cdate.replace("/","").replace("/","");
 		addDate(cdate);
 	}
@@ -117,8 +117,8 @@ function go(key){
 		heightStyle: "content"
 	});
 	$("#accordion").accordion("refresh");
-	$("#accordion > h3").html(window.opener.qstringd.split(",").length + " day(s) selected");
+	$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected");
 	
-	document.getElementById("Sradius").value = window.opener.qstringx;	
+	document.getElementById("Sradius").value = w_qstringx;	
 	
 }
