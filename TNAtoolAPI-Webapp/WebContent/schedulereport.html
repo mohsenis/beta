@@ -24,6 +24,7 @@
 <script type="text/javascript">
 var qstring = '';
 var dateID;
+var boo;
 var progVal = 0; 
 var html;
 var key = Math.random();
@@ -132,7 +133,7 @@ $(document).ready(function(){
 									
 					html = html + html2 + '</table><br><br><br>';
 					$('#displayReport'+k).append($(html));
-					
+					var orderBy =0;
 				    var columns;
 loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 						columns = $('.'+k+jj);
@@ -144,7 +145,7 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 					    }
 					    //alert(columns[0].innerHTML);
 					    //columns[0].id='sn'+k;
-					    var orderBy = jj;
+					    orderBy = jj;
 					    break;
 					} 
 				   
