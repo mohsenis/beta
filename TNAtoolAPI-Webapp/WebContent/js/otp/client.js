@@ -561,10 +561,10 @@ if (AUTO_CENTER_MAP) {
 }
 map.setView(initLocation,8);
 
-L.control.scale({'metric': false, 'position': 'bottomleft', 'maxWidth':200}).addTo(map);
-var mini = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"],minZoom: 4, maxZoom: 5, attribution: osmAttrib}),{position:'bottomleft'}).addTo(map);
+L.control.scale({'metric': false, 'position': 'bottomright', 'maxWidth':200}).addTo(map);
+var mini = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"],minZoom: 4, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright'}).addTo(map);
 $('.leaflet-control-minimap').css({'width':'180px','height':'170px','float':'left'});
-$('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'5px'});
+$('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'0px'});
 
 $('.leaflet-control-attribution').remove();
 
