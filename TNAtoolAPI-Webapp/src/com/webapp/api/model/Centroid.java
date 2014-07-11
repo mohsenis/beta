@@ -26,7 +26,7 @@ public class Centroid {
 	private double longitude;
         
     public void setcentroid(Census census) {
-        this.id = census.getId();
+        this.id = census.getBlockId();
         this.population = census.getPopulation();
         this.latitude = census.getLatitude();
         this.longitude = census.getLongitude();

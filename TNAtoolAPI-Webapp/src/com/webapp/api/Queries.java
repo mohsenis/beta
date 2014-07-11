@@ -551,7 +551,7 @@ public class Queries {
        	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
-    	    	
+       	x = x * 1609.34;    	
     	String[] dates = date.split(",");
     	int[][] days = daysOfWeek(dates);
     	    	
@@ -678,7 +678,22 @@ daysLoop:   for (int i=0; i<dates.length; i++){
         
         response.ServiceMiles = String.valueOf(Math.round(ServiceMiles*100.0)/100.0); 
         response.RouteMiles = String.valueOf(Math.round(RouteMiles*100.0)/100.0);
-        response.PopServed = String.valueOf(0);
+        long pop = 0;
+        List <Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency);
+		List <Coordinate> stopcoords = new ArrayList<Coordinate>();
+		for (Stop stop: stops){
+			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
+		}
+        try {
+			pop =EventManager.getunduppopbatch(x, stopcoords);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        response.PopServed = String.valueOf(pop);
         response.PopServedByService = String.valueOf(0);
         if (RouteMiles >0)
         	response.StopPerRouteMile = String.valueOf(Math.round((StopCount*10000.0)/(RouteMiles))/10000.0);
@@ -865,8 +880,23 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    	}
 	    	////////////////////////////////////////////////////////////////////////////////////////////
 			//each.RoutesCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance).size()) ;
-	        each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyAgency(instance.getId()).size());        
-	        each.PopServed = "0";
+	    	List <Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(instance.getId());
+	        each.StopsCount = String.valueOf(stops.size());        
+	       /* long pop = 0;	        
+			List <Coordinate> stopcoords = new ArrayList<Coordinate>();
+			for (Stop stop: stops){
+				stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
+			}
+	        try {
+				pop =EventManager.getunduppopbatch(x, stopcoords);
+			} catch (FactoryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TransformException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        each.PopServed = String.valueOf(pop);*/
 	        response.agencySR.add(each);
 	        setprogVal(key, (int) Math.round(index*100/totalLoad));
 	    }
@@ -1334,7 +1364,8 @@ Loop:  	for (Trip trip: routeTrips){
 	    for (Tract instance : alltracts){   
 	    	index++;
 	    	GeoR each = new GeoR();	    	
-	    	each.id = instance.getTractId();	    	
+	    	each.id = instance.getTractId();
+	    	each.Name = instance.getLongname();
 	    	each.waterArea = String.valueOf(Math.round(instance.getWaterarea()/2.58999e4)/100.0);
 	    	each.landArea = String.valueOf(Math.round(instance.getLandarea()/2.58999e4)/100.0);
 	    	each.population = String.valueOf(instance.getPopulation());
@@ -1480,5 +1511,288 @@ Loop:  	for (Trip trip: routeTrips){
 	    progVal.remove(key);
 	    return response;
 	} 
-    
+	
+	/**
+	 * Generates The urban areas Summary report
+	 */
+	    
+	@GET
+	@Path("/GeoUASR")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getGUASR(@QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+		List<Urban> allurbanareas = new ArrayList<Urban> ();
+		try {
+			allurbanareas = EventManager.geturban();
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		GeoRList response = new GeoRList();
+		response.type = "UrbanArea";
+	    int index =0;
+		int totalLoad = allurbanareas.size();
+	    for (Urban instance : allurbanareas){   
+	    	index++;
+	    	GeoR each = new GeoR();
+	    	each.Name = instance.getName();
+	    	each.id = instance.getUrbanId();	    	
+	    	each.waterArea = String.valueOf(Math.round(instance.getWaterarea()/2.58999e4)/100.0);
+	    	each.landArea = String.valueOf(Math.round(instance.getLandarea()/2.58999e4)/100.0);
+	    	each.population = String.valueOf(instance.getPopulation());
+	    	each.RoutesCount = String.valueOf(0);	    	
+	    	try {
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountbyurban(instance.getUrbanId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	    	each.StopsCount = String.valueOf(0);	    	
+	    	try {
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbyurban(instance.getUrbanId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	    	each.AverageFare = "0";
+	    	each.MedianFare = "0";
+	    	/*float sumFare=0; 
+	    	List<Float> fares = new ArrayList<Float>();
+	    	for(Route route: routes){
+	    		List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route);
+	    		if(fareRules.size()!=0){
+	    			sumFare+=fareRules.get(0).getFare().getPrice();
+	    			fares.add(fareRules.get(0).getFare().getPrice());
+	    		}
+	    	}
+	    	Collections.sort(fares);
+	    	if (fares.size()>0){
+	    		each.AverageFare = String.valueOf(sumFare/fares.size());
+	    		each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
+	    	} else {
+	    		each.AverageFare = "NA";
+		    	each.MedianFare =  "NA";
+	    	}*/
+	    	
+	        response.GeoR.add(each);
+	        setprogVal(key, (int) Math.round(index*100/totalLoad));
+	    }
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    progVal.remove(key);
+	    return response;
+	}
+	
+	/**
+	 * Generates The Congressional Districts Summary report
+	 */
+	
+	@GET
+	@Path("/GeoCDSR")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getGCDSR(@QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+		List<CongDist> allcongdists = new ArrayList<CongDist> ();
+		try {
+			allcongdists = EventManager.getcongdist();
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		GeoRList response = new GeoRList();
+		response.type = "CongressionalDistrict";
+	    int index =0;
+		int totalLoad = allcongdists.size();
+	    for (CongDist instance : allcongdists){   
+	    	index++;
+	    	GeoR each = new GeoR();
+	    	each.Name = instance.getName();
+	    	each.id = instance.getCongdistId();	    	
+	    	each.waterArea = String.valueOf(Math.round(instance.getWaterarea()/2.58999e4)/100.0);
+	    	each.landArea = String.valueOf(Math.round(instance.getLandarea()/2.58999e4)/100.0);
+	    	each.population = String.valueOf(instance.getPopulation());
+	    	each.RoutesCount = String.valueOf(0);	    	
+	    	try {
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountbycongdist(instance.getCongdistId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	    	each.StopsCount = String.valueOf(0);	    	
+	    	try {
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycongdist(instance.getCongdistId()));
+			} catch (FactoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (TransformException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	    	each.AverageFare = "0";
+	    	each.MedianFare = "0";
+	    	/*float sumFare=0; 
+	    	List<Float> fares = new ArrayList<Float>();
+	    	for(Route route: routes){
+	    		List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route);
+	    		if(fareRules.size()!=0){
+	    			sumFare+=fareRules.get(0).getFare().getPrice();
+	    			fares.add(fareRules.get(0).getFare().getPrice());
+	    		}
+	    	}
+	    	Collections.sort(fares);
+	    	if (fares.size()>0){
+	    		each.AverageFare = String.valueOf(sumFare/fares.size());
+	    		each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
+	    	} else {
+	    		each.AverageFare = "NA";
+		    	each.MedianFare =  "NA";
+	    	}*/
+	    	
+	        response.GeoR.add(each);
+	        setprogVal(key, (int) Math.round(index*100/totalLoad));
+	    }
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    progVal.remove(key);
+	    return response;
+	}
+	
+	/**
+	 * Generates ODOT Regions Summary report
+	 */
+	    
+	@GET
+	@Path("/GeoORSR")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getGORSR(@QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+		List<County> allcounties = new ArrayList<County> ();
+		try {
+			allcounties = EventManager.getcounties();
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}		
+		GeoRList response = new GeoRList();
+		response.type = "ODOT Region";
+	    int index =0;
+		int totalLoad = allcounties.size();
+		String regionId = "";
+		double waterArea = 0;
+		double landArea = 0;
+		long population = 0;		
+		long countiesCount = 0;
+		String regionName = "";
+		boolean notfirst = false;
+	    for (County instance : allcounties){   
+	    		    	
+	    	if (!(regionId.equals(instance.getRegionId()))){
+	    		if (notfirst){
+		    		GeoR each = new GeoR();
+		    		each.ODOTRegion = regionId;
+		    		each.ODOTRegionName = regionName;
+		    		each.landArea = String.valueOf(Math.round(landArea/2.58999e4)/100.0);
+		    		each.waterArea = String.valueOf(Math.round(waterArea/2.58999e4)/100.0);
+		    		each.population = String.valueOf(population);		    		
+		    		each.CountiesCount = String.valueOf(countiesCount);
+		    		each.AverageFare = "0";
+			    	each.MedianFare = "0";
+			    	each.StopsCount = String.valueOf(0);
+			    	try {
+			    		each.StopsCount = String.valueOf(EventManager.getstopscountbyregion(regionId));
+					} catch (FactoryException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (TransformException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+			    	each.RoutesCount = String.valueOf(0);
+			    	try {
+			    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyregion(regionId));
+					} catch (FactoryException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (TransformException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+			    	response.GeoR.add(each);			    	
+	    		} else {
+	    			notfirst = true;
+	    		}
+		    	regionId = instance.getRegionId();
+		    	regionName = instance.getRegionName();
+		    	waterArea = instance.getWaterarea();
+		    	landArea = instance.getLandarea();
+		    	population = instance.getPopulation();	    	
+		    	countiesCount = 1;	    	
+	    	} else {	    		
+	    		waterArea += instance.getWaterarea();
+		    	landArea += instance.getLandarea();
+		    	population += instance.getPopulation();	    	
+		    	countiesCount ++;
+		    	index++;
+	    	}
+	    	setprogVal(key, (int) Math.round(index*100/totalLoad));
+	    }
+	    GeoR each = new GeoR();
+		each.ODOTRegion = regionId;
+		each.ODOTRegionName = regionName;
+		each.landArea = String.valueOf(Math.round(landArea/2.58999e4)/100.0);
+		each.waterArea = String.valueOf(Math.round(waterArea/2.58999e4)/100.0);
+		each.population = String.valueOf(population);		    		
+		each.CountiesCount = String.valueOf(countiesCount);
+		each.AverageFare = "0";
+    	each.MedianFare = "0";
+    	each.StopsCount = String.valueOf(0);
+    	try {
+    		each.StopsCount = String.valueOf(EventManager.getstopscountbyregion(regionId));
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	each.RoutesCount = String.valueOf(0);
+    	try {
+    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyregion(regionId));
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	response.GeoR.add(each);
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    progVal.remove(key);
+	    return response;
+	}
 }

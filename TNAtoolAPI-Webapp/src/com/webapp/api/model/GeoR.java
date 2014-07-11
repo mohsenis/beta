@@ -61,6 +61,10 @@ public class GeoR {
 	@XmlAttribute
     @JsonSerialize
     public String RoutesCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String CountiesCount;
 		
 	@XmlAttribute
     @JsonSerialize

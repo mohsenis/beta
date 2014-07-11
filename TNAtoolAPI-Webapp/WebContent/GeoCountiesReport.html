@@ -26,6 +26,7 @@ var d = new Date();
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area.">?</em></th>'+
 '<th id="an">Name <em title="Name of the geographic area.">?</em></th>'+
+'<th>ODOT Region ID<em title="ODOT transit region id associated with the geographic area.">?</em></th>'+
 '<th>ODOT Transit Region <em title="ODOT transit region name associated with the geographic area.">?</em></th>'+
 '<th>Population <em title="Total population of the geographic area.">?</em></th>'+
 '<th>Land Area <em title="Total land area of the geographic area in square miles.">?</em></th>'+
@@ -89,7 +90,7 @@ $(document).ready(function(){
 			$('h2').append('Counties Summary Report <br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
-				item.Name + '</td><td>' + item.ODOTRegionName +'</td><td>' + numberconv(item.population) +
+				item.Name + '</td><td>' + item.ODOTRegion + '</td><td>' + item.ODOTRegionName +'</td><td>' + numberconv(item.population) +
 				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>'+
 		   '<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
 				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td>'+ 

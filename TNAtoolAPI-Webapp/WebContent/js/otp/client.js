@@ -517,34 +517,55 @@ $mylist
 	    //"events" : {
 	    "load" : function(evt, dlg) {
 	    	
-    	$(".ui-dialog-titlebar-buttonpane").css("right", 25 + "px");
-    	/*$(".ui-dialog-titlebar-maximize").css("right", 80+ "px");*/
-	    var titlebar = $(".ui-dialog-titlebar");
-	    var div = $("<div/>");
-	    div.addClass("dropdown");
-	    
-	    /*	    titlebar.append('<div class=dropdown><button class="dropdown-toggle" role="button" data-toggle="dropdown" text="reports"><img src="/path/to/ui-icon-document" alt="Submit"></button><ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="rep1" href="#">Transit Agnecy Summary Report</a></li><li role="presentation"><a id="rep2" href="#">Counties Summary Report</a></li><li role="presentation"><a id="rep2" href="#">ODOT Transit Regions Summary Report</a></li></ul><div>');*/
-		/*$('.dropdown-toggle').dropdown();*/
-				var button = $( "<button/>" ).text( "Reports" );
-        	/*right = titlebar.find( "[role='button']:last" )
-                             .css( "right" );*/
-	    button.button( { icons: { primary: "ui-icon-document" }, text: false } )
-            .addClass( "ui-dialog-titlebar-other" )
-            .css( "right", 5 + "px" )
-            .click( function( e ) {
-                openrep();
-            } )
-            .appendTo(titlebar);
-	      /*$(".ui-dialog-titlebar-minimize").after('<span class="ui-icon ui-icon-plusthick">minus</span>');*/
-		  $mylist.dialogExtend("collapse");
-		  $("#minimize").attr("title", "Minimize");		  
-		  	  
+	    	$(".ui-dialog-titlebar-buttonpane").css("right", 25 + "px");    	
+		    var titlebar = $(".ui-dialog-titlebar");
+		    var div = $("<div/>");
+		    div.addClass("ui-dialog-titlebar-other");	    
+		    var button = $( "<button/>" ).text( "Reports" );	    
+		    button.attr("data-toggle", "dropdown");	    
+		    button.button( { icons: { primary: "ui-icon-document" }, text: false } )	    
+	        .addClass( "ui-dialog-titlebar-other" )	       
+	        .css( "right", 1 + "px" )
+	        .css( "top", 55 + "%" )
+	        .appendTo(div);        
+		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="ASR" href="#">Transit Agnecy Summary Report</a></li><li role="presentation"><a id="CSR" href="#">Counties Summary Report</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Summary Report</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Summary Report</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Summary Report</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Summary Report</a></li></ul>');
+			div.appendTo(titlebar);
+		    $('.ui-dialog-titlebar-other').dropdown();	    
+			$mylist.dialogExtend("collapse");
+			$("#minimize").attr("title", "Minimize");
+			$('a').click(function(e){
+				//alert('oy');
+			    if ($(this).attr('id')=="ASR"){
+			    	qstringx = '0.1';
+			    	window.open('/TNAtoolAPI-Webapp/report.html');
+			    }else if($(this).attr('id')=="CSR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html');	    		
+			    }else if($(this).attr('id')=="CPSR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html');	    		
+			    }else if($(this).attr('id')=="CDSR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html');	    		
+			    }else if($(this).attr('id')=="UASR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html');	    		
+			    }else if($(this).attr('id')=="ORSR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html');	    		
+			    }
+			});
 	    },
 	    "restore": function(evt,dlg){
-	    	$("#collapse").attr("title", "Collapse");
+	    	$("#collapse").attr("title", "Collapse");	    	
+	    	$(".dropdown-menu").css("top", 100+"%" );
+	    	$(".dropdown-menu").css("bottom", "auto" );
+	    	/*$(".dropdown-menu").css("right", "auto");
+	    	$(".dropdown-menu").css("left", 0+"px");*/
 	    },
+	    "collapse" : function(evt,dlg){	    	
+	    	$(".dropdown-menu").css("top", 100+"%" );
+	    	$(".dropdown-menu").css("bottom", "auto" );
+	    },	    
 	    "minimize" : function(evt,dlg){
-	    	$("#collapse").attr("title", "Restore");			
+	    	$("#collapse").attr("title", "Restore");
+	    	$(".dropdown-menu").css("top", "auto" );
+	    	$(".dropdown-menu").css("bottom", 100+"%" );	    			
 	    	//$('<div class="ui-dialog-titlebar-buttonpane"></div>').find('.ui-dialog-titlebar-restore').attr("title", "test");
 	    	//$("#b2").attr("title", "test");
 	    	//alert('minimized');

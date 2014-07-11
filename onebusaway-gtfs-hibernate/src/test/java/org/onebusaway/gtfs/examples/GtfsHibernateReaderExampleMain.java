@@ -109,6 +109,15 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getTripsForAgency(agencyId);
   }
   
+  public static Double getRouteMilesforAgency (String agencyId){
+	  GtfsMutableRelationalDao dao = factory.getDao();
+	  List<Double> lengths = dao.getMaxTripLengthsForAgency(agencyId);
+	  Double response = 0.0;
+	  for (Double length: lengths){
+		  response  += length;
+	  }
+	  return response;
+  }
   public static List<String> QueryRouteIdsforStop(Stop stop){
 	  GtfsMutableRelationalDao dao = factory.getDao();	  
 	  return dao.getRouteIdsForStop(stop);
