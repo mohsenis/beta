@@ -20,12 +20,15 @@
 <script type="text/javascript">
 var qstring = '';
 var qstringx = '0.1';
-var w_qstringx = window.opener.qstringx;
-var w_qstring = window.opener.qstring;
-var w_qstringd = window.opener.qstringd;
+var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
+var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
+var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
+var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
 var dateID;
+var boo;
 var gg = 1.0/1.1;
 var progVal = 0; 
+var w_qstringd = localStorage.getItem(keyName);
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed.">?</em></th>'+
 '<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed.">?</em></th>'+
@@ -46,7 +49,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?&agency='+w_qstring+'&day='+w_qstringd+'&x='+ w_qstringx+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
 		async: true,
 		success: function(item){			
 			$('h2').append('Transit Agency Extended Report <br><hr>');				
@@ -82,9 +85,9 @@ $(document).ready(function(){
 			$("#RT_info").remove();
 			
 			$('.stopreport').click(function(e){
-				qstring = item.AgencyId;
 				qstringx = '0.1';
-				window.open('/TNAtoolAPI-Webapp/stopreport.html');
+				qstring = '&agency='+w_qstring+'&x='+qstringx;	    
+			    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring);
 			});
 		   
     }});

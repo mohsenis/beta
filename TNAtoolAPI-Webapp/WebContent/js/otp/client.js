@@ -23,6 +23,206 @@ var aerialLayer = new L.TileLayer(aerialURL,
 		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 18, attribution: osmAttrib});
 
 map.addLayer(osmLayer);
+
+///*****************Leaflet Draw******************///
+var dialogAgencies = new Array();
+var dialogAgenciesId = new Array();
+var dialog = $( "#dialog-form" ).dialog({
+    autoOpen: false,
+    height: 400,
+    width: 350,
+    modal: false,
+    draggable: false,
+    resizable: false,
+    closeOnEscape: false,
+    position: { my: "right top", at: "right-50 top", of: window },
+    //position: [calc(100% - 40), 2],
+    buttons: {
+      "Submit": dialogResultOpen/*function() {
+    	  dialogResults.dialog( "open" );
+    	  $('.ui-dialog:eq(2)').css('top','400px');  
+      }*/,
+      Cancel: function(){
+    	  dialog.dialog( "close" );
+      }
+    },
+    close: function() {
+      //form[ 0 ].reset();
+    },
+    open: function( event, ui ) {
+    	//$(".ui-dialog-titlebar-close", ui.dialog || ui).hide();
+    	$('#dialogLat').html(drawCentroid[0]);
+    	$('#dialogLng').html(drawCentroid[1]);
+    	$('#dialogArea').html(Math.round(area*100)/100);
+    	$('#popRadio').prop('checked', true);
+    	if($('#routeselect option').length<=1){
+	    	for(var i = 0; i < dialogAgencies.length; i++) {
+	    	    var opt1 = document.createElement('option');
+	    	    var opt2 = document.createElement('option');
+	    	    opt1.innerHTML = dialogAgencies[i];
+	    	    opt1.value = dialogAgenciesId[i];
+	    	    opt2.innerHTML = dialogAgencies[i];
+	    	    opt2.value = dialogAgencies[i];
+	    	    $('#routeselect').append( opt1 );
+	    	    $('#stopselect').append( opt2 );
+	    	}
+    	}
+    	$('#routeselect option[value="all"]').prop("selected",true);
+    	$('#stopselect option[value="all"]').prop("selected",true);
+    },
+  }).dialogExtend({
+	  "closable" : false,
+      "minimizable" : true,
+      "minimizeLocation": "right"
+  });
+var dialogResults = $( "#dialogResults" ).dialog({
+    autoOpen: false,
+    height: 500,
+    width: 400,
+    modal: false,
+    draggable: false,
+    resizable: false,
+    closeOnEscape: false,
+    position: { my: "right", at: "right", of: window },
+    buttons: {
+      
+      Close: function(){
+    	  dialogResults.dialog( "close" );
+      }
+    },
+    close: function() {
+      //form[ 0 ].reset();
+    },
+    open: function( event, ui ) {
+    	
+    },
+  }).dialogExtend({
+	  "closable" : false,
+      "minimizable" : true,
+      "minimizeLocation": "right",
+      "restore" : function(evt) {
+    	  $('.ui-dialog:eq(2)').css('top','400px'); 
+      }
+  });
+//$('.ui-dialog:eq(2)').css('margin-top','400px');
+//$('div.ui-dialog:nth-child(8)').css('bottom','0px');
+ /*var form = dialog.find( "form" ).on( "submit", function( event ) {
+    event.preventDefault();
+    alert();
+  });*/
+/*$('div.ui-dialog:nth-child(6) > div:nth-child(1) > button:nth-child(3)').click(function(){
+	alert();
+});*/
+
+var drawnItems = new L.FeatureGroup();
+map.addLayer(drawnItems);
+
+var drawControl = new L.Control.Draw({
+	draw: {
+		polyline: false,
+		polygon: {
+			
+			allowIntersection: false,
+			showArea: true,
+			drawError: {
+				color: '#b00b00',
+				timeout: 1000
+			},
+			shapeOptions: {
+				color: 'blue'
+			}
+		},
+		circle: {
+			shapeOptions: {
+				color: '#662d91'
+			}
+		},
+		marker: false
+	},
+	edit: {
+		featureGroup: drawnItems,
+	}
+});
+map.addControl(drawControl);
+
+map.on('draw:drawstart', function (e) {
+	
+	drawnItems.clearLayers();
+	dialog.dialog( "close" );
+	dialogResults.dialog( "close" );
+});
+
+$('.leaflet-draw-edit-remove').click(function(event){
+	//event.preventDefault(); 
+	//event.stopPropagation();
+	drawnItems.clearLayers();
+	dialog.dialog( "close" );
+	dialogResults.dialog( "close" );
+});
+
+var getCentroid = function (arrr) { 
+	var arr = new Array();
+	for(var i=0;i<arrr.length;i++){
+		var tmpP = [arrr[i].lat,arrr[i].lng];
+		arr[i]=tmpP;
+	}
+    return arr.reduce(function (x,y) {
+        return [x[0] + y[0]/arr.length, x[1] + y[1]/arr.length]; 
+    }, [0,0]); 
+};
+var drawCentroid = [0,0];
+var area=0;
+map.on('draw:created', function (e) {
+	type = e.layerType,
+	layer = e.layer;
+	layer.on('click', function() {
+		dialog.dialog( "open" );
+	});
+	if (type === 'circle') {
+		//alert(layer.getLatLng());
+		drawCentroid[0] = layer.getLatLng().lat;
+		drawCentroid[1] = layer.getLatLng().lng;
+		//alert(layer.getRadius());
+		area = Math.pow(layer.getRadius()*0.000621371,2)*Math.PI;
+	}else{
+		area = L.GeometryUtil.geodesicArea(layer.getLatLngs())*0.000000386102;
+		drawCentroid = getCentroid(layer.getLatLngs());
+		//alert(layer.getLatLngs().length);
+	}
+	drawnItems.addLayer(layer);
+	dialog.dialog( "open" );
+	/*var tmpCenter = new L.FeatureGroup();
+	var tmpmarker = L.marker(getCentroid(layer.getLatLngs()));
+	tmpCenter.addLayer(tmpmarker);
+	map.addLayer(tmpCenter);*/
+});
+map.on('draw:edited', function (e) {
+	
+	/*var type = e.layerType,
+	layer = e.layer;
+	alert(layer);*/
+	var layers = e.layers;
+    layers.eachLayer(function (layer) {
+        try{
+        	drawCentroid[0] = layer.getLatLng().lat;
+    		drawCentroid[1] = layer.getLatLng().lng;
+    		//alert(layer.getRadius());
+    		area = Math.pow(layer.getRadius()*0.000621371,2)*Math.PI;
+        }catch(err){
+        	area = L.GeometryUtil.geodesicArea(layer.getLatLngs())*0.000000386102;
+    		drawCentroid = getCentroid(layer.getLatLngs());
+        }
+    });
+	
+	
+	dialog.dialog( "close" );
+	dialogResults.dialog( "close" );
+	dialog.dialog( "open" );
+});
+
+
+ 
+////////*************************************/////////////////////
 var Layers = 0;
 function getdata(type,agency,route,variant,k,callback,popup) {	
 	switch (type){
@@ -361,6 +561,33 @@ if (AUTO_CENTER_MAP) {
 }
 map.setView(initLocation,8);
 
+L.control.scale({'metric': false, 'position': 'bottomleft', 'maxWidth':200}).addTo(map);
+var mini = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"],minZoom: 4, maxZoom: 5, attribution: osmAttrib}),{position:'bottomleft'}).addTo(map);
+$('.leaflet-control-minimap').css({'width':'180px','height':'170px','float':'left'});
+$('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'5px'});
+
+$('.leaflet-control-attribution').remove();
+
+/*var scaleD = $('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d');
+scaleD = scaleD.substr(scaleD.indexOf("z")-2);
+function changeRec(){
+	var tmpD = $('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d');
+	tmp = tmpD.substr(tmpD.indexOf("z")-2);
+	alert(scaleD+tmp);
+	//alert(tmp);
+	//tmpD.replace(tmp, scaleD);
+	//alert(tmpD);
+	$('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d',tmpD);
+	alert($('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d'));
+	alert();
+	
+}*/
+/*mini._mainMap.on('zoomend', function(e) {
+	mini._aimingRect.redraw();
+	$('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d',scaleD);
+	alert($('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d'));
+});*/
+
 
 // add layers to map 
 // do not add analyst layer yet -- it will be added in refresh() once params are pulled in
@@ -392,7 +619,12 @@ $mylist
 		"ajax" : {
             "url" : "/TNAtoolAPI-Webapp/queries/transit/menu",
             "type" : "get",	                
-            "success" : function(ops) {            	
+            "success" : function(ops) {  
+            	
+            	$.each(ops.data, function(i,item){
+            		dialogAgencies.push(item.data);
+            		dialogAgenciesId.push(item.attr.id);
+            	});
             	return ops.data;            	
             }    	               
         },
@@ -517,6 +749,7 @@ $mylist
 	    //"events" : {
 	    "load" : function(evt, dlg) {
 	    	
+
 	    	$(".ui-dialog-titlebar-buttonpane").css("right", 25 + "px");    	
 		    var titlebar = $(".ui-dialog-titlebar");
 		    var div = $("<div/>");
@@ -550,6 +783,29 @@ $mylist
 			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html');	    		
 			    }
 			});
+
+    	$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 25 + "px");
+    	/*$(".ui-dialog-titlebar-maximize").css("right", 80+ "px");*/
+	    var titlebar = $(".ui-dialog-titlebar:eq( 2 )");
+	    var div = $("<div/>");
+	    div.addClass("dropdown");
+	    
+	    /*	    titlebar.append('<div class=dropdown><button class="dropdown-toggle" role="button" data-toggle="dropdown" text="reports"><img src="/path/to/ui-icon-document" alt="Submit"></button><ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="rep1" href="#">Transit Agnecy Summary Report</a></li><li role="presentation"><a id="rep2" href="#">Counties Summary Report</a></li><li role="presentation"><a id="rep2" href="#">ODOT Transit Regions Summary Report</a></li></ul><div>');*/
+		/*$('.dropdown-toggle').dropdown();*/
+				var button = $( "<button/>" ).text( "Reports" );
+        	/*right = titlebar.find( "[role='button']:last" )
+                             .css( "right" );*/
+	    button.button( { icons: { primary: "ui-icon-document" }, text: false } )
+            .addClass( "ui-dialog-titlebar-other" )
+            .css( "right", 5 + "px" )
+            .click( function( e ) {
+                openrep();
+            } )
+            .appendTo(titlebar);
+	      /*$(".ui-dialog-titlebar-minimize").after('<span class="ui-icon ui-icon-plusthick">minus</span>');*/
+		  $mylist.dialogExtend("collapse");
+		  $("#minimize").attr("title", "Minimize");		  
+		  	  
 	    },
 	    "restore": function(evt,dlg){
 	    	$("#collapse").attr("title", "Collapse");	    	
@@ -719,4 +975,3 @@ $mylist
     	}    	
     };
 });
-
