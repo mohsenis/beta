@@ -38,10 +38,10 @@ var dialog = $( "#dialog-form" ).dialog({
     position: { my: "right top", at: "right-50 top", of: window },
     //position: [calc(100% - 40), 2],
     buttons: {
-      "Submit": dialogResultOpen/*function() {
+      /*"Submit": dialogResultOpen*//*function() {
     	  dialogResults.dialog( "open" );
     	  $('.ui-dialog:eq(2)').css('top','400px');  
-      }*/,
+      }*///,
       Cancel: function(){
     	  dialog.dialog( "close" );
       }
@@ -747,11 +747,10 @@ $mylist
 	      "close": "ui-icon-document",	     
 	    },
 	    //"events" : {
-	    "load" : function(evt, dlg) {
-	    	
+	    "load" : function(evt, dlg) {  	
 
-	    	$(".ui-dialog-titlebar-buttonpane").css("right", 25 + "px");    	
-		    var titlebar = $(".ui-dialog-titlebar");
+	    	$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 25 + "px");    	
+		    var titlebar = $(".ui-dialog-titlebar:eq( 2 )");
 		    var div = $("<div/>");
 		    div.addClass("ui-dialog-titlebar-other");	    
 		    var button = $( "<button/>" ).text( "Reports" );	    
@@ -769,8 +768,8 @@ $mylist
 			$('a').click(function(e){
 				//alert('oy');
 			    if ($(this).attr('id')=="ASR"){
-			    	qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/report.html');
+			    	var qstringx = '0.1';
+			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx);
 			    }else if($(this).attr('id')=="CSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html');	    		
 			    }else if($(this).attr('id')=="CPSR"){
@@ -784,24 +783,22 @@ $mylist
 			    }
 			});
 
-    	$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 25 + "px");
+    	//$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 25 + "px");
     	/*$(".ui-dialog-titlebar-maximize").css("right", 80+ "px");*/
-	    var titlebar = $(".ui-dialog-titlebar:eq( 2 )");
-	    var div = $("<div/>");
-	    div.addClass("dropdown");
-	    
+	    //var titlebar = $(".ui-dialog-titlebar:eq( 2 )");
+	    	    
 	    /*	    titlebar.append('<div class=dropdown><button class="dropdown-toggle" role="button" data-toggle="dropdown" text="reports"><img src="/path/to/ui-icon-document" alt="Submit"></button><ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="rep1" href="#">Transit Agnecy Summary Report</a></li><li role="presentation"><a id="rep2" href="#">Counties Summary Report</a></li><li role="presentation"><a id="rep2" href="#">ODOT Transit Regions Summary Report</a></li></ul><div>');*/
 		/*$('.dropdown-toggle').dropdown();*/
-				var button = $( "<button/>" ).text( "Reports" );
+				//var button = $( "<button/>" ).text( "Reports" );
         	/*right = titlebar.find( "[role='button']:last" )
                              .css( "right" );*/
-	    button.button( { icons: { primary: "ui-icon-document" }, text: false } )
+	    /*button.button( { icons: { primary: "ui-icon-document" }, text: false } )
             .addClass( "ui-dialog-titlebar-other" )
             .css( "right", 5 + "px" )
             .click( function( e ) {
                 openrep();
             } )
-            .appendTo(titlebar);
+            .appendTo(titlebar);*/
 	      /*$(".ui-dialog-titlebar-minimize").after('<span class="ui-icon ui-icon-plusthick">minus</span>');*/
 		  $mylist.dialogExtend("collapse");
 		  $("#minimize").attr("title", "Minimize");		  
