@@ -9,10 +9,10 @@ public final class GeoStopRouteMap {
   private String routeId;  
   private GeoStop stop;  
       
-  public GeoStopRouteMap() {
-  }
-  
-  public GeoStopRouteMap(GeoStopRouteMap a) {
+  public GeoStopRouteMap() {	
+}
+
+public GeoStopRouteMap(GeoStopRouteMap a) {
     this.id = a.id;
     this.agencyId = a.agencyId;
     this.stopId = a.stopId;    

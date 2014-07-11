@@ -282,6 +282,11 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   }
   
   @Override
+  public List<Double> getMaxTripLengthsForAgency(String agencyId){
+	  return _ops.findByNamedQueryAndNamedParam("serviceMilesbyAgency", "agencyId", agencyId);
+  }
+  
+  @Override
   public List<Trip> getTripsForAgency_RouteSorted(String agencyId){
 	  return _ops.findByNamedQueryAndNamedParam("tripsByAgency_routesorted", "agencyId", agencyId);
   }

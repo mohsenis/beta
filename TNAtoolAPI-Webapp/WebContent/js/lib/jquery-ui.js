@@ -9789,14 +9789,15 @@ $.widget( "ui.dialog", {
 	enable: $.noop,
 
 	close: function( event ) {
+		//alert(event);
 		var that = this;
 
 		if ( !this._isOpen || this._trigger( "beforeClose", event ) === false ) {
 			return;
 		}
 
-		//this._isOpen = false;
-		//this._destroyOverlay();
+		this._isOpen = false;
+		this._destroyOverlay();
 
 		if ( !this.opener.filter(":focusable").focus().length ) {
 			// Hiding a focused element doesn't trigger blur in WebKit
@@ -9804,10 +9805,10 @@ $.widget( "ui.dialog", {
 			// https://bugs.webkit.org/show_bug.cgi?id=47182
 			$( this.document[0].activeElement ).blur();
 		}
-		openrep();
-		//this._hide( this.uiDialog, this.options.hide, function() {
-		//	that._trigger( "close", event );
-		//});
+		//openrep();
+		this._hide( this.uiDialog, this.options.hide, function() {
+			that._trigger( "close", event );
+		});
 	},
 
 	isOpen: function() {

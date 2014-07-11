@@ -13,7 +13,20 @@ public class County {
     private String regionId;
     private String regionName;
     
-	public County() {		
+	public County(){
+	}
+
+	public County(County c) {		
+		this.countyId = c.countyId;
+		this.name = c.name;
+		this.population = c.population;
+		this.housing = c.housing;
+		this.latitude = c.latitude;
+		this.longitude = c.longitude;
+		this.landarea = c.landarea;
+		this.waterarea = c.waterarea;
+		this.regionId = c.regionId;
+		this.regionName = c.regionName;
 	}
 
 	public String getCountyId() {

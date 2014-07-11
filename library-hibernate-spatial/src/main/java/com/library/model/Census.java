@@ -16,10 +16,27 @@ public class Census {
     private String poptype;
     private Point location;
     
-    public Census() {
+    public Census(){    	
     }
     
-    public void setBlockId(String blockId) {
+	public Census(Census c) {
+		super();
+		this.blockId = c.blockId;
+		this.placeId = c.placeId;
+		this.districtId = c.districtId;
+		this.regionId = c.regionId;
+		this.urbanId = c.urbanId;
+		this.population = c.population;
+		this.latitude = c.latitude;
+		this.longitude = c.longitude;
+		this.landarea = c.landarea;
+		this.waterarea = c.waterarea;
+		this.poptype = c.poptype;
+		this.location = c.location;
+	}
+
+
+	public void setBlockId(String blockId) {
         this.blockId = blockId;
     }
     

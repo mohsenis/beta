@@ -20,19 +20,22 @@
 <script type="text/javascript">
 var qstring = '';
 var qstringx = '0.1';
-var w_qstringx = window.opener.qstringx;
-var w_qstring = window.opener.qstring;
-var w_qstringd = window.opener.qstringd;
+var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
+var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
+var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
+var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
 var dateID;
+var boo;
 var gg = 1.0/1.1;
 var progVal = 0; 
+var w_qstringd = localStorage.getItem(keyName);
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed.">?</em></th>'+
 '<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed.">?</em></th>'+
 '<th>Route Miles <em title="Summation of the lengths of the longest route variant for all routes that the transit agency serves.">?</em></th>'+
 '<th>Route Stops <em title="Total number of stops served by the transit agency.">?</em></th>'+
 '<th>Stops Per Route Mile <em title="Route stops divided by Route Miles.">?</em></th>'+
-'<th>Population Served By Route(Unduplicated) <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves.">?</em></th>'+
+'<th>Population Served By Agency(Unduplicated) <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves.">?</em></th>'+
 '<th>Service Miles <em title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific day of the week, a combination of days of the week (e.g., Monday and Wednesday) or for a seven day week.">?</em></th>'+
 '<th>Service Stops <em title="The number of trips scheduled at a stop in a route. The service stops for a route is calculated as its stop count multiplied by the number of visits per stop.">?</em></th>'+
 '<th>Population Served By Service <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops on trips served by the transit agency. Population served by service is calculated as service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops for every trip.">?</em></th></tr>';
@@ -46,7 +49,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?&agency='+w_qstring+'&day='+w_qstringd+'&x='+ w_qstringx+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
 		async: true,
 		success: function(item){			
 			$('h2').append('Transit Agency Extended Report <br><hr>');				
@@ -82,9 +85,9 @@ $(document).ready(function(){
 			$("#RT_info").remove();
 			
 			$('.stopreport').click(function(e){
-				qstring = item.AgencyId;
 				qstringx = '0.1';
-				window.open('/TNAtoolAPI-Webapp/stopreport.html');
+				qstring = '&agency='+w_qstring+'&x='+qstringx;	    
+			    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring);
 			});
 		   
     }});

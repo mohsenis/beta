@@ -1,6 +1,7 @@
 package com.library.model;
 
 import com.vividsolutions.jts.geom.Point;
+
 import java.io.Serializable;
 
 public final class GeoStop implements Serializable {
@@ -29,16 +30,13 @@ public final class GeoStop implements Serializable {
   private String placeId;
   private String regionId;
   private String urbanId;
-  private String districtId;
+  private String congdistId;
   private Point location;
   
+  public GeoStop(){
+	}  
   
-
-  public GeoStop() {
-
-  }
-
-  public GeoStop(GeoStop obj) {
+public GeoStop(GeoStop obj) {
     this.agencyId = obj.agencyId;
     this.stopId = obj.stopId;
     this.code = obj.code;
@@ -60,6 +58,7 @@ public final class GeoStop implements Serializable {
     this.regionId = obj.regionId;
     this.urbanId = obj.urbanId;
     this.location = obj.location;
+    this.congdistId = obj.congdistId;
   }
 
   public String getAgencyId() {
@@ -74,9 +73,9 @@ public final class GeoStop implements Serializable {
 	    return stopId;
 	  }
 
-	  public void setStopId(String stopId) {
-	    this.stopId = stopId;
-	  }
+  public void setStopId(String stopId) {
+    this.stopId = stopId;
+  }
 
   public String getCode() {
     return code;
@@ -211,12 +210,12 @@ public void setUrbanId(String urbanId) {
 	this.urbanId = urbanId;
 }
 
-public String getDistrictId() {
-	return districtId;
+public String getCongdistId() {
+	return congdistId;
 }
 
-public void setDistrictId(String districtId) {
-	this.districtId = districtId;
+public void setCongdistId(String congdistId) {
+	this.congdistId = congdistId;
 }
 
 public Point getLocation() {

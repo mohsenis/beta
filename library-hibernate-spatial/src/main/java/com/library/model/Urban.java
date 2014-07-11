@@ -1,120 +1,91 @@
 package com.library.model;
 
-public class Tract {
-	private String tractId;
+
+public class Urban {
+	private String urbanId;
 	private String name;
-	private String longname;
     private long population;
     private long housing;
     private double latitude;
     private double longitude;
     private long landarea;
-    private long waterarea;   
+    private long waterarea;
     
-    public Tract(){
+    public Urban(){    	
     }
-
-    public Tract(Tract t) {
-		this.tractId = t.tractId;
-		this.name = t.name;
-		this.longname = t.longname;
-		this.population = t.population;
-		this.housing = t.housing;
-		this.latitude = t.latitude;
-		this.longitude = t.longitude;
-		this.landarea = t.landarea;
-		this.waterarea = t.waterarea;
+    
+    public Urban(Urban u) {
+		this.urbanId = u.urbanId;
+		this.name = u.name;
+		this.population = u.population;
+		this.housing = u.housing;
+		this.latitude = u.latitude;
+		this.longitude = u.longitude;
+		this.landarea = u.landarea;
+		this.waterarea = u.waterarea;
 	}
 
-
-	public String getTractId() {
-		return tractId;
+	public String getUrbanId() {
+		return urbanId;
 	}
 
-
-	public void setTractId(String tractId) {
-		this.tractId = tractId;
+	public void setUrbanId(String urbanId) {
+		this.urbanId = urbanId;
 	}
-
 
 	public String getName() {
 		return name;
 	}
 
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
-
-	public String getLongname() {
-		return longname;
-	}
-
-
-	public void setLongname(String longname) {
-		this.longname = longname;
-	}
-
 
 	public long getPopulation() {
 		return population;
 	}
 
-
 	public void setPopulation(long population) {
 		this.population = population;
 	}
-
 
 	public long getHousing() {
 		return housing;
 	}
 
-
 	public void setHousing(long housing) {
 		this.housing = housing;
 	}
-
 
 	public double getLatitude() {
 		return latitude;
 	}
 
-
 	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
-
 
 	public double getLongitude() {
 		return longitude;
 	}
 
-
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
-
 
 	public long getLandarea() {
 		return landarea;
 	}
 
-
 	public void setLandarea(long landarea) {
 		this.landarea = landarea;
 	}
-
 
 	public long getWaterarea() {
 		return waterarea;
 	}
 
-
 	public void setWaterarea(long waterarea) {
 		this.waterarea = waterarea;
-	}
-
-   
+	}    
 }

@@ -20,10 +20,16 @@
 <script type="text/javascript">
 var qstring = '';
 var qstringx = '0.1';
+var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
+var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
+var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
+var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
 var dateID;
 var gg = 1.0/1.1;
 var progVal = 0; 
-
+var d = new Date();
+var boo;
+var w_qstringd = localStorage.getItem(keyName);
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th>Route ID <em title="Unique route identification number reported in the transit agency GTFS feed.">?</em></th>'+
 '<th id="rn">Route Name <em title="Route short name as reported in the transit agency GTFS feed.">?</em></th>'+
@@ -47,7 +53,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/RoutesR?&agency='+window.opener.qstring+'&day='+window.opener.qstringd+'&x='+window.opener.qstringx+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/RoutesR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
 		async: true,
 		success: function(d){
 			$('h2').append(d.AgencyName+' Routes Report<br><hr>');
@@ -60,15 +66,18 @@ $(document).ready(function(){
 			progressbar.remove();
 			$('.stopreport').click(function(e){
 				if ($(this).attr('id')!==undefined){
-				    qstring = window.opener.qstring + '&route=' + $(this).attr('id');	    
-				    window.open('/TNAtoolAPI-Webapp/stopreport.html');
+				    qstring = '&agency='+w_qstring+'&x='+qstringx+ '&route=' + $(this).attr('id');	    
+				    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring);
 			}});
 			$('.schedulereport').click(function(e){
 				if ($(this).attr('id')!==undefined){
-				    qstring = window.opener.qstring + '&route=' + $(this).attr('id');
+					
 				    var d = new Date();
 				    qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-				    window.open('/TNAtoolAPI-Webapp/schedulereport.html');
+				    var keyName = Math.random();
+		    		localStorage.setItem(keyName, qstringd);
+		    		qstring = w_qstring + '&route=' + $(this).attr('id');
+				    window.open('/TNAtoolAPI-Webapp/schedulereport.html?&agency='+qstring+'&n='+keyName);
 			}});
 			
 			var table = $('#RT').DataTable( {
