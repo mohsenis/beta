@@ -126,6 +126,9 @@
         <property name="shape" type="org.hibernatespatial.GeometryUserType"/>
     </class> -->
     
+    <query name = "STOP_BY_COORDINATES">
+    <![CDATA[from GeoStop where distance(:point,location)<:radius]]>
+	</query>
     <query name = "POP_BY_COORDINATES">
     <![CDATA[select sum(population) from Census where distance(:point,location)<:radius]]>
 	</query>

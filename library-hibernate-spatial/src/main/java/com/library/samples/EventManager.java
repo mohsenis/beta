@@ -27,7 +27,6 @@ import com.library.model.*;
 
 
 
-
 public class EventManager {		
 //private SessionFactory factory;
 private	static Session session = Hutil.getSessionFactory().openSession();
@@ -68,6 +67,30 @@ private	static Session session = Hutil.getSessionFactory().openSession();
         Hutil.getSessionFactory().close();
         return results;
     }
+	
+/**
+ * returns stops within a circle
+ */
+	public static List<GeoStop> getstopswithincircle(double d, double lat, double lon) throws FactoryException, TransformException {			
+		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
+		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
+		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
+		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();			
+		Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
+		Geometry targetGeometry = JTS.transform( point, transform);
+		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
+		point = targetGeometry.getCentroid();
+		point.setSRID(2993);	
+		session.beginTransaction();
+		Query q = session.getNamedQuery("STOP_BY_COORDINATES");
+		Type geomType = GeometryUserType.TYPE;
+		q.setParameter("point", point, geomType);
+		q.setParameter("radius", d);
+		@SuppressWarnings("unchecked")
+		List<GeoStop> results = (List<GeoStop>) q.list();
+        Hutil.getSessionFactory().close();
+        return results;
+    }	
 	
 /**
  * returns list of counties
