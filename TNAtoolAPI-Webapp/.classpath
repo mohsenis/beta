@@ -33,13 +33,13 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/onebusaway-gtfs-hibernate-cli"/>
 	<classpathentry kind="lib" path="lib/gt-opengis-12-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hibernate-core-3.6.0.Final.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Administrator/.m2/repository/org/hibernate/hibernate-core/3.3.1.GA/hibernate-core-3.3.1.GA.jar">
+	<classpathentry kind="lib" path="lib/hibernate-core-3.6.0.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Administrator/.m2/repository/org/hibernate/hibernate-core/3.3.1.GA/hibernate-core-3.3.1.GA.jar">
 		<attributes>
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/onebusaway-gtfs-hibernate-cli"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
