@@ -27,13 +27,12 @@ var qstringd = '';
 var d = new Date();
 var boo;
 var html = '<table id="RT" class="display" align="center">';
-var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed.">?</em></th>'+
-'<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed.">?</em></th>'+
-'<th>Phone # <em title="Phone number to contact the transit agency.">?</em></th>'+
-'<th>Total Routes <em title="Total number of routes operated by the transit agency.">?</em></th>'+
-'<th>Total Stops <em title="Total number of stops operated by the transit agency.">?</em></th>'+
-'<th>Population Served <em title="Summation of the unduplicated population count within an X radius (i.e., stop distance) of each stop operated by the transit agency. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">?</em></th>'+
-'<th>Fare<em title="If available, this field points to the fare information published by the transit agency on its web site.">?</em></th></tr>';	
+var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Phone # <em title="Phone number to contact the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total Routes <em title="Total number of routes operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total Stops <em title="Total number of stops operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Fare<em title="If available, this field points to the fare information published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var fURL = new Array();
@@ -50,6 +49,12 @@ function EscFunc(){
 }
 
 $(document).ready(function(){	
+	$(document).tooltip({
+		position: {
+	        my: "left bottom",
+	        at: "right bottom",
+	    }
+	});
 	$( "#progressbar" ).progressbar({
 	    value: false,
 	}); 
@@ -79,7 +84,7 @@ $(document).ready(function(){
 	} 
 	timeVar = setInterval(progress, 100);
 	
-	document.getElementById("Sradius").value = w_qstringx;
+	/* document.getElementById("Sradius").value = w_qstringx; */
 	
 	$.ajax({
 		type: 'GET',
@@ -96,7 +101,7 @@ $(document).ready(function(){
 				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.AgencyId+'">'+agencytxt+'</a></td>'+ '<td><a href="' 
 				+ item.URL + '">'+ item.AgencyName + '</a></td>'+ '<td>' + item.Phone +'</td>'+ '<td><a href="#" type="RC" id="'
 				+ item.AgencyId+'">'+item.RoutesCount+'</a></td>'+ '<td><a href="#" type="SC" id="'+item.AgencyId+'">'+item.StopsCount
-				+'</a></td>'+ '<td>'+numberconv(item.PopServed) + '</td>';
+				+'</a></td>';
 				html = html + '<td class="details-control"></td>';
 				fAverage.push(item.AverageFare);
 				fMedian.push(item.MedianFare);
@@ -142,7 +147,7 @@ $(document).ready(function(){
 				"iDisplayLength": 14,
 				
 				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [ 6 ] }
+				                 { "bSortable": false, "aTargets": [ 5 ] }
 				               ],
 				
 				"dom": 'T<"clear">lfrtip',
@@ -268,8 +273,8 @@ function pageLoad(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
-			    	<input type="button" onclick="reload()" title="Refresh Report"  value="Submit" class="button" />
+			    	<!-- Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
+			    	<input type="button" onclick="reload()" title="Refresh Report"  value="Submit" class="button" /> -->
 		    	    	
 		    	</div>
 			  </td>

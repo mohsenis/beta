@@ -70,7 +70,7 @@ public interface GtfsRelationalDao extends GtfsDao {
   public List<Stop> getStopsForRoute(AgencyAndId route);
   
   public List<Stop> getStopsForStation(Stop station);
-
+  
   /****
    * Stop Methods
    * Alireza: 
@@ -94,9 +94,11 @@ public interface GtfsRelationalDao extends GtfsDao {
 
   public List<Trip> getTripsForBlockId(AgencyAndId blockId);
   
+  public List<Double> getMaxTripLengthsForAgency(String agencyId);
+  
   public void updateTrip(Trip trip);
-
-  /****
+  
+   /****
    * {@link StopTime} Methods
    ****/
 

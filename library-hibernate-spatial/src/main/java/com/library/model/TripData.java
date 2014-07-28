@@ -1,6 +1,7 @@
 package com.library.model;
 
 import com.vividsolutions.jts.geom.LineString;
+
 import java.io.Serializable;
 
 public class TripData implements Serializable {
@@ -11,10 +12,18 @@ public class TripData implements Serializable {
     private String agencyId;    
     private double length;
     private double estlength;    
-    private LineString shape;   
-
-    public TripData() {
+    private LineString shape;  
+    
+    public TripData(){    	
     }
+
+    public TripData(TripData t) {
+		this.id = t.id;
+		this.agencyId = t.agencyId;
+		this.length = t.length;
+		this.estlength = t.estlength;
+		this.shape = t.shape;
+	}
 
 	public String getId() {
 		return id;

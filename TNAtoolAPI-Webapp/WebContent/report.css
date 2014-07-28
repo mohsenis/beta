@@ -63,6 +63,13 @@ tr.odd td,tr.even td{
 #RT,#RT0,#RT1{
 	width:auto
 }
+#RT0,#RT1 {
+/* margin: 0 auto;
+clear: both;
+border-collapse: collapse; */
+table-layout: fixed; 
+word-wrap:break-word; 
+}
 .dataTables_scrollHeadInner,.dataTables_scrollFootInner{
 	margin:auto
 }
@@ -121,42 +128,10 @@ div.DTTT_collection{
 .displayReport{
 	overflow:auto;
 }
-/* #RT{
-	border: 1px solid black;	
-	border-collapse:collapse;
-	max-width: 99%;
-} 
-
-#RT th
-{
-	
-	border: 1px solid black;
-	background-color:grey;
-	border-collapse:collapse;
-	vertical-align:middle;
-	text-align:center;
-	padding:5px;
-	color: white;
-	
+.serviceCol{
+	background-color:#C0C0C0;
 }
 
-#RT td
-{
-	border: 1px solid black;
-	vertical-align:middle;
-	text-align:center;
-	padding:5px;
-}
-
-#RT tr:nth-child(odd) {
-  	background-color: #eee;
-}
-#RT tr:nth-child(even) {
-  	background-color: #fff;
-}
-#RT tr:hover { 
-	background: #def; 
-} */
 div#map {
 	height: 100%; 
 	background: #eee;

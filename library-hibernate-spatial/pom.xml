@@ -6,6 +6,7 @@
   <name>library-hibernate-spatial</name>
   <description>A library for spatial queries</description>
   <build>
+  <pluginManagement>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -15,11 +16,30 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+     <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-dependency-plugin</artifactId>
+    <executions>
+      <execution>
+        <id>copy-dependencies</id>
+        <phase>package</phase>
+        <goals>
+          <goal>copy-dependencies</goal>
+        </goals>
+        <configuration>
+          <outputDirectory>${project.build.directory}</outputDirectory>
+          <overWriteReleases>false</overWriteReleases>
+          <overWriteSnapshots>true</overWriteSnapshots>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin> 
     </plugins>
+    </pluginManagement>
   </build>
   <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <geotools.version>12-SNAPSHOT</geotools.version>
+        <geotools.version>10-SNAPSHOT</geotools.version>
     </properties>
   <dependencies>
 

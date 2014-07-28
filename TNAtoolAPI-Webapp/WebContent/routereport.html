@@ -31,17 +31,17 @@ var d = new Date();
 var boo;
 var w_qstringd = localStorage.getItem(keyName);
 var html = '<table id="RT" class="display" align="center">';
-var tmp = '<tr><th>Route ID <em title="Unique route identification number reported in the transit agency GTFS feed.">?</em></th>'+
-'<th id="rn">Route Name <em title="Route short name as reported in the transit agency GTFS feed.">?</em></th>'+
-'<th>Route Long Name <em title="Route long name as reported in the transit agency GTFS feed.">?</em></th>'+
-'<th>Route Type <em title="Type of transportation used on a route: 0-Tram, Streetcar & Light rail 1-Subway & Metro 2-Rail 3-Bus 4-Ferry 5-Cable car 6-Gondola & Suspended cable car 7-Funicular">?</em></th>'+
-'<th>Route Length <em title="Length of the longest route variant for the given route.">?</em></th>'+
-'<th>Total Stops <em title="Total number of stops on the route.">?</em></th>'+
-'<th>Unduplicated Population <em title="Summation of the unduplicated population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">?</em></th>'+
-'<th>Service Stops <em title="Number of stops scheduled on all trips in a route. The service stops for a route is calculated as its stop count multiplied by the number of visits per stop.">?</em></th>'+
-'<th>Population Served by Route <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops on all trips. The Population Served by Route for a route is calculated as route service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops on all trips.">?</em></th>'+
-'<th>Service Miles <em title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific day of the week, a combination of days of the week (e.g., Monday and Wednesday) of for a seven day week.">?</em></th>'+
-'<th>More.. <em title="If available, this field contains a description of the route (the value is null otherwise).">?</em></th></tr>';	
+var tmp = '<tr><th>Route ID <em title="Unique route identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th id="rn">Route Name <em title="Route short name as reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Route Long Name <em title="Route long name as reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Route Type <em title="Type of transportation used on a route: 0-Tram, Streetcar & Light rail 1-Subway & Metro 2-Rail 3-Bus 4-Ferry 5-Cable car 6-Gondola & Suspended cable car 7-Funicular"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Route Length <em title="Length of the longest route variant for the given route."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total Stops <em title="Total number of stops on the route."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Unduplicated Population <em title="Summation of the unduplicated population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Service Stops <em title="Number of stops scheduled on all trips in a route. The service stops for a route is calculated as its stop count multiplied by the number of visits per stop."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Population Served by Route <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops on all trips. The Population Served by Route for a route is calculated as route service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops on all trips."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Service Miles <em title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific date or a set of dates specified using the calendar."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>More.. <em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';

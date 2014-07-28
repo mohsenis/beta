@@ -2,7 +2,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Counties Summary Report</title>
+	<title>Urban Areas Summary Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -26,14 +26,11 @@ var d = new Date();
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Name of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>ODOT Region ID<em title="ODOT transit region id associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>ODOT Transit Region <em title="ODOT transit region name associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Population <em title="Total population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Land Area <em title="Total land area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Routes <em title="Total number of routes serving stops in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Tracts <em title="Total number of census tracts within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+ 
 '<th>Fare<em title="If available, this field points to the fare information published by transit agencies within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
@@ -90,17 +87,16 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCSR?&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoUASR?&key='+ key,
 		async: true,
 		success: function(d){			
-			$('h2').append('Counties Summary Report <br><hr>');
+			$('h2').append('Urban Areas Summary Report <br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
-				item.Name + '</td><td>' + item.ODOTRegion + '</td><td>' + item.ODOTRegionName +'</td><td>' + numberconv(item.population) +
+				item.Name + '</td><td>' +numberconv(item.population) +
 				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>'+
 		   '<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
-				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td>'+ 
-				'<td><a href="#" type="TC" id="'+item.id+'" name="'+item.Name+'" >'+item.TractsCount+'</a></td>' ;
+				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td>';
 				html = html + '<td class="details-control"></td>';
 				fAverage.push(item.AverageFare);
 				fMedian.push(item.MedianFare);				
@@ -111,10 +107,11 @@ $(document).ready(function(){
 			progressbar.remove();
 			$('a').click(function(e){
 				var d = new Date();
-			    if ($(this).attr('type')=="TC"){
+			    if ($(this).attr('type')=="RC"){
 			    	qstring = $(this).attr('id');
-			    	qstringd =$(this).attr('name');
-			    	window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html');
+			    	qstringx = '0.1';
+			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+			    	window.open('/TNAtoolAPI-Webapp/routereport.html');
 			    }else if($(this).attr('type')=="SC"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.1';

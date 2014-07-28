@@ -455,4 +455,10 @@ public List<FareRule> getFareRuleForRoute(Route route) {
 	return null;
 }
 
+@Override
+public List<Double> getMaxTripLengthsForAgency(String agencyId) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
 }

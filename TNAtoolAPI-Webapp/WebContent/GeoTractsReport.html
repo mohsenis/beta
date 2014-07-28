@@ -24,14 +24,15 @@ var qstringd = '';
 var d = new Date();
 
 var html = '<table id="RT" class="display" align="center">';
-var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area.">?</em></th>'+
-'<th>Population <em title="Total population of the geographic area.">?</em></th>'+
-'<th>Land Area <em title="Total land area of the geographic area in square miles.">?</em></th>'+
-'<th>Water Area <em title="Total water area of the geographic area in square miles.">?</em></th>'+
-'<th>Total Routes <em title="Total number of routes serving stops in the given geographic area.">?</em></th>'+
-'<th>Total Stops <em title="Total number of stops within the given geographic area.">?</em></th>'+
-'<th>Blocks <em title="Total number of census blocks within the geographic area.">?</em></th>'+ 
-'<th>Fare<em title="If available, this field points to the fare information published by transit agencies within the geographic area.">?</em></th></tr>';	
+var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th id="an">Name <em title="Name of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Population <em title="Total population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Land Area <em title="Total land area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total Routes <em title="Total number of routes serving stops in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Blocks <em title="Total number of census blocks within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+ 
+'<th>Fare<em title="If available, this field points to the fare information published by transit agencies within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var fAverage = new Array();
@@ -47,6 +48,12 @@ function EscFunc(){
 }
 
 $(document).ready(function(){	
+	$(document).tooltip({
+		position: {
+	        my: "left bottom",
+	        at: "right bottom",
+	    }
+	});
 	$( "#progressbar" ).progressbar({
 	    value: false,
 	}); 
@@ -87,9 +94,9 @@ $(document).ready(function(){
 			$('h2').append('Cenus Tracts Summary Report: '+window.opener.qstringd+'<br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ 
-				'<td>' + numberconv(item.population) +
+				'<td>' + item.Name + '</td><td>' + numberconv(item.population) +
 				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>'+
-		   '<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
+		  		'<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
 				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td>'+ 
 				'<td><a href="#" type="TC" id="'+item.id+'">'+item.BlocksCount+'</a></td>' ;
 				html = html + '<td class="details-control"></td>';
@@ -127,7 +134,7 @@ $(document).ready(function(){
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
-		        	"sRowSelect": "multi",
+		        	"sRowSelect": "os",
 		            "aButtons": [
 						
 						/* { "sExtends": "print", 

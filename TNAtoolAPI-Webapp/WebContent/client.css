@@ -152,3 +152,6 @@ form span.timeEntry select {
 .fullWidth {
 	width: 100%;
 }
+
+div.ui-dialog{font-size: 85%;}
+div.ui-dialog.ui-draggable{font-size: 100%}

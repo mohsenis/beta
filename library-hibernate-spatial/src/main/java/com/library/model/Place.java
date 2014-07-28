@@ -11,8 +11,19 @@ public class Place {
     private long landarea;
     private long waterarea;
     
-    public Place() {
+    public Place(){    	
     }
+    
+    public Place(Place p) {
+		this.placeId = p.placeId;
+		this.name = p.name;
+		this.population = p.population;
+		this.housing = p.housing;
+		this.latitude = p.latitude;
+		this.longitude = p.longitude;
+		this.landarea = p.landarea;
+		this.waterarea = p.waterarea;
+	}
 
 	public String getPlaceId() {
 		return placeId;

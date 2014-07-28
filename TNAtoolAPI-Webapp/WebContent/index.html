@@ -11,68 +11,33 @@
 	<script  src="js/lib/jstree-v.pre1.0/jquery.jstree.js"></script>	
 	<link rel="stylesheet" type="text/css" href="client.css" />	
 	<script src="js/lib/jquery-ui.js"></script>
+	<script src="js/lib/bootstrap-dropdown.js"></script>
+	<link rel="stylesheet" href="js/lib/bootstrap.css" />
 	<script src="js/lib/Polylinencoded.js"></script>
 	<link rel="stylesheet" href="js/lib/MarkerCluster/MarkerCluster.css" />
 	<link rel="stylesheet" href="js/lib/MarkerCluster/MarkerCluster.styles.css" />
 	<link rel="stylesheet" href="js/lib/MarkerCluster/MarkerCluster.Default.css" />
-	<script src="js/lib/simple-expand.min.js"></script>
 	<script src="js/lib/MarkerCluster/leaflet_markercluster-src.js"></script>
-	<script src="js/lib/jquery.dialogextend.js"></script>
+	<script src="js/lib/jquery_dialogextend.js"></script>
 	<script type="text/javascript" src="js/otp/shapedata.js"></script>
 	
-	<link rel="stylesheet" href="js/lib/leaflet-0.7/src/leaflet.draw.css" />
-	<script src="js/lib/leaflet-0.7/src/Leaflet.draw.js"></script>
+	<script src="js/lib/date.js"></script>
 	
-	<script src="js/lib/leaflet-0.7/src/edit/handler/Edit.Poly.js"></script>
-	<script src="js/lib/leaflet-0.7/src/edit/handler/Edit.SimpleShape.js"></script>
-	<script src="js/lib/leaflet-0.7/src/edit/handler/Edit.Circle.js"></script>
-	<script src="js/lib/leaflet-0.7/src/edit/handler/Edit.Rectangle.js"></script>
-
-	<script src="js/lib/leaflet-0.7/src/draw/handler/Draw.Feature.js"></script>
-	<script src="js/lib/leaflet-0.7/src/draw/handler/Draw.Polyline.js"></script>
-	<script src="js/lib/leaflet-0.7/src/draw/handler/Draw.Polygon.js"></script>
-	<script src="js/lib/leaflet-0.7/src/draw/handler/Draw.SimpleShape.js"></script>
-	<script src="js/lib/leaflet-0.7/src/draw/handler/Draw.Rectangle.js"></script>
-	<script src="js/lib/leaflet-0.7/src/draw/handler/Draw.Circle.js"></script>
-	<script src="js/lib/leaflet-0.7/src/draw/handler/Draw.Marker.js"></script>
-
-	<script src="js/lib/leaflet-0.7/src/ext/LatLngUtil.js"></script>
-	<script src="js/lib/leaflet-0.7/src/ext/GeometryUtil.js"></script>
-	<script src="js/lib/leaflet-0.7/src/ext/LineUtil.Intersect.js"></script>
-	<script src="js/lib/leaflet-0.7/src/ext/Polyline.Intersect.js"></script>
-	<script src="js/lib/leaflet-0.7/src/ext/Polygon.Intersect.js"></script>
-
-	<script src="js/lib/leaflet-0.7/src/Control.Draw.js"></script>
-	<script src="js/lib/leaflet-0.7/src/Tooltip.js"></script>
-	<script src="js/lib/leaflet-0.7/src/Toolbar.js"></script>
-
-	<script src="js/lib/leaflet-0.7/src/draw/DrawToolbar.js"></script>
-	<script src="js/lib/leaflet-0.7/src/edit/EditToolbar.js"></script>
-	<script src="js/lib/leaflet-0.7/src/edit/handler/EditToolbar.Edit.js"></script>
-	<script src="js/lib/leaflet-0.7/src/edit/handler/EditToolbar.Delete.js"></script>
+	<link rel="stylesheet" href="js/lib/leaflet-0.7/leaflet.draw.css" />
+	<script src="js/lib/leaflet-0.7/leaflet.draw.js"></script>
 	
-	<script src="js/lib/leaflet-0.7/minimap/Control.MiniMap.js"></script>
-	<link rel="stylesheet" href="js/lib/leaflet-0.7/minimap/Control.MiniMap.css" />
+	
+	<script src="js/lib/leaflet-0.7/Control.MiniMap.js"></script>
+	<link rel="stylesheet" href="js/lib/leaflet-0.7/Control.MiniMap.css" />
 	
 	<script src="js/lib/leaflet-0.7/leaflet.contextmenu.js"></script>
 	<link rel="stylesheet" href="js/lib/leaflet-0.7/leaflet.contextmenu.css" /> 
 	
 	<script src="js/lib/leaflet-0.7/minimap/html2canvas.js"></script>
 	<script src="tmpScript.js"></script>
-	<style>
-		div.ui-dialog{font-size: 85%;}
-		div.ui-dialog.ui-draggable{font-size: 100%}
-	    /* body { font-size: 62.5%; } */
-	    label, input { display:block; }
-	    input.text { margin-bottom:12px; width:95%; padding: .4em; }
-	    fieldset { padding:0; border:0; margin-top:25px; }
-	    h1 { font-size: 1.2em; margin: .6em 0; }
-	    .ui-dialog .ui-state-error { padding: .3em; }
-	    .validateTips { border: 1px solid transparent; padding: 0.3em; }
-	</style>
 	
 <script type="text/javascript">
-var qstringx = '0.1';
+
 //$(function() {
 	//$( "#toolbox" ).dialogExtend({maximizable:true, minimizable: true, collapsable:true, minimizeLocation: "left"});
 	//$( "#toolbox" ).resizable({ containment: "#map" , maxHeight: 850, maxWidth: 600, minHeight: 40, minWidth: 340});
@@ -80,10 +45,8 @@ var qstringx = '0.1';
 	
 	//});
 //var replist = [];
-function openrep(){
-	qstringx = '0.1';
-	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx);	
-};
+
+
 </script>
 
 </head>
@@ -93,13 +56,13 @@ function openrep(){
 	</div>
 	<div id="dialog-form" title="On-Map Report">
 	  <p><b>Centroid</b>:<br>
-    	<span style="padding-left:3em">Latitude: <span style="padding-left:10px" id="dialogLat"></span></span><br>
+    	<span style="padding-left:3em">Latitude: <span style="padding-left:1.5em" id="dialogLat"></span></span><br>
     	<span style="padding-left:3em">Longitude: <span id="dialogLng"></span></span>
       </p>
       <p><b>Area</b>:<span id="dialogArea" style="padding-left:1em"></span> Square Miles
       </p><br>
       <label><i>Select the report you want to be displayed</i></label>
-      <div style="border:1px solid grey;margin:10px auto;padding:5px"">
+      <div style="border:1px solid grey;margin:10px auto;padding:5px">
 	      <p>
 	      	Stops from <select id="stopselect" class="dialogSel" style="width:105px;margin-left:1em"><option value='all'>All Agencies</option></select>
 	      	<input id="stopRadio" type="radio" name="onMapRep" value="stops" style="display:inline; margin-left:3em"><br>
