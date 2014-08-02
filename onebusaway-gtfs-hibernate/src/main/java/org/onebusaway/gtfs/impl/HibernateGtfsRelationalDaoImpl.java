@@ -267,6 +267,14 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   }
   
   @Override
+  public List<Stop> getStopsForTrip(AgencyAndId trip) {	  
+	  String[] names = {"agency", "trip"};
+	  Object[] values = {trip.getAgencyId(), trip.getId()};
+	  return _ops.findByNamedQueryAndNamedParams("stopsForTrip", names,
+		        values);
+  }
+  
+  @Override
   public List<Trip> getTripsForRoute(Route route) {
     return _ops.findByNamedQueryAndNamedParam("tripsByRoute", "route", route);
   }

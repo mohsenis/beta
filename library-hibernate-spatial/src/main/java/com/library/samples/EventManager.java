@@ -440,7 +440,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);
-		queryBuf.append(" where distance(:allpoints, location)<:radius ) ");
+		queryBuf.append(" where dwithin(:allpoints, location, :radius)= true ) ");
 		System.out.println("no of points: "+plist.length);
 		//queryBuf.append(") ");
 		String hqlQuery = queryBuf.toString();
@@ -458,7 +458,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
         
         List results = query.list();
 		long pop = 0;
-		if (results.size()>0){ 
+		if (results.size()>0 && results.get(0)!=null){ 
 		pop = (Long) results.get(0);
 		//pop = (Integer) results.get(0);
 		}

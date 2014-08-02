@@ -571,6 +571,7 @@ public class Queries {
     	double length = 0;
     	double ServiceMiles = 0;    	
         double Stopportunity = 0;
+        double PopStopportunity = 0;
         
         String serviceAgency = alltrips.get(0).getServiceId().getAgencyId();
         int startDate;
@@ -667,10 +668,25 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 					}
 				}
 			}
+    		long trippop = 0;
+    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTrip(instance.getId());
+    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();
+    		for (Stop stop: tripstops){
+    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
+    		}
+            try {
+    			trippop =EventManager.getunduppopbatch(x, tripstopcoords);
+    		} catch (FactoryException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} catch (TransformException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
     		    		
     		ServiceMiles += TL * frequency;  
-    		Stopportunity += frequency * stops;
-    		
+    		Stopportunity += frequency * stops; 
+    		PopStopportunity += frequency * trippop;
     		setprogVal(key, (int) Math.round(index*100/totalLoad));
     	}
         
@@ -694,7 +710,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 			e.printStackTrace();
 		}
         response.PopServed = String.valueOf(pop);
-        response.PopServedByService = String.valueOf(0);
+        response.PopServedByService = String.valueOf(PopStopportunity);
         if (RouteMiles >0)
         	response.StopPerRouteMile = String.valueOf(Math.round((StopCount*10000.0)/(RouteMiles))/10000.0);
         else 
@@ -932,7 +948,8 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 		RouteR each = new RouteR();
 		double length = 0;
 		double ServiceMiles = 0;
-	    double Stopportunity = 0;       
+	    double Stopportunity = 0;
+	    double PopStopportunity = 0;
 		each.RouteId = routeId+"";
 		each.RouteSName = thisroute.getShortName()+"";
 		each.RouteLName = thisroute.getLongName()+"";
@@ -953,14 +970,30 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 			
 			int frequency = 0;
 			int stops = instance.getStopscount();
+			long trippop = 0;
 			
 			//int stops = 0;
 			if (!routeId.equals(instance.getRoute().getId().getId())){		
 				each.RouteLength = String.valueOf(Math.round(length*100.0)/100.0);                
 		        each.ServiceMiles = String.valueOf(Math.round(ServiceMiles*100.0)/100.0); 
 		        each.Stopportunity = String.valueOf(Math.round(Stopportunity));
-		        each.PopStopportunity = String.valueOf(0);
-		        each.PopWithinX = String.valueOf(0);
+		        each.PopStopportunity = String.valueOf(Math.round(Stopportunity));
+		        long pop = 0;
+		        List <Stop> Rstops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(instance.getRoute().getId());
+				List <Coordinate> Rstopcoords = new ArrayList<Coordinate>();
+				for (Stop stop: Rstops){
+					Rstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
+				}
+		        try {
+					pop =EventManager.getunduppopbatch(x, Rstopcoords);
+				} catch (FactoryException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (TransformException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		        each.PopWithinX = String.valueOf(pop);		        
 				response.RouteR.add(each);
 				//initialize all again
 				thisroute =  instance.getRoute();
@@ -968,7 +1001,8 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 				each = new RouteR();
 				length = 0;
 				ServiceMiles = 0;
-			    Stopportunity = 0;		        
+			    Stopportunity = 0;
+			    PopStopportunity = 0;	
 				each.RouteId = routeId+"";			
 				each.RouteSName = thisroute.getShortName()+"";
 				each.RouteLName = thisroute.getLongName()+"";
@@ -1054,7 +1088,21 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 					}
 				}
 			}
-		    		
+			List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTrip(instance.getId());
+    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();
+    		for (Stop stop: tripstops){
+    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
+    		}
+            try {
+    			trippop =EventManager.getunduppopbatch(x, tripstopcoords);
+    		} catch (FactoryException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} catch (TransformException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+            PopStopportunity += frequency * trippop;
 			ServiceMiles += TL * frequency;  
 			Stopportunity += frequency * stops;
 			
@@ -1063,8 +1111,23 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 		each.RouteLength = String.valueOf(Math.round(length*100.0)/100.0)+"";                
 	    each.ServiceMiles = String.valueOf(Math.round(ServiceMiles*100.0)/100.0)+""; 
 	    each.Stopportunity = String.valueOf(Math.round(Stopportunity))+"";
-	    each.PopStopportunity = String.valueOf(0);
-	    each.PopWithinX = String.valueOf(0);
+	    each.PopStopportunity = String.valueOf(Math.round(PopStopportunity))+"";	    
+	    long pop = 0;
+        List <Stop> Rstops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(alltrips.get(alltrips.size()-1).getRoute().getId());
+		List <Coordinate> Rstopcoords = new ArrayList<Coordinate>();
+		for (Stop stop: Rstops){
+			Rstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
+		}
+        try {
+			pop =EventManager.getunduppopbatch(x, Rstopcoords);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        each.PopWithinX = String.valueOf(pop);
 		response.RouteR.add(each);
 		
 		try {
