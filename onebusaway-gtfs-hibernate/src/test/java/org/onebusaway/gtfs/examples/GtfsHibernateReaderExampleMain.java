@@ -210,6 +210,14 @@ public class GtfsHibernateReaderExampleMain {
 	  
 	  return dao.getStopsForRoute(route);
   }
+  
+  public static List<Stop> QueryStopsbyTrip (AgencyAndId trip){
+	  //String resource = "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";
+	  //HibernateGtfsFactory factory = createHibernateGtfsFactory(resource);
+	  GtfsMutableRelationalDao dao = factory.getDao();	  
+	  
+	  return dao.getStopsForTrip(trip);
+  }
  
   private static ServiceDate min(ServiceDate a, ServiceDate b) {
     if (a == null)

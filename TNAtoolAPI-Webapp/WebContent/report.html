@@ -27,12 +27,12 @@ var qstringd = '';
 var d = new Date();
 var boo;
 var html = '<table id="RT" class="display" align="center">';
-var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed.">?</em></th>'+
-'<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed.">?</em></th>'+
-'<th>Phone # <em title="Phone number to contact the transit agency.">?</em></th>'+
-'<th>Total Routes <em title="Total number of routes operated by the transit agency.">?</em></th>'+
-'<th>Total Stops <em title="Total number of stops operated by the transit agency.">?</em></th>'+
-'<th>Fare<em title="If available, this field points to the fare information published by the transit agency on its web site.">?</em></th></tr>';	
+var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Phone # <em title="Phone number to contact the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total Routes <em title="Total number of routes operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total Stops <em title="Total number of stops operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Fare<em title="If available, this field points to the fare information published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var fURL = new Array();
@@ -49,6 +49,12 @@ function EscFunc(){
 }
 
 $(document).ready(function(){	
+	$(document).tooltip({
+		position: {
+	        my: "left bottom",
+	        at: "right bottom",
+	    }
+	});
 	$( "#progressbar" ).progressbar({
 	    value: false,
 	}); 

@@ -150,11 +150,15 @@
         <property name="shape" type="org.hibernatespatial.GeometryUserType"/>
     </class> -->
     
+    <query name = "STOP_BY_COORDINATES">
+    <![CDATA[from GeoStop where distance(:point,location)<:radius]]>
+	</query>
     <query name = "POP_BY_COORDINATES">
     <![CDATA[select sum(population) from Census where distance(:point,location)<:radius]]>
 	</query>
 	<query name = "CENSUS_BY_COORDINATES">
     <![CDATA[from Census where distance(:point,location)<:radius]]>
+    <!-- <![CDATA[from Census where dwithin(location, :point, :radius) = true]]> -->
 	</query>
 	<!-- <query name = "SHAPE_BY_TRIP">
     <![CDATA[from Geotrip where id=:id]]>
@@ -227,5 +231,8 @@
 	</query>
 	<query name = "ROUTES_BY_CONGDIST">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.congdistId=:id group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where id in (select distinct id from Census where dwithin(location, :allpoints ,:radius)=true ) ]]>
 	</query>
 </hibernate-mapping>
