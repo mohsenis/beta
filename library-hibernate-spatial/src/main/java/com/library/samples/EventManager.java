@@ -28,7 +28,6 @@ import com.library.model.*;
 
 
 
-
 public class EventManager {		
 //private SessionFactory factory;
 private	static Session session = Hutil.getSessionFactory().openSession();
@@ -69,6 +68,30 @@ private	static Session session = Hutil.getSessionFactory().openSession();
         Hutil.getSessionFactory().close();
         return results;
     }
+	
+/**
+ * returns stops within a circle
+ */
+	public static List<GeoStop> getstopswithincircle(double d, double lat, double lon) throws FactoryException, TransformException {			
+		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
+		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
+		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
+		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();			
+		Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
+		Geometry targetGeometry = JTS.transform( point, transform);
+		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
+		point = targetGeometry.getCentroid();
+		point.setSRID(2993);	
+		session.beginTransaction();
+		Query q = session.getNamedQuery("STOP_BY_COORDINATES");
+		Type geomType = GeometryUserType.TYPE;
+		q.setParameter("point", point, geomType);
+		q.setParameter("radius", d);
+		@SuppressWarnings("unchecked")
+		List<GeoStop> results = (List<GeoStop>) q.list();
+        Hutil.getSessionFactory().close();
+        return results;
+    }	
 	
 /**
  * returns list of counties
@@ -421,7 +444,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
 		session.beginTransaction();
 		Type geomType = GeometryUserType.TYPE;		
-		StringBuffer queryBuf = new StringBuffer("select sum(population) from Census where id in (select distinct id from Census");
+		//StringBuffer queryBuf = new StringBuffer("select sum(population) from Census where id in (select distinct id from Census");
 		//boolean firstClause = true;
 		int i = 0;		
 		//List<Point> qpoints = new ArrayList<Point>();
@@ -440,15 +463,16 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);
-		queryBuf.append(" where dwithin(:allpoints, location, :radius)= true ) ");
+		//queryBuf.append(" where dwithin(location, :allpoints, :radius) = true ) ");
 		System.out.println("no of points: "+plist.length);
 		//queryBuf.append(") ");
-		String hqlQuery = queryBuf.toString();
-		Query query = session.createQuery(hqlQuery);
-		System.out.println(hqlQuery);		
+		Query q = session.getNamedQuery("POP_UNDUP_BATCH");
+		//String hqlQuery = queryBuf.toString();
+		//Query query = session.createQuery(hqlQuery);				
 		//i=1;
-		query.setParameter("radius",d);
-		query.setParameter("allpoints",allpoints,geomType);
+		q.setParameter("radius",d);
+		q.setParameter("allpoints",allpoints,geomType);
+		System.out.println(q.toString());
 		/*for (Point p :qpoints){
 			query.setParameter("point"+String.valueOf(i),p,geomType);			
 			i++;
@@ -456,13 +480,14 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		//@SuppressWarnings("unchecked")
 		//List<Census> results = (List<Census>) query.list();		
         
-        List results = query.list();
+        List results = q.list();
 		long pop = 0;
 		if (results.size()>0 && results.get(0)!=null){ 
 		pop = (Long) results.get(0);
 		//pop = (Integer) results.get(0);
 		}
 		Hutil.getSessionFactory().close();
+		System.out.println("Query returned: "+pop);
         return pop;		
     }
 /*

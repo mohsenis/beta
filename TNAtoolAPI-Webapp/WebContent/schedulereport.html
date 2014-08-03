@@ -32,7 +32,13 @@ var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+docum
 var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
 var w_qstringd = localStorage.getItem(keyName);
 var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
-$(document).ready(function(){		
+$(document).ready(function(){	
+	$(document).tooltip({
+		position: {
+	        my: "left bottom",
+	        at: "right bottom",
+	    }
+	});
 	$("#accordion").accordion({
 		collapsible: true,
 		active: false,
@@ -185,17 +191,29 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 				    
 				    
 				    var table = $('#RT'+k).DataTable( {
-				    	
 						"scrollY": "40%",
 						"width": "auto",
 						"sScrollX": "100%",
 						"bScrollCollapse": true,
-						"autoWidth": false,
+						"bAutoWidth": false,
 						//"iDisplayLength": 15,
 						"paging": false,
 						"order": [[ orderBy, "asc" ]],
 						//"bSort": false,
-						
+						/* "aoColumns": [
+							{ "sWidth": "80px" }, // 1st column width 
+							{ "sWidth": "80px" }, // 2nd column width 
+							{ "sWidth": "80px" }, // 3rd column width and so on 
+							{ "sWidth": "80px" }, // 1st column width 
+							{ "sWidth": "80px" }, // 2nd column width 
+							{ "sWidth": "80px" },
+							{ "sWidth": "80px" }, // 1st column width 
+							{ "sWidth": "80px" }, // 2nd column width 
+							{ "sWidth": "80px" },
+							{ "sWidth": "80px" }, // 1st column width 
+							{ "sWidth": "80px" }, // 2nd column width 
+							{ "sWidth": "80px" },
+						], */
 						"columnDefs": [
 				            {
 				                "targets": tar,
@@ -255,18 +273,37 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 				            ]
 				        },
 				        "fnDrawCallback": function( oSettings ) {
-				        	//$('#RT0_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th').css("padding-left","0px");
-				        	$('#RT'+k+'_wrapper').css("width", $('#RT'+k+'_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table').css("width"));
+				        	$( '#RT'+k+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
+				        	$( '#RT'+k+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
+				        	vCols =0;
+							$.each(oSettings.aoColumns, function(c){
+								if(oSettings.aoColumns[c].bVisible == true){
+								vCols +=1;
+							}});
+				        	var width = $( window ).width();
+				        	//alert(width);
+				        	width /= 8;
+				        	width -= 10;
+				        	//alert(width);
+				        	$('#RT'+k).css('width',vCols*width+'px');
+				        	////////////////////////////////
+				        	//$('#RT'+k+'_wrapper').css("width", $('#RT'+k+'_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table').css("width"));
+				        	$('#RT'+k+'_wrapper').css("width", $('#RT'+k).css('width'));
 				        	$('#RT'+k+'_wrapper').css("width", "+=17");
-						    
 						    $('#RT'+k+'_wrapper').css("margin","auto");
-						    //this.columns.adjust();
-						    
+						    $('#RT'+k+'_wrapper').css("max-width",$( window ).width()-25);
+						    ////////////////////////////////
+						    $( '#RT'+k+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
+				        	$( '#RT'+k+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
+				        	$( '#RT'+k+'_wrapper .dataTables_scrollHeadInner > table:nth-child(1)' ).css( "width", $('#RT'+k).css('width') );
+				        	$( '#RT'+k+'_wrapper .dataTables_scrollFootInner > table:nth-child(1)' ).css( "width", $('#RT'+k).css('width') );
+				        	//$( '#RT'+k+'_wrapper .ColVis_Button').click();
+				        	//$( '#RT'+k+'_wrapper .ColVis_Button').click();
 				        },
 				        
 						
 					} );
-				    
+				    //table.fnDraw();
 				    
 				    $('.ColVis').css("float", "left");
 				    if(gr.length==0){
@@ -288,8 +325,9 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 				    $('#RT'+k+'_filter').insertBefore('#RT'+k+'_info');
 				    $( ".dataTables_filter" ).css( "float", "left");
 				    $( ".dataTables_filter" ).before( "<br>" );
-		
-					
+				    //$( ".dataTables_scroll" ).css( "overflow", "scroll");
+				    
+				   
 				}
 		
 			});
@@ -362,7 +400,7 @@ function reload(){
 			  </td> 
 			  <td id="td3" >
 			  	<div class="headerBR" > 
-			    	<input type="button" onclick="adjust()" title="Refresh Report"  value="Submit" class="button" />
+			    	<!-- <input type="button" onclick="adjust()" title="Refresh Report"  value="Submit" class="button" /> -->
 		    	    <!-- <div id="datepicker" style="text-align:center"></div> -->
 		    	    <!-- <p ><input type="text" id="alternate" style="text-align:left;border:none; width:70%" ></input></p> -->
 		    	</div>
