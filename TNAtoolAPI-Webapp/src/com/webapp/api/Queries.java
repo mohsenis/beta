@@ -555,7 +555,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     		PopStopportunity += frequency * trippop;
     		setprogVal(key, (int) Math.round(index*100/totalLoad));
     	}
-        
+        RouteMiles += length;
         response.ServiceStops = String.valueOf(Math.round(Stopportunity));
         
         response.ServiceMiles = String.valueOf(Math.round(ServiceMiles*100.0)/100.0); 

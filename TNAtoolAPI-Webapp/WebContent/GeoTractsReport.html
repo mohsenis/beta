@@ -22,6 +22,7 @@ var qstringx = '0.1';
 var progVal = 0; 
 var qstringd = '';
 var d = new Date();
+var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -88,7 +89,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCTSR?&county='+window.opener.qstring+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCTSR?&county='+w_qstring+'&key='+ key,
 		async: true,
 		success: function(d){			
 			$('h2').append('Cenus Tracts Summary Report: '+window.opener.qstringd+'<br><hr>');
@@ -107,7 +108,7 @@ $(document).ready(function(){
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
-			$('a').click(function(e){
+			/* $('a').click(function(e){
 				var d = new Date();
 			    if ($(this).attr('type')=="RC"){
 			    	qstring = $(this).attr('id');
@@ -125,7 +126,7 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		window.open('/TNAtoolAPI-Webapp/Xreport.html');	    		
 			    };
-			});
+			}); */
 			
 			var table = $('#RT').DataTable( {
 				//"scrollY": "76%",
