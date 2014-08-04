@@ -114,17 +114,17 @@ $(document).ready(function(){
 			    if ($(this).attr('type')=="TC"){
 			    	qstring = $(this).attr('id');
 			    	qstringd =$(this).attr('name');
-			    	window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html');
+			    	window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html?&county='+qstring);
 			    }else if($(this).attr('type')=="SC"){
-			    		qstring = $(this).attr('id');
+			    		/* qstring = $(this).attr('id');
 			    		qstringx = '0.1';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		window.open('/TNAtoolAPI-Webapp/stopreport.html');	    		
+			    		window.open('/TNAtoolAPI-Webapp/stopreport.html'); */	    		
 			    }else if($(this).attr('type')=="XR"){
-			    		qstring = $(this).attr('id');
+			    		/* qstring = $(this).attr('id');
 			    		qstringx = '0.1';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		window.open('/TNAtoolAPI-Webapp/Xreport.html');	    		
+			    		window.open('/TNAtoolAPI-Webapp/Xreport.html'); */	    		
 			    };
 			});
 			

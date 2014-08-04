@@ -557,7 +557,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     		setprogVal(key, (int) Math.round(index*100/totalLoad));
     	}
         RouteMiles += length;
-        response.ServiceStops = String.valueOf(Math.round(Stopportunity));        
+        response.ServiceStops = String.valueOf(Math.round(Stopportunity));             
         response.ServiceMiles = String.valueOf(Math.round(ServiceMiles*100.0)/100.0); 
         response.RouteMiles = String.valueOf(Math.round(RouteMiles*100.0)/100.0);
         long pop = 0;

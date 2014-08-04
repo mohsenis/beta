@@ -105,7 +105,7 @@ $(document).ready(function(){
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
-			$('a').click(function(e){
+			/* $('a').click(function(e){
 				var d = new Date();
 			    if ($(this).attr('type')=="RC"){
 			    	qstring = $(this).attr('id');
@@ -123,7 +123,7 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		window.open('/TNAtoolAPI-Webapp/Xreport.html');	    		
 			    };
-			});
+			}); */
 			
 			var table = $('#RT').DataTable( {
 				//"scrollY": "76%",
