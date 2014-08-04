@@ -62,7 +62,7 @@ public interface GtfsDao extends GenericDao {
    * CensusData Methods
    ****/
   
-  public List<CensusData> getAllCensusData();
+  /*public List<CensusData> getAllCensusData();*/
 
   /****
    * {@link ServiceCalendarDate} Methods
