@@ -14,9 +14,11 @@ import java.util.List;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Polygon;
 
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.JTS;
@@ -48,7 +50,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 /**
  * returns population centroids
  */
-	public static List<Census> getcentroids(double d, double lat, double lon) throws FactoryException, TransformException {			
+	public static List<Census> getcentroids(double d, double lat, double lon) throws FactoryException, TransformException {
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
@@ -68,6 +70,38 @@ private	static Session session = Hutil.getSessionFactory().openSession();
         Hutil.getSessionFactory().close();
         return results;
     }
+	
+/**
+ * returns centroids within a rectangle
+ */
+	public static List<Census> getcentroidswithinrectangle(double[] lat, double[] lon) throws FactoryException, TransformException {			
+		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
+		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
+		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
+		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
+		Coordinate[] coords = new Coordinate[lat.length+1];
+		for(int i=0;i<lat.length;i++){
+			coords[i]= new Coordinate(lat[i], lon[i]);
+		}
+		coords[coords.length-1]= new Coordinate(lat[0], lon[0]);
+		LinearRing ring = geometryFactory.createLinearRing( coords );
+		LinearRing holes[] = null; 
+		Polygon polygon = geometryFactory.createPolygon(ring, holes );
+		//Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
+		Geometry targetGeometry = JTS.transform( polygon, transform);
+		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
+		//point = targetGeometry.getCentroid();
+		targetGeometry.setSRID(2993);	
+		session.beginTransaction();
+		Query q = session.getNamedQuery("CENSUS_WITHIN_RECTANGLE");
+		Type geomType = GeometryUserType.TYPE;
+		q.setParameter("polygon", targetGeometry, geomType);
+		//q.setParameter("radius", d);
+		@SuppressWarnings("unchecked")
+		List<Census> results = (List<Census>) q.list();
+        Hutil.getSessionFactory().close();
+        return results;
+    }	
 	
 /**
  * returns stops within a circle
@@ -93,6 +127,64 @@ private	static Session session = Hutil.getSessionFactory().openSession();
         return results;
     }	
 	
+	/**
+	 * returns stops within a rectangle
+	 */
+		public static List<GeoStop> getstopswithinrectangle(double[] lat, double[] lon) throws FactoryException, TransformException {			
+			CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
+			CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
+			MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
+			GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
+			Coordinate[] coords = new Coordinate[lat.length+1];
+			for(int i=0;i<lat.length;i++){
+				coords[i]= new Coordinate(lat[i], lon[i]);
+			}
+			coords[coords.length-1]= new Coordinate(lat[0], lon[0]);
+			LinearRing ring = geometryFactory.createLinearRing( coords );
+			LinearRing holes[] = null; 
+			Polygon polygon = geometryFactory.createPolygon(ring, holes );
+			//Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
+			Geometry targetGeometry = JTS.transform( polygon, transform);
+			//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
+			//point = targetGeometry.getCentroid();
+			targetGeometry.setSRID(2993);	
+			session.beginTransaction();
+			Query q = session.getNamedQuery("STOP_WITHIN_RECTANGLE");
+			Type geomType = GeometryUserType.TYPE;
+			q.setParameter("polygon", targetGeometry, geomType);
+			//q.setParameter("radius", d);
+			@SuppressWarnings("unchecked")
+			List<GeoStop> results = (List<GeoStop>) q.list();
+	        Hutil.getSessionFactory().close();
+	        return results;
+	    }	
+	
+/**
+ * returns route for a given stop
+ */
+	public static List<GeoStopRouteMap> getroutebystop(String id, String agency) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("ROUTE_BY_STOP");
+		q.setParameter("id", id).setParameter("agency", agency);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = (List<GeoStopRouteMap>) q.list();
+        Hutil.getSessionFactory().close();
+        return result;
+	}
+
+/**
+ * returns list of stop_route_map
+ */
+	public static List<GeoStopRouteMap> getstoproutemaps() throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("All_STOP_ROUTE_MAPS");
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> results = q.list();
+        Hutil.getSessionFactory().close();
+        return results;
+    }
+			
+	
 /**
  * returns list of counties
  */
@@ -100,7 +192,19 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		session.beginTransaction();
 		Query q = session.getNamedQuery("All_COUNTIES");
 		@SuppressWarnings("unchecked")
-		List<County> results = (List<County>) q.list();
+		List<County> results = q.list();
+        Hutil.getSessionFactory().close();
+        return results;
+    }
+	
+/**
+ * returns list of tracts
+ */
+	public static List<Tract> gettracts() throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("All_TRACTS");
+		@SuppressWarnings("unchecked")
+		List<Tract> results = q.list();
         Hutil.getSessionFactory().close();
         return results;
     }

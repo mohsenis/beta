@@ -156,7 +156,7 @@ public interface GtfsDao extends GenericDao {
    * {@link Trip} Methods
    ****/
 
-  public Collection<Trip> getAllTrips();
+  public List<Trip> getAllTrips();
 
   public Trip getTripForId(AgencyAndId id);
 

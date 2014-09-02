@@ -135,7 +135,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
 
   @Override
   public List<Trip> getAllTrips() {
-    return _ops.find("FROM Trip");
+    return _ops.find("FROM Trip ORDER BY id.agencyId");
   }
 
   @Override

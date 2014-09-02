@@ -58,10 +58,10 @@ $(document).ready(function(){
 		success: function(d){
 			$('h2').append(d.AgencyName+' Routes Report<br><hr>');
 			$.each(d.RouteR, function(i,item){
-				html = html + '<tr><td><a href="#" class="schedulereport" id="'+ item.RouteId+'">'+item.RouteId+'</a></td><td>' + item.RouteSName + '</td><td>' + item.RouteLName +'</td><td>'+ item.RouteType +'</td><td>'+item.RouteLength +'</td><td><a href="#" class="stopreport" id="'+ item.RouteId+'">'+item.StopsCount+'</a></td><td>'+ numberconv(item.PopWithinX)+'</td><td>'+numberconv(item.Stopportunity)+'</td><td>'+numberconv(item.PopStopportunity)+'</td><td>'+numberconv(item.ServiceMiles)+'</td><td class="details-control"></td></tr>';
+				html = html + '<tr><td><a href="#" class="schedulereport" id="'+ item.RouteId+'">'+item.RouteId+'</a></td><td>' + item.RouteSName + '</td><td>' + item.RouteLName +'</td><td>'+ item.RouteType +'</td><td>'+item.RouteLength +'</td><td><a href="#" class="stopreport" id="'+ item.RouteId+'">'+item.StopsCount+'</a></td><td>'+ numberconv(item.PopWithinX)+'</td><td class="serviceCol">'+numberconv(item.Stopportunity)+'</td><td class="serviceCol">'+numberconv(item.PopStopportunity)+'</td><td class="serviceCol">'+numberconv(item.ServiceMiles)+'</td><td class="details-control"></td></tr>';
 				description.push(item.RouteDesc);					    
 			});		
-			html = html + '</tbody>'+html2+'</table>'
+			html = html + '</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));	
 			progressbar.remove();
 			$('.stopreport').click(function(e){

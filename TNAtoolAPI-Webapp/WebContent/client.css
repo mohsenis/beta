@@ -2,7 +2,7 @@ body {
 	font-family: sans-serif;	
 	line-height: 16px;
 	font-size: 15px;
-	color: #06185c;
+	/* color: #06185c; */
 	margin: 0px;
 	/* do not add scroll bars unless overridden on sub-elements */
 	overflow: hidden;
@@ -155,3 +155,49 @@ form span.timeEntry select {
 
 div.ui-dialog{font-size: 85%;}
 div.ui-dialog.ui-draggable{font-size: 100%}
+
+#stopRoute td, #blockTract td{
+	padding-bottom: 8px;
+	
+}
+
+.onMapData{
+	padding-left: 30px;	
+}
+
+#transitTable tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
+	text-align:center;
+	font-size:60%
+} 
+
+#transitTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+	text-align:center;
+	font-size:60%
+} 
+#transitTable tbody tr,.dataTables_scrollBody tbody tr{
+	text-align:center;
+	font-size:60%
+} 
+#geoTable tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
+	text-align:center;
+	font-size:60%
+} 
+
+#geoTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+	text-align:center;
+	font-size:60%
+} 
+#geoTable tbody tr,.dataTables_scrollBody tbody tr{
+	text-align:center;
+	font-size:60%
+} 
+#overlay {
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: 1999;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+}
