@@ -233,7 +233,7 @@ public class Queries {
   		        	routeRef.put(route.getAgency().getId()+route.getId().getId(), route);
   		        }
   		        Map<String, TmpMapRoute> tripKey = new HashMap<String, TmpMapRoute>();
-  		        List<Trip> trips = GtfsHibernateReaderExampleMain.QueryAllTrips();
+  		        List<Trip> trips = (List<Trip>) GtfsHibernateReaderExampleMain.QueryAllTrips();
 				String currentAgency  = trips.get(0).getId().getAgencyId();
 				List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(currentAgency);
 				List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(currentAgency);

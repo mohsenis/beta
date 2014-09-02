@@ -191,7 +191,7 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getAllRoutes();
   }
   
-  public static List<Trip> QueryAllTrips (){
+  public static Collection<Trip> QueryAllTrips (){
 	  GtfsMutableRelationalDao dao = factory.getDao();	  
 	  return dao.getAllTrips();
   }
