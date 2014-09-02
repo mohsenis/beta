@@ -29,8 +29,8 @@ var dialogAgencies = new Array();
 var dialogAgenciesId = new Array();
 var dialog = $( "#dialog-form" ).dialog({
     autoOpen: false,
-    height: 870,
-    width: 420,
+    height: 400,
+    width: 350,
     modal: false,
     draggable: false,
     resizable: false,
@@ -40,21 +40,18 @@ var dialog = $( "#dialog-form" ).dialog({
     buttons: {
       /*"Submit": dialogResultOpen*//*function() {
     	  dialogResults.dialog( "open" );
-    	  $('.ui-dialog:eq(1)').css('top','400px');  
+    	  $('.ui-dialog:eq(2)').css('top','400px');  
       }*///,
-      /*Close: function(){
+      Cancel: function(){
     	  dialog.dialog( "close" );
-      }*/
+      }
     },
     close: function() {
-    	miniMap._restore();
-    	map.removeLayer(onMapCluster);
       //form[ 0 ].reset();
     },
     open: function( event, ui ) {
-    	miniMap._minimize();
     	//$(".ui-dialog-titlebar-close", ui.dialog || ui).hide();
-    	/*$('#dialogLat').html(drawCentroid[0]);
+    	$('#dialogLat').html(drawCentroid[0]);
     	$('#dialogLng').html(drawCentroid[1]);
     	$('#dialogArea').html(Math.round(area*100)/100);
     	$('#popRadio').prop('checked', true);
@@ -71,20 +68,14 @@ var dialog = $( "#dialog-form" ).dialog({
 	    	}
     	}
     	$('#routeselect option[value="all"]').prop("selected",true);
-    	$('#stopselect option[value="all"]').prop("selected",true);*/
+    	$('#stopselect option[value="all"]').prop("selected",true);
     },
   }).dialogExtend({
-	  "closable" : true,
+	  "closable" : false,
       "minimizable" : true,
-      "minimizeLocation": "right",
-      "minimize" : function() {
-    	  miniMap._restore();
-      },
-      "restore" : function() {
-    	  miniMap._minimize();
-      }
+      "minimizeLocation": "right"
   });
-/*var dialogResults = $( "#dialogResults" ).dialog({
+var dialogResults = $( "#dialogResults" ).dialog({
     autoOpen: false,
     height: 500,
     width: 400,
@@ -110,9 +101,9 @@ var dialog = $( "#dialog-form" ).dialog({
       "minimizable" : true,
       "minimizeLocation": "right",
       "restore" : function(evt) {
-    	  $('.ui-dialog:eq(1)').css('top','400px'); 
+    	  $('.ui-dialog:eq(2)').css('top','400px'); 
       }
-  });*/
+  });
 //$('.ui-dialog:eq(2)').css('margin-top','400px');
 //$('div.ui-dialog:nth-child(8)').css('bottom','0px');
  /*var form = dialog.find( "form" ).on( "submit", function( event ) {
@@ -130,9 +121,9 @@ var drawControl = new L.Control.Draw({
 	draw: {
 		polyline: false,
 		polygon: {
-			metric: false,
+			
 			allowIntersection: false,
-			showArea: false,
+			showArea: true,
 			drawError: {
 				color: '#b00b00',
 				timeout: 1000
@@ -142,7 +133,6 @@ var drawControl = new L.Control.Draw({
 			}
 		},
 		circle: {
-			metric: false,
 			shapeOptions: {
 				color: '#662d91'
 			}
@@ -156,12 +146,10 @@ var drawControl = new L.Control.Draw({
 map.addControl(drawControl);
 
 map.on('draw:drawstart', function (e) {
-	$('.jstree-checked').each(function() {
-		$( this ).children('a').children('.jstree-checkbox').click();
-	});
-	$mylist.dialogExtend("collapse");
+	
 	drawnItems.clearLayers();
 	dialog.dialog( "close" );
+	dialogResults.dialog( "close" );
 });
 
 $('.leaflet-draw-edit-remove').click(function(event){
@@ -169,6 +157,7 @@ $('.leaflet-draw-edit-remove').click(function(event){
 	//event.stopPropagation();
 	drawnItems.clearLayers();
 	dialog.dialog( "close" );
+	dialogResults.dialog( "close" );
 });
 
 var getCentroid = function (arrr) { 
@@ -183,140 +172,52 @@ var getCentroid = function (arrr) {
 };
 var drawCentroid = [0,0];
 var area=0;
-var popX=0;
-var currentLayer;
-var currentCircleCenter;
-var currentCircleCenterTmp;
-var currentDate = new Date();
-var currentX=0;
-var currentLats;
-var currentLngs;
-function editCancel(){
-	$('#circleRadius1').css('visibility','hidden');
-	currentCircleCenterTmp=currentCircleCenter;
-}
-function pad(s) { return (s < 10) ? '0' + s : s; }
 map.on('draw:created', function (e) {
-	currentLats = new Array();
-	currentLngs = new Array();
 	type = e.layerType,
 	layer = e.layer;
-	currentLayer = layer;
-	map.fitBounds(layer.getBounds().pad(0.5));
+	layer.on('click', function() {
+		dialog.dialog( "open" );
+	});
 	if (type === 'circle') {
 		//alert(layer.getLatLng());
-		currentCircleCenter = layer.getLatLng();
-		currentCircleCenterTmp= layer.getLatLng();
 		drawCentroid[0] = layer.getLatLng().lat;
 		drawCentroid[1] = layer.getLatLng().lng;
-		currentLats.push((Math.round(drawCentroid[0] * 1000000) / 1000000).toString());
-		currentLngs.push((Math.round(drawCentroid[1] * 1000000) / 1000000).toString());
-		currentX = layer.getRadius();
 		//alert(layer.getRadius());
 		area = Math.pow(layer.getRadius()*0.000621371,2)*Math.PI;
 	}else{
 		area = L.GeometryUtil.geodesicArea(layer.getLatLngs())*0.000000386102;
 		drawCentroid = getCentroid(layer.getLatLngs());
-		var tmpPoints = layer.getLatLngs();
-		for(var ii=0; ii<tmpPoints.length; ii++){
-			currentLats.push((Math.round(tmpPoints[ii].lat * 1000000) / 1000000).toString());
-			currentLngs.push((Math.round(tmpPoints[ii].lng * 1000000) / 1000000).toString());
-		}
 		//alert(layer.getLatLngs().length);
 	}
 	drawnItems.addLayer(layer);
-	
-	drawCentroid[0]= (Math.round(drawCentroid[0] * 1000000) / 1000000).toString();
-	drawCentroid[1]= (Math.round(drawCentroid[1] * 1000000) / 1000000).toString();
-	area = Math.round(area * 100) / 100;
-	layer.on('popupopen', function(e) {
-		
-		$( "#POPdatepicker" ).datepicker({
-		    showButtonPanel: true,
-			onSelect: function (date) {
-				currentDate = date;
-				//$('#POPbutton').prop('disabled', false);
-				//w_qstringd = date;
-				//localStorage.setItem(keyName, w_qstringd);
-		    }
-		});
-		$("#POPdatepicker").datepicker( "setDate", new Date());
-		var d = new Date();
-		currentDate = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-		$('.leaflet-popup-content-wrapper').css('opacity','0.75');
-		$('.leaflet-popup-close-button').css({'color':'#9B9A9A','z-index':'1'});
-	});
-	layer.bindPopup(
-			'<p><b>Centroid:</b><br>'+
-			'<span style="padding-left:1em">Latitude: <span id="POPlat" style="padding-left:1.5em">'+drawCentroid[0]+'</span></span><br>'+
-	    	'<span style="padding-left:1em">Longitude: <span id="POPlon">'+drawCentroid[1]+'</span></span>'+
-			'<p><b>Area:</b> <span id="POParea">'+area+'</span> mi<sup>2</sup></p>'+
-			'<p><b>Date</b>: <input readonly type="text" class="POPcal" id="POPdatepicker"></p>'+
-			'<p><button type="button" style="width:100%" id="POPbutton" onclick="onMapSubmit()">Generate Report</button></p>'
-	,{closeOnClick:false,draggable:true}).openPopup();
-	//map.fitBounds(layer.getBounds().pad(1));
-	//dialog.dialog( "open" );
+	dialog.dialog( "open" );
 	/*var tmpCenter = new L.FeatureGroup();
 	var tmpmarker = L.marker(getCentroid(layer.getLatLngs()));
 	tmpCenter.addLayer(tmpmarker);
 	map.addLayer(tmpCenter);*/
 });
-setDialog();
-function circleMove(latlng){
-	currentCircleCenterTmp = latlng;
-}
-function circleResize(radius){
-	//var radius = latlng.distanceTo(currentCircleCenter)*0.000621371;
-	radius = Math.round(radius*0.0621371)/100;
-	$('#circleRadius1').css('visibility','visible');
-	$('#circleRadius2').html(radius);
-	//console.log(radius);
-}
-
-map.on('draw:editstart', function (e) {
-	currentLayer.closePopup();
-	dialog.dialog( "close" );
-});
 map.on('draw:edited', function (e) {
-	$('#circleRadius1').css('visibility','hidden');
 	
+	/*var type = e.layerType,
+	layer = e.layer;
+	alert(layer);*/
 	var layers = e.layers;
     layers.eachLayer(function (layer) {
-    	currentLats = new Array();
-		currentLngs = new Array();
-    	map.fitBounds(layer.getBounds().pad(0.5));
         try{
         	drawCentroid[0] = layer.getLatLng().lat;
     		drawCentroid[1] = layer.getLatLng().lng;
-    		currentX = layer.getRadius();
     		//alert(layer.getRadius());
-    		currentLats.push((Math.round(drawCentroid[0] * 1000000) / 1000000).toString());
-    		currentLngs.push((Math.round(drawCentroid[1] * 1000000) / 1000000).toString());
     		area = Math.pow(layer.getRadius()*0.000621371,2)*Math.PI;
-    		currentCircleCenter = layer.getLatLng();
-    		currentCircleCenterTmp= layer.getLatLng();
         }catch(err){
         	area = L.GeometryUtil.geodesicArea(layer.getLatLngs())*0.000000386102;
     		drawCentroid = getCentroid(layer.getLatLngs());
-    		var tmpPoints = layer.getLatLngs();
-    		for(var ii=0; ii<tmpPoints.length; ii++){
-    			currentLats.push((Math.round(tmpPoints[ii].lat * 1000000) / 1000000).toString());
-    			currentLngs.push((Math.round(tmpPoints[ii].lng * 1000000) / 1000000).toString());
-    		}
         }
-        drawCentroid[0]= (Math.round(drawCentroid[0] * 1000000) / 1000000).toString();
-    	drawCentroid[1]= (Math.round(drawCentroid[1] * 1000000) / 1000000).toString();
-    	area = Math.round(area * 100) / 100;
-    	layer.openPopup();
-    	$('#POPlat').html(drawCentroid[0]);
-    	$('#POPlon').html(drawCentroid[1]);
-    	$('#POParea').html(area);
-    	
     });
 	
 	
 	dialog.dialog( "close" );
-	//dialog.dialog( "open" );
+	dialogResults.dialog( "close" );
+	dialog.dialog( "open" );
 });
 
 
@@ -543,77 +444,19 @@ function disponmap(layerid,k,points,popup){
 	for (var i = 0; i < points.length; i++) {
 		var p = points[i];
 		var marker = new L.Marker(p[0],{title:popup});
-		var marLat = (Math.round(marker.getLatLng().lat * 1000000) / 1000000).toString().replace('.','').replace('-','');
-		var marLng = (Math.round(marker.getLatLng().lng * 1000000) / 1000000).toString().replace('.','').replace('-','');
-		marker.on('popupopen', function(e) {
-			dialog.dialog( "close" );
-			var markerLat = (Math.round(this.getLatLng().lat * 1000000) / 1000000).toString().replace('.','').replace('-','');
-			var markerLng = (Math.round(this.getLatLng().lng * 1000000) / 1000000).toString().replace('.','').replace('-','');
-			$( '#'+markerLat+'POPdatepicker'+markerLng).datepicker({
-				showButtonPanel: true,
-				onSelect: function (date) {
-					currentDate = date;
-					//$('#'+markerLat+'POPbutton'+markerLng).prop('disabled', false);
-					//w_qstringd = date;
-					//localStorage.setItem(keyName, w_qstringd);
-			    }
-			});
-			$('#'+markerLat+'POPdatepicker'+markerLng).datepicker( "setDate", new Date());
-			var d = new Date();
-			currentDate = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			/*$('#'+markerLat+'POPdatepicker'+markerLng).focusout(function(){
-				$( '#'+markerLat+'POPdatepicker'+markerLng).datepicker( "hide" );
-			});*/
-			$('.leaflet-popup-content-wrapper').css('opacity','0.70');
-			$('.leaflet-popup-close-button').css({'color':'#9B9A9A','z-index':'1'});
-		});
-		marker.bindPopup(
-				'<p><b>'+p[1]+'</b></p>'+
-				'<p><b>Location:</b><br>'+
-				'<span style="padding-left:1em">Latitude: <span style="padding-left:1.5em">'+p[0].lat+'</span></span><br>'+
-		    	'<span style="padding-left:1em">Longitude: <span>'+p[0].lng+'</span></span>'+
-				'<p><b>Date:</b> <input readonly type="text" class="POPcal" id="'+marLat+'POPdatepicker'+marLng+'"></p>'+
-				'<p><b>Population Search Radius (miles):</b> <input type="text" value="0.1" id="'+marLat+'POPx'+marLng+'" style="width:40px"></p>'+
-				'<p><button type="button" id="'+marLat+'POPbutton'+marLng+'" style="width:100%" onclick="onMapBeforeSubmit('+p[0].lat+','+p[0].lng+','+marLat+','+marLng+')">Generate Report</button></p>'
-				
-				//'<input type="button" value="Submit" style="font-size:90%;width:50px;height:22px" onclick="showPop('+p[0].lat+','+p[0].lng+')">'+
-				//'<br><input type="text" id="p'+p[0].lat+p[0].lng+'" style="font-size:90%;width:60px;height:20px" disabled>&nbsp&nbsp'+
-				//'<span style="margin-left:50px">Show on map</span>: <input type="checkbox" id="c'+p[0].lat+p[0].lng+'" onchange="triggerShow(this)">'
-				,{closeOnClick:false,draggable:true});
+		marker.bindPopup('<b style="">'+p[1]+'</b><br><br><a class="expander" href="#"></a>'+
+							
+								'<div class="content">'+
+									'Population Search Radius (miles) <input type="text" id="x'+p[0].lat+p[0].lng+'" style="font-size:90%;width:30px;height:20px">'+
+									'<input type="button" value="Submit" style="font-size:90%;width:50px;height:22px" onclick="showPop('+p[0].lat+','+p[0].lng+')">'+
+									'<br><input type="text" id="p'+p[0].lat+p[0].lng+'" style="font-size:90%;width:60px;height:20px" disabled>&nbsp&nbsp'+
+									'<span style="margin-left:50px">Show on map</span>: <input type="checkbox" id="c'+p[0].lat+p[0].lng+'" onchange="triggerShow(this)">'+
+					            '</div>');
 		markers.addLayer(marker);
 	}
 	markers._leaflet_id = layerid;
 	stops.addLayer(markers);
-}
-
-function onMapBeforeSubmit(lat,lng,mlat,mlng){
-	var x = $('#'+mlat+'POPx'+mlng).val();
-	if(isNaN(x)||x<=0){
-		alert('Please enter a valid radius');
-		return false;
-	}
-	drawCentroid[0]= lat;
-	drawCentroid[1]= lng;
-	
-	area = Math.pow(x,2)*Math.PI;
-	drawCentroid[0]= (Math.round(drawCentroid[0] * 1000000) / 1000000).toString();
-	drawCentroid[1]= (Math.round(drawCentroid[1] * 1000000) / 1000000).toString();
-	area = Math.round(area * 100) / 100;
-	//currentCircle = L.circle([lat,lng], x*1609.34);
-	//currentCircle.addTo(map);
-	var that = drawControl._toolbars[L.DrawToolbar.TYPE]._modes.circle.handler;
-	that.enable();
-	that._startLatLng = [lat,lng];
-	that._shape = new L.Circle([lat,lng], x*1609.34, that.options.shapeOptions);
-	that._map.addLayer(that._shape);
-	//map.fitBounds(that._shape.getBounds());
-	//that._map.fire('draw:created', { layer: that, layerType: that.type });
-	that._fireCreatedEvent();//L.Draw.Feature.prototype._fireCreatedEvent.call(this, poly);
-	that.disable();
-	//drawControl._toolbars[L.DrawToolbar.TYPE]._modes.circle.handler.disable();
-	//currentDate = $('#'+mlat+'POPdatepicker'+mlng).datepicker( "getDate" );
-	//currentCircle.addTo(map);
-	onMapSubmit();
+	$('.expander').simpleexpand();//remember ro delete simple expand js and link
 }
 /////////////////////////////////////////////////////////////////////////////////
 function triggerShow(e){
@@ -720,15 +563,35 @@ if (AUTO_CENTER_MAP) {
 map.setView(initLocation,8);
 
 L.control.scale({'metric': false, 'position': 'bottomright', 'maxWidth':200}).addTo(map);
+var mini = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"],minZoom: 4, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright'}).addTo(map);
+$('.leaflet-control-minimap').css({'width':'180px','height':'170px','float':'left'});
+$('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'5px'});
 
-var mmRecLat = 0;
-var mmRecLng = 0;
-var miniMap = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"], minZoom: 5, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright',toggleDisplay:true}).addTo(map);
-
-$('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'0px'});
 $('.leaflet-control-attribution').remove();
 
+/*var scaleD = $('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d');
+scaleD = scaleD.substr(scaleD.indexOf("z")-2);
+function changeRec(){
+	var tmpD = $('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d');
+	tmp = tmpD.substr(tmpD.indexOf("z")-2);
+	alert(scaleD+tmp);
+	//alert(tmp);
+	//tmpD.replace(tmp, scaleD);
+	//alert(tmpD);
+	$('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d',tmpD);
+	alert($('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d'));
+	alert();
+	
+}*/
+/*mini._mainMap.on('zoomend', function(e) {
+	mini._aimingRect.redraw();
+	$('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d',scaleD);
+	alert($('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d'));
+});*/
 
+
+// add layers to map 
+// do not add analyst layer yet -- it will be added in refresh() once params are pulled in
 
 var baseMaps = {
 	    "OSM": osmLayer,
@@ -859,7 +722,7 @@ $mylist
 .bind("loaded.jstree", function (event, data) {
 	$mylist
 	.dialog({ 
-		"title" : "Oregon Transit Agencies", 
+		"title" : "Oregon Transportation Agencies", 
 		width : 400,
 		height: 720,
 		maxHeight: 820,
@@ -887,8 +750,8 @@ $mylist
 	    //"events" : {
 	    "load" : function(evt, dlg) {  	
 
-	    	$(".ui-dialog-titlebar-buttonpane:eq( 1 )").css("right", 25 + "px");    	
-		    var titlebar = $(".ui-dialog-titlebar:eq( 1 )");
+	    	$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 25 + "px");    	
+		    var titlebar = $(".ui-dialog-titlebar:eq( 2 )");
 		    var div = $("<div/>");
 		    div.addClass("ui-dialog-titlebar-other");	    
 		    var button = $( "<button/>" ).text( "Reports" );	    
@@ -898,7 +761,7 @@ $mylist
 	        .css( "right", 1 + "px" )
 	        .css( "top", 55 + "%" )
 	        .appendTo(div);        
-		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
+		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="ASR" href="#">Transit Agnecy Summary Report</a></li><li role="presentation"><a id="CSR" href="#">Counties Summary Report</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Summary Report</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Summary Report</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Summary Report</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Summary Report</a></li></ul>');
 			div.appendTo(titlebar);
 		    $('.ui-dialog-titlebar-other').dropdown();	    
 			$mylist.dialogExtend("collapse");
@@ -921,9 +784,9 @@ $mylist
 			    }
 			});
 
-    	//$(".ui-dialog-titlebar-buttonpane:eq( 1 )").css("right", 25 + "px");
+    	//$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 25 + "px");
     	/*$(".ui-dialog-titlebar-maximize").css("right", 80+ "px");*/
-	    //var titlebar = $(".ui-dialog-titlebar:eq( 1 )");
+	    //var titlebar = $(".ui-dialog-titlebar:eq( 2 )");
 	    	    
 	    /*	    titlebar.append('<div class=dropdown><button class="dropdown-toggle" role="button" data-toggle="dropdown" text="reports"><img src="/path/to/ui-icon-document" alt="Submit"></button><ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="rep1" href="#">Transit Agnecy Summary Report</a></li><li role="presentation"><a id="rep2" href="#">Counties Summary Report</a></li><li role="presentation"><a id="rep2" href="#">ODOT Transit Regions Summary Report</a></li></ul><div>');*/
 		/*$('.dropdown-toggle').dropdown();*/
@@ -946,12 +809,6 @@ $mylist
 	    	$("#collapse").attr("title", "Collapse");	    	
 	    	$(".dropdown-menu").css("top", 100+"%" );
 	    	$(".dropdown-menu").css("bottom", "auto" );
-	    	$('.leaflet-draw-edit-remove').click();
-	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.rectangle.handler.disable();
-	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.polygon.handler.disable();
-	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.circle.handler.disable();
-	    	drawControl._toolbars[L.EditToolbar.TYPE]._modes.edit.handler.disable();
-	    	//L.Draw.Feature._cancelDrawing();
 	    	/*$(".dropdown-menu").css("right", "auto");
 	    	$(".dropdown-menu").css("left", 0+"px");*/
 	    },

@@ -38,6 +38,9 @@
     <query name="stopsForRoute" read-only="true">
        SELECT srm.stop FROM StopRouteMap srm WHERE srm.routeId = :route AND srm.agencyId = :agency
     </query>
+    <query name="stopsForTrip" read-only="true">
+       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency
+    </query>
     <query name="routeIdsForStop" read-only="true">
        SELECT srm.routeId FROM StopRouteMap srm WHERE srm.stop = :stop
     </query>    

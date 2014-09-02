@@ -28,5 +28,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/onebusaway-gtfs"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/onebusaway-gtfs-hibernate"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/library-hibernate-spatial"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
