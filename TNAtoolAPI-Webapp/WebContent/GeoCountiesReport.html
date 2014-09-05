@@ -118,7 +118,11 @@ $(document).ready(function(){
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
 			    		window.open('/TNAtoolAPI-Webapp/GeoCountiesXreport.html?&county='+qstring+'&x='+qstringx+'&n='+keyName);    		
-			    };
+			    }else if($(this).attr('type')=="TC"){
+			    	qstring = $(this).attr('id');
+			    	qstringd =$(this).attr('name');
+			    	window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html?&county='+qstring);
+			    } ;
 			});
 			
 			var table = $('#RT').DataTable( {

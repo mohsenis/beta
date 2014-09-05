@@ -109,7 +109,7 @@
         </id>        
         <property name="agencyId" />        
         <property name="routeId" />       
-        <many-to-one name="stop" not-null="true">
+        <many-to-one name="stop" not-null="true" update="false">
             <column name="agencyId_def" />
             <column name="stopId" />                        
         </many-to-one>                
