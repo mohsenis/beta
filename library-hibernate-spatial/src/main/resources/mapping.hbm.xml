@@ -107,13 +107,28 @@
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>        
-        <property name="agencyId" />
+        <property name="agencyId" />        
         <property name="routeId" />       
         <many-to-one name="stop" not-null="true">
             <column name="agencyId_def" />
             <column name="stopId" />                        
         </many-to-one>                
     </class> 
+    
+    <class name="CountyTripMap" table="census_counties_trip_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>        
+        <property name="agencyId" />
+        <property name="agencyId_def" />
+        <property name="countyId" />       
+        <property name="tripId" /> 
+        <property name="routeId" />                       
+        <property name="length" />
+        <property name="stopscount" />
+        <property name="serviceId" />
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" />
+    </class>
     
     <!-- <class name="Geotrip" table="gtfs_trips">
 
@@ -150,15 +165,27 @@
         <property name="shape" type="org.hibernatespatial.GeometryUserType"/>
     </class> -->
     
+    <query name = "All_STOP_ROUTE_MAPS">
+    <![CDATA[from GeoStopRouteMap]]>
+	</query>
+    <query name = "ROUTE_BY_STOP">
+    <![CDATA[from GeoStopRouteMap gsr where gsr.stop.id.stopId=:id AND gsr.stop.id.agencyId=:agency]]>
+	</query>
+	<query name = "STOP_WITHIN_RECTANGLE">
+    <![CDATA[from GeoStop where within(location, :polygon) = true]]>
+	</query>
     <query name = "STOP_BY_COORDINATES">
-    <![CDATA[from GeoStop where distance(:point,location)<:radius]]>
+    <![CDATA[from GeoStop where dwithin(location, :point, :radius) = true]]>
+	</query>
+	<query name = "CENSUS_WITHIN_RECTANGLE">
+    <![CDATA[from Census where within(location, :polygon) = true]]>
 	</query>
     <query name = "POP_BY_COORDINATES">
     <![CDATA[select sum(population) from Census where distance(:point,location)<:radius]]>
 	</query>
 	<query name = "CENSUS_BY_COORDINATES">
-    <![CDATA[from Census where distance(:point,location)<:radius]]>
-    <!-- <![CDATA[from Census where dwithin(location, :point, :radius) = true]]> -->
+    <!-- <![CDATA[from Census where distance(:point,location)<:radius]]> -->
+    <![CDATA[from Census where dwithin(location, :point, :radius) = true]]>
 	</query>
 	<!-- <query name = "SHAPE_BY_TRIP">
     <![CDATA[from Geotrip where id=:id]]>
@@ -202,6 +229,9 @@
 	<query name = "STOPS_BY_COUNTY">
     <![CDATA[select count(stopId) from GeoStop where substring(blockid,1,5)=:id]]>
 	</query>
+	<query name = "STOPSL_BY_COUNTY">
+    <![CDATA[from GeoStop where substring(blockid,1,5)=:id]]>
+	</query>
 	<query name = "STOPS_BY_TRACT">
     <![CDATA[select count(stopId) from GeoStop where substring(blockid,1,11)=:id]]>
 	</query>
@@ -220,6 +250,9 @@
 	<query name = "ROUTES_BY_COUNTY">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
+	<query name = "TRIPS_BY_COUNTY">
+    <![CDATA[from CountyTripMap where countyId=:id order by agencyId_def, routeId, tripId]]>
+	</query>
 	<query name = "ROUTES_BY_PLACE">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.placeId=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
@@ -234,5 +267,8 @@
 	</query>
 	<query name = "POP_UNDUP_BATCH">
     <![CDATA[select sum(population) from Census where id in (select distinct id from Census where dwithin(location, :allpoints ,:radius)=true ) ]]>
+	</query>
+	<query name = "COUNTY_BY_ID">
+    <![CDATA[from County where countyId =:id]]>
 	</query>
 </hibernate-mapping>

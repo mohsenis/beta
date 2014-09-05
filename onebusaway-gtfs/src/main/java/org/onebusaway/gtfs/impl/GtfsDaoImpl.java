@@ -292,10 +292,10 @@ public class GtfsDaoImpl extends GenericDaoImpl implements GtfsMutableDao {
     }
   }
 
-@Override
+/*@Override
 public java.util.List<CensusData> getAllCensusData() {
 	// TODO Auto-generated method stub
 	return null;
-}
+}*/
 
 }

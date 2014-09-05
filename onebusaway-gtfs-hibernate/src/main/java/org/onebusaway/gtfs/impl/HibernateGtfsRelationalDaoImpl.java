@@ -27,7 +27,6 @@ import java.util.Set;
 import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.CensusData;
 import org.onebusaway.gtfs.model.FareAttribute;
 import org.onebusaway.gtfs.model.FareRule;
 import org.onebusaway.gtfs.model.FeedInfo;
@@ -135,7 +134,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
 
   @Override
   public List<Trip> getAllTrips() {
-    return _ops.find("FROM Trip");
+    return _ops.find("FROM Trip ORDER BY id.agencyId");
   }
 
   @Override
@@ -240,7 +239,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
         agency);
   }
   
-  @Override
+  //@Override
   public List<String> getRouteIdsForStop(Stop stop){
 	  return _ops.findByNamedQueryAndNamedParam("routeIdsForStop", "stop", stop);
   }
@@ -252,13 +251,13 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     return _ops.findByNamedQueryAndNamedParams("stopsForStation", names, values);
   }
 //Added by saeed
-  @Override
+ // @Override
   public List<Stop> getStopsForAgency(String agency) {
 	  return _ops.findByNamedQueryAndNamedParam("stopsForAgency", "agency",
 		        agency);
   }
   
-  @Override
+ // @Override
   public List<Stop> getStopsForRoute(AgencyAndId route) {	  
 	  String[] names = {"agency", "route"};
 	  Object[] values = {route.getAgencyId(), route.getId()};
@@ -266,11 +265,18 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
 		        values);
   }
   
-  @Override
+ // @Override
   public List<Stop> getStopsForTrip(AgencyAndId trip) {	  
 	  String[] names = {"agency", "trip"};
 	  Object[] values = {trip.getAgencyId(), trip.getId()};
 	  return _ops.findByNamedQueryAndNamedParams("stopsForTrip", names,
+		        values);
+  }
+  
+  public List<Stop> getStopsForTripCounty(AgencyAndId trip, String county) {	  
+	  String[] names = {"agency", "trip", "county"};
+	  Object[] values = {trip.getAgencyId(), trip.getId(), county};
+	  return _ops.findByNamedQueryAndNamedParams("stopsForTripCounty", names,
 		        values);
   }
   
@@ -279,22 +285,22 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     return _ops.findByNamedQueryAndNamedParam("tripsByRoute", "route", route);
   }
   
-  @Override
+//  @Override
   public List<ServiceCalendar> getServiceCalendarsForRoute(Route route) {	
     return _ops.findByNamedQueryAndNamedParam("serviceCalendarsForRoute", "route", route);
   }
   
-  @Override
+//  @Override
   public List<Trip> getTripsForAgency(String agencyId){
 	  return _ops.findByNamedQueryAndNamedParam("tripsByAgency_shapesorted", "agencyId", agencyId);
   }
   
-  @Override
+//  @Override
   public List<Double> getMaxTripLengthsForAgency(String agencyId){
 	  return _ops.findByNamedQueryAndNamedParam("serviceMilesbyAgency", "agencyId", agencyId);
   }
   
-  @Override
+//  @Override
   public List<Trip> getTripsForAgency_RouteSorted(String agencyId){
 	  return _ops.findByNamedQueryAndNamedParam("tripsByAgency_routesorted", "agencyId", agencyId);
   }
@@ -316,7 +322,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     return _ops.findByNamedQueryAndNamedParams("tripsByBlockId", names, values);
   }
   
-  @Override
+//  @Override
   public void updateTrip(Trip trip) {
     String[] names = {"length", "estlength", "shape", "tripid"};
     Object[] values = {trip.getLength(), trip.getEstlength(), trip.getEpshape(), trip.getId()};
@@ -333,7 +339,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     return _ops.findByNamedQueryAndNamedParam("stopTimesByStop", "stop", stop);
   }
   
-  @Override
+//  @Override
   public List<FareRule> getFareRuleForRoute(Route route) {
     return _ops.findByNamedQueryAndNamedParam("fareRuleForRoute", "route", route);
   }
@@ -388,14 +394,14 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     throw new MultipleCalendarsForServiceIdException(serviceId);
   }
   
-  @Override
+//  @Override
   public List<ServiceCalendarDate> getCalendarDatesForAgency(
       String agency) {
     return _ops.findByNamedQueryAndNamedParam("calendarDatesForAgency",
         "agency", agency);
   }
   
-  @Override
+ // @Override
   public List<ServiceCalendar> getCalendarForAgency(String agency) {
 	    List<ServiceCalendar> calendars = _ops.findByNamedQueryAndNamedParam(
 	        "calendarForAgency", "agency", agency);
@@ -459,9 +465,9 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     _ops.clearAllEntitiesForType(type);
   }
 
-@Override
+/*//@Override
 public List<CensusData> getAllCensusData() {
 	// TODO Auto-generated method stub
 	return null;
-}
+}*/
 }

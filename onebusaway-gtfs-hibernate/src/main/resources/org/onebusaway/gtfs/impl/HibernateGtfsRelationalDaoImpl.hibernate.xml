@@ -41,6 +41,9 @@
     <query name="stopsForTrip" read-only="true">
        SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency
     </query>
+    <query name="stopsForTripCounty" read-only="true">
+       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND substring(stm.stop.blockId,1,5)=:county
+    </query>
     <query name="routeIdsForStop" read-only="true">
        SELECT srm.routeId FROM StopRouteMap srm WHERE srm.stop = :stop
     </query>    
@@ -54,7 +57,7 @@
         FROM Stop stop WHERE stop.parentStation = :stationId AND stop.id.agencyId = :agencyId
     </query>
     <query name="tripsByRoute" read-only="true">
-        FROM Trip trip WHERE trip.route = :route
+        FROM Trip trip WHERE trip.route = :route order by trip.length+trip.estlength desc
     </query>
     <query name="tripsByShapeId" read-only="true">
         FROM Trip trip WHERE trip.shapeId = :shapeId

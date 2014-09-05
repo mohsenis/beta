@@ -71,6 +71,8 @@ public interface GtfsRelationalDao extends GtfsDao {
   
   public List<Stop> getStopsForTrip(AgencyAndId trip);
   
+  public List<Stop> getStopsForTripCounty(AgencyAndId trip, String county);
+  
   public List<Stop> getStopsForStation(Stop station);
   
   /****

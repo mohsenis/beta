@@ -461,4 +461,10 @@ public List<Double> getMaxTripLengthsForAgency(String agencyId) {
 	return null;
 }
 
+@Override
+public List<Stop> getStopsForTrip(AgencyAndId trip) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
 }

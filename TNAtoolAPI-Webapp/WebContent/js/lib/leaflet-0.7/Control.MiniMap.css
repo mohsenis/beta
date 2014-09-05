@@ -14,6 +14,15 @@
     border-radius: 3px 0px 0px 0px;
 }
 
+.leaflet-control-minimap.leaflet-control-minimap-rts {
+    border:none;
+    cursor:crosshair;
+}
+
+.leaflet-control-minimap.mousedown {
+    cursor:move;
+}
+
 .leaflet-control-minimap a.minimized {
     -webkit-transform: rotate(180deg);
     transform: rotate(180deg);

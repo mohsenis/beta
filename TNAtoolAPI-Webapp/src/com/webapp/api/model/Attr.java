@@ -31,4 +31,8 @@ public class Attr {
     @JsonSerialize
 	public String type;
 	
+	@XmlAttribute
+    @JsonSerialize
+	public int longest;
+	
 }
