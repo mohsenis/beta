@@ -191,8 +191,7 @@ public class Queries {
     @GET
     @Path("/menu")
     @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Object getmenu() throws JSONException {    
-    	
+    public Object getmenu() throws JSONException {     	
     	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies();
     	if (menuResponse==null || menuResponse.data.size()!=allagencies.size() ){
     		menuResponse = new AgencyRouteList();
@@ -203,7 +202,7 @@ public class Queries {
 	        	attribute.type = "agency";        	
 	        	each.state = "closed";        	
 	        	each.attr = attribute;
-	    		List <Route> routes = GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance);    		
+	    		List <Route> routes = GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance);	    		
 	    		for (Route route : routes){
 	    			RouteListm eachO = new RouteListm();
 	    			String str = null;
@@ -224,7 +223,8 @@ public class Queries {
 	                List<Trip> trips = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(route);
 	                List<String> shapeids = new ArrayList<String>();
 	                List<String> shapes = new ArrayList<String>();
-	                for (Trip trip: trips){
+	                int counter = 0;
+	                for (Trip trip: trips){	                	
 	                	AgencyAndId sid = trip.getShapeId();
 	                	if (sid !=null) {
 	                		if (!(shapeids.contains(sid.getId()))){
@@ -246,9 +246,10 @@ public class Queries {
 	        	                eachV.data = name;
 	        	                eachV.state = "leaf";
 	        	                attribute.id = trip.getId().getId();
-	        	                attribute.type = "variant";		                
-	        	                eachV.attr = attribute;
-	        	            	eachO.children.add(eachV) ; 
+	        	                attribute.type = "variant";	
+	        	                attribute.longest = (counter > 0 )? 0:1;	        	                	
+	        	                eachV.attr = attribute;	        	                
+	        	            	eachO.children.add(eachV) ;	        	            	
 	                    	}
 	                	} else{
 	                		String shape = trip.getEpshape();
@@ -270,12 +271,14 @@ public class Queries {
 	                        	eachV.data = name;
 	        	                eachV.state = "leaf";
 	        	                attribute.id = trip.getId().getId();
-	        	                attribute.type = "variant";		                
+	        	                attribute.type = "variant";
+	        	                attribute.longest = (counter > 0 )? 0:1;
 	        	                eachV.attr = attribute;
 	        	            	eachO.children.add(eachV) ; 
 	                    	}
 	                	}
-	                }
+	                	counter++;
+	                }	                
 	                each.children.add(eachO);
 	    		}
 	    		each.data = instance.getName();
@@ -1300,6 +1303,212 @@ Loop:  	for (Trip trip: routeTrips){
 	    progVal.remove(key);
 	    return response;
 	}
+	
+	 /**
+     * Generates The Counties Extended report
+     */ 
+    @GET
+    @Path("/CountiesXR")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getCXR(@QueryParam("county") String county, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key) throws JSONException {
+    	
+       	if (Double.isNaN(x) || x <= 0) {
+            x = STOP_SEARCH_RADIUS;
+        }
+       	x = x * 1609.34;    	
+    	String[] dates = date.split(",");
+    	int[][] days = daysOfWeek(dates);
+    	    	
+    	GeoXR response = new GeoXR();
+    	response.AreaId = county;
+    	County instance = EventManager.QueryCountybyId(county);
+    	response.AreaName = instance.getName();
+    	long StopsCount = 0;
+    	List<GeoStop> stops = new ArrayList<GeoStop>();
+    	try {
+    		stops = EventManager.getstopsbycounty(instance.getCountyId());
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	StopsCount = stops.size();
+    	response.StopsPersqMile = String.valueOf(Math.round((StopsCount*2.58999e8)/instance.getLandarea())/100.0);
+    	long pop = 0;	
+		List <Coordinate> stopcoords = new ArrayList<Coordinate>();
+		for (GeoStop stop: stops){
+			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
+		}
+        try {
+			pop =EventManager.getunduppopbatch(x, stopcoords);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		response.PopWithinX = String.valueOf(pop);
+		response.PopServed = String.valueOf(Math.round((1E4*pop/instance.getPopulation()))/100.0);
+		response.PopUnServed = String.valueOf(100-Math.round((1E4*pop/instance.getPopulation()))/100.0);
+		List<CountyTripMap> trips = new ArrayList<CountyTripMap>();
+		try {
+			trips = EventManager.gettripsbycounty(county);
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	    	
+    	int totalLoad = trips.size();
+    	double RouteMiles = 0;    	
+    	double length = 0;
+    	double ServiceMiles = 0;    	
+        double Stopportunity = 0;
+        double PopStopportunity = 0;
+    	String agencyId = "";
+    	String routeId = "";
+    	int index = 0;
+    	List <ServiceCalendar> agencyServiceCalendar = new ArrayList<ServiceCalendar>();
+    	List <ServiceCalendarDate> agencyServiceCalendarDates = new ArrayList<ServiceCalendarDate>();
+    	int frequency = 0;
+    	int startDate;
+        int endDate;
+        
+        for (CountyTripMap inst: trips){
+        	index++;
+        	frequency = 0;
+        	int tripstopscount = inst.getStopscount();
+        	double TL = inst.getLength();			
+    		if (TL > length) 
+    			length = TL;
+        	if (!agencyId.equals(inst.getagencyId_def())){     		
+        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def());
+        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def()); 
+        		agencyId = inst.getagencyId_def();
+        	} 
+        	if (!routeId.equals(inst.getRouteId())){		
+    			RouteMiles += length;  	        
+    			//initialize all again    			
+    			routeId = inst.getRouteId();   			
+    			length = 0;    						
+    		}
+        	ServiceCalendar sc = null;
+    		if(agencyServiceCalendar!=null){
+    			for(ServiceCalendar scs: agencyServiceCalendar){
+    				if(scs.getServiceId().getId().equals(inst.getServiceId())){
+    					sc = scs;
+    					break;
+    				}
+    			}  
+    		}
+            List <ServiceCalendarDate> scds = new ArrayList<ServiceCalendarDate>();
+    		for(ServiceCalendarDate scdss: agencyServiceCalendarDates){
+    			if(scdss.getServiceId().getId().equals(inst.getServiceId())){
+    				scds.add(scdss);
+    			}			
+    		}        	
+        	daysLoop:   for (int i=0; i<dates.length; i++){  
+				for(ServiceCalendarDate scd: scds){
+					if(days[0][i]==Integer.parseInt(scd.getDate().getAsString())){
+						if(scd.getExceptionType()==1){
+							frequency ++;
+						}
+						continue daysLoop;
+					}
+				}
+				if (sc!=null){
+					startDate = Integer.parseInt(sc.getStartDate().getAsString());
+	        		endDate = Integer.parseInt(sc.getEndDate().getAsString());
+	        		if(!(days[0][i]>=startDate && days[0][i]<=endDate)){
+    					continue;
+    				}
+	        		switch (days[1][i]){
+						case 1:
+							if (sc.getSunday()==1){
+								frequency ++;											
+							}
+							break;
+						case 2:
+							if (sc.getMonday()==1){
+								frequency ++;
+							}
+							break;
+						case 3:
+							if (sc.getTuesday()==1){
+								frequency ++;
+							}
+							break;
+						case 4:
+							if (sc.getWednesday()==1){
+								frequency ++;
+							}
+							break;
+						case 5:
+							if (sc.getThursday()==1){
+								frequency ++;
+							}
+							break;
+						case 6:
+							if (sc.getFriday()==1){
+								frequency ++;
+							}
+							break;
+						case 7:
+							if (sc.getSaturday()==1){
+								frequency ++;
+							}
+							break;
+					}
+				}
+			}
+    		
+    		long trippop = 0;
+    		if (frequency >0){
+    			AgencyAndId trip = new AgencyAndId(agencyId, inst.getTripId());    			
+	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripCounty(trip,county);
+	    		if (tripstops.size()>0 && tripstops.get(0)!=null){
+		    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();
+		    		for (Stop stop: tripstops){
+		    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
+		    		}
+		            try {
+		    			trippop =EventManager.getunduppopbatch(x, tripstopcoords);
+		    		} catch (FactoryException e) {
+		    			// TODO Auto-generated catch block
+		    			e.printStackTrace();
+		    		} catch (TransformException e) {
+		    			// TODO Auto-generated catch block
+		    			e.printStackTrace();
+		    		}
+	    		}	            
+    		}  		
+    		ServiceMiles += TL * frequency;  
+    		Stopportunity += frequency * tripstopscount; 
+    		PopStopportunity += frequency * trippop;
+    		setprogVal(key, (int) Math.round(index*100/totalLoad));    		
+    	}                
+        RouteMiles += length;
+        response.ServiceStops = String.valueOf(Math.round(Stopportunity));             
+        response.ServiceMiles = String.valueOf(Math.round(ServiceMiles*100.0)/100.0); 
+        response.RouteMiles = String.valueOf(Math.round(RouteMiles*100.0)/100.0);        
+        response.PopServedByService = String.valueOf(PopStopportunity);
+        response.ServiceMilesPersqMile = String.valueOf(Math.round((ServiceMiles*2.58999e6)/instance.getLandarea())/100.0);
+        response.MilesofServicePerCapita = String.valueOf(Math.round((ServiceMiles*100.0)/instance.getPopulation())/100.0);
+        response.StopPerServiceMile = String.valueOf(Math.round((StopsCount*2.58999e6)/instance.getLandarea())/100.0);    	        
+        try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}        
+        progVal.remove(key);                
+    	return response;
+    }
+    
     /**
 	 * Generates The Tracts (by county) Summary report
 	 */

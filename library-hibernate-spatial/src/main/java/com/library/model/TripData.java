@@ -19,7 +19,7 @@ public class TripData implements Serializable {
 
     public TripData(TripData t) {
 		this.id = t.id;
-		this.agencyId = t.agencyId;
+		this.agencyId = t.agencyId;		
 		this.length = t.length;
 		this.estlength = t.estlength;
 		this.shape = t.shape;
@@ -39,8 +39,8 @@ public class TripData implements Serializable {
 
 	public void setAgencyId(String agencyId) {
 		this.agencyId = agencyId;
-	}
-
+	}	
+	
 	public double getLength() {
 		return length;
 	}

@@ -227,6 +227,9 @@
         <property name="wheelchairBoarding" />
         <property name="platformCode" />
         <property name="blockId" />        
+        <property name="placeId" />
+        <property name="regionId" />
+        <property name="urbanId" />
     </class>
 
     <class name="org.onebusaway.gtfs.model.StopTime" table="gtfs_stop_times">

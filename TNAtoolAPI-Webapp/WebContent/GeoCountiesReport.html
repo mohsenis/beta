@@ -111,20 +111,13 @@ $(document).ready(function(){
 			progressbar.remove();
 			$('a').click(function(e){
 				var d = new Date();
-			    if ($(this).attr('type')=="TC"){
-			    	qstring = $(this).attr('id');
-			    	qstringd =$(this).attr('name');
-			    	window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html?&county='+qstring);
-			    }else if($(this).attr('type')=="SC"){
-			    		/* qstring = $(this).attr('id');
+			    if($(this).attr('type')=="XR"){
+			    		qstring = $(this).attr('id');
 			    		qstringx = '0.1';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		window.open('/TNAtoolAPI-Webapp/stopreport.html'); */	    		
-			    }else if($(this).attr('type')=="XR"){
-			    		/* qstring = $(this).attr('id');
-			    		qstringx = '0.1';
-			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		window.open('/TNAtoolAPI-Webapp/Xreport.html'); */	    		
+			    		var keyName = Math.random();
+			    		localStorage.setItem(keyName, qstringd);
+			    		window.open('/TNAtoolAPI-Webapp/GeoCountiesXreport.html?&county='+qstring+'&x='+qstringx+'&n='+keyName);    		
 			    };
 			});
 			

@@ -294,7 +294,7 @@ map.on('draw:edited', function (e) {
  
 ////////*************************************/////////////////////
 var Layers = 0;
-function getdata(type,agency,route,variant,k,callback,popup) {	
+function getdata(type,agency,route,variant,k,callback,popup,node) {	
 	switch (type){
 	case 1:
 		var points = [];
@@ -307,7 +307,7 @@ function getdata(type,agency,route,variant,k,callback,popup) {
 				points.push([new L.LatLng(Number(stop.stopLat), Number(stop.stopLon)),stop.stopName]);	
 				//points.push([Number(stop.stopLon),Number(stop.stopLat)]); 			
 	        });				
-			if (points.length!=0) callback("A"+agency,k,points,popup);
+			if (points.length!=0) callback("A"+agency,k,points,popup,node);
 	    }});
 		break;
 	case 2:
@@ -321,7 +321,7 @@ function getdata(type,agency,route,variant,k,callback,popup) {
 				points.push([new L.LatLng(Number(stop.stopLat), Number(stop.stopLon)),stop.stopName]);	
 				//points.push([Number(stop.stopLon),Number(stop.stopLat)]); 			
 	        });				
-			if (points.length!=0) callback("R"+agency+route,k,points,popup);
+			if (points.length!=0) callback("R"+agency+route,k,points,popup,node);
 	    }});
 		break;
 	case 3:
@@ -331,7 +331,7 @@ function getdata(type,agency,route,variant,k,callback,popup) {
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/shape?&agency='+agency+'&trip='+variant,
 			success: function(d){				
-			if (d.points!= null) callback(k,d.points,"V"+agency+route+variant);
+			if (d.points!= null) callback(k,d.points,"V"+agency+route+variant,node);
 	    }});
 		break;
 	}		
@@ -448,7 +448,7 @@ function disponmap2(layerid,k,points,popup){
 	//stops.bringToFront();
 };
 
-function disponmap(layerid,k,points,popup){
+function disponmap(layerid,k,points,popup,node){
 	
 	//maxClusterRadius: 120,
 	//iconCreateFunction: function (cluster) {
@@ -552,6 +552,7 @@ function disponmap(layerid,k,points,popup){
 	}
 	markers._leaflet_id = layerid;
 	stops.addLayer(markers);
+	$.jstree._reference($mylist).set_type("default", $(node));
 }
 
 function onMapBeforeSubmit(lat,lng,mlat,mlng){
@@ -651,7 +652,7 @@ function removeAllCentroids(){
     map.removeLayer(markersCentroids);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function dispronmap(k,points,name){	
+function dispronmap(k,points,name,node){	
 	var polyline = L.Polyline.fromEncoded(points, {	
 		weight: 5,
 		color: colorset[k],
@@ -666,6 +667,7 @@ function dispronmap(k,points,name){
 		//mylayer.bindpopup(name);		
 		polyline._leaflet_id = name;	
 		routes.addLayer(polyline);
+		$.jstree._reference($mylist).set_type("default", $(node));
 };
      
 var initLocation = INIT_LOCATION;
@@ -758,21 +760,38 @@ $mylist
         "progressive_render" : true       
 	},
 	"types" : {
-		"types": {
-		"default": {
-		"select_node" : false
-		}
+		"types" : {
+			"default": {	
+				"icon" : {
+	            	"image" : "js/lib/images/spacer.png"
+	            	},
+            	"select_node" : false,
+            	"check_node" : true, 
+                "uncheck_node" : true,                
+                "open_node" :true,
+                "hover_node" : true
+			},
+			"disabled" : {
+				"icon" : {
+	            	"image" : "js/lib/images/loader.png"
+	            	},
+	            "check_node" : false, 
+	            "uncheck_node" : false,
+	            "select_node" : false,
+	            "open_node" :false,
+	            "hover_node" : false
+	          }
 		}
 	},
 	"themes": {
         "theme": "default-rtl",
         "url": "js/lib/jstree-v.pre1.0/themes/default-rtl/style.css",
         "dots": false,
-        "icons":false
+        "icons":true
     },
     "contextmenu" : {
-        "items" : function (node) {
-        	if ((node.attr("type"))!=="variant") {        	       	 
+        "items" : function (node) {        	
+        	if ((node.attr("type"))!=="variant" && $.jstree._reference($mylist)._get_type($(node))!="disabled") {        	       	 
         	return { 
         		"show" : {
                     "label" : "Show Route Shapes",
@@ -783,12 +802,20 @@ $mylist
                     		if ($.jstree._reference($mylist)._is_loaded(node)){
                     			$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
                     				if ($.jstree._reference($mylist)._is_loaded(child)){
-                    					$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){
-            								$.jstree._reference($mylist).change_state(gchild, false);
+                    					$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){                    						
+                    						//if ($.jstree._reference($mylist).is_checked(gchild)){
+                    						$.jstree._reference($mylist).change_state(gchild, true);
+                    						//}
+                    						if ($(gchild).attr("longest")==1){
+                    							$.jstree._reference($mylist).change_state(gchild, false);
+                    						}            								
             								});
                     				}else{
                     					$.jstree._reference($mylist).load_node_json(child, function(){$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){
-            								$.jstree._reference($mylist).change_state(gchild, false);
+            								$.jstree._reference($mylist).change_state(gchild, true);
+            								if ($(gchild).attr("longest")==1){
+                    							$.jstree._reference($mylist).change_state(gchild, false);
+                    						}
             								});},function(){alert("Node Load Error");});
                     				}                        			
                                 		});
@@ -796,11 +823,17 @@ $mylist
                 				$.jstree._reference($mylist).load_node_json(node,function(){$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
                 					if ($.jstree._reference($mylist)._is_loaded(child)){
                 						$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){
-            								$.jstree._reference($mylist).change_state(gchild, false);
+            								$.jstree._reference($mylist).change_state(gchild, true);
+            								if ($(gchild).attr("longest")==1){
+                    							$.jstree._reference($mylist).change_state(gchild, false);
+                    						}
             								});
                 					}else{
                 						$.jstree._reference($mylist).load_node_json(child, function(){$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){
-            								$.jstree._reference($mylist).change_state(gchild, false);
+            								$.jstree._reference($mylist).change_state(gchild, true);
+            								if ($(gchild).attr("longest")==1){
+                    							$.jstree._reference($mylist).change_state(gchild, false);
+                    						}
             								});},function(){alert("Node Load Error");});
                 					}                        			
                                 		});},function(){alert("Node Load Error");});
@@ -809,11 +842,17 @@ $mylist
                     	case "route":
                     		if ($.jstree._reference($mylist)._is_loaded(node)){
 	                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
-	                    		$.jstree._reference($mylist).change_state(child, false);
+	                    		$.jstree._reference($mylist).change_state(child, true);
+	                    		if ($(child).attr("longest")==1){
+        							$.jstree._reference($mylist).change_state(child, false);
+        						}
 	                    		}); 
                     		}else {
                     			$.jstree._reference($mylist).load_node_json(node, function(){$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
-                            		$.jstree._reference($mylist).change_state(child, false);
+                            		$.jstree._reference($mylist).change_state(child, true);
+                            		if ($(child).attr("longest")==1){
+            							$.jstree._reference($mylist).change_state(child, false);
+            						}
                             		});},function(){alert("Node Load Error");});
                     		}
                     		break;
@@ -985,8 +1024,9 @@ $mylist
     		//mynode = $("#" + node.attr("id") + ".jstree-checked");
     		//alert(mynode.length);
     		//checkbox is checked
-    		if ($.jstree._reference($mylist).is_checked(node)){    			
-    			//if it has any checked children   			
+    		if ($.jstree._reference($mylist).is_checked(node)){
+    			//$(node).disabled = true;
+    			$.jstree._reference($mylist).set_type("disabled", $(node));    			   			
     			$.jstree._reference($mylist)._get_children(node).each( function( idx, listItem ) {    				
     				if ($.jstree._reference($mylist).is_checked($(listItem))){
 	    				//alert($(listItem).attr("id"));
@@ -1008,7 +1048,7 @@ $mylist
     			//alert(nodeid);
     			node.css("opacity", "1");
     			node.css("background-color", colorset[Layers%6]);    			
-    			getdata(1,node.attr("id"),"","",Layers%6,disponmap,$.jstree._reference($mylist).get_text(node));
+    			getdata(1,node.attr("id"),"","",Layers%6,disponmap,$.jstree._reference($mylist).get_text(node),node);
     			Layers = Layers + 1;
     			//var marker = L.marker([44.574606,-123.27987]).addTo(stops);
     		} else {    			
@@ -1026,6 +1066,7 @@ $mylist
     	case "route":
     		//mynode = $("#" + node.attr("id") + ".jstree-checked");
     		if ($.jstree._reference($mylist).is_checked(node)){
+    			$.jstree._reference($mylist).set_type("disabled", $(node));
     			//parent= $("#" + d.inst._get_parent(node).attr("id") + ".jstree-checked");
     			rparent = $.jstree._reference($mylist)._get_parent(node);
     			//parent = d.inst._get_parent(node);
@@ -1050,7 +1091,7 @@ $mylist
     			//$("#" + parent.attr("id")).addClass("hasSelections");
     			//parent.addClass("hasSelections");
     			rparent.css("opacity", "0.6");
-    			getdata(2,rparent.attr("id"),node.attr("id"),"",Layers%6,disponmap,$.jstree._reference($mylist).get_text(node));
+    			getdata(2,rparent.attr("id"),node.attr("id"),"",Layers%6,disponmap,$.jstree._reference($mylist).get_text(node),node);
     			Layers = Layers + 1;
     			//var marker = L.marker([44.574606,-123.27987]).addTo(stops);
     		} else {    			
@@ -1073,6 +1114,7 @@ $mylist
     		//mynode = $("#" + node.attr("id")+ ".jstree-checked");    		
     		//alert(d.inst.is_checked(mynode));
     		if ($.jstree._reference($mylist).is_checked(node)){
+    			$.jstree._reference($mylist).set_type("disabled", $(node));
     			//alert(id+','+d.rslt.attr("type"));
     			//alert(d.rslt.attr("id"));
     			//alert(d.rslt.attr("type")+", routeid: "+d.rslt.attr("id")+", variant: "+d.rslt.text()+", agencyid: "+ d.inst._get_parent((d.inst._get_parent(d.rslt))).attr("id"));
@@ -1081,7 +1123,7 @@ $mylist
     			node.css("background-color", colorset[Layers%6]);
     			vparent.css("font-weight", "bold");
     			$.jstree._reference($mylist)._get_parent(vparent).css("opacity", "0.6");
-    			getdata(3,d.inst._get_parent((d.inst._get_parent(node))).attr("id"),(d.inst._get_parent(node)).attr("id"),node.attr("id"),Layers%6,dispronmap,node.attr("id"));
+    			getdata(3,d.inst._get_parent((d.inst._get_parent(node))).attr("id"),(d.inst._get_parent(node)).attr("id"),node.attr("id"),Layers%6,dispronmap,node.attr("id"),node);
     			Layers = Layers + 1;
     			//var marker = L.marker([44.574606,-123.27987]).addTo(stops);
     		} else {    			

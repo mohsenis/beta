@@ -179,6 +179,33 @@ private	static Session session = Hutil.getSessionFactory().openSession();
         Hutil.getSessionFactory().close();
         return result;
 	    }
+	
+/**
+ * returns list of stops for a given county
+ */
+	public static List<GeoStop> getstopsbycounty(String countyId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("STOPSL_BY_COUNTY");
+		q.setParameter("id", countyId);
+		@SuppressWarnings("unchecked")
+		List<GeoStop> result = (List<GeoStop>) q.list();
+        Hutil.getSessionFactory().close();
+        return result;
+	    }
+	
+/**
+ * returns list of trips for a given county
+ */
+	public static List<CountyTripMap> gettripsbycounty(String countyId) throws FactoryException, TransformException {			
+		session.beginTransaction();
+		Query q = session.getNamedQuery("TRIPS_BY_COUNTY");
+		q.setParameter("id", countyId);
+		@SuppressWarnings("unchecked")
+		List<CountyTripMap> result = (List<CountyTripMap>) q.list();
+        Hutil.getSessionFactory().close();
+        return result;
+	    }
+	
 /**
  * returns number of stops for a given ODOT Region
  */
@@ -490,6 +517,19 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		System.out.println("Query returned: "+pop);
         return pop;		
     }
+	
+	public static County QueryCountybyId(String id){
+		Query q = session.getNamedQuery("COUNTY_BY_ID");		
+		q.setParameter("id",id);		
+        List results = q.list();
+		County ct = new County();
+		if (results.size()>0 && results.get(0)!=null){ 
+		ct = (County) results.get(0);
+		//pop = (Integer) results.get(0);
+		}
+		Hutil.getSessionFactory().close();
+		return ct;
+	}
 /*
     private void createAndStoreEvent(String id, String pop, String lat, String lon) {
 
