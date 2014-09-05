@@ -1635,7 +1635,6 @@ Loop:  	for (Trip trip: routeTrips){
 	    	each.waterArea = String.valueOf(Math.round(instance.getWaterarea()/2.58999e4)/100.0);
 	    	each.landArea = String.valueOf(Math.round(instance.getLandarea()/2.58999e4)/100.0);
 	    	each.population = String.valueOf(instance.getPopulation());
-	    	each.RoutesCount = String.valueOf(0);
 	    	each.TractsCount = "0";
 	    	try {
 	    		each.TractsCount = String.valueOf(EventManager.gettractscountbycounty(instance.getCountyId()));
@@ -1745,7 +1744,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
 		response.PopWithinX = String.valueOf(pop);
 		response.PopServed = String.valueOf(Math.round((1E4*pop/instance.getPopulation()))/100.0);
-		response.PopUnServed = String.valueOf(100-Math.round((1E4*pop/instance.getPopulation()))/100.0);
+		response.PopUnServed = String.valueOf(Math.round(1E4-((1E4*pop/instance.getPopulation())))/100.0);
 		List<CountyTripMap> trips = new ArrayList<CountyTripMap>();
 		try {
 			trips = EventManager.gettripsbycounty(county);
