@@ -165,15 +165,27 @@
         <property name="shape" type="org.hibernatespatial.GeometryUserType"/>
     </class> -->
     
+    <query name = "All_STOP_ROUTE_MAPS">
+    <![CDATA[from GeoStopRouteMap]]>
+	</query>
+    <query name = "ROUTE_BY_STOP">
+    <![CDATA[from GeoStopRouteMap gsr where gsr.stop.id.stopId=:id AND gsr.stop.id.agencyId=:agency]]>
+	</query>
+	<query name = "STOP_WITHIN_RECTANGLE">
+    <![CDATA[from GeoStop where within(location, :polygon) = true]]>
+	</query>
     <query name = "STOP_BY_COORDINATES">
-    <![CDATA[from GeoStop where distance(:point,location)<:radius]]>
+    <![CDATA[from GeoStop where dwithin(location, :point, :radius) = true]]>
+	</query>
+	<query name = "CENSUS_WITHIN_RECTANGLE">
+    <![CDATA[from Census where within(location, :polygon) = true]]>
 	</query>
     <query name = "POP_BY_COORDINATES">
     <![CDATA[select sum(population) from Census where distance(:point,location)<:radius]]>
 	</query>
 	<query name = "CENSUS_BY_COORDINATES">
-    <![CDATA[from Census where distance(:point,location)<:radius]]>
-    <!-- <![CDATA[from Census where dwithin(location, :point, :radius) = true]]> -->
+    <!-- <![CDATA[from Census where distance(:point,location)<:radius]]> -->
+    <![CDATA[from Census where dwithin(location, :point, :radius) = true]]>
 	</query>
 	<!-- <query name = "SHAPE_BY_TRIP">
     <![CDATA[from Geotrip where id=:id]]>

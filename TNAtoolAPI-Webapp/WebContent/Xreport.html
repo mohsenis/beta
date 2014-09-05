@@ -53,7 +53,7 @@ $(document).ready(function(){
 		async: true,
 		success: function(item){			
 			$('h2').append('Transit Agency Extended Report <br><hr>');	
-			html = html + '<tr><td>' + item.AgencyId +'</td><td>' + item.AgencyName +'</td><td>' + numberconv(item.RouteMiles) +'</td><td><a href="#" class="stopreport" id="'+ item.RouteId+'">' + numberconv(item.StopCount) +'</a></td><td>' + numberconv(item.StopPerRouteMile) +'</td><td id="popServed"><img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px"> Calculating...</td><td  class="serviceCol">'+numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'+ numberconv(item.ServiceStops) +'</td><td  class="serviceCol">'+numberconv(item.PopServedByService)+'</td></tr>';
+			html = html + '<tr><td>' + item.AgencyId +'</td><td>' + item.AgencyName +'</td><td>' + numberconv(item.RouteMiles) +'</td><td><a href="#" class="stopreport" id="'+ item.RouteId+'">' + numberconv(item.StopCount) +'</a></td><td>' + numberconv(item.StopPerRouteMile) +'</td><td  class="serviceCol" id="popServed"><img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px"> Calculating...</td><td  class="serviceCol">'+numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'+ numberconv(item.ServiceStops) +'</td><td  class="serviceCol">'+numberconv(item.PopServedByService)+'</td></tr>';
 							    
 			html = html + '</tbody></table>';
 			$('#displayReport').append($(html));	

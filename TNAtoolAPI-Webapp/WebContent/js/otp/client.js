@@ -29,8 +29,8 @@ var dialogAgencies = new Array();
 var dialogAgenciesId = new Array();
 var dialog = $( "#dialog-form" ).dialog({
     autoOpen: false,
-    height: 400,
-    width: 350,
+    height: 870,
+    width: 420,
     modal: false,
     draggable: false,
     resizable: false,
@@ -40,18 +40,21 @@ var dialog = $( "#dialog-form" ).dialog({
     buttons: {
       /*"Submit": dialogResultOpen*//*function() {
     	  dialogResults.dialog( "open" );
-    	  $('.ui-dialog:eq(2)').css('top','400px');  
+    	  $('.ui-dialog:eq(1)').css('top','400px');  
       }*///,
-      Cancel: function(){
+      /*Close: function(){
     	  dialog.dialog( "close" );
-      }
+      }*/
     },
     close: function() {
+    	miniMap._restore();
+    	map.removeLayer(onMapCluster);
       //form[ 0 ].reset();
     },
     open: function( event, ui ) {
+    	miniMap._minimize();
     	//$(".ui-dialog-titlebar-close", ui.dialog || ui).hide();
-    	$('#dialogLat').html(drawCentroid[0]);
+    	/*$('#dialogLat').html(drawCentroid[0]);
     	$('#dialogLng').html(drawCentroid[1]);
     	$('#dialogArea').html(Math.round(area*100)/100);
     	$('#popRadio').prop('checked', true);
@@ -68,14 +71,20 @@ var dialog = $( "#dialog-form" ).dialog({
 	    	}
     	}
     	$('#routeselect option[value="all"]').prop("selected",true);
-    	$('#stopselect option[value="all"]').prop("selected",true);
+    	$('#stopselect option[value="all"]').prop("selected",true);*/
     },
   }).dialogExtend({
-	  "closable" : false,
+	  "closable" : true,
       "minimizable" : true,
-      "minimizeLocation": "right"
+      "minimizeLocation": "right",
+      "minimize" : function() {
+    	  miniMap._restore();
+      },
+      "restore" : function() {
+    	  miniMap._minimize();
+      }
   });
-var dialogResults = $( "#dialogResults" ).dialog({
+/*var dialogResults = $( "#dialogResults" ).dialog({
     autoOpen: false,
     height: 500,
     width: 400,
@@ -101,9 +110,9 @@ var dialogResults = $( "#dialogResults" ).dialog({
       "minimizable" : true,
       "minimizeLocation": "right",
       "restore" : function(evt) {
-    	  $('.ui-dialog:eq(2)').css('top','400px'); 
+    	  $('.ui-dialog:eq(1)').css('top','400px'); 
       }
-  });
+  });*/
 //$('.ui-dialog:eq(2)').css('margin-top','400px');
 //$('div.ui-dialog:nth-child(8)').css('bottom','0px');
  /*var form = dialog.find( "form" ).on( "submit", function( event ) {
@@ -153,7 +162,6 @@ map.on('draw:drawstart', function (e) {
 	$mylist.dialogExtend("collapse");
 	drawnItems.clearLayers();
 	dialog.dialog( "close" );
-	dialogResults.dialog( "close" );
 });
 
 $('.leaflet-draw-edit-remove').click(function(event){
@@ -161,7 +169,6 @@ $('.leaflet-draw-edit-remove').click(function(event){
 	//event.stopPropagation();
 	drawnItems.clearLayers();
 	dialog.dialog( "close" );
-	dialogResults.dialog( "close" );
 });
 
 var getCentroid = function (arrr) { 
@@ -180,25 +187,41 @@ var popX=0;
 var currentLayer;
 var currentCircleCenter;
 var currentCircleCenterTmp;
+var currentDate = new Date();
+var currentX=0;
+var currentLats;
+var currentLngs;
 function editCancel(){
 	$('#circleRadius1').css('visibility','hidden');
 	currentCircleCenterTmp=currentCircleCenter;
 }
+function pad(s) { return (s < 10) ? '0' + s : s; }
 map.on('draw:created', function (e) {
+	currentLats = new Array();
+	currentLngs = new Array();
 	type = e.layerType,
 	layer = e.layer;
 	currentLayer = layer;
+	map.fitBounds(layer.getBounds().pad(0.5));
 	if (type === 'circle') {
 		//alert(layer.getLatLng());
 		currentCircleCenter = layer.getLatLng();
 		currentCircleCenterTmp= layer.getLatLng();
 		drawCentroid[0] = layer.getLatLng().lat;
 		drawCentroid[1] = layer.getLatLng().lng;
+		currentLats.push((Math.round(drawCentroid[0] * 1000000) / 1000000).toString());
+		currentLngs.push((Math.round(drawCentroid[1] * 1000000) / 1000000).toString());
+		currentX = layer.getRadius();
 		//alert(layer.getRadius());
 		area = Math.pow(layer.getRadius()*0.000621371,2)*Math.PI;
 	}else{
 		area = L.GeometryUtil.geodesicArea(layer.getLatLngs())*0.000000386102;
 		drawCentroid = getCentroid(layer.getLatLngs());
+		var tmpPoints = layer.getLatLngs();
+		for(var ii=0; ii<tmpPoints.length; ii++){
+			currentLats.push((Math.round(tmpPoints[ii].lat * 1000000) / 1000000).toString());
+			currentLngs.push((Math.round(tmpPoints[ii].lng * 1000000) / 1000000).toString());
+		}
 		//alert(layer.getLatLngs().length);
 	}
 	drawnItems.addLayer(layer);
@@ -209,17 +232,17 @@ map.on('draw:created', function (e) {
 	layer.on('popupopen', function(e) {
 		
 		$( "#POPdatepicker" ).datepicker({
-		    altFormat: "DD, d MM, yy",
+		    showButtonPanel: true,
 			onSelect: function (date) {
+				currentDate = date;
 				//$('#POPbutton').prop('disabled', false);
 				//w_qstringd = date;
 				//localStorage.setItem(keyName, w_qstringd);
 		    }
 		});
 		$("#POPdatepicker").datepicker( "setDate", new Date());
-		$("#POPdatepicker").focusout(function(){
-			$( "#POPdatepicker" ).datepicker( "hide" );
-		});
+		var d = new Date();
+		currentDate = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		$('.leaflet-popup-content-wrapper').css('opacity','0.75');
 		$('.leaflet-popup-close-button').css({'color':'#9B9A9A','z-index':'1'});
 	});
@@ -228,22 +251,17 @@ map.on('draw:created', function (e) {
 			'<span style="padding-left:1em">Latitude: <span id="POPlat" style="padding-left:1.5em">'+drawCentroid[0]+'</span></span><br>'+
 	    	'<span style="padding-left:1em">Longitude: <span id="POPlon">'+drawCentroid[1]+'</span></span>'+
 			'<p><b>Area:</b> <span id="POParea">'+area+'</span> mi<sup>2</sup></p>'+
-			'<p><b>Date</b>: <input readonly type="text" id="POPdatepicker"></p>'+
+			'<p><b>Date</b>: <input readonly type="text" class="POPcal" id="POPdatepicker"></p>'+
 			'<p><button type="button" style="width:100%" id="POPbutton" onclick="onMapSubmit()">Generate Report</button></p>'
 	,{closeOnClick:false,draggable:true}).openPopup();
-	//map.fitBounds(layer.getBounds().pad(1.1));
+	//map.fitBounds(layer.getBounds().pad(1));
 	//dialog.dialog( "open" );
 	/*var tmpCenter = new L.FeatureGroup();
 	var tmpmarker = L.marker(getCentroid(layer.getLatLngs()));
 	tmpCenter.addLayer(tmpmarker);
 	map.addLayer(tmpCenter);*/
 });
-function onMapSubmit(){
-	currentLayer.closePopup();
-	//layer.closePopup();
-	dialog.dialog( "close" );
-	dialog.dialog( "open" );
-}
+setDialog();
 function circleMove(latlng){
 	currentCircleCenterTmp = latlng;
 }
@@ -261,18 +279,30 @@ map.on('draw:editstart', function (e) {
 });
 map.on('draw:edited', function (e) {
 	$('#circleRadius1').css('visibility','hidden');
+	
 	var layers = e.layers;
     layers.eachLayer(function (layer) {
+    	currentLats = new Array();
+		currentLngs = new Array();
+    	map.fitBounds(layer.getBounds().pad(0.5));
         try{
         	drawCentroid[0] = layer.getLatLng().lat;
     		drawCentroid[1] = layer.getLatLng().lng;
+    		currentX = layer.getRadius();
     		//alert(layer.getRadius());
+    		currentLats.push((Math.round(drawCentroid[0] * 1000000) / 1000000).toString());
+    		currentLngs.push((Math.round(drawCentroid[1] * 1000000) / 1000000).toString());
     		area = Math.pow(layer.getRadius()*0.000621371,2)*Math.PI;
     		currentCircleCenter = layer.getLatLng();
     		currentCircleCenterTmp= layer.getLatLng();
         }catch(err){
         	area = L.GeometryUtil.geodesicArea(layer.getLatLngs())*0.000000386102;
     		drawCentroid = getCentroid(layer.getLatLngs());
+    		var tmpPoints = layer.getLatLngs();
+    		for(var ii=0; ii<tmpPoints.length; ii++){
+    			currentLats.push((Math.round(tmpPoints[ii].lat * 1000000) / 1000000).toString());
+    			currentLngs.push((Math.round(tmpPoints[ii].lng * 1000000) / 1000000).toString());
+    		}
         }
         drawCentroid[0]= (Math.round(drawCentroid[0] * 1000000) / 1000000).toString();
     	drawCentroid[1]= (Math.round(drawCentroid[1] * 1000000) / 1000000).toString();
@@ -286,7 +316,6 @@ map.on('draw:edited', function (e) {
 	
 	
 	dialog.dialog( "close" );
-	dialogResults.dialog( "close" );
 	//dialog.dialog( "open" );
 });
 
@@ -521,17 +550,20 @@ function disponmap(layerid,k,points,popup,node){
 			var markerLat = (Math.round(this.getLatLng().lat * 1000000) / 1000000).toString().replace('.','').replace('-','');
 			var markerLng = (Math.round(this.getLatLng().lng * 1000000) / 1000000).toString().replace('.','').replace('-','');
 			$( '#'+markerLat+'POPdatepicker'+markerLng).datepicker({
-			    altFormat: "DD, d MM, yy",
+				showButtonPanel: true,
 				onSelect: function (date) {
+					currentDate = date;
 					//$('#'+markerLat+'POPbutton'+markerLng).prop('disabled', false);
 					//w_qstringd = date;
 					//localStorage.setItem(keyName, w_qstringd);
 			    }
 			});
 			$('#'+markerLat+'POPdatepicker'+markerLng).datepicker( "setDate", new Date());
-			$('#'+markerLat+'POPdatepicker'+markerLng).focusout(function(){
+			var d = new Date();
+			currentDate = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+			/*$('#'+markerLat+'POPdatepicker'+markerLng).focusout(function(){
 				$( '#'+markerLat+'POPdatepicker'+markerLng).datepicker( "hide" );
-			});
+			});*/
 			$('.leaflet-popup-content-wrapper').css('opacity','0.70');
 			$('.leaflet-popup-close-button').css({'color':'#9B9A9A','z-index':'1'});
 		});
@@ -580,8 +612,7 @@ function onMapBeforeSubmit(lat,lng,mlat,mlng){
 	that._fireCreatedEvent();//L.Draw.Feature.prototype._fireCreatedEvent.call(this, poly);
 	that.disable();
 	//drawControl._toolbars[L.DrawToolbar.TYPE]._modes.circle.handler.disable();
-	
-	
+	//currentDate = $('#'+mlat+'POPdatepicker'+mlng).datepicker( "getDate" );
 	//currentCircle.addTo(map);
 	onMapSubmit();
 }
@@ -691,35 +722,15 @@ if (AUTO_CENTER_MAP) {
 map.setView(initLocation,8);
 
 L.control.scale({'metric': false, 'position': 'bottomright', 'maxWidth':200}).addTo(map);
-var mini = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"],minZoom: 4, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright'}).addTo(map);
-$('.leaflet-control-minimap').css({'width':'180px','height':'170px','float':'left'});
-$('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'0px'});
 
+var mmRecLat = 0;
+var mmRecLng = 0;
+var miniMap = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"], minZoom: 5, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright',toggleDisplay:true}).addTo(map);
+
+$('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'0px'});
 $('.leaflet-control-attribution').remove();
 
-/*var scaleD = $('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d');
-scaleD = scaleD.substr(scaleD.indexOf("z")-2);
-function changeRec(){
-	var tmpD = $('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d');
-	tmp = tmpD.substr(tmpD.indexOf("z")-2);
-	alert(scaleD+tmp);
-	//alert(tmp);
-	//tmpD.replace(tmp, scaleD);
-	//alert(tmpD);
-	$('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d',tmpD);
-	alert($('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d'));
-	alert();
-	
-}*/
-/*mini._mainMap.on('zoomend', function(e) {
-	mini._aimingRect.redraw();
-	$('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d',scaleD);
-	alert($('.leaflet-zoom-hide > g:nth-child(1) > path:nth-child(1)').attr('d'));
-});*/
 
-
-// add layers to map 
-// do not add analyst layer yet -- it will be added in refresh() once params are pulled in
 
 var baseMaps = {
 	    "OSM": osmLayer,
@@ -915,8 +926,8 @@ $mylist
 	    //"events" : {
 	    "load" : function(evt, dlg) {  	
 
-	    	$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 25 + "px");    	
-		    var titlebar = $(".ui-dialog-titlebar:eq( 2 )");
+	    	$(".ui-dialog-titlebar-buttonpane:eq( 1 )").css("right", 25 + "px");    	
+		    var titlebar = $(".ui-dialog-titlebar:eq( 1 )");
 		    var div = $("<div/>");
 		    div.addClass("ui-dialog-titlebar-other");	    
 		    var button = $( "<button/>" ).text( "Reports" );	    
@@ -949,9 +960,9 @@ $mylist
 			    }
 			});
 
-    	//$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 25 + "px");
+    	//$(".ui-dialog-titlebar-buttonpane:eq( 1 )").css("right", 25 + "px");
     	/*$(".ui-dialog-titlebar-maximize").css("right", 80+ "px");*/
-	    //var titlebar = $(".ui-dialog-titlebar:eq( 2 )");
+	    //var titlebar = $(".ui-dialog-titlebar:eq( 1 )");
 	    	    
 	    /*	    titlebar.append('<div class=dropdown><button class="dropdown-toggle" role="button" data-toggle="dropdown" text="reports"><img src="/path/to/ui-icon-document" alt="Submit"></button><ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="rep1" href="#">Transit Agnecy Summary Report</a></li><li role="presentation"><a id="rep2" href="#">Counties Summary Report</a></li><li role="presentation"><a id="rep2" href="#">ODOT Transit Regions Summary Report</a></li></ul><div>');*/
 		/*$('.dropdown-toggle').dropdown();*/

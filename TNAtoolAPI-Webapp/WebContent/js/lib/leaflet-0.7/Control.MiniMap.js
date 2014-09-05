@@ -6,8 +6,8 @@ L.Control.MiniMap = L.Control.extend({
 		zoomLevelFixed: false,
 		zoomAnimation: false,
 		autoToggleDisplay: false,
-		width: 150,
-		height: 150,
+		width: 180,
+		height: 170,
 		aimingRectOptions: {color: "#ff7800", weight: 1, clickable: false},
 		shadowRectOptions: {color: "#000000", weight: 1, clickable: false, opacity:0, fillOpacity:0}
 	},
@@ -172,11 +172,43 @@ L.Control.MiniMap = L.Control.extend({
 		} else {
 			this._miniMapMoving = false;
 		}
-		this._aimingRect.setBounds(this._mainMap.getBounds());
+		var zoomL = this._mainMap.getZoom();
+		/*if(zoomL<=10){
+			var tmpPad =0;
+			for(var i=zoomL; i<10; i++){
+				tmpPad += 0.5*Math.pow(0.5,10-i);
+			}
+			this._aimingRect.setBounds(this._mainMap.getBounds().pad(-1*tmpPad));
+		}else{
+			var tmpPad = (Math.pow(2,zoomL-10)-1)/2;
+			this._aimingRect.setBounds(this._mainMap.getBounds().pad(tmpPad));
+		}*/
+		if(zoomL>12){
+			var tmpPad = (Math.pow(2,zoomL-12)-1)/2;
+			this._aimingRect.setBounds(this._mainMap.getBounds().pad(tmpPad));
+		}else{
+			this._aimingRect.setBounds(this._mainMap.getBounds());
+		}
 	},
 
 	_onMainMapMoving: function (e) {
-		this._aimingRect.setBounds(this._mainMap.getBounds());
+		var zoomL = this._mainMap.getZoom();
+		/*if(zoomL<=10){
+			var tmpPad =0;
+			for(var i=zoomL; i<10; i++){
+				tmpPad += 0.5*Math.pow(0.5,10-i);
+			}
+			this._aimingRect.setBounds(this._mainMap.getBounds().pad(-1*tmpPad));
+		}else{
+			var tmpPad = (Math.pow(2,zoomL-10)-1)/2;
+			this._aimingRect.setBounds(this._mainMap.getBounds().pad(tmpPad));
+		}*/
+		if(zoomL>12){
+			var tmpPad = (Math.pow(2,zoomL-12)-1)/2;
+			this._aimingRect.setBounds(this._mainMap.getBounds().pad(tmpPad));
+		}else{
+			this._aimingRect.setBounds(this._mainMap.getBounds());
+		}
 	},
 
 	_onMiniMapMoveStarted:function (e) {

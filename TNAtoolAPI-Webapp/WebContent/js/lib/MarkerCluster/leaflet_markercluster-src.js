@@ -623,7 +623,11 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 	_hideCoverage: function (e) {
 		if (this._shownPolygon) {
-			e.layer.setOpacity(1);
+			try{
+				e.layer.setOpacity(1);
+			}catch(err){
+				
+			}
 			this._map.removeLayer(this._shownPolygon);
 			this._shownPolygon = null;
 		}
@@ -653,6 +657,10 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 		this._zoom = this._map._zoom;
 		this._currentShownBounds = this._getExpandedVisibleBounds();
+		//alert('a');
+		//sleep(300, doNotDelete);
+		//map._onTransitionEnd;
+		//alert('a');
 	},
 
 	_moveEnd: function () {

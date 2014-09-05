@@ -6,10 +6,10 @@
 	<link rel="stylesheet" href="js/lib/jquery-ui.css" />
 	<script src="js/lib/jquery-1.9.1.min.js"></script>	
 	<link rel="stylesheet" href="js/lib/leaflet-0.7/leaflet.css" /> 
-	<script src="js/lib/leaflet-0.7/leaflet.js"></script>	  
+	<script src="js/lib/leaflet-0.7/leaflet-src.js"></script>	  
     <script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.2.1"></script>	
 	<script  src="js/lib/jstree-v.pre1.0/jquery.jstree.js"></script>	
-	<link rel="stylesheet" type="text/css" href="client.css" />	
+	
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/bootstrap-dropdown.js"></script>
 	<link rel="stylesheet" href="js/lib/bootstrap.css" />
@@ -34,19 +34,16 @@
 	<script src="js/lib/leaflet-0.7/leaflet.contextmenu.js"></script>
 	<link rel="stylesheet" href="js/lib/leaflet-0.7/leaflet.contextmenu.css" /> 
 	
+	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="client.css" />	
+	<script src="js/onMapReport.js"></script>
+
 	<script src="js/lib/leaflet-0.7/minimap/html2canvas.js"></script>
 	<script src="tmpScript.js"></script>
-	<style>
-		div.ui-dialog{font-size: 85%;}
-		div.ui-dialog.ui-draggable{font-size: 100%}
-	    /* body { font-size: 62.5%; } */
-	    /* label, input { display:block; } */this is what ruins the layer control
-	    input.text { margin-bottom:12px; width:95%; padding: .4em; }
-	    fieldset { padding:0; border:0; margin-top:25px; }
-	    h1 { font-size: 1.2em; margin: .6em 0; }
-	    .ui-dialog .ui-state-error { padding: .3em; }
-	    .validateTips { border: 1px solid transparent; padding: 0.3em; }
-	</style>
+	
 <script type="text/javascript">
 
 //$(function() {
@@ -63,6 +60,7 @@
 </head>
 
 <body>
+	<div id="overlay"></div>
 	<div id='list' class='list'>
 	</div>
 	<div id="dialog-form" title="On-Map Report">
@@ -71,8 +69,72 @@
     	<span style="padding-left:3em">Longitude: <span id="dialogLng"></span></span>
       </p>
       <p><b>Area</b>:<span id="dialogArea" style="padding-left:1em"></span> Square Miles
-      </p><br>
-      <label><i>Select the report you want to be displayed</i></label>
+      </p>
+      <p><b>Date</b>: <input readonly type="text" id="dialogDate">
+      </p>
+      <input  type="text" autofocus style="visibility:hidden">
+	  <div id="tabs">
+		  <ul>
+		    <li><a href="#transit">Transit Agencies Report</a></li>
+		    <li><a href="#geography">Geographical Report</a></li>
+		  </ul>
+		  <div id="transit">
+		  	<b>Show Transit: </b><input type="radio" name="transitShow" id="stopsCheck" value="stops" style="margin-left:2em" onclick="transitRadio(this)">Stops
+		  				 <input type="radio" name="transitShow" id="routeCheck" value="routes" style="margin-left:1em" onclick="transitRadio(this)">Routes
+		  				 <input type="radio" name="transitShow" class="bothCheck" value="both" style="margin-left:1em" checked onclick="transitRadio(this)">Both<br><br>
+		  	<table id="stopRoute" style="border:none; font-size:100%">
+		  		<tr>
+		  			<td><b>Number of Stops:</b></td>
+		  			<td class="onMapdata" id="ts"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Number of Routes:</b></td>
+		  			<td class="onMapdata" id="tr"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Average Fare:</b></td>
+		  			<td class="onMapdata" id="af"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Median Fare:</b></td>
+		  			<td class="onMapdata" id="mff"></td>
+		  		</tr>
+		  	</table>
+		  	<br>
+		  	<br>
+		  	<br>
+		  	<p id="displayTransitReport"></p>
+		  </div>
+		  <div id="geography">
+		  	<b>Show Census: </b><input type="radio" name="censusShow" id="blocksCheck" value="blocks" style="margin-left:2em" onclick="geoRadio(this)">Blocks
+		  						<input type="radio" name="censusShow" id="tractsCheck" value="tracts" style="margin-left:1em" onclick="geoRadio(this)">Tracts
+		  				 		<input type="radio" name="censusShow" class="bothCheck" value="both" style="margin-left:1em" checked onclick="geoRadio(this)">Both<br><br>
+		  	<table id="blockTract" style="border:none; font-size:100%">
+		  		<tr>
+		  			<td><b>Population:</b></td>
+		  			<td class="onMapdata" id="tp"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Number of Census Blocks:</b></td>
+		  			<td class="onMapdata" id="tb"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Number of Census Tracts:</b></td>
+		  			<td class="onMapdata" id="tt"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Land Area:</b></td>
+		  			<td class="onMapdata" id="tl"></td>
+		  		</tr>
+		  	</table>
+		  	<br>
+		  	<br>
+		  	<br>
+		  	<p id="displayGeoReport"></p>
+		  </div>
+	  </div>
+      <img id="dialogPreLoader" src="images/287.GIF" alt="Page Loading" style="margin:9em;margin-top:22em" >	
+      <!-- <label><i>Select the report you want to be displayed</i></label>
       <div style="border:1px solid grey;margin:10px auto;padding:5px">
 	      <p>
 	      	Stops from <select id="stopselect" class="dialogSel" style="width:105px;margin-left:1em"><option value='all'>All Agencies</option></select>
@@ -86,7 +148,7 @@
 	      	Population (Census Blocks)
 	      	<input id="popRadio" type="radio" name="onMapRep" value="popupation" style="display:inline; margin-left:4.3em" checked="checked"><br>
 	      </p>
-      </div>     
+      </div> -->     
     </div>
     <div id="dialogResults" title="Report Results">
 	</div>

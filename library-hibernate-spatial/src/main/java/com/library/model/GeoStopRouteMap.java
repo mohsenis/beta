@@ -2,7 +2,7 @@ package com.library.model;
 
 public final class GeoStopRouteMap {
 
-  private String id;
+  private int id;
   private String agencyId;  
   private String agencyId_def;
   private String stopId;  
@@ -19,7 +19,7 @@ public GeoStopRouteMap(GeoStopRouteMap a) {
     this.routeId = a.routeId;
   }
 
-  public String getId() {
+  public int getId() {
     return id;
   }
   
@@ -40,7 +40,7 @@ public GeoStopRouteMap(GeoStopRouteMap a) {
       this.stopId = stop.getStopId();
   }
   
-  public void setId(String id) {
+  public void setId(int id) {
     this.id = id;
   }
 
