@@ -94,7 +94,7 @@ public class DbUpdate {
 		args[1] = "--url=\"jdbc:postgresql://localhost:5432/gtfsdb\"";
 		args[2] = "--username=\"postgres\"";
 		args[3] = "--password=\"123123\"";
-		args[4] = "C:/feeds/"+feedname;
+		args[4] = "C:/Users/Administrator/Documents/Development/Feeds/"+feedname;
 		GtfsDatabaseLoaderMain.main(args);		
 		return new TransitError(feedname +"Has been added to the database");
 	}

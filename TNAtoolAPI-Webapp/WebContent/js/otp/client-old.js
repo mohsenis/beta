@@ -722,6 +722,104 @@ $mylist
 .bind("loaded.jstree", function (event, data) {
 	$mylist
 	.dialog({ 
+		"title" : "Oregon Transit Agencies", 
+		width : 400,
+		height: 720,
+		maxHeight: 820,
+		maxWidth: 600,
+		closeOnEscape: false,
+		position: [40,2],
+		show: {
+		 effect: "blind",
+		 duration: 1000
+		 }		 
+		})	
+	.dialogExtend({
+	  "closable" : false,
+	  "expandTitle":"test",
+	  "minimizable" : true,
+	  "collapsable" : true,
+	  "maximizable" : false,
+	  "dblclick" : "collapse",
+	  "titlebar" : "transparent",
+	  "icons" : { 
+		  "collapse" : "ui-icon-circle-arrow-n",
+	      "restore" : "ui-icon-newwin",
+	      "close": "ui-icon-document",	     
+	    },
+	    //"events" : {
+	    "load" : function(evt, dlg) {  	
+	    	$(".ui-dialog-titlebar-minimize:eq( 2 )").attr("title", "Minimize");
+	    	$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 25 + "px");    	
+		    var titlebar = $(".ui-dialog-titlebar:eq( 2 )");
+		    var div = $("<div/>");
+		    div.addClass("ui-dialog-titlebar-other");	    
+		    var button = $( "<button/>" ).text( "Reports" );	    
+		    button.attr("data-toggle", "dropdown");	    
+		    button.button( { icons: { primary: "ui-icon-document" }, text: false } )	    
+	        .addClass( "ui-dialog-titlebar-other" )	       
+	        .css( "right", 1 + "px" )
+	        .css( "top", 55 + "%" )
+	        .appendTo(div);        
+		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
+			div.appendTo(titlebar);
+		    $('.ui-dialog-titlebar-other').dropdown();	    
+			//$mylist.dialogExtend("collapse");			
+			$('a').click(function(e){
+				//alert('oy');
+			    if ($(this).attr('id')=="ASR"){
+			    	var qstringx = '0.1';
+			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx);
+			    }else if($(this).attr('id')=="CSR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html');	    		
+			    }else if($(this).attr('id')=="CPSR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html');	    		
+			    }else if($(this).attr('id')=="CDSR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html');	    		
+			    }else if($(this).attr('id')=="UASR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html');	    		
+			    }else if($(this).attr('id')=="ORSR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html');	    		
+			    }
+			});
+
+    	//$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 25 + "px");
+    	/*$(".ui-dialog-titlebar-maximize").css("right", 80+ "px");*/
+	    //var titlebar = $(".ui-dialog-titlebar:eq( 2 )");
+	    	    
+	    /*	    titlebar.append('<div class=dropdown><button class="dropdown-toggle" role="button" data-toggle="dropdown" text="reports"><img src="/path/to/ui-icon-document" alt="Submit"></button><ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="rep1" href="#">Transit Agnecy Summary Report</a></li><li role="presentation"><a id="rep2" href="#">Counties Summary Report</a></li><li role="presentation"><a id="rep2" href="#">ODOT Transit Regions Summary Report</a></li></ul><div>');*/
+		/*$('.dropdown-toggle').dropdown();*/
+				//var button = $( "<button/>" ).text( "Reports" );
+        	/*right = titlebar.find( "[role='button']:last" )
+                             .css( "right" );*/
+	    /*button.button( { icons: { primary: "ui-icon-document" }, text: false } )
+            .addClass( "ui-dialog-titlebar-other" )
+            .css( "right", 5 + "px" )
+            .click( function( e ) {
+                openrep();
+            } )
+            .appendTo(titlebar);*/
+	      /*$(".ui-dialog-titlebar-minimize").after('<span class="ui-icon ui-icon-plusthick">minus</span>');*/
+		  $mylist.dialogExtend("collapse");
+		  //$("#minimize").attr("title", "Minimize");		  
+		  	  
+	    },
+	    "restore": function(evt,dlg){
+	    	//$("#collapse").attr("title", "Collapse");	    	
+	    	$(".dropdown-menu").css("top", 100+"%" );
+	    	$(".dropdown-menu").css("bottom", "auto" );
+	    	/*$(".dropdown-menu").css("right", "auto");
+	    	$(".dropdown-menu").css("left", 0+"px");*/
+	    },
+	    "collapse" : function(evt,dlg){
+	    	$(".ui-dialog-titlebar-collapse:eq( 2 )").attr("title", "Collapse");
+	    	$(".dropdown-menu").css("top", 100+"%" );
+	    	$(".dropdown-menu").css("bottom", "auto" );
+	    },	    
+	    "minimize" : function(evt,dlg){
+	    	$(".ui-dialog-titlebar-collapse:eq( 2 )").attr("title", "Restore");
+	    	$(".ui-dialog-titlebar-restore:eq( 2 )").attr("title", "Maximize");
+	    	//$("#restore").attr("title", "Minimize");
 		"title" : "Oregon Transportation Agencies", 
 		width : 400,
 		height: 720,
@@ -818,6 +916,7 @@ $mylist
 	    },	    
 	    "minimize" : function(evt,dlg){
 	    	$("#collapse").attr("title", "Restore");
+>>>>>>> branch 'master' of https://github.com/tnatool/test.git
 	    	$(".dropdown-menu").css("top", "auto" );
 	    	$(".dropdown-menu").css("bottom", 100+"%" );	    			
 	    	//$('<div class="ui-dialog-titlebar-buttonpane"></div>').find('.ui-dialog-titlebar-restore').attr("title", "test");

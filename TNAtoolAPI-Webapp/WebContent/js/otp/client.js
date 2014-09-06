@@ -925,7 +925,7 @@ $mylist
 	    },
 	    //"events" : {
 	    "load" : function(evt, dlg) {  	
-
+	    	$(".ui-dialog-titlebar-minimize:eq( 1 )").attr("title", "Minimize");
 	    	$(".ui-dialog-titlebar-buttonpane:eq( 1 )").css("right", 25 + "px");    	
 		    var titlebar = $(".ui-dialog-titlebar:eq( 1 )");
 		    var div = $("<div/>");
@@ -997,9 +997,11 @@ $mylist
 	    "collapse" : function(evt,dlg){	    	
 	    	$(".dropdown-menu").css("top", 100+"%" );
 	    	$(".dropdown-menu").css("bottom", "auto" );
+	    	$(".ui-dialog-titlebar-collapse:eq( 1 )").attr("title", "Collapse");
 	    },	    
 	    "minimize" : function(evt,dlg){
-	    	$("#collapse").attr("title", "Restore");
+	    	$(".ui-dialog-titlebar-collapse:eq( 1 )").attr("title", "Restore");
+	    	$(".ui-dialog-titlebar-restore:eq( 1 )").attr("title", "Maximize");
 	    	$(".dropdown-menu").css("top", "auto" );
 	    	$(".dropdown-menu").css("bottom", 100+"%" );	    			
 	    	//$('<div class="ui-dialog-titlebar-buttonpane"></div>').find('.ui-dialog-titlebar-restore').attr("title", "test");
