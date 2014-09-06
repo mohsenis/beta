@@ -104,12 +104,12 @@
     </class>
         
    <class name="GeoStopRouteMap" table="gtfs_stop_route_map">
-        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
-            <generator class="native" />
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null" >
+            <generator class="native"  />
         </id>        
-        <property name="agencyId" />        
-        <property name="routeId" />       
-        <many-to-one name="stop" not-null="true">
+        <property name="agencyId" update="false"/>        
+        <property name="routeId" update="false"/>       
+        <many-to-one name="stop" not-null="true" update="false">
             <column name="agencyId_def" />
             <column name="stopId" />                        
         </many-to-one>                
