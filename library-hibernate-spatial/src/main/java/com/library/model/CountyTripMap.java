@@ -14,6 +14,7 @@ public final class CountyTripMap {
   private double length;
   private int stopscount;
   private MultiLineString shape;
+  private String uid;
     
       
   public CountyTripMap() {	
@@ -28,6 +29,7 @@ public CountyTripMap(CountyTripMap a) {
     this.countyId = a.countyId;
     this.length = a.length;
     this.shape = a.shape;
+    this.uid = a.uid;
   }
 
   public int getId() {
@@ -108,6 +110,14 @@ public CountyTripMap(CountyTripMap a) {
   
   public void setShape(MultiLineString shape){
 	  this.shape = shape;
+  }
+  
+  public String getUid(){
+	  return uid;
+  }
+  
+  public void setUid(String uid){
+	  this.uid = uid;
   }
   
   public String toString() {

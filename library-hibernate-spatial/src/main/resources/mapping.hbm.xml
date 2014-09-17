@@ -104,8 +104,8 @@
     </class>
         
    <class name="GeoStopRouteMap" table="gtfs_stop_route_map">
-        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
-            <generator class="native" />
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null" >
+            <generator class="native"  />
         </id>        
         <property name="agencyId" />        
         <property name="routeId" />       
@@ -251,7 +251,7 @@
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
 	<query name = "TRIPS_BY_COUNTY">
-    <![CDATA[from CountyTripMap where countyId=:id order by agencyId_def, routeId, tripId]]>
+    <![CDATA[from CountyTripMap where countyId=:id order by agencyId_def, routeId, uid]]>
 	</query>
 	<query name = "ROUTES_BY_PLACE">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.placeId=:id group by gsr.routeId, gsr.agencyId]]>

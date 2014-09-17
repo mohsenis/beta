@@ -321,6 +321,7 @@
         <property name="length"/>
         <property name="estlength"/>
         <property name="stopscount"/>
+        <property name="uid"/>
     </class>
 
 

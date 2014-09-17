@@ -68,11 +68,11 @@
     <query name="tripsByServiceId" read-only="true">
         FROM Trip trip WHERE trip.serviceId = :serviceId
     </query>
-    <query name="tripsByAgency_shapesorted" read-only="true">
-        FROM Trip trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.shapeId.id, trip.id.id
+    <query name="tripsByAgency_uidsorted" read-only="true">
+        FROM Trip trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.route.id, trip.uid
     </query>
     <query name="tripsByAgency_routesorted" read-only="true">
-        FROM Trip trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.route.id
+        FROM Trip trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.route.id, trip.uid
     </query>
     
     <query name="tripsByBlockId" read-only="true">
