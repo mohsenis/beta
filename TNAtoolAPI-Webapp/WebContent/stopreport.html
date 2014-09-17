@@ -84,7 +84,7 @@ $(document).ready(function(){
 		success: function(d){
 			$('h2').append(d.AgencyName+' Stops Report<br><hr>');
 			$.each(d.StopR, function(i,item){
-			html = html + '<tr><td>' + item.StopId + '</td>'; 
+			html = html + '<tr class="tablerow"><td>' + item.StopId + '</td>'; 
 			if (item.URL !== null){
 				html = html + '<td> <a href="' + item.URL + '">'+item.StopName+'</a> </td>';
 				} else {
@@ -137,6 +137,8 @@ $(document).ready(function(){
 		            //alert( 'DataTables has redrawn the table' );
 		        	var routeName = document.getElementsByClassName('routeName');
 				    var pop = document.getElementsByClassName('pop');
+				    var row = document.getElementsByClassName('tablerow');
+				    //var row;
 				    for(var ii=0; ii<routeName.length; ii++){
 				    	routeName[ii].innerHTML = '<img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px">';
 				    	pop[ii].innerHTML = '<img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px">';
@@ -157,8 +159,11 @@ $(document).ready(function(){
 						async: boo,
 						success: function(d){
 							$.each(d.StopR, function(jj,item){
-								routeName[jj].innerHTML = item.Routes;	
-								pop[jj].innerHTML = item.PopWithinX;
+								$('#RT').dataTable().fnUpdate(item.Routes,row[jj],2,false,false);
+								$('#RT').dataTable().fnUpdate(item.PopWithinX,row[jj],3,false,false); 
+								//console.log(jj);
+								/* routeName[jj].innerHTML = item.Routes;	
+								pop[jj].innerHTML = item.PopWithinX; */
 							});
 						}
 					});
