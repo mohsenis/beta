@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -801,7 +802,24 @@ public class Queries {
     	}
     	return days;
     }
-    
+    /**
+     * Returns full date for the dates selected on calendar
+     */
+    public String[] fulldate(String[] dates){
+    	//Calendar calendar = Calendar.getInstance();
+    	SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+    	SimpleDateFormat tdf = new SimpleDateFormat("EEE, dd MMM yyyy");    	
+    	String[] result = new String [dates.length];     	
+    	for(int i=0; i<dates.length; i++){    		
+    		try {
+				result[i] = tdf.format(sdf.parse(dates[i]));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}  		
+    	}
+    	return result;
+    }
     /**
      * Generates The Agency Extended report
      */ 
@@ -1724,6 +1742,7 @@ Loop:  	for (Trip trip: routeTrips){
        	x = x * 1609.34;    	
     	String[] dates = date.split(",");
     	int[][] days = daysOfWeek(dates);
+    	String[] fulldates = fulldate(dates);
     	    	
     	GeoXR response = new GeoXR();
     	response.AreaId = county;
@@ -1779,6 +1798,7 @@ Loop:  	for (Trip trip: routeTrips){
     	String agencyId = "";
     	String routeId = "";
     	String uid = "";
+    	String ServiceDays = "";
     	long trippop = 0;
     	int index = 0;
     	List <ServiceCalendar> agencyServiceCalendar = new ArrayList<ServiceCalendar>();
@@ -1825,6 +1845,7 @@ Loop:  	for (Trip trip: routeTrips){
 					if(days[0][i]==Integer.parseInt(scd.getDate().getAsString())){
 						if(scd.getExceptionType()==1){
 							frequency ++;
+							ServiceDays+= ";"+fulldates[i];
 						}
 						continue daysLoop;
 					}
@@ -1838,37 +1859,44 @@ Loop:  	for (Trip trip: routeTrips){
 	        		switch (days[1][i]){
 						case 1:
 							if (sc.getSunday()==1){
-								frequency ++;											
+								frequency ++;
+								ServiceDays+= ";"+fulldates[i];
 							}
 							break;
 						case 2:
 							if (sc.getMonday()==1){
 								frequency ++;
+								ServiceDays+= ";"+fulldates[i];
 							}
 							break;
 						case 3:
 							if (sc.getTuesday()==1){
 								frequency ++;
+								ServiceDays+= ";"+fulldates[i];
 							}
 							break;
 						case 4:
 							if (sc.getWednesday()==1){
 								frequency ++;
+								ServiceDays+= ";"+fulldates[i];
 							}
 							break;
 						case 5:
 							if (sc.getThursday()==1){
 								frequency ++;
+								ServiceDays+= ";"+fulldates[i];
 							}
 							break;
 						case 6:
 							if (sc.getFriday()==1){
 								frequency ++;
+								ServiceDays+= ";"+fulldates[i];
 							}
 							break;
 						case 7:
 							if (sc.getSaturday()==1){
 								frequency ++;
+								ServiceDays+= ";"+fulldates[i];
 							}
 							break;
 					}
@@ -1907,7 +1935,8 @@ Loop:  	for (Trip trip: routeTrips){
         response.PopServedByService = String.valueOf(PopStopportunity);
         response.ServiceMilesPersqMile = String.valueOf(Math.round((ServiceMiles*2.58999e6)/instance.getLandarea())/100.0);
         response.MilesofServicePerCapita = String.valueOf(Math.round((ServiceMiles*100.0)/instance.getPopulation())/100.0);
-        response.StopPerServiceMile = String.valueOf(Math.round((StopsCount*2.58999e6)/instance.getLandarea())/100.0);    	        
+        response.StopPerServiceMile = String.valueOf(Math.round((StopsCount*2.58999e6)/instance.getLandarea())/100.0);   
+        response.ServiceDays = ServiceDays;
         try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
