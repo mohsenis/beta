@@ -90,7 +90,7 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCPSR?&key='+ key,
 		async: true,
 		success: function(d){			
-			$('h2').append('Census Designated Places Summary Report <br><hr>');
+			$('h2').append('Census Places Summary Report <br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
 				item.Name + '</td><td>' +numberconv(item.population) +
