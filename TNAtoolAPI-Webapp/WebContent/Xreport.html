@@ -42,7 +42,6 @@ var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported 
 html += '<thead>'+tmp+'</thead><tbody>';
 
 var key = Math.random();
-
 $(document).ready(function(){
 	go(key);
 	
@@ -95,7 +94,8 @@ $(document).ready(function(){
 				url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXRS?&agency='+w_qstring+'&x='+w_qstringx,
 				async: true,
 				success: function(d){
-					$('#popServed').html(numberconv(d.PopServed));
+					//$('#popServed').html(numberconv(d.PopServed));
+					$('#RT').dataTable().fnUpdate(numberconv(d.PopServed),$('tr') ,5);
 					
 				}
 			});
