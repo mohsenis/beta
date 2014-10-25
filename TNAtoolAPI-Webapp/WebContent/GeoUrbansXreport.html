@@ -2,7 +2,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Counties Extended Report</title>
+	<title>Urban Areas Extended Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -61,10 +61,10 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/CountiesXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/UrbansXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
 		async: true,
 		success: function(item){			
-			$('h2').append(item.AreaName+' Extended Report <br><hr>');	
+			$('h2').append(item.AreaName+' Urban Area Extended Report <br><hr>');	
 			html = html + '<tr><td>' + item.AreaId +'</td><td>' + item.AreaName +'</td><td class="details-control"></td><td>' + numberconv(item.RouteMiles) +'</td><td>'+ numberconv(item.StopsPersqMile) 
 			+'</td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) +'</td><td class="serviceCol">'+ numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'
 			+ numberconv(item.ServiceMilesPersqMile) +'</td><td  class="serviceCol">'+numberconv(item.MilesofServicePerCapita)+'</td><td class="serviceCol">' + numberconv(item.PopWithinX) 

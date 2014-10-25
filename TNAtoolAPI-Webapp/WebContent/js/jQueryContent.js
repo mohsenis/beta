@@ -1,8 +1,23 @@
 function dateRemove(e, d){
 	$(e).remove();
 	$("#datepicker").multiDatesPicker('removeDates', d);
-	$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected");
+	$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected");	
+	$("#submit").trigger('mouseenter');    
 }
+
+function isNumber(evt) {
+	evt = (evt) ? evt : window.event;
+	//var havedot = (howManyDecimals(document.getElementById("Sradius").value));
+	var charCode = (evt.which) ? evt.which : evt.keyCode;
+	//alert(charCode);
+	if (charCode == 46) {
+	//alert ('test');
+	if (document.getElementById("Sradius").value.indexOf('.') !== -1) return false;
+	} else if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+	return false;
+	}
+	return true;
+	};
 
 function addDate(date){
 	$( "<li title='Click to remove.' id="+dateID+" onclick=\"dateRemove(this, '"+date+"')\">"+Date.parse(date).toString('dddd, MMMM d, yyyy')+"</li>" ).appendTo( "#accordionItems" );
@@ -11,7 +26,7 @@ function addDate(date){
 		  $(this).css({"cursor":"pointer","-moz-transform":"scale(1.1,1.1)","-webkit-transform":"scale(1.1,1.1)","transform":"scale(1.1,1.1)"});
 	},function(){
 		  $(this).css({"cursor":"pointer","-moz-transform":"scale(1,1)","-webkit-transform":"scale(1,1)","transform":"scale(1,1)"});
-	});
+	});			
 }
 
 function numberconv(x) {
@@ -97,8 +112,10 @@ function go(key){
 			dateID = date.replace("/","").replace("/","");
 			if($("#"+dateID).length==0){
 				addDate(date);
+				$("#submit").trigger('mouseenter');
 			}else{
 				$("#"+dateID).remove();
+				$("#submit").trigger('mouseenter');
 			}
 			$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected");
 	    }
@@ -108,7 +125,7 @@ function go(key){
 	for(var i=0; i<w_qstringd.split(",").length; i++){
 		cdate = w_qstringd.split(",")[i];
 		dateID = cdate.replace("/","").replace("/","");
-		addDate(cdate);
+		addDate(cdate);		
 	}
 	
 	$("#accordion").accordion({
@@ -119,6 +136,17 @@ function go(key){
 	$("#accordion").accordion("refresh");
 	$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected");
 	
-	document.getElementById("Sradius").value = w_qstringx;	
+	document.getElementById("Sradius").value = w_qstringx;
+	jQuery('#Sradius').on('input', function() {		
+		$("#submit").trigger('mouseenter');		
+	});
 	
+	
+	$("#submit").tooltip({
+		  open: function () {		    	    
+		    setTimeout(function () {		      
+		    	$("#submit").trigger('mouseleave');
+		    }, 4000);
+		  }
+		});
 }

@@ -2,7 +2,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Counties Extended Report</title>
+	<title>Congressional Districts Extended Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -61,7 +61,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/CountiesXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/CongdistsXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
 		async: true,
 		success: function(item){			
 			$('h2').append(item.AreaName+' Extended Report <br><hr>');	

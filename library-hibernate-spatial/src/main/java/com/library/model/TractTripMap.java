@@ -2,38 +2,36 @@ package com.library.model;
 
 import com.vividsolutions.jts.geom.MultiLineString;
 
-public final class CountyTripMap {
+public final class TractTripMap {
 
   private int id;
   private String agencyId;
   private String agencyId_def;
   private String tripId; 
   private String routeId;
-  private String countyId;
-  private String regionId;
+  private String tractId;
   private String serviceId;
   private double length;
   private int stopscount;
   private MultiLineString shape;
   private String uid;
-  private County county;
+  private Tract tract;
     
       
-  public CountyTripMap() {	
+  public TractTripMap() {	
 }
 
-public CountyTripMap(CountyTripMap a) {
+public TractTripMap(TractTripMap a) {
     this.id = a.id;
     this.agencyId = a.agencyId;
     this.agencyId_def = a.agencyId_def;
     this.tripId = a.tripId;
     this.routeId = a.routeId;
-    this.countyId = a.countyId;
+    this.tractId = a.tractId;
     this.length = a.length;
     this.shape = a.shape;
     this.uid = a.uid;
-    this.county = a.county;
-    this.regionId = a.regionId;
+    this.tract = a.tract;
   }
 
   public int getId() {
@@ -50,14 +48,6 @@ public CountyTripMap(CountyTripMap a) {
   
   public void setTripId(String tripId) {
 	    this.tripId= tripId;
-	  }
-  
-  public String getRegionId() {
-	    return regionId;
-	  }
-
-public void setRegionId(String regionId) {
-	    this.regionId= regionId;
 	  }
   
   public String getRouteId() {
@@ -84,12 +74,12 @@ public void setRegionId(String regionId) {
     this.agencyId_def = agencyId_def;
   }
   
-  public String getCountyId() {
-    return countyId;
+  public String getTractId() {
+    return tractId;
   }
 
-  public void setCountyId(String countyId) {
-    this.countyId = countyId;
+  public void setCountyId(String tractId) {
+    this.tractId = tractId;
   }
   
   public String getServiceId() {
@@ -132,15 +122,15 @@ public void setRegionId(String regionId) {
 	  this.uid = uid;
   }
   
-  public County getCounty() {
-	return county;
+  public Tract getTract() {
+	return tract;
 }
 
-public void setCounty(County county) {
-	this.county = county;
+public void setTract(Tract tract) {
+	this.tract = tract;
 }
 
 public String toString() {
-    return "<Trip " + this.tripId + "Intersects with county "+ this.countyId+ ">";
+    return "<Trip " + this.tripId + "Intersects with census tract "+ this.tractId+ ">";
   }
 }

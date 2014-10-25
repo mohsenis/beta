@@ -33,8 +33,7 @@ var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated w
 '<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Routes <em title="Total number of routes serving stops in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Tracts <em title="Total number of census tracts within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+ 
-'<th>Fare<em title="If available, this field points to the fare information published by transit agencies within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>Tracts <em title="Total number of census tracts within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var fAverage = new Array();
@@ -101,9 +100,6 @@ $(document).ready(function(){
 		   '<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
 				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td>'+ 
 				'<td><a href="#" type="TC" id="'+item.id+'" name="'+item.Name+'" >'+item.TractsCount+'</a></td>' ;
-				html = html + '<td class="details-control"></td>';
-				fAverage.push(item.AverageFare);
-				fMedian.push(item.MedianFare);				
 				html = html + '</tr>';				   			
 			});		
 			html = html + '</tbody>'+html2+'</table>'
@@ -129,6 +125,7 @@ $(document).ready(function(){
 				//"scrollY": "76%",
 				"paging": true,				
 				"iDisplayLength": 14,
+				"order": [[ 1, "asc" ]],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",

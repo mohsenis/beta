@@ -28,6 +28,10 @@ public class GeoXR {
 	
 	@XmlAttribute
     @JsonSerialize
+	public String AreaLongName;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String AreaId;
 	
 	@XmlAttribute
