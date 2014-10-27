@@ -71,6 +71,18 @@ public interface GtfsRelationalDao extends GtfsDao {
   
   public List<Stop> getStopsForTrip(AgencyAndId trip);
   
+  public List<Stop> getStopsForTripCounty(AgencyAndId trip, String county);
+  
+  public List<Stop> getStopsForTripTract(AgencyAndId trip, String tract);
+  
+  public List<Stop> getStopsForTripPlace(AgencyAndId trip, String place);
+  
+  public List<Stop> getStopsForTripUrban(AgencyAndId trip, String urban);
+  
+  public List<Stop> getStopsForTripCongdist(AgencyAndId trip, String congdist);
+  
+  public List<Stop> getStopsForTripRegion(AgencyAndId trip, String region);
+  
   public List<Stop> getStopsForStation(Stop station);
   
   /****
@@ -80,6 +92,7 @@ public interface GtfsRelationalDao extends GtfsDao {
   public List<ServiceCalendar> getCalendarForAgency(String agency);
   public List<ServiceCalendarDate> getCalendarDatesForAgency(String agency);
   public List<FareRule> getFareRuleForRoute(Route route);
+  public List<Float> getFarePriceForRoutes(List<String> routes);
   /****
    * {@link Trip} Methods
    ****/
@@ -103,7 +116,11 @@ public interface GtfsRelationalDao extends GtfsDao {
    /****
    * {@link StopTime} Methods
    ****/
-
+  /**
+   * @return the max and min of {@link StopTime} arrival and departure times associated with the trips.
+   *         
+   */
+  public String getServiceHours(List<String> trips);
   /**
    * @return the list of {@link StopTime} objects associated with the trip,
    *         sorted by {@link StopTime#getStopSequence()}
@@ -150,6 +167,8 @@ public interface GtfsRelationalDao extends GtfsDao {
    * {@link FareRule}
    *****/
 
-  public List<FareRule> getFareRulesForFareAttribute(FareAttribute fareAttribute);
+  public List<FareRule> getFareRulesForFareAttribute(FareAttribute fareAttribute); 
+
+  
 
 }

@@ -5,7 +5,7 @@ import com.vividsolutions.jts.geom.Point;
 public class Census {
 	private String blockId;
 	private String placeId;
-	private String districtId;
+	private String congdistId;
 	private String regionId;
 	private String urbanId;	
     private int population;
@@ -23,7 +23,7 @@ public class Census {
 		super();
 		this.blockId = c.blockId;
 		this.placeId = c.placeId;
-		this.districtId = c.districtId;
+		this.congdistId = c.congdistId;
 		this.regionId = c.regionId;
 		this.urbanId = c.urbanId;
 		this.population = c.population;
@@ -52,12 +52,12 @@ public class Census {
 		return placeId;
 	}
 
-	public String getDistrictId() {
-		return districtId;
+	public String getCongdistId() {
+		return congdistId;
 	}
 
-	public void setDistrictId(String districtId) {
-		this.districtId = districtId;
+	public void setCongdistId(String congdistId) {
+		this.congdistId = congdistId;
 	}
 
 	public String getRegionId() {

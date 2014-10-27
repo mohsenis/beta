@@ -8,7 +8,7 @@
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
  *
- * $Date: 2011-02-09 01:17:14 +0200 (ср, 09 февр 2011) $
+ * $Date: 2011-02-09 01:17:14 +0200 (Ñ�Ñ€, 09 Ñ„ÐµÐ²Ñ€ 2011) $
  * $Revision: 236 $
  */
 
@@ -279,8 +279,8 @@
 				'.jstree ins { display:inline-block; text-decoration:none; width:18px; height:18px; margin:0 0 0 0; padding:0; } ' + 
 				'.jstree a { display:inline-block; line-height:16px; height:16px; color:black; white-space:nowrap; text-decoration:none; padding:1px 2px; margin:0; } ' + 
 				'.jstree a:focus { outline: none; } ' + 
-				'.jstree a > ins { height:16px; width:16px; } ' + 
-				'.jstree a > .jstree-icon { margin-right:3px; } ' + 
+				'.jstree a > ins { height:16px; width:16px; } ' + /*changed this value*/
+				'.jstree a > .jstree-icon { margin-right:-1px; } ' + 
 				'.jstree-rtl a > .jstree-icon { margin-left:3px; margin-right:0; } ' + 
 				'li.jstree-open > ul { display:block; } ' + 
 				'li.jstree-closed > ul { display:none; } ';
@@ -299,8 +299,8 @@
 				'.jstree-rtl li li { margin-left:0px; margin-right:18px; } ' + 
 				'li.jstree-open ul { display:block; } ' + 
 				'li.jstree-closed ul { display:none !important; } ' + 
-				'.jstree li a { display:inline; border-width:0 !important; padding:0px 2px !important; } ' + 
-				'.jstree li a ins { height:16px; width:16px; margin-right:3px; } ' + 
+				'.jstree li a { display:inline; border-width:0 !important; padding:0px 2px !important; } ' + /*changed this value*/
+				'.jstree li a ins { height:16px; width:16px; margin-right:-1px; } ' + 
 				'.jstree-rtl li a ins { margin-right:0px; margin-left:3px; } ';
 		}
 		// Correct IE 7 (shifts anchor nodes onhover)

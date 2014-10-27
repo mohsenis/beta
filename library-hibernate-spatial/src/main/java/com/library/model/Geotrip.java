@@ -40,6 +40,7 @@ public class Geotrip extends IdentityBean<AgencyAndId> {
   private int stopscount;
   private int bikesAllowed;
   private LineString shape;
+  private String uid;
 
   public Geotrip() {
 
@@ -61,6 +62,7 @@ public class Geotrip extends IdentityBean<AgencyAndId> {
     this.epshape = obj.epshape;
     this.length = obj.length;
     this.estlength = obj.estlength;
+    this.uid = obj.uid;
   }
 
   public AgencyAndId getId() {
@@ -198,8 +200,15 @@ public void setShape(LineString shape) {
 	this.shape = shape;
 }
 
+public String getUid(){
+	return uid;
+}
+
+public void setUid(String uid){
+	this.uid = uid;
+}
+
 public String toString() {
     return "<Trip " + getId() + ">";
   }
-
 }

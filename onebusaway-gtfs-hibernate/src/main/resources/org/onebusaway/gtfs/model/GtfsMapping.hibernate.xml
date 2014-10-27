@@ -227,6 +227,10 @@
         <property name="wheelchairBoarding" />
         <property name="platformCode" />
         <property name="blockId" />        
+        <property name="placeId" />
+        <property name="regionId" />
+        <property name="urbanId" />
+        <property name="congdistId" />
     </class>
 
     <class name="org.onebusaway.gtfs.model.StopTime" table="gtfs_stop_times">
@@ -318,6 +322,7 @@
         <property name="length"/>
         <property name="estlength"/>
         <property name="stopscount"/>
+        <property name="uid"/>
     </class>
 
 

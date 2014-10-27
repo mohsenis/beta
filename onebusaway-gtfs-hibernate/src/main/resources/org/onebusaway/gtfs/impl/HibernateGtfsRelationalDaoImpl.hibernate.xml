@@ -41,6 +41,24 @@
     <query name="stopsForTrip" read-only="true">
        SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency
     </query>
+    <query name="stopsForTripCounty" read-only="true">
+       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND substring(stm.stop.blockId,1,5)=:county
+    </query>
+    <query name="stopsForTripRegion" read-only="true">
+       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND regionId=:region
+    </query>
+    <query name="stopsForTripTract" read-only="true">
+       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND substring(stm.stop.blockId,1,11)=:tract
+    </query>
+    <query name="stopsForTripPlace" read-only="true">
+       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.placeId=:place
+    </query>
+    <query name="stopsForTripUrban" read-only="true">
+       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.urbanId=:urban
+    </query>
+    <query name="stopsForTripCongdist" read-only="true">
+       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.congdistId=:congdist
+    </query>
     <query name="routeIdsForStop" read-only="true">
        SELECT srm.routeId FROM StopRouteMap srm WHERE srm.stop = :stop
     </query>    
@@ -54,24 +72,26 @@
         FROM Stop stop WHERE stop.parentStation = :stationId AND stop.id.agencyId = :agencyId
     </query>
     <query name="tripsByRoute" read-only="true">
-        FROM Trip trip WHERE trip.route = :route
+        FROM Trip trip WHERE trip.route = :route order by trip.length+trip.estlength desc
     </query>
     <query name="tripsByShapeId" read-only="true">
         FROM Trip trip WHERE trip.shapeId = :shapeId
     </query>
     <query name="fareRuleForRoute" read-only="true">
         FROM FareRule fr WHERE fr.route = :route
+    </query>    
+    <query name="farePriceForRoutes" read-only="true">
+        select fr.fare.price FROM FareRule fr WHERE concat(fr.route.id.agencyId,',',fr.route.id.id) in (:routes) order by fr.fare.price
     </query>
     <query name="tripsByServiceId" read-only="true">
         FROM Trip trip WHERE trip.serviceId = :serviceId
     </query>
-    <query name="tripsByAgency_shapesorted" read-only="true">
-        FROM Trip trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.shapeId.id, trip.id.id
+    <query name="tripsByAgency_uidsorted" read-only="true">
+        FROM Trip trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.route.id, trip.uid
     </query>
     <query name="tripsByAgency_routesorted" read-only="true">
-        FROM Trip trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.route.id
-    </query>
-    
+        FROM Trip trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.route.id, trip.uid
+    </query>    
     <query name="tripsByBlockId" read-only="true">
         FROM Trip trip WHERE trip.id.agencyId = :agencyId AND trip.blockId = :blockId
     </query>
@@ -104,5 +124,8 @@
     </query>
     <query name="fareRulesForFareAttribute" read-only="true">
         FROM FareRule fr WHERE fr.fare = :fareAttribute
+    </query>
+    <query name="serviceHoursbyTrip" read-only="true">
+        select concat(min(st.arrivalTime),'-',max(st.departureTime)) FROM StopTime st WHERE concat(st.trip.id.agencyId, st.trip.id.id) in (:trips) and st.arrivalTime>0 and st.departureTime>0
     </query>
 </hibernate-mapping>

@@ -171,6 +171,11 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getFareRuleForRoute(route);
   }
   
+  public static List<Float> QueryFarePriceByRoutes(List <String> routes){
+	  GtfsMutableRelationalDao dao = factory.getDao();	  	  
+	  return dao.getFarePriceForRoutes(routes);
+  }
+  
   public static void updateTrip(Trip trip){
 	GtfsMutableRelationalDao dao = factory.getDao();
 	dao.updateTrip(trip);
@@ -227,6 +232,46 @@ public class GtfsHibernateReaderExampleMain {
 	  GtfsMutableRelationalDao dao = factory.getDao();	  
 	  
 	  return dao.getStopsForTrip(trip);
+  }
+  
+  public static List<Stop> QueryStopsbyTripCounty (AgencyAndId trip, String county){
+	  GtfsMutableRelationalDao dao = factory.getDao();  
+	  return dao.getStopsForTripCounty(trip,county);
+  }
+  
+  public static List<Stop> QueryStopsbyTripRegion (AgencyAndId trip, String region){
+	  GtfsMutableRelationalDao dao = factory.getDao();  
+	  return dao.getStopsForTripRegion(trip,region);
+  }
+  
+  public static List<Stop> QueryStopsbyTripTract (AgencyAndId trip, String tract){
+	  GtfsMutableRelationalDao dao = factory.getDao();  
+	  return dao.getStopsForTripTract(trip,tract);
+  }
+  
+  public static List<Stop> QueryStopsbyTripPlace (AgencyAndId trip, String place){
+	  GtfsMutableRelationalDao dao = factory.getDao();  
+	  return dao.getStopsForTripPlace(trip,place);
+  }
+  
+  public static List<Stop> QueryStopsbyTripUrban (AgencyAndId trip, String urban){
+	  GtfsMutableRelationalDao dao = factory.getDao();  
+	  return dao.getStopsForTripUrban(trip,urban);
+  }
+  
+  public static List<Stop> QueryStopsbyTripCongdist (AgencyAndId trip, String congdist){
+	  GtfsMutableRelationalDao dao = factory.getDao();  
+	  return dao.getStopsForTripCongdist(trip,congdist);
+  }
+  public static String QueryServiceHours (List<String> trips){
+	  //String resource = "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";
+	  //HibernateGtfsFactory factory = createHibernateGtfsFactory(resource);
+	  GtfsMutableRelationalDao dao = factory.getDao();	  
+	  String tripList = "";
+	  /*for (String str:trips ){
+		  tripList += "'"+ str+"'"+", ";
+	  }*/
+	  return dao.getServiceHours(trips);
   }
  
   private static ServiceDate min(ServiceDate a, ServiceDate b) {

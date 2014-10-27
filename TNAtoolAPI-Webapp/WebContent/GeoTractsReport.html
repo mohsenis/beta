@@ -32,8 +32,7 @@ var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated w
 '<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Routes <em title="Total number of routes serving stops in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Blocks <em title="Total number of census blocks within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+ 
-'<th>Fare<em title="If available, this field points to the fare information published by transit agencies within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>Blocks <em title="Total number of census blocks within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var fAverage = new Array();
@@ -100,33 +99,22 @@ $(document).ready(function(){
 		  		'<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
 				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td>'+ 
 				'<td><a href="#" type="TC" id="'+item.id+'">'+item.BlocksCount+'</a></td>' ;
-				html = html + '<td class="details-control"></td>';
-				fAverage.push(item.AverageFare);
-				fMedian.push(item.MedianFare);				
 				html = html + '</tr>';				   			
 			});		
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
-			/* $('a').click(function(e){
+			$('a').click(function(e){
 				var d = new Date();
-			    if ($(this).attr('type')=="RC"){
-			    	qstring = $(this).attr('id');
-			    	qstringx = '0.1';
-			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    	window.open('/TNAtoolAPI-Webapp/routereport.html');
-			    }else if($(this).attr('type')=="SC"){
+			    if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.1';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		window.open('/TNAtoolAPI-Webapp/stopreport.html');	    		
-			    }else if($(this).attr('type')=="XR"){
-			    		qstring = $(this).attr('id');
-			    		qstringx = '0.1';
-			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		window.open('/TNAtoolAPI-Webapp/Xreport.html');	    		
+			    		var keyName = Math.random();
+			    		localStorage.setItem(keyName, qstringd);
+			    		window.open('/TNAtoolAPI-Webapp/GeoTractsXreport.html?&tract='+qstring+'&x='+qstringx+'&n='+keyName);    		
 			    };
-			}); */
+			});
 			
 			var table = $('#RT').DataTable( {
 				//"scrollY": "76%",

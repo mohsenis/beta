@@ -74,6 +74,18 @@ public final class Stop extends IdentityBean<AgencyAndId> {
   
   @CsvField(optional = true)
   private String blockId;
+  
+  @CsvField(optional = true)
+  private String placeId;
+  
+  @CsvField(optional = true)
+  private String congdistId;
+  
+  @CsvField(optional = true)
+  private String regionId;
+  
+  @CsvField(optional = true)
+  private String urbanId;
 
   public Stop() {
 
@@ -180,6 +192,38 @@ public final class Stop extends IdentityBean<AgencyAndId> {
 
   public String getBlockId() {
     return blockId;
+  }
+  
+  public void setPlaceId(String placeId) {
+	    this.placeId = placeId;
+	  }
+
+  public String getPlaceId() {
+    return placeId;
+  }
+  
+  public void setUrbanId(String urbanId) {
+	    this.urbanId = urbanId;
+	  }
+
+  public String getUrbanId() {
+    return urbanId;
+  }
+  
+  public void setRegionId(String regionId) {
+	    this.regionId = regionId;
+	  }
+
+  public String getRegionId() {
+    return regionId;
+  }
+  
+  public void setCongdistId(String congdistId) {
+	    this.congdistId = congdistId;
+	  }
+
+  public String getCongdistId() {
+    return congdistId;
   }
 
   public void setParentStation(String parentStation) {

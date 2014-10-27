@@ -67,6 +67,9 @@ public final class Trip extends IdentityBean<AgencyAndId> {
   
   @CsvField(optional = true, defaultValue = "0")
   private int stopscount = 0;
+  
+  @CsvField(optional = true, defaultValue = "")
+  private String uid = "";
 
   @Deprecated
   @CsvField(optional = true, defaultValue = "0")
@@ -99,6 +102,7 @@ public final class Trip extends IdentityBean<AgencyAndId> {
     this.epshape = obj.epshape;
     this.length = obj.length;
     this.estlength = obj.estlength;
+    this.uid = obj.uid;
   }
 
   public AgencyAndId getId() {
@@ -211,6 +215,14 @@ public final class Trip extends IdentityBean<AgencyAndId> {
 
   public int getWheelchairAccessible() {
     return wheelchairAccessible;
+  }
+  
+  public String getUid(){
+	  return uid;
+  }
+  
+  public void setUid(String uid) {
+	  this.uid = uid;
   }
 
   @Deprecated

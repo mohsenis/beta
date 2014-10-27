@@ -18,25 +18,29 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement(name = "AgencyXR")
-public class AgencyXR {
+@XmlRootElement(name = "GeoXR")
+public class GeoXR {
 	
 	
 	@XmlAttribute
     @JsonSerialize
-	public String AgencyName;
+	public String AreaName;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String AgencyId;
+	public String AreaLongName;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String ServiceMiles;
+    public String AreaId;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String RouteMiles;
+    public String StopsPersqMile;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String PopWithinX;
 	
 	@XmlAttribute
     @JsonSerialize
@@ -44,11 +48,47 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String StopCount;
+    public String PopUnServed;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String StopPerRouteMile;
+    public String AverageFare;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String MedianFare;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String HoursOfService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String ServiceDays;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String ConnectedCommunities;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String ServiceMiles;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String ServiceMilesPersqMile;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String MilesofServicePerCapita;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String StopPerServiceMile;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RouteMiles;
 	
 	@XmlAttribute
     @JsonSerialize
@@ -56,21 +96,5 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String PopServedByService;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String Stopportunity;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String PopStopportunity;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String AreaServed; 
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String HoursOfService;	
+    public String PopServedByService;	
 }

@@ -7,8 +7,8 @@
         <id name="blockId" column="blockid" type="string" length="15" />
         <property name="placeId" column="placeid" type="string" length="7" />
         <property name="urbanId" column="urbanid" type="string" length="5" />
-        <property name="regionId" column="regionid" type="string" length="1" />
-        <property name="districtId" column="districtid" type="string" length="4" />        
+        <property name="regionId" column="regionid" type="string" length="2" />
+        <property name="congdistId" column="congdistid" type="string" length="4" />        
         <property name="population" type="integer" column="population"/>       
         <property name="latitude" type="double" column="lat" />
         <property name="longitude" type="double" column="lon"/>
@@ -39,8 +39,8 @@
         <property name="longitude" type="double" column="lon"/>        
         <property name="landarea" type="long" />
         <property name="waterarea" type="long" />
-        <property name="regionId" column="regionid" type="string" length="1" />
-        <property name="regionName" column="regionname" type="string" length="50" />        
+        <property name="regionId" column="odotregionid" type="string" length="2" />
+        <property name="regionName" column="odotregionname" type="string" length="9" />        
     </class>
     
     <class name="Place" table="census_places">
@@ -99,22 +99,108 @@
         <property name="placeId" column="placeid" /> 
         <property name="regionId" column="regionid"/> 
         <property name="urbanId" column="urbanid"/>
-        <property name="congdistId" column="congdistId"/>
+        <property name="congdistId" column="congdistid"/>
         <property name="location" type="org.hibernatespatial.GeometryUserType"  column="location"/>       
     </class>
         
    <class name="GeoStopRouteMap" table="gtfs_stop_route_map">
-        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
-            <generator class="native" />
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null" >
+            <generator class="native"  />
         </id>        
-        <property name="agencyId" />
+        <property name="agencyId" />        
         <property name="routeId" />       
-        <many-to-one name="stop" not-null="true">
+        <many-to-one name="stop" not-null="true" update="false">
             <column name="agencyId_def" />
             <column name="stopId" />                        
         </many-to-one>                
     </class> 
     
+    <class name="CountyTripMap" table="census_counties_trip_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>                
+        <property name="agencyId" update="false"/> 
+        <property name="agencyId_def" update="false"/>
+        <property name="tripId" update="false"/>  
+        <property name="routeId" update="false"/>                       
+        <property name="length" update="false"/>
+        <property name="stopscount" update="false"/>
+        <property name="serviceId" update="false"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" />
+        <property name="uid" update="false"/>
+        <property name="regionId" update="false"/>
+        <many-to-one name="County" not-null="true" update="false">
+            <column name="countyId" />            
+        </many-to-one>       
+    </class>    
+    <class name="TractTripMap" table="census_tracts_trip_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>                
+        <property name="agencyId" update="false"/> 
+        <property name="agencyId_def" update="false"/>
+        <property name="tripId" update="false"/>  
+        <property name="routeId" update="false"/>                       
+        <property name="length" update="false"/>
+        <property name="stopscount" update="false"/>
+        <property name="serviceId" update="false"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
+        <property name="uid" update="false"/>
+        <many-to-one name="Tract" not-null="true" update="false">
+            <column name="tractId" />            
+        </many-to-one>       
+    </class>
+    <class name="PlaceTripMap" table="census_places_trip_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null" >
+            <generator class="native" />
+        </id>                
+        <property name="agencyId" update="false"/> 
+        <property name="agencyId_def" update="false"/>
+        <property name="tripId" update="false"/>  
+        <property name="routeId" update="false"/>                       
+        <property name="length" update="false"/>
+        <property name="stopscount" update="false"/>
+        <property name="serviceId" update="false"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
+        <property name="uid" update="false"/>
+        <many-to-one name="Place" not-null="true" update="false">
+            <column name="placeId" />            
+        </many-to-one>       
+    </class>
+    <class name="UrbanTripMap" table="census_urbans_trip_map" >
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>                
+        <property name="agencyId" update="false"/> 
+        <property name="agencyId_def" update="false"/>
+        <property name="tripId" update="false"/>  
+        <property name="routeId" update="false"/>                       
+        <property name="length" update="false"/>
+        <property name="stopscount" update="false"/>
+        <property name="serviceId" update="false"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
+        <property name="uid" update="false"/>
+        <many-to-one name="Urban" not-null="true" update="false">
+            <column name="urbanId" />            
+        </many-to-one>       
+    </class>
+    <class name="CongdistTripMap" table="census_congdists_trip_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>                
+        <property name="agencyId" update="false"/> 
+        <property name="agencyId_def" update="false"/>
+        <property name="tripId" update="false"/>  
+        <property name="routeId" update="false"/>                       
+        <property name="length" update="false"/>
+        <property name="stopscount" update="false"/>
+        <property name="serviceId" update="false"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
+        <property name="uid" update="false"/>
+        <many-to-one name="Congdist" not-null="true" update="false">
+            <column name="congdistId" />            
+        </many-to-one>       
+    </class>
     <!-- <class name="Geotrip" table="gtfs_trips">
 
         <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
@@ -200,7 +286,7 @@
     <![CDATA[from Place where SUBSTRING(placeId,1,5)=:id]]>
 	</query>
 	<query name = "TRACTS_BY_COUNTY">
-    <![CDATA[from Tract where SUBSTRING(tractid,1,5)=:id]]>
+    <![CDATA[from Tract where SUBSTRING(tractId,1,5)=:id]]>
 	</query>
 	<query name = "TRACTSNO_BY_COUNTY">
     <![CDATA[select count(tractId) from Tract where SUBSTRING(tractId,1,5)=:id]]>
@@ -212,10 +298,28 @@
     <![CDATA[select count(stopId) from GeoStop where regionId=:id]]>
 	</query>
 	<query name = "STOPS_BY_COUNTY">
-    <![CDATA[select count(stopId) from GeoStop where substring(blockid,1,5)=:id]]>
+    <![CDATA[select count(stopId) from GeoStop where substring(blockId,1,5)=:id]]>
+	</query>
+	<query name = "STOPSL_BY_COUNTY">
+    <![CDATA[from GeoStop where substring(blockId,1,5)=:id]]>
+	</query>
+	<query name = "STOPSL_BY_TRACT">
+    <![CDATA[from GeoStop where substring(blockId,1,11)=:id]]>
+	</query>
+	<query name = "STOPSL_BY_PLACE">
+    <![CDATA[from GeoStop where placeId=:id]]>
+	</query>
+	<query name = "STOPSL_BY_URBAN">
+    <![CDATA[from GeoStop where urbanId=:id]]>
+	</query>
+	<query name = "STOPSL_BY_CONGDIST">
+    <![CDATA[from GeoStop where congdistId=:id]]>
+	</query>
+	<query name = "STOPSL_BY_REGION">
+    <![CDATA[from GeoStop where regionId=:id]]>
 	</query>
 	<query name = "STOPS_BY_TRACT">
-    <![CDATA[select count(stopId) from GeoStop where substring(blockid,1,11)=:id]]>
+    <![CDATA[select count(stopId) from GeoStop where substring(blockId,1,11)=:id]]>
 	</query>
 	<query name = "STOPS_BY_PLACE">
     <![CDATA[select count(stopId) from GeoStop where placeId=:id]]>
@@ -232,6 +336,24 @@
 	<query name = "ROUTES_BY_COUNTY">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
+	<query name = "TRIPS_BY_COUNTY">
+    <![CDATA[from CountyTripMap where countyId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_REGION">
+    <![CDATA[from CountyTripMap where regionId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_TRACT">
+    <![CDATA[from TractTripMap where tractId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_PLACE">
+    <![CDATA[from PlaceTripMap where placeId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_CONGDIST">
+    <![CDATA[from CongdistTripMap where congdistId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_URBAN">
+    <![CDATA[from UrbanTripMap where urbanId=:id order by agencyId_def, routeId, uid]]>
+	</query>
 	<query name = "ROUTES_BY_PLACE">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.placeId=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
@@ -245,6 +367,60 @@
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.congdistId=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
 	<query name = "POP_UNDUP_BATCH">
-    <![CDATA[select sum(population) from Census where id in (select distinct id from Census where dwithin(location, :allpoints ,:radius)=true ) ]]>
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true ) ]]>
 	</query>
+	<query name = "COUNTY_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and substring(blockId,1,5)=:id )]]>
+	</query>
+	<query name = "TRACT_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and substring(blockId,1,11)=:id )]]>
+	</query>
+	<query name = "PLACE_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and placeId=:id )]]>
+	</query>
+	<query name = "URBAN_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and urbanId=:id )]]>
+	</query>
+	<query name = "CONGDIST_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and congdistId=:id )]]>
+	</query>
+	<query name = "REGION_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and regionId=:id )]]>
+	</query>
+	<query name = "COUNTY_BY_ID">
+    <![CDATA[from County where countyId =:id]]>
+	</query>
+	<query name = "TRACT_BY_ID">
+    <![CDATA[from Tract where tractId =:id]]>
+	</query>
+	<query name = "PLACE_BY_ID">
+    <![CDATA[from Place where placeId =:id]]>
+	</query>
+	<query name = "URBAN_BY_ID">
+    <![CDATA[from Urban where urbanId =:id]]>
+	</query>
+	<query name = "CONGDIST_BY_ID">
+    <![CDATA[from CongDist where congdistId =:id]]>
+	</query>
+	<query name = "REGION_BY_ID">
+    <![CDATA[from County where regionId =:id]]>
+	</query>
+	<query name = "CONNECTED_COUNTIES">
+    <![CDATA[select map.County.name from CountyTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from CountyTripMap where countyId =:id ) group by map.County.countyId, map.County.name order by map.County.name ]]>
+	</query>
+	<query name = "CONNECTED_TRACTS">
+    <![CDATA[select map.Tract.name from TractTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from TractTripMap where tractId =:id ) group by map.Tract.tractId, map.Tract.name order by map.Tract.name ]]>
+	</query>
+	<query name = "CONNECTED_PLACES">
+    <![CDATA[select map.Place.name from PlaceTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from PlaceTripMap where placeId =:id ) group by map.Place.placeId, map.Place.name order by map.Place.name ]]>
+	</query>
+	<query name = "CONNECTED_URBANS">
+    <![CDATA[select map.Urban.name from UrbanTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from UrbanTripMap where urbanId =:id ) group by map.Urban.urbanId, map.Urban.name order by map.Urban.name ]]>
+	</query>
+	<query name = "CONNECTED_CONGDISTS">
+    <![CDATA[select map.Congdist.name from CongdistTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from CongdistTripMap where congdistId =:id ) group by map.Congdist.congdistId, map.Congdist.name order by map.Congdist.name ]]>
+	</query>
+	<query name = "CONNECTED_REGIONS">
+    <![CDATA[select map.regionId from CountyTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from CountyTripMap where regionId =:id ) group by map.regionId order by map.regionId ]]>
+	</query>	
 </hibernate-mapping>
