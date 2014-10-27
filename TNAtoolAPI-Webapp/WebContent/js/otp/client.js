@@ -375,7 +375,7 @@ info.onAdd = function (map) {
 
 info.update = function (props) {
     this._div.innerHTML = (props ?
-        '<div id="box"><b>County: </b>' + props.NAME + ' <br/>' + '<b>Area: </b>'+ props.CENSUSAREA + ' mi<sup>2</sup></div>' 
+        '<div id="box"><b>Name: </b>' + props.name + ' <br/>' + '<b>Area: </b>'+ props.area + ' mi<sup>2</sup></div>' 
         :'');
 };
 
@@ -393,8 +393,13 @@ function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
 }
 function resetHighlight(e) {
-	shapes.resetStyle(e.target);
-	info.update();
+	/*resetStyle(e.target);
+	info.update();*/
+	var layer = e.target;
+    layer.setStyle({              
+        fillOpacity: 0.1
+    });
+    info.update();
 }
 function highlightFeature(e) {
     var layer = e.target;
@@ -414,7 +419,10 @@ function onEachFeature(feature, layer) {
 var stops = new L.LayerGroup().addTo(map);
 var routes = new L.LayerGroup().addTo(map);
 
-var shapes = L.geoJson(shapedata, {style: style, onEachFeature: onEachFeature});
+var county = L.geoJson(countyshape, {style: style, onEachFeature: onEachFeature});
+var odot = L.geoJson(odotregionshape, {style: style, onEachFeature: onEachFeature}); 
+var urban = L.geoJson(urbanshapes, {style: style, onEachFeature: onEachFeature});
+var congdist = L.geoJson(congdistshape, {style: style, onEachFeature: onEachFeature});
 //var uscounties = new L.LayerGroup(shapes);
 //uscounties.addLayer(shapes);
 //uscounties.onAdd = function (obj) {
@@ -741,7 +749,10 @@ var baseMaps = {
 var overlayMaps = {
 		"Stops": stops,
 		"Routes": routes,
-		"Counties": shapes
+		"Counties": county,
+		"ODOT Regions": odot,
+		"Urbanized Areas 50k+": urban,
+		"Congressional Districts": congdist		
 	};
 
 map.addControl(new L.Control.Layers(baseMaps,overlayMaps));
