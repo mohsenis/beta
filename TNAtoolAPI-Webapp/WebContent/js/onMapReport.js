@@ -1,3 +1,52 @@
+//var coorcoor = [{lat: 44.054395, lng: -123.088453}, {lat: 44.63030637, lng: -123.10329518}, {lat: 45.517039, lng: -122.679887}];
+var coorcoor = [L.latLng(44.054395, -123.088453),L.latLng(44.63030637, -123.10329518),L.latLng(45.517039, -122.679887)];
+function addShapefile(coords){
+	var that = drawControl._toolbars[L.DrawToolbar.TYPE]._modes.polygon.handler;
+	that.enable();
+	
+	for(var i=0;i<coords.length;i++){
+		that.addVertex(coords[i]);
+	}
+	//that._markers[0].click();
+	that._finishShape();
+	that.disable();
+}
+var ggm=false;
+var ggb;
+function openStreetView(lat, lon){
+	if(!ggb){
+		alert('You need to be in Google Aerial map layer to use this feature');
+		return;
+	}
+	var place = new google.maps.LatLng(lat, lon);
+	panorama = ggm.getStreetView();
+	panorama.setPosition(place);
+	map.dragging.disable();
+	map.touchZoom.disable();
+	map.doubleClickZoom.disable();
+	map.scrollWheelZoom.disable();
+	/*map.removeControl(drawControl);
+	map.removeControl(miniMap);
+	map.removeControl(info);*/
+	google.maps.event.addListener(panorama, 'closeclick', function() {
+		/*map.addControl(drawControl);
+		map.addControl(miniMap);
+		map.addControl(info);*/
+		map.dragging.enable();
+		map.touchZoom.enable();
+		map.doubleClickZoom.enable();
+		map.scrollWheelZoom.enable();
+	});
+	google.maps.event.addListener(panorama, 'visible_changed', function() {
+		if(panorama.getVisible()){
+			$('div.gm-style:nth-child(2)').css('z-index','10000');
+		}
+	});
+	panorama.setVisible(true);
+	//alert();
+	
+}
+
 function onMapSubmit(){
 	map.removeLayer(onMapCluster);
 	$( '.POPcal').datepicker( "hide" );
@@ -104,7 +153,7 @@ function showOnMapReport(lat, lon, date, x){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date,
 		async: true,
 		success: function(data){
 			$('#ts').html(numberWithCommas(data.MapTr.TotalStops));
@@ -203,14 +252,14 @@ function showOnMapReport(lat, lon, date, x){
 			$('#tp').html(numberWithCommas(data.MapG.TotalPopulation));
 			$('#tb').html(numberWithCommas(data.MapG.TotalBlocks));
 			$('#tt').html(numberWithCommas(data.MapG.TotalTracts));
-			$('#tl').html(Math.round(parseFloat(data.MapG.TotalLandArea)*0.0000386102)/100+' mi<sup>2</sup>');
+			//$('#tl').html(Math.round(parseFloat(data.MapG.TotalLandArea)*0.0000386102)/100+' mi<sup>2</sup>');
 			
 			html = '<table id="geoTable" class="display" align="center">';
 			tmp = //'<tr><th>County ID</th>'+
 			'<th>County Name</th>'+
 			'<th>Tracts</th>'+
 			'<th>Blocks</th>'+
-			'<th>Population</th></tr>';	
+			'<th>Population (2010)</th></tr>';	
 			html += '<thead>'+tmp+'</thead><tbody>';
 			$.each(data.MapG.MapCounties, function(i,item){
 				html += //'<tr><td>'+item.Id+'</td>'+
