@@ -3,7 +3,7 @@ var AUTO_CENTER_MAP = false;
 var ROUTER_ID = "";
 //alert (window.screen.availHeight);
 
-var map = new L.Map('map', {
+var map = new L.Map('map', {	
 	minZoom : 6,
 	maxZoom : 17,
 	// what we really need is a fade transition between old and new tiles without removing the old ones
@@ -15,7 +15,7 @@ var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
 var minimalLayer = new L.StamenTileLayer("toner");
 //var mapboxAttrib = "Tiles from <a href='http://mapbox.com/about/maps' target='_blank'> Streets</a>";
 //var minimalLayer = new L.TileLayer(CloudURL, {maxZoom: 17, attribution: mapboxAttrib});
-var osmAttrib = 'Map data &copy; 2013 OpenStreetMap contributors';
+var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov">US Census Bureau</a> 2010';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 18, attribution: osmAttrib});
 
@@ -736,7 +736,7 @@ var mmRecLng = 0;
 var miniMap = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"], minZoom: 5, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright',toggleDisplay:true}).addTo(map);
 
 $('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'0px'});
-$('.leaflet-control-attribution').remove();
+//$('.leaflet-control-attribution').remove();
 
 
 
