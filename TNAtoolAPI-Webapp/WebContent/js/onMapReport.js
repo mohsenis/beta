@@ -56,7 +56,7 @@ function checkSVChange()
 		return;
 	}
 	$('div.gm-style:nth-child(2)').css('z-index','10000');
-    setTimeout( checkDOMChange, 100 );
+    setTimeout( checkSVChange, 100 );
 }
 
 function onMapSubmit(){
