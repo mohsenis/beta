@@ -14,6 +14,14 @@ public class Rshape {
 	
 	@XmlAttribute
 	@JsonSerialize
+	public String agency;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String headSign;
+	
+	@XmlAttribute
+	@JsonSerialize
 	public double length;
 	
 	@XmlAttribute

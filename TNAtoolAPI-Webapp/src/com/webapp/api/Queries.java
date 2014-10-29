@@ -715,7 +715,13 @@ public class Queries {
     	Trip tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip);    	
     	Rshape shape = new Rshape();
     	shape.points = tp.getEpshape();
-    	shape.length = tp.getLength();    	    	 
+    	shape.length = tp.getLength();  
+    	shape.agency = agency;
+    	if(tp.getTripHeadsign()==null){
+    		shape.headSign = "N/A";
+    	}else{
+    		shape.headSign = tp.getTripHeadsign();
+    	}
     	shape.estlength = tp.getEstlength();
 		return shape;
     }
@@ -844,7 +850,8 @@ public class Queries {
     	List <Trip> alltrips = GtfsHibernateReaderExampleMain.QueryTripsforAgency_RouteSorted(agency);
     	
     	int totalLoad = alltrips.size();
-    	
+    	int tripCount=0;
+    	int stopsC=0;
     	Route thisroute =  alltrips.get(0).getRoute();
     	String routeId =thisroute.getId().getId();
     	String uid = "";
@@ -988,12 +995,16 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     		Stopportunity += frequency * stops; 
     		PopStopportunity += frequency * trippop;
     		setprogVal(key, (int) Math.round(index*100/totalLoad));
+    		tripCount+= frequency;
+    		stopsC+= stops*frequency;
     	}
         RouteMiles += length;
         response.ServiceStops = String.valueOf(Math.round(Stopportunity));
         response.ServiceMiles = String.valueOf(Math.round(ServiceMiles*100.0)/100.0); 
         response.RouteMiles = String.valueOf(Math.round(RouteMiles*100.0)/100.0);
         long pop = 0;
+        System.out.println("count:"+tripCount);
+        System.out.println("Scount:"+stopsC);
         /*List <Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency);
 		List <Coordinate> stopcoords = new ArrayList<Coordinate>();
 		for (Stop stop: stops){

@@ -618,7 +618,11 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 			e.layer.setOpacity(0.2);
 			this._shownPolygon = new L.Polygon(e.layer.getConvexHull(), this.options.polygonOptions);
 			map.addLayer(this._shownPolygon);
+			this.bindPopup('hello').openPopup();
+			//this._shownPolygon.bindPopup('hello').openPopup();
 		}
+		this.bindPopup('hello').openPopup();
+		//e.bindPopup('hello').openPopup();
 	},
 
 	_hideCoverage: function (e) {
@@ -631,6 +635,7 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 			this._map.removeLayer(this._shownPolygon);
 			this._shownPolygon = null;
 		}
+		//this.closePopup();
 	},
 
 	_unbindEvents: function () {

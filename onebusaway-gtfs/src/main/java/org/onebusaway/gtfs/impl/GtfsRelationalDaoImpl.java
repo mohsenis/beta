@@ -467,4 +467,52 @@ public List<Stop> getStopsForTrip(AgencyAndId trip) {
 	return null;
 }
 
+@Override
+public List<Stop> getStopsForTripCounty(AgencyAndId trip, String county) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public List<Stop> getStopsForTripTract(AgencyAndId trip, String tract) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public List<Stop> getStopsForTripPlace(AgencyAndId trip, String place) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public List<Stop> getStopsForTripUrban(AgencyAndId trip, String urban) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public List<Stop> getStopsForTripCongdist(AgencyAndId trip, String congdist) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public List<Stop> getStopsForTripRegion(AgencyAndId trip, String region) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public List<Float> getFarePriceForRoutes(List<String> routes) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public String getServiceHours(List<String> trips) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
 }

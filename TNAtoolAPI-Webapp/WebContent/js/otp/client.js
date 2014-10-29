@@ -5,22 +5,22 @@ var ROUTER_ID = "";
 
 var map = new L.Map('map', {	
 	minZoom : 6,
-	maxZoom : 17,
+	maxZoom : 19,
+	//dragging: false,
 	// what we really need is a fade transition between old and new tiles without removing the old ones
 });
 
 var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
-
 var minimalLayer = new L.StamenTileLayer("toner");
 //var mapboxAttrib = "Tiles from <a href='http://mapbox.com/about/maps' target='_blank'> Streets</a>";
 //var minimalLayer = new L.TileLayer(CloudURL, {maxZoom: 17, attribution: mapboxAttrib});
 var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov">US Census Bureau</a> 2010';
 var osmLayer = new L.TileLayer(OSMURL, 
-		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 18, attribution: osmAttrib});
+		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
 
 var aerialLayer = new L.TileLayer(aerialURL, 
-		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 18, attribution: osmAttrib});
+		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 19, attribution: osmAttrib});
 
 map.addLayer(osmLayer);
 
@@ -252,7 +252,8 @@ map.on('draw:created', function (e) {
 	    	'<span style="padding-left:1em">Longitude: <span id="POPlon">'+drawCentroid[1]+'</span></span>'+
 			'<p><b>Area:</b> <span id="POParea">'+area+'</span> mi<sup>2</sup></p>'+
 			'<p><b>Date</b>: <input readonly type="text" class="POPcal" id="POPdatepicker"></p>'+
-			'<p><button type="button" style="width:100%" id="POPbutton" onclick="onMapSubmit()">Generate Report</button></p>'
+			'<p><button type="button" style="width:100%" id="POPbutton" onclick="onMapSubmit()">Generate Report</button></p>'/*+
+			'<p><button type="button" style="width:100%" id="streetViewButton" onclick="openStreetView('+drawCentroid[0]+','+drawCentroid[1]+')">Open Stree View</button></p>'*/
 	,{closeOnClick:false,draggable:true}).openPopup();
 	//map.fitBounds(layer.getBounds().pad(1));
 	//dialog.dialog( "open" );
@@ -260,6 +261,7 @@ map.on('draw:created', function (e) {
 	var tmpmarker = L.marker(getCentroid(layer.getLatLngs()));
 	tmpCenter.addLayer(tmpmarker);
 	map.addLayer(tmpCenter);*/
+	//gglMap.setOptions({draggable:true});
 });
 setDialog();
 function circleMove(latlng){
@@ -375,6 +377,7 @@ info.onAdd = function (map) {
 
 info.update = function (props) {
     this._div.innerHTML = (props ?
+
         '<div id="box"><b>Name: </b>' + props.name + ' <br/>' + '<b>Area: </b>'+ props.area + ' mi<sup>2</sup></div>' 
         :'');
 };
@@ -401,6 +404,10 @@ function resetHighlight(e) {
     });
     info.update();
 }
+/*function resetHighlightTracts(e) {
+	tractShape.resetStyle(e.target);
+	info.updateTracts();
+}*/
 function highlightFeature(e) {
     var layer = e.target;
     layer.setStyle({              
@@ -409,6 +416,16 @@ function highlightFeature(e) {
     //layer.bringToFront(); //enable if borders are changed on mouseover
     info.update(layer.feature.properties);    
 }
+
+/*function highlightFeatureTracts(e) {
+    var layer = e.target;
+    layer.setStyle({              
+        fillOpacity: 0
+    });
+    //layer.bringToFront(); //enable if borders are changed on mouseover
+    info.updateTracts(layer.feature.properties);    
+}*/
+
 function onEachFeature(feature, layer) {
     layer.on({
         mouseover: highlightFeature,
@@ -416,6 +433,13 @@ function onEachFeature(feature, layer) {
         click: zoomToFeature        
     });
 }
+/*function onEachFeatureTracts(feature, layer) {
+    layer.on({
+        mouseover: highlightFeatureTracts,
+        mouseout: resetHighlightTracts,
+        click: zoomToFeature        
+    });
+}*/
 var stops = new L.LayerGroup().addTo(map);
 var routes = new L.LayerGroup().addTo(map);
 
@@ -423,6 +447,7 @@ var county = L.geoJson(countyshape, {style: style, onEachFeature: onEachFeature}
 var odot = L.geoJson(odotregionshape, {style: style, onEachFeature: onEachFeature}); 
 var urban = L.geoJson(urbanshapes, {style: style, onEachFeature: onEachFeature});
 var congdist = L.geoJson(congdistshape, {style: style, onEachFeature: onEachFeature});
+
 //var uscounties = new L.LayerGroup(shapes);
 //uscounties.addLayer(shapes);
 //uscounties.onAdd = function (obj) {
@@ -582,7 +607,8 @@ function disponmap(layerid,k,points,popup,node){
 		    	'<span style="padding-left:1em">Longitude: <span>'+p[0].lng+'</span></span>'+
 				'<p><b>Date:</b> <input readonly type="text" class="POPcal" id="'+marLat+'POPdatepicker'+marLng+'"></p>'+
 				'<p><b>Population Search Radius (miles):</b> <input type="text" value="0.1" id="'+marLat+'POPx'+marLng+'" style="width:40px"></p>'+
-				'<p><button type="button" id="'+marLat+'POPbutton'+marLng+'" style="width:100%" onclick="onMapBeforeSubmit('+p[0].lat+','+p[0].lng+','+marLat+','+marLng+')">Generate Report</button></p>'
+				'<p><button type="button" id="'+marLat+'POPbutton'+marLng+'" style="width:100%" onclick="onMapBeforeSubmit('+p[0].lat+','+p[0].lng+','+marLat+','+marLng+')">Generate Report</button></p>'+
+				'<p><button type="button" style="width:100%" id="'+marLat+'streetViewButton" onclick="openStreetView('+p[0].lat+','+p[0].lng+')">Open Stree View</button></p>'
 				
 				//'<input type="button" value="Submit" style="font-size:90%;width:50px;height:22px" onclick="showPop('+p[0].lat+','+p[0].lng+')">'+
 				//'<br><input type="text" id="p'+p[0].lat+p[0].lng+'" style="font-size:90%;width:60px;height:20px" disabled>&nbsp&nbsp'+
@@ -625,16 +651,16 @@ function onMapBeforeSubmit(lat,lng,mlat,mlng){
 	onMapSubmit();
 }
 /////////////////////////////////////////////////////////////////////////////////
-function triggerShow(e){
+/*function triggerShow(e){
 	if(e.checked==false){
 		map.removeLayer(markersCentroids);
 	}else{
 		map.addLayer(markersCentroids);
 		map.fitBounds(markersCentroids.getBounds());
 	}
-}
-map.on('click', removeAllCentroids);
-var markersCentroids = new L.FeatureGroup();
+}*/
+
+/*var markersCentroids = new L.FeatureGroup();
 function showPop(lat,lon){
 	var personIcon = L.icon({
 	    iconUrl: 'js/otp/person1.png',
@@ -686,13 +712,14 @@ function showPop(lat,lon){
 		document.getElementById('p'+lat+lon).value = pop;
 	}
 	
-}
-function removeAllCentroids(){
-    map.removeLayer(markersCentroids);
-}
+}*/
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function dispronmap(k,points,name,node){	
-	var polyline = L.Polyline.fromEncoded(points, {	
+
+function dispronmap(k,d,name){	
+	var polyline = L.Polyline.fromEncoded(d.points, {	
+
 		weight: 5,
 		color: colorset[k],
 		smoothFactor: 10,
@@ -704,6 +731,7 @@ function dispronmap(k,points,name,node){
 		smoothFactor: 1
 		});	
 		//mylayer.bindpopup(name);		
+		polyline.bindPopup('<b>Agency ID:</b> '+d.agency+'<br><b>Trip Name:</b> '+d.headSign);
 		polyline._leaflet_id = name;	
 		routes.addLayer(polyline);
 		$.jstree._reference($mylist).set_type("default", $(node));
@@ -728,9 +756,32 @@ if (AUTO_CENTER_MAP) {
 	}
 }
 map.setView(initLocation,8);
+//var gglMap;
+var visible = true;
+var ggl = new L.Google();
+$('.leaflet-control-zoom').css('margin-top','50px');
 
 L.control.scale({'metric': false, 'position': 'bottomright', 'maxWidth':200}).addTo(map);
+var geocoder = L.Control.Geocoder.google('AIzaSyCTlrYCuni4VWJkeJXzf8Ku_cnhX9aBh74');
+var searchControl = L.Control.geocoder({
+				geocoder: geocoder,
+				position:'topright'
+			}).addTo(map);
+map.on('click', function(){
+	if (searchControl._geocodeMarker) {
+		searchControl._map.removeLayer(searchControl._geocodeMarker);
+	}
+});
 
+//alert(map.options.dragging);
+osmLayer.on('load', function(e) {
+	ggb = false;
+    //map.dragging.enable();
+});
+minimalLayer.on('load', function(e) {
+	ggb = false;
+	//map.dragging.enable();
+});
 var mmRecLat = 0;
 var mmRecLng = 0;
 var miniMap = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"], minZoom: 5, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright',toggleDisplay:true}).addTo(map);
@@ -743,7 +794,8 @@ $('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1
 var baseMaps = {
 	    "OSM": osmLayer,
 	    "Toner": minimalLayer,
-	    "Aerial Photo": aerialLayer
+	    "Google Aerial":ggl,
+	    //"Aerial Photo": aerialLayer
 	};
 		        
 var overlayMaps = {
@@ -997,10 +1049,12 @@ $mylist
 	    	$(".dropdown-menu").css("top", 100+"%" );
 	    	$(".dropdown-menu").css("bottom", "auto" );
 	    	$('.leaflet-draw-edit-remove').click();
+	    	//addShapefile(coorcoor);
 	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.rectangle.handler.disable();
 	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.polygon.handler.disable();
 	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.circle.handler.disable();
 	    	drawControl._toolbars[L.EditToolbar.TYPE]._modes.edit.handler.disable();
+
 	    	//L.Draw.Feature._cancelDrawing();
 	    	/*$(".dropdown-menu").css("right", "auto");
 	    	$(".dropdown-menu").css("left", 0+"px");*/
