@@ -43,8 +43,20 @@ function openStreetView(lat, lon){
 		}
 	});
 	panorama.setVisible(true);
+	checkSVChange();
+	//panorama.setVisible(false);
+	//panorama.setVisible(true);
 	//alert();
 	
+}
+
+function checkSVChange()
+{
+	if($('div.gm-style:nth-child(2)').css('z-index')=='10000'){
+		return;
+	}
+	$('div.gm-style:nth-child(2)').css('z-index','10000');
+    setTimeout( checkDOMChange, 100 );
 }
 
 function onMapSubmit(){
