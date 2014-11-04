@@ -762,11 +762,11 @@ var ggl = new L.Google();
 $('.leaflet-control-zoom').css('margin-top','50px');
 
 L.control.scale({'metric': false, 'position': 'bottomright', 'maxWidth':200}).addTo(map);
-var geocoder = L.Control.Geocoder.google('AIzaSyCTlrYCuni4VWJkeJXzf8Ku_cnhX9aBh74');
-var searchControl = L.Control.geocoder({
-				geocoder: geocoder,
-				position:'topright'
-			}).addTo(map);
+
+var searchControl = L.Control.geocoder().addTo(map);
+/*new L.Control.GeoSearch({
+    provider: new L.GeoSearch.Provider.OpenStreetMap()
+}).addTo(map);*/
 map.on('click', function(){
 	if (searchControl._geocodeMarker) {
 		searchControl._map.removeLayer(searchControl._geocodeMarker);

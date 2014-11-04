@@ -21,6 +21,7 @@ function openStreetView(lat, lon){
 	var place = new google.maps.LatLng(lat, lon);
 	panorama = ggm.getStreetView();
 	panorama.setPosition(place);
+	alert(panorama.getStatus());
 	map.dragging.disable();
 	map.touchZoom.disable();
 	map.doubleClickZoom.disable();
@@ -40,6 +41,13 @@ function openStreetView(lat, lon){
 	google.maps.event.addListener(panorama, 'visible_changed', function() {
 		if(panorama.getVisible()){
 			$('div.gm-style:nth-child(2)').css('z-index','10000');
+			$('#map > div.leaflet-map-pane').css('position','relative');
+			$('#map > div.leaflet-control-container').children().css('position','relative');
+			$('body > div.ui-dialog.ui-widget.ui-widget-content.ui-corner-all.ui-front.ui-draggable.ui-resizable').css('display','none');
+		}else{
+			$('#map > div.leaflet-map-pane').css('position','absolute');
+			$('#map > div.leaflet-control-container').children().css('position','absolute');
+			$('body > div.ui-dialog.ui-widget.ui-widget-content.ui-corner-all.ui-front.ui-draggable.ui-resizable').css('display','');
 		}
 	});
 	panorama.setVisible(true);
@@ -128,7 +136,7 @@ function geoRadio(r){
 		onMapCluster.addLayer(onMapTractCluster);
 	}else{
 		onMapCluster.addLayer(onMapBlockCluster);
-		onMapCluster.addLayer(onMapTractClustern );
+		onMapCluster.addLayer(onMapTractCluster);
 	}
 }
 function doNotDelete(){
