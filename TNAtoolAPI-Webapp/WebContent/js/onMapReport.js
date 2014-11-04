@@ -21,7 +21,6 @@ function openStreetView(lat, lon){
 	var place = new google.maps.LatLng(lat, lon);
 	panorama = ggm.getStreetView();
 	panorama.setPosition(place);
-	alert(panorama.getStatus());
 	map.dragging.disable();
 	map.touchZoom.disable();
 	map.doubleClickZoom.disable();
