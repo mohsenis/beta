@@ -20,10 +20,11 @@
 <script type="text/javascript">
 var qstring = '';
 var qstringx = '0.1';
-var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
+var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3]+"&"+document.URL.split("&")[4],"");
 var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
 var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
+var dbindex = parseInt(document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1));
 var dateID;
 var gg = 1.0/1.1;
 var progVal = 0; 
@@ -47,13 +48,36 @@ html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var key = Math.random();
 var description = new Array();
-$(document).ready(function(){ 
-	go(key);
-	
+$(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/RoutesR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
+		async: false,
+		success: function(d){	
+			var select = document.getElementById("dbselect");
+			select.options.length = 0;
+		    var menusize = 0;
+		    $.each(d.DBelement, function(i,item){
+		    	var option = document.createElement('option');
+		        option.text = item;
+		        option.value = 'DB'+i;
+		        select.add(option, i);		    	
+		    	menusize++;
+		    });		    		    
+		    if (dbindex<0 || dbindex>menusize-1){
+		    	dbindex = 0;
+		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');;
+		    }
+		    select.options.size = menusize;
+		    select.selectedIndex = dbindex;		    				    
+		}			
+	});
+	go(key);	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/RoutesR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&dbindex='+dbindex,
 		async: true,
 		success: function(d){
 			$('h2').append(d.AgencyName+' Routes Report<br><hr>');
@@ -63,11 +87,11 @@ $(document).ready(function(){
 			});		
 			html = html + '</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));	
-			progressbar.remove();
+			progressbar.remove();			
 			$('.stopreport').click(function(e){
 				if ($(this).attr('id')!==undefined){
 				    qstring = '&agency='+w_qstring+'&x='+qstringx+ '&route=' + $(this).attr('id');	    
-				    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring);
+				    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring+'&dbindex='+dbindex);
 			}});
 			$('.schedulereport').click(function(e){
 				if ($(this).attr('id')!==undefined){
@@ -77,7 +101,7 @@ $(document).ready(function(){
 				    var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
 		    		qstring = w_qstring + '&route=' + $(this).attr('id');
-				    window.open('/TNAtoolAPI-Webapp/schedulereport.html?&agency='+qstring+'&n='+keyName);
+				    window.open('/TNAtoolAPI-Webapp/schedulereport.html?&agency='+qstring+'&n='+keyName+'&dbindex='+dbindex);
 			}});
 			
 			var table = $('#RT').DataTable( {
@@ -139,8 +163,13 @@ $(document).ready(function(){
 		    $( ".dataTables_filter" ).before( "<br>" );
 			
     }});
-});	
-	
+});
+
+function dbchange(){
+	if (document.getElementById("dbselect").selectedIndex !=dbindex){
+		location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
+	}
+}	
 </script>
 
 
@@ -155,6 +184,7 @@ $(document).ready(function(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
+				<select id='dbselect' onchange='dbchange()'></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	
