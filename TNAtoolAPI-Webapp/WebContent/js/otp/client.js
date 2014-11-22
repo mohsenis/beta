@@ -362,7 +362,7 @@ function getdata(type,agency,route,variant,k,callback,popup,node) {
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/shape?&agency='+agency+'&trip='+variant,
 			success: function(d){				
-			if (d.points!= null) callback(k,d.points,"V"+agency+route+variant,node);
+			if (d.points!= null) callback(k,d,"V"+agency+route+variant,node);
 	    }});
 		break;
 	}		
@@ -717,7 +717,7 @@ function showPop(lat,lon){
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-function dispronmap(k,d,name){	
+function dispronmap(k,d,name,node){	
 	var polyline = L.Polyline.fromEncoded(d.points, {	
 
 		weight: 5,
