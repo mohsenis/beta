@@ -24,6 +24,7 @@ var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+docum
 var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
 var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
+var dbindex = parseInt(document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1));
 var dateID;
 var boo;
 var gg = 1.0/1.1;
@@ -56,8 +57,31 @@ var fMedian = new Array();
 var key = Math.random();
 
 $(document).ready(function(){
-	go(key);
-	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
+		async: false,
+		success: function(d){	
+			var select = document.getElementById("dbselect");
+			select.options.length = 0;
+		    var menusize = 0;
+		    $.each(d.DBelement, function(i,item){
+		    	var option = document.createElement('option');
+		        option.text = item;
+		        option.value = 'DB'+i;
+		        select.add(option, i);		    	
+		    	menusize++;
+		    });		    		    
+		    if (dbindex<0 || dbindex>menusize-1){
+		    	dbindex = 0;
+		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
+		    }
+		    select.options.size = menusize;
+		    select.selectedIndex = dbindex;		    				    
+		}			
+	});
+	go(key);	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -171,24 +195,13 @@ $(document).ready(function(){
 			$("#RT_info").remove();
 			//$( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
 			//$( '#RT'+'_wrapper .dataTables_scrollHeadInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
-    }});
-	/* $(document).ready(function() {
-		$( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-		$( '#RT'+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
-	    
-	} ); */
-	/* $(document).ready(function() {
-		//alert('hi');
-		 $('#RT').dataTable( {
-			"scrollY": 10,
-			"scrollX": true
-		} );
-	} );   */
-	    	
+    }});	    	
 });
-
-
-
+function dbchange(){
+	if (document.getElementById("dbselect").selectedIndex !=dbindex){
+		location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
+	}
+}
 </script>
 </head>
 <body >
@@ -200,6 +213,7 @@ $(document).ready(function(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
+				<select id='dbselect' onchange='dbchange()'></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

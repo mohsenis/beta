@@ -32,7 +32,13 @@ import com.library.model.*;
 
 public class EventManager {		
 //private SessionFactory factory;
-private	static Session session = Hutil.getSessionFactory().openSession();
+private	static Session[] session = new Session[Hutil.getSessionFactory().length];
+static{
+	for (int scnt=0; scnt< session.length; scnt++){
+		session[scnt] = Hutil.getSessionFactory()[scnt].openSession();
+	}
+};
+
 
 /**
  * returns trip data and shape
@@ -50,7 +56,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 /**
  * returns population centroids
  */
-	public static List<Census> getcentroids(double d, double lat, double lon) throws FactoryException, TransformException {
+	public static List<Census> getcentroids(double d, double lat, double lon, int sessionindex) throws FactoryException, TransformException {
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
@@ -60,21 +66,21 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
 		point = targetGeometry.getCentroid();
 		point.setSRID(2993);	
-		session.beginTransaction();
-		Query q = session.getNamedQuery("CENSUS_BY_COORDINATES");
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("CENSUS_BY_COORDINATES");
 		Type geomType = GeometryUserType.TYPE;
 		q.setParameter("point", point, geomType);
 		q.setParameter("radius", d);
 		@SuppressWarnings("unchecked")
 		List<Census> results = (List<Census>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return results;
     }
 	
 /**
  * returns centroids within a rectangle
  */
-	public static List<Census> getcentroidswithinrectangle(double[] lat, double[] lon) throws FactoryException, TransformException {			
+	public static List<Census> getcentroidswithinrectangle(double[] lat, double[] lon, int sessionindex) throws FactoryException, TransformException {			
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
@@ -92,21 +98,21 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
 		//point = targetGeometry.getCentroid();
 		targetGeometry.setSRID(2993);	
-		session.beginTransaction();
-		Query q = session.getNamedQuery("CENSUS_WITHIN_RECTANGLE");
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("CENSUS_WITHIN_RECTANGLE");
 		Type geomType = GeometryUserType.TYPE;
 		q.setParameter("polygon", targetGeometry, geomType);
 		//q.setParameter("radius", d);
 		@SuppressWarnings("unchecked")
 		List<Census> results = (List<Census>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return results;
     }	
 	
 /**
  * returns stops within a circle
  */
-	public static List<GeoStop> getstopswithincircle(double d, double lat, double lon) throws FactoryException, TransformException {			
+	public static List<GeoStop> getstopswithincircle(double d, double lat, double lon, int sessionindex) throws FactoryException, TransformException {			
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
@@ -116,21 +122,21 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
 		point = targetGeometry.getCentroid();
 		point.setSRID(2993);	
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOP_BY_COORDINATES");
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOP_BY_COORDINATES");
 		Type geomType = GeometryUserType.TYPE;
 		q.setParameter("point", point, geomType);
 		q.setParameter("radius", d);
 		@SuppressWarnings("unchecked")
 		List<GeoStop> results = (List<GeoStop>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return results;
     }	
 	
 	/**
 	 * returns stops within a rectangle
 	 */
-		public static List<GeoStop> getstopswithinrectangle(double[] lat, double[] lon) throws FactoryException, TransformException {			
+		public static List<GeoStop> getstopswithinrectangle(double[] lat, double[] lon, int sessionindex) throws FactoryException, TransformException {			
 			CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 			CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 			MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
@@ -148,39 +154,39 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 			//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
 			//point = targetGeometry.getCentroid();
 			targetGeometry.setSRID(2993);	
-			session.beginTransaction();
-			Query q = session.getNamedQuery("STOP_WITHIN_RECTANGLE");
+			session[sessionindex].beginTransaction();
+			Query q = session[sessionindex].getNamedQuery("STOP_WITHIN_RECTANGLE");
 			Type geomType = GeometryUserType.TYPE;
 			q.setParameter("polygon", targetGeometry, geomType);
 			//q.setParameter("radius", d);
 			@SuppressWarnings("unchecked")
 			List<GeoStop> results = (List<GeoStop>) q.list();
-	        Hutil.getSessionFactory().close();
+	        Hutil.getSessionFactory()[sessionindex].close();
 	        return results;
 	    }	
 	
 /**
  * returns route for a given stop
  */
-	public static List<GeoStopRouteMap> getroutebystop(String id, String agency) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("ROUTE_BY_STOP");
+	public static List<GeoStopRouteMap> getroutebystop(String id, String agency, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTE_BY_STOP");
 		q.setParameter("id", id).setParameter("agency", agency);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = (List<GeoStopRouteMap>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	}
 
 /**
  * returns list of stop_route_map
  */
-	public static List<GeoStopRouteMap> getstoproutemaps() throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("All_STOP_ROUTE_MAPS");
+	public static List<GeoStopRouteMap> getstoproutemaps(int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("All_STOP_ROUTE_MAPS");
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> results = q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return results;
     }
 			
@@ -188,481 +194,481 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 /**
  * returns list of counties
  */
-	public static List<County> getcounties() throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("All_COUNTIES");
+	public static List<County> getcounties(int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("All_COUNTIES");
 		@SuppressWarnings("unchecked")
 		List<County> results = q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return results;
     }
 	
 /**
  * returns list of tracts
  */
-	public static List<Tract> gettracts() throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("All_TRACTS");
+	public static List<Tract> gettracts(int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("All_TRACTS");
 		@SuppressWarnings("unchecked")
 		List<Tract> results = q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return results;
     }
 	
 /**
  * returns list of census places
  */
-	public static List<Place> getplaces() throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("All_PLACES");
+	public static List<Place> getplaces(int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("All_PLACES");
 		@SuppressWarnings("unchecked")
 		List<Place> results = (List<Place>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return results;
     }
 	
 /**
  * returns list of urban areas
  */
-	public static List<Urban> geturban() throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("All_URBANS");
+	public static List<Urban> geturban(int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("All_URBANS");
 		@SuppressWarnings("unchecked")
 		List<Urban> results = (List<Urban>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return results;
     }
 
 /**
  * returns list of urban areas
  */
-	public static List<CongDist> getcongdist() throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("All_CONGDISTS");
+	public static List<CongDist> getcongdist(int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("All_CONGDISTS");
 		@SuppressWarnings("unchecked")
 		List<CongDist> results = (List<CongDist>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return results;
     }
 	
 /**
  * returns number of tracts for a given county
  */
-	public static long gettractscountbycounty(String countyId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("TRACTSNO_BY_COUNTY");
+	public static long gettractscountbycounty(String countyId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("TRACTSNO_BY_COUNTY");
 		q.setParameter("id", countyId);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 
 /**
  * returns number of census blocks for a given county
  */
-	public static long getblockscountbytract(String tractId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("BLOCKSNO_BY_TRACT");
+	public static long getblockscountbytract(String tractId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("BLOCKSNO_BY_TRACT");
 		q.setParameter("id", tractId);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns number of stops for a given county
  */
-	public static long getstopscountbycounty(String countyId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPS_BY_COUNTY");
+	public static long getstopscountbycounty(String countyId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_COUNTY");
 		q.setParameter("id", countyId);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns list of stops for a given county
  */
-	public static List<GeoStop> getstopsbycounty(String countyId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPSL_BY_COUNTY");
+	public static List<GeoStop> getstopsbycounty(String countyId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPSL_BY_COUNTY");
 		q.setParameter("id", countyId);
 		@SuppressWarnings("unchecked")
 		List<GeoStop> result = (List<GeoStop>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns list of stops for a given county
  */
-	public static List<GeoStop> getstopsbyregion(String regionId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPSL_BY_REGION");
+	public static List<GeoStop> getstopsbyregion(String regionId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPSL_BY_REGION");
 		q.setParameter("id", regionId);
 		@SuppressWarnings("unchecked")
 		List<GeoStop> result = (List<GeoStop>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns list of trips for a given county
  */
-	public static List<CountyTripMap> gettripsbycounty(String countyId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("TRIPS_BY_COUNTY");
+	public static List<CountyTripMap> gettripsbycounty(String countyId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("TRIPS_BY_COUNTY");
 		q.setParameter("id", countyId);
 		@SuppressWarnings("unchecked")
 		List<CountyTripMap> result = (List<CountyTripMap>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns list of trips for a given odot transit region
  */
-	public static List<CountyTripMap> gettripsbyregion(String regionId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("TRIPS_BY_REGION");
+	public static List<CountyTripMap> gettripsbyregion(String regionId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("TRIPS_BY_REGION");
 		q.setParameter("id", regionId);
 		@SuppressWarnings("unchecked")
 		List<CountyTripMap> result = (List<CountyTripMap>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns list of trips for a given census tracts
  */
-	public static List<TractTripMap> gettripsbytract(String tractId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("TRIPS_BY_TRACT");
+	public static List<TractTripMap> gettripsbytract(String tractId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("TRIPS_BY_TRACT");
 		q.setParameter("id", tractId);
 		@SuppressWarnings("unchecked")
 		List<TractTripMap> result = (List<TractTripMap>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns list of trips for a given census places
  */
-	public static List<PlaceTripMap> gettripsbyplace(String placeId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("TRIPS_BY_PLACE");
+	public static List<PlaceTripMap> gettripsbyplace(String placeId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("TRIPS_BY_PLACE");
 		q.setParameter("id", placeId);
 		@SuppressWarnings("unchecked")
 		List<PlaceTripMap> result = (List<PlaceTripMap>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 
 /**
  * returns list of trips for a given urban area
  */
-	public static List<UrbanTripMap> gettripsbyurban(String urbanId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("TRIPS_BY_URBAN");
+	public static List<UrbanTripMap> gettripsbyurban(String urbanId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("TRIPS_BY_URBAN");
 		q.setParameter("id", urbanId);
 		@SuppressWarnings("unchecked")
 		List<UrbanTripMap> result = (List<UrbanTripMap>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns list of trips for a given congressional district
  */
-	public static List<CongdistTripMap> gettripsbycongdist(String congdistId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("TRIPS_BY_CONGDIST");
+	public static List<CongdistTripMap> gettripsbycongdist(String congdistId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("TRIPS_BY_CONGDIST");
 		q.setParameter("id", congdistId);
 		@SuppressWarnings("unchecked")
 		List<CongdistTripMap> result = (List<CongdistTripMap>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns list of all connected counties for a given county
  */
-	public static List<String> getconnectedcounties(String countyId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("CONNECTED_COUNTIES");
+	public static List<String> getconnectedcounties(String countyId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("CONNECTED_COUNTIES");
 		q.setParameter("id", countyId);
 		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns list of all connected Tracts for a given census tract
  */
-	public static List<String> getconnectedtracts(String tractId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("CONNECTED_TRACTS");
+	public static List<String> getconnectedtracts(String tractId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("CONNECTED_TRACTS");
 		q.setParameter("id", tractId);
 		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns list of all connected places for a given census place
  */
-	public static List<String> getconnectedplaces(String placeId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("CONNECTED_PLACES");
+	public static List<String> getconnectedplaces(String placeId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("CONNECTED_PLACES");
 		q.setParameter("id", placeId);
 		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns list of all connected urban areas for a given urban area
  */
-	public static List<String> getconnectedurbans(String urbanId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("CONNECTED_URBANS");
+	public static List<String> getconnectedurbans(String urbanId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("CONNECTED_URBANS");
 		q.setParameter("id", urbanId);
 		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns list of all connected congressional districts for a given congressional district
  */
-	public static List<String> getconnectedcongdists(String congdistId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("CONNECTED_CONGDISTS");
+	public static List<String> getconnectedcongdists(String congdistId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("CONNECTED_CONGDISTS");
 		q.setParameter("id", congdistId);
 		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns list of all connected ODOT Transit Regions for a given region
  */
-	public static List<String> getconnectedregions(String regionId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("CONNECTED_REGIONS");
+	public static List<String> getconnectedregions(String regionId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("CONNECTED_REGIONS");
 		q.setParameter("id", regionId);
 		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns number of stops for a given ODOT Region
  */
-	public static long getstopscountbyregion(String regionId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPS_BY_REGION");
+	public static long getstopscountbyregion(String regionId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_REGION");
 		q.setParameter("id", regionId);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns number of stops for a given census tract
  */
-	public static long getstopscountbytract(String tractId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPS_BY_TRACT");
+	public static long getstopscountbytract(String tractId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_TRACT");
 		q.setParameter("id", tractId);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns list of stops for a given census tract
  */
-	public static List<GeoStop> getstopsbytract(String tractId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPSL_BY_TRACT");
+	public static List<GeoStop> getstopsbytract(String tractId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPSL_BY_TRACT");
 		q.setParameter("id", tractId);
 		@SuppressWarnings("unchecked")
 		List<GeoStop> result = (List<GeoStop>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 		
 /**
  * returns list of stops for a given census place
  */
-	public static List<GeoStop> getstopsbyplace(String placeId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPSL_BY_PLACE");
+	public static List<GeoStop> getstopsbyplace(String placeId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPSL_BY_PLACE");
 		q.setParameter("id", placeId);
 		@SuppressWarnings("unchecked")
 		List<GeoStop> result = (List<GeoStop>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 
 /**
  * returns list of stops for a given urban area
  */
-	public static List<GeoStop> getstopsbyurban(String urbanId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPSL_BY_URBAN");
+	public static List<GeoStop> getstopsbyurban(String urbanId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPSL_BY_URBAN");
 		q.setParameter("id", urbanId);
 		@SuppressWarnings("unchecked")
 		List<GeoStop> result = (List<GeoStop>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns list of stops for a given congressional district
  */
-	public static List<GeoStop> getstopsbycongdist(String congdistId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPSL_BY_CONGDIST");
+	public static List<GeoStop> getstopsbycongdist(String congdistId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPSL_BY_CONGDIST");
 		q.setParameter("id", congdistId);
 		@SuppressWarnings("unchecked")
 		List<GeoStop> result = (List<GeoStop>) q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns number of stops for a given census place
  */
-	public static long getstopscountbyplace(String placeId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPS_BY_PLACE");
+	public static long getstopscountbyplace(String placeId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_PLACE");
 		q.setParameter("id", placeId);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns number of stops for a given urban area
  */
-	public static long getstopscountbyurban(String urbanId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPS_BY_URBAN");
+	public static long getstopscountbyurban(String urbanId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_URBAN");
 		q.setParameter("id", urbanId);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 	
 /**
  * returns number of stops for a given congressional district
  */
-	public static long getstopscountbycongdist(String congdistId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("STOPS_BY_CONGDIST");
+	public static long getstopscountbycongdist(String congdistId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_CONGDIST");
 		q.setParameter("id", congdistId);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns list of routes for a given ODOT region
  */
-	public static int getroutescountsbyregion(String regionId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("ROUTES_BY_REGION");
+	public static int getroutescountsbyregion(String regionId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_REGION");
 		q.setParameter("id", regionId);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
 /**
  * returns list of routes for a given county
  */
-	public static int getroutescountsbycounty(String countyId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("ROUTES_BY_COUNTY");
+	public static int getroutescountsbycounty(String countyId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_COUNTY");
 		q.setParameter("id", countyId);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
 /**
  * returns list of routes for a given census place
  */
-	public static int getroutescountsbyplace(String placeId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("ROUTES_BY_PLACE");
+	public static int getroutescountsbyplace(String placeId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_PLACE");
 		q.setParameter("id", placeId);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
 /**
  * returns list of routes for a given census tract
  */
-	public static int getroutescountsbytract(String tractId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("ROUTES_BY_TRACT");
+	public static int getroutescountsbytract(String tractId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_TRACT");
 		q.setParameter("id", tractId);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
 /**
  * returns list of routes for a given urban area
  */
-	public static int getroutescountbyurban(String urbanId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("ROUTES_BY_URBAN");
+	public static int getroutescountbyurban(String urbanId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_URBAN");
 		q.setParameter("id", urbanId);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }	
 	
 /**
  * returns list of routes for a given congressional district
  */
-	public static int getroutescountbycongdist(String congdistId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("ROUTES_BY_CONGDIST");
+	public static int getroutescountbycongdist(String congdistId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_CONGDIST");
 		q.setParameter("id", congdistId);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
 	
 /**
  * returns list of tracts for a given county
  */
-	public static List<Tract> gettractsbycounty(String countyId) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("TRACTS_BY_COUNTY");
+	public static List<Tract> gettractsbycounty(String countyId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("TRACTS_BY_COUNTY");
 		q.setParameter("id", countyId);
 		@SuppressWarnings("unchecked")
 		List<Tract> result = q.list();
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
 /**
  * returns population within the d distance of a point
  */
-	public static long getpop(double d, double lat, double lon) throws FactoryException, TransformException {			
+	public static long getpop(double d, double lat, double lon, int sessionindex) throws FactoryException, TransformException {			
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
@@ -672,8 +678,8 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
 		point = targetGeometry.getCentroid();
 		point.setSRID(2993);	
-		session.beginTransaction();
-		Query q = session.getNamedQuery("POP_BY_COORDINATES");
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("POP_BY_COORDINATES");
 		Type geomType = GeometryUserType.TYPE;
 		q.setParameter("point", point, geomType);
 		q.setParameter("radius", d);
@@ -683,22 +689,22 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		if (results.get(0)!=null){ 
 		pop = (Long) results.get(0);
 		}
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return pop;
     }
 	
 	/**
 	 * returns census block internal points within the d distance of a point
 	 */
-	public static List<Long> getpopbatch(double d, List <Coordinate> points) throws FactoryException, TransformException {			
+	public static List<Long> getpopbatch(double d, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {			
 		List<Long> response = new ArrayList<Long> ();
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		session.beginTransaction();
+		session[sessionindex].beginTransaction();
 		Type geomType = GeometryUserType.TYPE;
-		Query q = session.getNamedQuery("POP_BY_COORDINATES");
+		Query q = session[sessionindex].getNamedQuery("POP_BY_COORDINATES");
 		q.setParameter("radius", d);
 		for (Coordinate point: points){
 			Point p = geometryFactory.createPoint(point);
@@ -713,19 +719,19 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 			}
 			response.add(pop);
 		}		
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         return response;
     }
 	/**
 	 * returns unduplicated population within the d distance of a list of points
 	 */
 	
-	public static List<Census> getundupcentbatch(double d, List <Coordinate> points) throws FactoryException, TransformException {		
+	public static List<Census> getundupcentbatch(double d, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {		
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		session.beginTransaction();
+		session[sessionindex].beginTransaction();
 		Type geomType = GeometryUserType.TYPE;		
 		StringBuffer queryBuf = new StringBuffer("from Census");
 		//boolean firstClause = true;
@@ -749,7 +755,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		queryBuf.append(" where distance(:allpoints, location)<:radius ");
 		queryBuf.append("group by blockId");
 		String hqlQuery = queryBuf.toString();
-		Query query = session.createQuery(hqlQuery);
+		Query query = session[sessionindex].createQuery(hqlQuery);
 		query.setParameter("radius",d);
 		query.setParameter("allpoints",allpoints,geomType);
 		System.out.println(hqlQuery);		
@@ -760,7 +766,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		}*/
 		@SuppressWarnings("unchecked")
 		List<Census> results = (List<Census>) query.list();		
-        Hutil.getSessionFactory().close();
+        Hutil.getSessionFactory()[sessionindex].close();
         //List results = query.list();
 		//long pop = 0;
 		//if (results.get(0)!=null){ 
@@ -768,12 +774,12 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		//}
         return results;		
     }
-	public static long getunduppopbatch(double d, List <Coordinate> points) throws FactoryException, TransformException {		
+	public static long getunduppopbatch(double d, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {		
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		session.beginTransaction();
+		session[sessionindex].beginTransaction();
 		Type geomType = GeometryUserType.TYPE;		
 		//StringBuffer queryBuf = new StringBuffer("select sum(population) from Census where id in (select distinct id from Census");
 		//boolean firstClause = true;
@@ -797,7 +803,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		//queryBuf.append(" where dwithin(location, :allpoints, :radius) = true ) ");
 		System.out.println("no of points: "+plist.length);
 		//queryBuf.append(") ");
-		Query q = session.getNamedQuery("POP_UNDUP_BATCH");
+		Query q = session[sessionindex].getNamedQuery("POP_UNDUP_BATCH");
 		//String hqlQuery = queryBuf.toString();
 		//Query query = session.createQuery(hqlQuery);				
 		//i=1;
@@ -817,17 +823,17 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		pop = (Long) results.get(0);
 		//pop = (Integer) results.get(0);
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		System.out.println("Query returned: "+pop);
         return pop;		
     }
 	
-	public static long getcountyunduppopbatch(double d, String countyId, List <Coordinate> points) throws FactoryException, TransformException {		
+	public static long getcountyunduppopbatch(double d, String countyId, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {		
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		session.beginTransaction();
+		session[sessionindex].beginTransaction();
 		Type geomType = GeometryUserType.TYPE;	
 		int i = 0;		
 		Point[] plist = new Point[points.size()];
@@ -842,7 +848,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
 		System.out.println("no of points: "+plist.length);		
-		Query q = session.getNamedQuery("COUNTY_POP_UNDUP_BATCH");		
+		Query q = session[sessionindex].getNamedQuery("COUNTY_POP_UNDUP_BATCH");		
 		q.setParameter("id",countyId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
@@ -852,16 +858,16 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		if (results.size()>0 && results.get(0)!=null){ 
 		pop = (Long) results.get(0);		
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return pop;		
     }
 	
-	public static long getregionunduppopbatch(double d, String regionId, List <Coordinate> points) throws FactoryException, TransformException {		
+	public static long getregionunduppopbatch(double d, String regionId, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {		
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		session.beginTransaction();
+		session[sessionindex].beginTransaction();
 		Type geomType = GeometryUserType.TYPE;	
 		int i = 0;		
 		Point[] plist = new Point[points.size()];
@@ -876,7 +882,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
 		System.out.println("no of points: "+plist.length);		
-		Query q = session.getNamedQuery("REGION_POP_UNDUP_BATCH");		
+		Query q = session[sessionindex].getNamedQuery("REGION_POP_UNDUP_BATCH");		
 		q.setParameter("id",regionId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
@@ -886,16 +892,16 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		if (results.size()>0 && results.get(0)!=null){ 
 		pop = (Long) results.get(0);		
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return pop;		
     }
 	
-	public static long gettractunduppopbatch(double d, String tractId, List <Coordinate> points) throws FactoryException, TransformException {		
+	public static long gettractunduppopbatch(double d, String tractId, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {		
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		session.beginTransaction();
+		session[sessionindex].beginTransaction();
 		Type geomType = GeometryUserType.TYPE;	
 		int i = 0;		
 		Point[] plist = new Point[points.size()];
@@ -910,7 +916,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
 		System.out.println("no of points: "+plist.length);		
-		Query q = session.getNamedQuery("TRACT_POP_UNDUP_BATCH");		
+		Query q = session[sessionindex].getNamedQuery("TRACT_POP_UNDUP_BATCH");		
 		q.setParameter("id",tractId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
@@ -920,15 +926,15 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		if (results.size()>0 && results.get(0)!=null){ 
 		pop = (Long) results.get(0);		
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return pop;		
     }
-	public static long getplaceunduppopbatch(double d, String placeId, List <Coordinate> points) throws FactoryException, TransformException {		
+	public static long getplaceunduppopbatch(double d, String placeId, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {		
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		session.beginTransaction();
+		session[sessionindex].beginTransaction();
 		Type geomType = GeometryUserType.TYPE;	
 		int i = 0;		
 		Point[] plist = new Point[points.size()];
@@ -943,7 +949,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
 		System.out.println("no of points: "+plist.length);		
-		Query q = session.getNamedQuery("PLACE_POP_UNDUP_BATCH");		
+		Query q = session[sessionindex].getNamedQuery("PLACE_POP_UNDUP_BATCH");		
 		q.setParameter("id",placeId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
@@ -953,16 +959,16 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		if (results.size()>0 && results.get(0)!=null){ 
 		pop = (Long) results.get(0);		
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return pop;		
     }
 	
-	public static long geturbanunduppopbatch(double d, String urbanId, List <Coordinate> points) throws FactoryException, TransformException {		
+	public static long geturbanunduppopbatch(double d, String urbanId, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {		
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		session.beginTransaction();
+		session[sessionindex].beginTransaction();
 		Type geomType = GeometryUserType.TYPE;	
 		int i = 0;		
 		Point[] plist = new Point[points.size()];
@@ -977,7 +983,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
 		System.out.println("no of points: "+plist.length);		
-		Query q = session.getNamedQuery("URBAN_POP_UNDUP_BATCH");		
+		Query q = session[sessionindex].getNamedQuery("URBAN_POP_UNDUP_BATCH");		
 		q.setParameter("id",urbanId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
@@ -987,15 +993,15 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		if (results.size()>0 && results.get(0)!=null){ 
 		pop = (Long) results.get(0);		
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return pop;		
     }
-	public static long getcongdistunduppopbatch(double d, String congdistId, List <Coordinate> points) throws FactoryException, TransformException {		
+	public static long getcongdistunduppopbatch(double d, String congdistId, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {		
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		session.beginTransaction();
+		session[sessionindex].beginTransaction();
 		Type geomType = GeometryUserType.TYPE;	
 		int i = 0;		
 		Point[] plist = new Point[points.size()];
@@ -1010,7 +1016,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
 		System.out.println("no of points: "+plist.length);		
-		Query q = session.getNamedQuery("CONGDIST_POP_UNDUP_BATCH");		
+		Query q = session[sessionindex].getNamedQuery("CONGDIST_POP_UNDUP_BATCH");		
 		q.setParameter("id",congdistId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
@@ -1020,13 +1026,13 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		if (results.size()>0 && results.get(0)!=null){ 
 		pop = (Long) results.get(0);		
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return pop;		
     }
 
 
-	public static County QueryCountybyId(String id){
-		Query q = session.getNamedQuery("COUNTY_BY_ID");		
+	public static County QueryCountybyId(String id, int sessionindex){
+		Query q = session[sessionindex].getNamedQuery("COUNTY_BY_ID");		
 		q.setParameter("id",id);		
         List results = q.list();
 		County ct = new County();
@@ -1034,12 +1040,12 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		ct = (County) results.get(0);
 		//pop = (Integer) results.get(0);
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
 	}
 	
-	public static List<County> QueryOdotregionsbyId(String id){
-		Query q = session.getNamedQuery("REGION_BY_ID");		
+	public static List<County> QueryOdotregionsbyId(String id, int sessionindex){
+		Query q = session[sessionindex].getNamedQuery("REGION_BY_ID");		
 		q.setParameter("id",id);		
         List results = q.list();
 		List<County> ct = new ArrayList<County>();
@@ -1047,12 +1053,12 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		ct = (List<County>) results;
 		//pop = (Integer) results.get(0);
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
 	}
 	
-	public static Tract QueryTractbyId(String id){
-		Query q = session.getNamedQuery("TRACT_BY_ID");		
+	public static Tract QueryTractbyId(String id, int sessionindex){
+		Query q = session[sessionindex].getNamedQuery("TRACT_BY_ID");		
 		q.setParameter("id",id);		
         List results = q.list();
 		Tract ct = new Tract();
@@ -1060,12 +1066,12 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		ct = (Tract) results.get(0);
 		//pop = (Integer) results.get(0);
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
 	}
 	
-	public static Place QueryPlacebyId(String id){
-		Query q = session.getNamedQuery("PLACE_BY_ID");		
+	public static Place QueryPlacebyId(String id, int sessionindex){
+		Query q = session[sessionindex].getNamedQuery("PLACE_BY_ID");		
 		q.setParameter("id",id);		
         List results = q.list();
 		Place ct = new Place();
@@ -1073,12 +1079,12 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		ct = (Place) results.get(0);
 		//pop = (Integer) results.get(0);
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
 	}
 	
-	public static Urban QueryUrbanbyId(String id){
-		Query q = session.getNamedQuery("URBAN_BY_ID");		
+	public static Urban QueryUrbanbyId(String id, int sessionindex){
+		Query q = session[sessionindex].getNamedQuery("URBAN_BY_ID");		
 		q.setParameter("id",id);		
         List results = q.list();
 		Urban ct = new Urban();
@@ -1086,12 +1092,12 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		ct = (Urban) results.get(0);
 		//pop = (Integer) results.get(0);
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
 	}
 	
-	public static CongDist QueryCongdistbyId(String id){
-		Query q = session.getNamedQuery("CONGDIST_BY_ID");		
+	public static CongDist QueryCongdistbyId(String id, int sessionindex){
+		Query q = session[sessionindex].getNamedQuery("CONGDIST_BY_ID");		
 		q.setParameter("id",id);		
         List results = q.list();
 		CongDist ct = new CongDist();
@@ -1099,7 +1105,7 @@ private	static Session session = Hutil.getSessionFactory().openSession();
 		ct = (CongDist) results.get(0);
 		//pop = (Integer) results.get(0);
 		}
-		Hutil.getSessionFactory().close();
+		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
 	}
 /*
