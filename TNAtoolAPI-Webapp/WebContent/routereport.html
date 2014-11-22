@@ -117,17 +117,19 @@ $(document).ready(function(){
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
 		        	"sRowSelect": "os",
-		            "aButtons": [
-						
-						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false},
-		                {
-		                    "sExtends":    "collection",
-		                    "sButtonText": "Export Report",
-		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
-		                } 
-		            ]
+		        	"aButtons": [
+		 						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 							"sMessage": ""
+		 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
+		 		                
+		 		                {
+		 		                    "sExtends":    "collection",
+		 		                    "sButtonText": "Export Report",
+		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
+		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
+		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		 		                } 
+		 		         ]
 		        }
 				
 			} );

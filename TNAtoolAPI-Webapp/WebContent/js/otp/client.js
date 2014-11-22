@@ -163,7 +163,7 @@ map.on('draw:created', function (e) {
 		$("#POPdatepicker").datepicker( "setDate", new Date());
 		var d = new Date();
 		currentDate = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-		$('.leaflet-popup-content-wrapper').css('opacity','0.75');
+		$('.leaflet-popup-content-wrapper').css('opacity','0.80');
 		$('.leaflet-popup-close-button').css({'color':'#9B9A9A','z-index':'1'});
 	});
 	layer.bindPopup(
@@ -447,7 +447,7 @@ function disponmap(layerid,k,points,popup,node){
 			$('#'+markerLat+'POPdatepicker'+markerLng).datepicker( "setDate", new Date());
 			var d = new Date();
 			currentDate = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');			
-			$('.leaflet-popup-content-wrapper').css('opacity','0.70');
+			$('.leaflet-popup-content-wrapper').css('opacity','0.80');
 			$('.leaflet-popup-close-button').css({'color':'#9B9A9A','z-index':'1'});
 		});
 		marker.bindPopup(
