@@ -21,6 +21,7 @@
 var qstring = '';
 //var w_qstringx = window.opener.qstringx;
 var w_qstringx = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
+var dbindex = parseInt(document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1));
 var qstringx = '0.1';
 var progVal = 0; 
 var qstringd = '';
@@ -48,7 +49,31 @@ function EscFunc(){
 	jQuery.event.trigger({ type : 'keydown', which : 27 });
 }
 
-$(document).ready(function(){	
+$(document).ready(function(){
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
+		async: false,
+		success: function(d){	
+			var select = document.getElementById("dbselect");
+			select.options.length = 0;
+		    var menusize = 0;
+		    $.each(d.DBelement, function(i,item){
+		    	var option = document.createElement('option');
+		        option.text = item;
+		        option.value = 'DB'+i;
+		        select.add(option, i);		    	
+		    	menusize++;
+		    });		    		    
+		    if (dbindex<0 || dbindex>menusize-1){
+		    	dbindex = 0;
+		    	history.pushState('data', '', document.URL.split("?")[0]+'?&x=0.1&dbindex=0');
+		    }
+		    select.options.size = menusize;
+		    select.selectedIndex = dbindex;		    				    
+		}			
+	});	
 	$(document).tooltip({
 		position: {
 	        my: "left bottom",
@@ -89,7 +114,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex,
 		async: true,
 		success: function(d){			
 			$('h2').append('Transit Agency Summary Report <br><hr>');
@@ -115,7 +140,7 @@ $(document).ready(function(){
 			});		
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
-			progressbar.remove();
+			progressbar.remove();			
 			$('a').click(function(e){
 				var d = new Date();
 			    if ($(this).attr('type')=="RC"){
@@ -124,20 +149,20 @@ $(document).ready(function(){
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    	var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName);
+			    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);
 			    }else if($(this).attr('type')=="SC"){
 		    		qstring = $(this).attr('id');
 		    		qstringx = '0.1';
 		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		
-		    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&x='+qstringx);	    		
+		    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&x='+qstringx+'&dbindex='+dbindex);	    		
 			    }else if($(this).attr('type')=="XR"){
 		    		qstring = $(this).attr('id');
 		    		qstringx = '0.1';
 		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-		    		window.open('/TNAtoolAPI-Webapp/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName);	    		
+		    		window.open('/TNAtoolAPI-Webapp/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);	    		
 			    };
 			});
 			
@@ -156,15 +181,10 @@ $(document).ready(function(){
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
 		        	"sRowSelect": "os",
 		            "aButtons": [
-						
-						/* { "sExtends": "print", 
-						"sMessage": "Your original message"
-						+ " <input type='button' value='Return' onclick='EscFunc()' />"
-						}, */
 						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
 							"sMessage": ""
 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
-		                //"print",
+		                
 		                {
 		                    "sExtends":    "collection",
 		                    "sButtonText": "Export Report",
@@ -225,6 +245,12 @@ $(document).ready(function(){
 	
 });
 
+function dbchange(){
+	if (document.getElementById("dbselect").selectedIndex !=dbindex){
+		location.replace(document.URL.split("?")[0]+'?&x=0.1&dbindex='+document.getElementById("dbselect").selectedIndex);
+	}
+}
+
 function reload(){	
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
@@ -261,6 +287,7 @@ function pageLoad(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
+				<select id='dbselect' onchange='dbchange()'></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

@@ -40,77 +40,43 @@ import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
 import org.onebusaway.gtfs.services.HibernateGtfsFactory;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 
+import org.onebusaway.gtfs.impl.Databases;
+
 public class GtfsHibernateReaderExampleMain {
 
   private static final String KEY_CLASSPATH = "classpath:";
 
   private static final String KEY_FILE = "file:";
   
-  public static HibernateGtfsFactory factory = createHibernateGtfsFactory("classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml");
+  public static HibernateGtfsFactory[] factory = new HibernateGtfsFactory[2];
+  static{
+	  for (int k=0; k<Databases.dbsize; k++){
+		  factory[k] = createHibernateGtfsFactory(Databases.ConfigPaths[k]);
+	  }	    
+  }		  
 
-  public static void main(String[] args) throws IOException {
-
-    if (!(args.length == 1 || args.length == 2)) {
-      System.err.println("usage: gtfsPath [hibernate-config.xml]");
-      System.exit(-1);
-    }
-
-    String resource = "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";
-    if (args.length == 2)
-      resource = args[1];
-
-    HibernateGtfsFactory factory = createHibernateGtfsFactory(resource);
-
-    GtfsReader reader = new GtfsReader();
-    reader.setInputLocation(new File(args[0]));
-
-    GtfsMutableRelationalDao dao = factory.getDao();
-    reader.setEntityStore(dao);
-    reader.run();
-
-    Collection<Stop> stops = dao.getAllStops();
-
-    for (Stop stop : stops)
-      System.out.println(stop.getName());
-
-    CalendarService calendarService = factory.getCalendarService();
-    Set<AgencyAndId> serviceIds = calendarService.getServiceIds();
-
-    for (AgencyAndId serviceId : serviceIds) {
-      Set<ServiceDate> dates = calendarService.getServiceDatesForServiceId(serviceId);
-      ServiceDate from = null;
-      ServiceDate to = null;
-      for (ServiceDate date : dates) {
-        from = min(from, date);
-        to = max(to, date);
-      }
-
-      System.out.println("serviceId=" + serviceId + " from=" + from + " to="
-          + to);
-    }
-  }
-  public static Agency QueryAgencybyid(String id){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static Agency QueryAgencybyid(String id, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getAgencyForId(id);
   }
   
-  public static Stop QueryStopbyid(AgencyAndId id){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static Stop QueryStopbyid(AgencyAndId id, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getStopForId(id);
   }
   
-  public static Route QueryRoutebyid(AgencyAndId route){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static Route QueryRoutebyid(AgencyAndId route, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getRouteForId(route);
   }
   
-  public static List<Trip> QueryTripsforAgency(String agencyId){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static List<Trip> QueryTripsforAgency(String agencyId, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getTripsForAgency(agencyId);
   }
   
-  public static Double getRouteMilesforAgency (String agencyId){
-	  GtfsMutableRelationalDao dao = factory.getDao();
+  public static Double getRouteMilesforAgency (String agencyId, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	  List<Double> lengths = dao.getMaxTripLengthsForAgency(agencyId);
 	  Double response = 0.0;
 	  for (Double length: lengths){
@@ -118,155 +84,155 @@ public class GtfsHibernateReaderExampleMain {
 	  }
 	  return response;
   }
-  public static List<String> QueryRouteIdsforStop(Stop stop){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static List<String> QueryRouteIdsforStop(Stop stop, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getRouteIdsForStop(stop);
   }
   
-  public static List<Trip> QueryTripsforAgency_RouteSorted(String agencyId){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static List<Trip> QueryTripsforAgency_RouteSorted(String agencyId, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getTripsForAgency_RouteSorted(agencyId);
   }
   
-  public static List<ServiceCalendar> QueryCalsforRoute(Route route){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static List<ServiceCalendar> QueryCalsforRoute(Route route, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getServiceCalendarsForRoute(route);
   }
   
-  public static ServiceCalendar  QueryCalendarforTrip(Trip trip){
-	  GtfsMutableRelationalDao dao = factory.getDao();
+  public static ServiceCalendar  QueryCalendarforTrip(Trip trip, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	  return dao.getCalendarForServiceId(trip.getServiceId());
   }
   
-  public static List<ServiceCalendarDate>  QueryCalendarDatesforTrip(Trip trip){
-	  GtfsMutableRelationalDao dao = factory.getDao();
+  public static List<ServiceCalendarDate>  QueryCalendarDatesforTrip(Trip trip, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	  return dao.getCalendarDatesForServiceId(trip.getServiceId());
   }
   
   //Alireza
-  public static List<ServiceCalendar>  QueryCalendarforAgency(String agency){
-	  GtfsMutableRelationalDao dao = factory.getDao();
+  public static List<ServiceCalendar>  QueryCalendarforAgency(String agency, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	  return dao.getCalendarForAgency(agency);
   }
   
-  public static List<ServiceCalendarDate>  QueryCalendarDatesforAgency(String agency){
-	  GtfsMutableRelationalDao dao = factory.getDao();
+  public static List<ServiceCalendarDate>  QueryCalendarDatesforAgency(String agency, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	  return dao.getCalendarDatesForAgency(agency);
   }
   
-  public static List<ShapePoint> Queryshapebytrip(AgencyAndId trip){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static List<ShapePoint> Queryshapebytrip(AgencyAndId trip, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  AgencyAndId shapeid = dao.getTripForId(trip).getShapeId();	  
 	  return dao.getShapePointsForShapeId(shapeid);
   }
   
-  public static List<StopTime> Querystoptimebytrip(AgencyAndId trip){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static List<StopTime> Querystoptimebytrip(AgencyAndId trip, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  Trip trp = dao.getTripForId(trip);	  
 	  return dao.getStopTimesForTrip(trp);
   }
   
-  public static List<FareRule> QueryFareRuleByRoute(Route route){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  	  
+  public static List<FareRule> QueryFareRuleByRoute(Route route, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  	  
 	  return dao.getFareRuleForRoute(route);
   }
   
-  public static List<Float> QueryFarePriceByRoutes(List <String> routes){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  	  
+  public static List<Float> QueryFarePriceByRoutes(List <String> routes, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  	  
 	  return dao.getFarePriceForRoutes(routes);
   }
   
-  public static void updateTrip(Trip trip){
-	GtfsMutableRelationalDao dao = factory.getDao();
+  public static void updateTrip(Trip trip, int dbindex){
+	GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	dao.updateTrip(trip);
   }
   
-  public static Trip getTrip(AgencyAndId id){
-	  GtfsMutableRelationalDao dao = factory.getDao();
+  public static Trip getTrip(AgencyAndId id, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	  return dao.getTripForId(id);
   }
   
-  public static Collection<Agency> QueryAllAgencies (){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static Collection<Agency> QueryAllAgencies (int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getAllAgencies();
   }
   
-  public static Collection<Route> QueryAllRoutes (){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static Collection<Route> QueryAllRoutes (int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getAllRoutes();
   }
   
-  public static Collection<Trip> QueryAllTrips (){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static Collection<Trip> QueryAllTrips (int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getAllTrips();
   }
   
-  public static List<Route> QueryRoutesbyAgency (Agency agency){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static List<Route> QueryRoutesbyAgency (Agency agency, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getRoutesForAgency(agency);
   }
   
-  public static List<Trip> QueryTripsbyRoute (Route route){
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+  public static List<Trip> QueryTripsbyRoute (Route route, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getTripsForRoute(route);
   }
   
-  public static List<Stop> QueryStopsbyAgency (String id){
+  public static List<Stop> QueryStopsbyAgency (String id, int dbindex){
 	  //String resource = "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";
 	  //HibernateGtfsFactory factory = createHibernateGtfsFactory(resource);
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  
 	  return dao.getStopsForAgency(id);
   }
-  public static List<Stop> QueryStopsbyRoute (AgencyAndId route){
+  public static List<Stop> QueryStopsbyRoute (AgencyAndId route, int dbindex){
 	  //String resource = "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";
 	  //HibernateGtfsFactory factory = createHibernateGtfsFactory(resource);
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  
 	  return dao.getStopsForRoute(route);
   }
   
-  public static List<Stop> QueryStopsbyTrip (AgencyAndId trip){
+  public static List<Stop> QueryStopsbyTrip (AgencyAndId trip, int dbindex){
 	  //String resource = "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";
 	  //HibernateGtfsFactory factory = createHibernateGtfsFactory(resource);
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  
 	  return dao.getStopsForTrip(trip);
   }
   
-  public static List<Stop> QueryStopsbyTripCounty (AgencyAndId trip, String county){
-	  GtfsMutableRelationalDao dao = factory.getDao();  
+  public static List<Stop> QueryStopsbyTripCounty (AgencyAndId trip, String county, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
 	  return dao.getStopsForTripCounty(trip,county);
   }
   
-  public static List<Stop> QueryStopsbyTripRegion (AgencyAndId trip, String region){
-	  GtfsMutableRelationalDao dao = factory.getDao();  
+  public static List<Stop> QueryStopsbyTripRegion (AgencyAndId trip, String region, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
 	  return dao.getStopsForTripRegion(trip,region);
   }
   
-  public static List<Stop> QueryStopsbyTripTract (AgencyAndId trip, String tract){
-	  GtfsMutableRelationalDao dao = factory.getDao();  
+  public static List<Stop> QueryStopsbyTripTract (AgencyAndId trip, String tract, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
 	  return dao.getStopsForTripTract(trip,tract);
   }
   
-  public static List<Stop> QueryStopsbyTripPlace (AgencyAndId trip, String place){
-	  GtfsMutableRelationalDao dao = factory.getDao();  
+  public static List<Stop> QueryStopsbyTripPlace (AgencyAndId trip, String place, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
 	  return dao.getStopsForTripPlace(trip,place);
   }
   
-  public static List<Stop> QueryStopsbyTripUrban (AgencyAndId trip, String urban){
-	  GtfsMutableRelationalDao dao = factory.getDao();  
+  public static List<Stop> QueryStopsbyTripUrban (AgencyAndId trip, String urban, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
 	  return dao.getStopsForTripUrban(trip,urban);
   }
   
-  public static List<Stop> QueryStopsbyTripCongdist (AgencyAndId trip, String congdist){
-	  GtfsMutableRelationalDao dao = factory.getDao();  
+  public static List<Stop> QueryStopsbyTripCongdist (AgencyAndId trip, String congdist, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
 	  return dao.getStopsForTripCongdist(trip,congdist);
   }
-  public static String QueryServiceHours (List<String> trips){
+  public static String QueryServiceHours (List<String> trips, int dbindex){
 	  //String resource = "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";
 	  //HibernateGtfsFactory factory = createHibernateGtfsFactory(resource);
-	  GtfsMutableRelationalDao dao = factory.getDao();	  
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  String tripList = "";
 	  /*for (String str:trips ){
 		  tripList += "'"+ str+"'"+", ";

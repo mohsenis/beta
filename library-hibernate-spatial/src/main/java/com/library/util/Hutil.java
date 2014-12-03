@@ -2,22 +2,28 @@ package com.library.util;
 
 import org.hibernate.*;
 import org.hibernate.cfg.*;
+import org.onebusaway.gtfs.impl.Databases;
 
 public class Hutil {
-	private static final SessionFactory sessionFactory;
+	private static final SessionFactory[] sessionFactory = new SessionFactory[2];	
 
     static {
-        try {
-            // Create the SessionFactory from hibernate.cfg.xml
-            sessionFactory = new Configuration().configure().buildSessionFactory();
-        } catch (Throwable ex) {
-            // Make sure you log the exception, as it might be swallowed
-            System.err.println("Initial SessionFactory creation failed." + ex);
-            throw new ExceptionInInitializerError(ex);
-        }
-    }
+    	for (int k=0; k<Databases.dbsize; k++)
+    	{
+    		try {
+                // Create the SessionFactory from hibernate.cfg.xml
+                sessionFactory[k] = new Configuration().configure(Databases.spatialConfigPaths[k]).buildSessionFactory();
+            } catch (Throwable ex) {
+                // Make sure you log the exception, as it might be swallowed
+                System.err.println("Initial SessionFactory creation failed." + ex);
+                throw new ExceptionInInitializerError(ex);
+            }
+    	}
+        
+    }    
 
-    public static SessionFactory getSessionFactory() {
+    public static SessionFactory[] getSessionFactory() {
         return sessionFactory;
     }
+    
 }

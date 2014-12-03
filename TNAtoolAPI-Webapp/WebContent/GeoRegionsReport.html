@@ -21,8 +21,8 @@ var qstring = '';
 var qstringx = '0.1';
 var progVal = 0; 
 var qstringd = '';
+var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
 var d = new Date();
-
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Name of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -46,7 +46,31 @@ function EscFunc(){
 	jQuery.event.trigger({ type : 'keydown', which : 27 });
 }
 
-$(document).ready(function(){	
+$(document).ready(function(){
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
+		async: false,
+		success: function(d){	
+			var select = document.getElementById("dbselect");
+			select.options.length = 0;
+		    var menusize = 0;
+		    $.each(d.DBelement, function(i,item){
+		    	var option = document.createElement('option');
+		        option.text = item;
+		        option.value = 'DB'+i;
+		        select.add(option, i);		    	
+		    	menusize++;
+		    });		    		    
+		    if (dbindex<0 || dbindex>menusize-1){
+		    	dbindex = 0;
+		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
+		    }
+		    select.options.size = menusize;
+		    select.selectedIndex = dbindex;		    				    
+		}			
+	});
 	$(document).tooltip({
 		position: {
 	        my: "left bottom",
@@ -87,7 +111,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/GeoORSR?&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoORSR?&key='+ key+'&dbindex='+dbindex,
 		async: true,
 		success: function(d){			
 			$('h2').append('ODOT Transit Regions Summary Report <br><hr>');
@@ -111,7 +135,7 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/GeoRegionsXreport.html?&region='+qstring+'&x='+qstringx+'&n='+keyName);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoRegionsXreport.html?&region='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);    		
 			    };
 			});
 			
@@ -123,22 +147,19 @@ $(document).ready(function(){
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
 		        	"sRowSelect": "os",
-		            "aButtons": [
-						
-						/* { "sExtends": "print", 
-						"sMessage": "Your original message"
-						+ " <input type='button' value='Return' onclick='EscFunc()' />"
-						}, */
-						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false},
-		                //"print",
-		                {
-		                    "sExtends":    "collection",
-		                    "sButtonText": "Export Report",
-		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true},
-		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false},
-		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false}, ]
-		                } 
-		            ]
+		        	"aButtons": [
+		 						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 							"sMessage": ""
+		 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
+		 		                
+		 		                {
+		 		                    "sExtends":    "collection",
+		 		                    "sButtonText": "Export Report",
+		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
+		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
+		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		 		                } 
+		 		            ]
 		        }
 				
 			} );
@@ -201,9 +222,11 @@ function exportbutton(){
 	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
 	window.open(uri, 'AgencySummaryReport.csv');
 }
-/* $(window).load(function () {	
-	sorttable.innerSortFunction.apply(document.getElementById('an'), []);
-}); */
+function dbchange(){
+	if (document.getElementById("dbselect").selectedIndex !=dbindex){
+		location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
+	}
+}
 
 </script>
 
@@ -219,6 +242,7 @@ function exportbutton(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
+				<select id='dbselect' onchange='dbchange()'></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

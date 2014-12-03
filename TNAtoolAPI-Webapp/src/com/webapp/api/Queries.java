@@ -19,6 +19,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.QueryParam;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jettison.json.JSONException;
@@ -26,6 +28,7 @@ import org.codehaus.jettison.json.JSONException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.webapp.api.model.*;
 import com.webapp.api.utils.PolylineEncoder;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.library.samples.*;
 import com.library.model.*;
 
@@ -42,6 +45,7 @@ import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.examples.GtfsHibernateReaderExampleMain;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
+import org.onebusaway.gtfs.impl.Databases;
 
 
 @Path("/transit")
@@ -49,20 +53,41 @@ import org.opengis.referencing.operation.TransformException;
 public class Queries {
 	
 	private static final double STOP_SEARCH_RADIUS = 0.1;
-	static AgencyRouteList menuResponse;
+	private static final int default_dbindex = Databases.defaultDBIndex;
+	static AgencyRouteList[] menuResponse = new AgencyRouteList[Databases.dbsize];
+	static int dbsize = Databases.dbsize;	
+	
+	@GET
+    @Path("/DBList")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getDBList() throws JSONException {
+		
+				
+        String[] DBList = Databases.dbnames;
+        DBList response = new DBList();
+        
+        for (int s=0; s<dbsize; s++){        	
+        	response.DBelement.add(DBList[s]);
+        }
+        
+        return response;
+    }
 	
 	@GET
     @Path("/NearBlocks")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getNearBlocks(@QueryParam("lat") double lat,@QueryParam("x") double x, @QueryParam("lon") double lon) throws JSONException {
+    public Object getNearBlocks(@QueryParam("lat") double lat,@QueryParam("x") double x, @QueryParam("lon") double lon, @QueryParam("dbindex") Integer dbindex ) throws JSONException {
         
         if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
+        if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }        	
         x = x * 1609.34;
         List <Census> centroids = new ArrayList<Census> ();
         try {
-            centroids =EventManager.getcentroids(x, lat, lon);
+            centroids =EventManager.getcentroids(x, lat, lon, dbindex);
         } catch (FactoryException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -79,68 +104,21 @@ public class Queries {
         }
         return response;
     }
-
-
-	@GET
-    @Path("/saeed")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object saeed(@QueryParam("routerId") String routerId) throws JSONException {
-
-        return new TransitError("This is a test. You entered: "+ routerId);
-    }
 	
-	@GET
-    @Path("/censustest")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object census(@QueryParam("radius") double x,@QueryParam("agency") String agency){
-		if (Double.isNaN(x) || x <= 0) {
-            x = STOP_SEARCH_RADIUS;
-        }
-    	x = x * 1609.34;
-		//List <Census> centroids = new ArrayList <Census> ();
-		long pop = 0;
-		List <Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency);
-		List <Coordinate> stopcoords = new ArrayList<Coordinate>();
-		for (Stop stop: stops){
-			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
-		}
-        try {
-			pop =EventManager.getunduppopbatch(x, stopcoords);
-		} catch (FactoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        List <Census> centroids = new ArrayList <Census> ();
-        try {
-        	centroids =EventManager.getundupcentbatch(x, stopcoords);
-		} catch (FactoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        //CensusList response = new CensusList();
-        long popsum=0;
-        for (Census c:centroids){
-        	popsum+=c.getPopulation();
-        }
-        return new TransitError("Unduplicated Population for agency "+agency+" is: "+ String.valueOf(pop)+" The sum based on centroid list is: "+String.valueOf(popsum));
-    }
 	@GET
     @Path("/poparound")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getpop(@QueryParam("radius") double x,@QueryParam("lat") double lat,@QueryParam("lon") double lon){
+    public Object getpop(@QueryParam("radius") double x,@QueryParam("lat") double lat,@QueryParam("lon") double lon, @QueryParam("dbindex") Integer dbindex){
 		if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        } 
     	x = x * 1609.34;
 		long response = 0;
         try {
-			response =EventManager.getpop(x, lat, lon);
+			response =EventManager.getpop(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -150,7 +128,7 @@ public class Queries {
 		}
         List <Census> centroids = new ArrayList<Census>(); 
         try {
-        	centroids =EventManager.getcentroids(x, lat, lon);
+        	centroids =EventManager.getcentroids(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -174,11 +152,15 @@ public class Queries {
     @GET
     @Path("/onmapreport")
     @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Object getSecondmenu(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x) throws JSONException { 
-    	/*if (Double.isNaN(x) || x <= 0) {
+    public Object getSecondmenu(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex) throws JSONException { 
+    	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
-    	x = x * 1609.34;*/
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        } 
+    	final int sdbindex = dbindex;
+//    	x = x * 1609.34;
     	String[] latss = lats.split(",");
     	double[] lat = new double[latss.length];
     	int ind = 0;
@@ -223,21 +205,21 @@ public class Queries {
     			List<Float> medianFare= new ArrayList<Float>();
     			
     			List<GeoStop> stops;
-    			Collection<Agency> agencies = GtfsHibernateReaderExampleMain.QueryAllAgencies();
+    			Collection<Agency> agencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(sdbindex);
     			Map<String, Agency> agencyRef = new HashMap<String, Agency>();
     			for(Agency agency: agencies){
     				agencyRef.put(agency.getId(), agency);
     			}
-    			Collection<Route> routes = GtfsHibernateReaderExampleMain.QueryAllRoutes();
+    			Collection<Route> routes = GtfsHibernateReaderExampleMain.QueryAllRoutes(sdbindex);
   		        Map<String, Route> routeRef= new HashMap<String, Route>();
   		        for(Route route: routes){
   		        	routeRef.put(route.getAgency().getId()+route.getId().getId(), route);
   		        }
   		        Map<String, TmpMapRoute> tripKey = new HashMap<String, TmpMapRoute>();
-  		        List<Trip> trips = (List<Trip>) GtfsHibernateReaderExampleMain.QueryAllTrips();
+  		        List<Trip> trips = (List<Trip>) GtfsHibernateReaderExampleMain.QueryAllTrips(sdbindex);
 				String currentAgency  = trips.get(0).getId().getAgencyId();
-				List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(currentAgency);
-				List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(currentAgency);
+				List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(currentAgency, sdbindex);
+				List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(currentAgency, sdbindex);
 				for(Trip trip: trips){
 					String ai = trip.getId().getAgencyId();
 					
@@ -251,8 +233,8 @@ public class Queries {
 			        int endDate;
 			        
 			        if(!ai.equals(currentAgency)){
-				        agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(trip.getServiceId().getAgencyId());
-				        agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(trip.getServiceId().getAgencyId());
+				        agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(trip.getServiceId().getAgencyId(), sdbindex);
+				        agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(trip.getServiceId().getAgencyId(), sdbindex);
 				        currentAgency = ai;
 			        }
 			        double TL = Math.max(trip.getLength(),trip.getEstlength());	
@@ -351,7 +333,7 @@ public class Queries {
 				Map<String, MapAgency> agencyKey = new HashMap<String, MapAgency>();
 	            Map<String, MapRoute> routeKey = new HashMap<String, MapRoute>();
     			try {
-    				List <GeoStopRouteMap> asrms = EventManager.getstoproutemaps();
+    				List <GeoStopRouteMap> asrms = EventManager.getstoproutemaps(sdbindex);
 					Map<String, List<GeoStopRouteMap>> stopRouteMapKey = new HashMap<String, List<GeoStopRouteMap>>();
 					String kk="";
 					for(GeoStopRouteMap gstm: asrms){
@@ -362,9 +344,9 @@ public class Queries {
 						stopRouteMapKey.get(kk).add(gstm);
 					}
 					if(lat.length==1){
-						stops = EventManager.getstopswithincircle(x, lat[0], lon[0]);
+						stops = EventManager.getstopswithincircle(x, lat[0], lon[0], sdbindex);
 					}else{
-						stops = EventManager.getstopswithinrectangle(lat, lon);
+						stops = EventManager.getstopswithinrectangle(lat, lon, sdbindex);
 						//stops = EventManager.getstopswithincircle(x, lat[0], lon[0]);
 					}
     				
@@ -421,7 +403,7 @@ public class Queries {
     		    				}
     		    				
     		    				mr.Frequency = tmr.getFrequency();
-    		    				List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(rou);
+    		    				List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(rou, sdbindex);
     					    	if(fareRules.size()==0){
     					    		mr.Fare = "N/A";
     					    	}else{
@@ -497,15 +479,15 @@ public class Queries {
   		        Map<String, Tract> tractRef= new HashMap<String, Tract>();
 		        try {
 		        	if(lat.length==1){
-		        		centroids =EventManager.getcentroids(x, lat[0], lon[0]);
+		        		centroids =EventManager.getcentroids(x, lat[0], lon[0], sdbindex);
 		        	}else{
-		        		centroids =EventManager.getcentroidswithinrectangle(lat, lon);
+		        		centroids =EventManager.getcentroidswithinrectangle(lat, lon, sdbindex);
 		        		//centroids =EventManager.getcentroids(x, lat[0], lon[0]);
 		        	}
 		            
 		            mg.TotalBlocks = centroids.size()+"";
-		            tracts = EventManager.gettracts();
-		            counties = EventManager.getcounties();
+		            tracts = EventManager.gettracts(sdbindex);
+		            counties = EventManager.getcounties(sdbindex);
 		            for(County cou: counties){
 		            	countyRef.put(cou.getCountyId(), cou);
 		            }
@@ -585,10 +567,13 @@ public class Queries {
     @GET
     @Path("/menu")
     @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Object getmenu() throws JSONException {     	
-    	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies();
-    	if (menuResponse==null || menuResponse.data.size()!=allagencies.size() ){
-    		menuResponse = new AgencyRouteList();
+    public Object getmenu(@QueryParam("dbindex") Integer dbindex) throws JSONException {  
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);
+    	if (menuResponse[dbindex]==null || menuResponse[dbindex].data.size()!=allagencies.size() ){
+    		menuResponse[dbindex] = new AgencyRouteList();
 	    	for (Agency instance : allagencies){    		
 	    		AgencyRoute each = new AgencyRoute();
 	    		Attr attribute = new Attr();
@@ -596,7 +581,7 @@ public class Queries {
 	        	attribute.type = "agency";        	
 	        	each.state = "closed";        	
 	        	each.attr = attribute;
-	    		List <Route> routes = GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance);	    		
+	    		List <Route> routes = GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance, dbindex);	    		
 	    		for (Route route : routes){
 	    			RouteListm eachO = new RouteListm();
 	    			String str = null;
@@ -614,7 +599,7 @@ public class Queries {
 	                attribute.id = route.getId().getId();
 	                attribute.type = "route";			                
 	                eachO.attr = attribute;
-	                List<Trip> trips = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(route);
+	                List<Trip> trips = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(route, dbindex);
 	                List<String> shapeids = new ArrayList<String>();
 	                List<String> shapes = new ArrayList<String>();
 	                int counter = 0;
@@ -632,7 +617,7 @@ public class Queries {
 	                        		if (trip.getTripShortName()!=null){
 	                        			name = trip.getTripShortName();
 	                        		}else{
-	                        			List<StopTime> st = GtfsHibernateReaderExampleMain.Querystoptimebytrip(trip.getId());
+	                        			List<StopTime> st = GtfsHibernateReaderExampleMain.Querystoptimebytrip(trip.getId(), dbindex);
 	                        			
 	                        			name = "From "+ st.get(0).getStop().getName() + " to "+ st.get(st.size()-1).getStop().getName();
 	                        		}
@@ -658,7 +643,7 @@ public class Queries {
 	                        		if (trip.getTripShortName()!=null){
 	                        			name = trip.getTripShortName();
 	                        		}else{
-	                        			List<StopTime> st = GtfsHibernateReaderExampleMain.Querystoptimebytrip(trip.getId());
+	                        			List<StopTime> st = GtfsHibernateReaderExampleMain.Querystoptimebytrip(trip.getId(), dbindex);
 	                        			name = "From "+ st.get(0).getStopHeadsign() + " to "+ st.get(st.size()-1).getStopHeadsign();
 	                        		}
 	                        	}
@@ -676,10 +661,10 @@ public class Queries {
 	                each.children.add(eachO);
 	    		}
 	    		each.data = instance.getName();
-	    		menuResponse.data.add(each);
+	    		menuResponse[dbindex].data.add(each);
 	    	}
     	}
-    	return menuResponse;    	
+    	return menuResponse[dbindex];    	
     }
     
     	/**
@@ -688,10 +673,13 @@ public class Queries {
     @GET
     @Path("/stops")
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object dbstopsforagency(@QueryParam("agency") String agency){
-		StopList response = new StopList();
+    public Object dbstopsforagency(@QueryParam("agency") String agency, @QueryParam("dbindex") Integer dbindex){
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	StopList response = new StopList();
     	//StopList response = new StopList();		
-		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency);		
+		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency, dbindex);		
 		for (Stop stop : stops){
 			  response.stops.add(new StopType(stop, false));
 		  } 
@@ -708,11 +696,14 @@ public class Queries {
     @GET
     @Path("/shape")
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object dbshapesforagency(@QueryParam("agency") String agency,@QueryParam("trip") String trip){
+    public Object dbshapesforagency(@QueryParam("agency") String agency,@QueryParam("trip") String trip, @QueryParam("dbindex") Integer dbindex){
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	AgencyAndId agencyandtrip = new AgencyAndId();
     	agencyandtrip.setAgencyId(agency);
     	agencyandtrip.setId(trip);
-    	Trip tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip);    	
+    	Trip tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip, dbindex);    	
     	Rshape shape = new Rshape();
     	shape.points = tp.getEpshape();
     	shape.length = tp.getLength();  
@@ -732,11 +723,14 @@ public class Queries {
     @GET
     @Path("/tlength")
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object triplength(@QueryParam("agency") String agency,@QueryParam("trip") String trip){
+    public Object triplength(@QueryParam("agency") String agency,@QueryParam("trip") String trip, @QueryParam("dbindex") Integer dbindex){
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	AgencyAndId agencyandtrip = new AgencyAndId();
     	agencyandtrip.setAgencyId(agency);
     	agencyandtrip.setId(trip);
-    	List<ShapePoint> shapes = GtfsHibernateReaderExampleMain.Queryshapebytrip(agencyandtrip);
+    	List<ShapePoint> shapes = GtfsHibernateReaderExampleMain.Queryshapebytrip(agencyandtrip, dbindex);
     	String pe = PolylineEncoder.createEncodings(shapes, 1);
     	Rshape shape = new Rshape();
     	shape.points = pe;
@@ -749,13 +743,16 @@ public class Queries {
     @GET
     @Path("/stopsbyroute")
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object dbstopsforroute(@QueryParam("agency") String agency,@QueryParam("route") String route){
-		StopList response = new StopList();
+    public Object dbstopsforroute(@QueryParam("agency") String agency,@QueryParam("route") String route, @QueryParam("dbindex") Integer dbindex){
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	StopList response = new StopList();
 		AgencyAndId routeandid = new AgencyAndId();
 		routeandid.setAgencyId(agency);
 		routeandid.setId(route);
     	//StopList response = new StopList();		
-		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(routeandid);
+		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(routeandid, dbindex);
 		
 		for (Stop stop : stops){
 			  response.stops.add(new StopType(stop, false));
@@ -832,22 +829,25 @@ public class Queries {
     @GET
     @Path("/AgencyXR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getAXR(@QueryParam("agency") String agency, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key) throws JSONException {
+    public Object getAXR(@QueryParam("agency") String agency, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
     	
        	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
-       	x = x * 1609.34;    	
+       	x = x * 1609.34; 
+       	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	String[] dates = date.split(",");
     	int[][] days = daysOfWeek(dates);
     	    	
     	AgencyXR response = new AgencyXR();
     	response.AgencyId = agency;
-    	response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency).getName();
-    	int StopCount = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency).size();
+    	response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
+    	int StopCount = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency, dbindex).size();
     	response.StopCount =  String.valueOf(StopCount);
     	    	
-    	List <Trip> alltrips = GtfsHibernateReaderExampleMain.QueryTripsforAgency_RouteSorted(agency);
+    	List <Trip> alltrips = GtfsHibernateReaderExampleMain.QueryTripsforAgency_RouteSorted(agency, dbindex);
     	
     	int totalLoad = alltrips.size();
     	int tripCount=0;
@@ -866,8 +866,8 @@ public class Queries {
         int startDate;
         int endDate;
                      
-        List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(serviceAgency);
-        List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(serviceAgency);
+        List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(serviceAgency, dbindex);
+        List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(serviceAgency, dbindex);
         
         int index = 0;
         ArrayList <String> activeTrips = new ArrayList<String>();
@@ -976,13 +976,13 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     		if (frequency>0 && !instance.getUid().equals(uid)){    			
 				trippop=0;
 				uid = instance.getUid();
-				List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTrip(instance.getId());
+				List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTrip(instance.getId(), dbindex);
 	    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();
 	    		for (Stop stop: tripstops){
 	    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 	    		}
 	            try {
-	    			trippop =EventManager.getunduppopbatch(x, tripstopcoords);
+	    			trippop =EventManager.getunduppopbatch(x, tripstopcoords, dbindex);
 	    		} catch (FactoryException e) {
 	    			// TODO Auto-generated catch block
 	    			e.printStackTrace();
@@ -1026,7 +1026,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
         else 
         	response.StopPerRouteMile = "NA";
         if (activeTrips.size()>0) {
-        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips);
+        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
         	response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
         }
         
@@ -1044,20 +1044,23 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     @GET
     @Path("/AgencyXRS")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getAXRS(@QueryParam("agency") String agency,@QueryParam("x") double x){
+    public Object getAXRS(@QueryParam("agency") String agency,@QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex){
     	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
        	x = x * 1609.34;
+       	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	AgencyXR response = new AgencyXR();
     	long pop = 0;
-    	List <Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency);
+    	List <Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency, dbindex);
 		List <Coordinate> stopcoords = new ArrayList<Coordinate>();
 		for (Stop stop: stops){
 			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		}
         try {
-			pop =EventManager.getunduppopbatch(x, stopcoords);
+			pop =EventManager.getunduppopbatch(x, stopcoords, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1075,18 +1078,21 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     @GET
     @Path("/StopsR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getTAS(@QueryParam("agency") String agency, @QueryParam("x") double x, @QueryParam("route") String routeid, @QueryParam("key") double key) throws JSONException {
+    public Object getTAS(@QueryParam("agency") String agency, @QueryParam("x") double x, @QueryParam("route") String routeid, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
     	
     	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
     	x = x * 1609.34;
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	StopListR response = new StopListR();
-    	response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency).getName();
+    	response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
     	int index =0;
     	if (routeid != null){    		
     		AgencyAndId route = new AgencyAndId(agency,routeid);
-    		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(route);
+    		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(route, dbindex);
     		/*List <Coordinate> points = new ArrayList <Coordinate>();
     		for (Stop s : stops){    			
     			points.add(new Coordinate(s.getLat(), s.getLon()));
@@ -1123,7 +1129,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     			setprogVal(key, (int) Math.round(index*100/totalLoad));
     		}
     	} else{
-    		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency);
+    		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency, dbindex);
     		
     		int totalLoad = stops.size();
     		for (Stop instance: stops){
@@ -1160,22 +1166,24 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     @GET
     @Path("/StopsRX")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getTASX(@QueryParam("agency") String agency, @QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("stopids") String stops) throws JSONException {
+    public Object getTASX(@QueryParam("agency") String agency, @QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("stopids") String stops, @QueryParam("dbindex") Integer dbindex) throws JSONException {
     	
     	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
     	x = x * 1609.34;
-    	
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	String[] stopIds = stops.split(",");
     	StopListR response = new StopListR();
     	response.AgencyName = "";
-    	List<Stop> tmpStops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency);
+    	List<Stop> tmpStops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency, dbindex);
     	String defAgency = tmpStops.get(0).getId().getAgencyId();
     	for (String instance: stopIds){
     		
     		AgencyAndId stopId = new AgencyAndId(defAgency,instance);
-    		Stop stop = GtfsHibernateReaderExampleMain.QueryStopbyid(stopId);
+    		Stop stop = GtfsHibernateReaderExampleMain.QueryStopbyid(stopId, dbindex);
     		//System.out.println(stop.toString());
 	    	StopR each = new StopR();
 			each.StopId = "";
@@ -1184,13 +1192,13 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 			each.PopWithinX = "";
 			
 			try{
-			each.PopWithinX = String.valueOf(EventManager.getpop(x, stop.getLat(), stop.getLon()));
+			each.PopWithinX = String.valueOf(EventManager.getpop(x, stop.getLat(), stop.getLon(), dbindex));
 			} catch (FactoryException e) {    				
 				e.printStackTrace();
 			} catch (TransformException e) {    				
 				e.printStackTrace();
 			}
-			each.Routes = GtfsHibernateReaderExampleMain.QueryRouteIdsforStop(stop).toString();
+			each.Routes = GtfsHibernateReaderExampleMain.QueryRouteIdsforStop(stop, dbindex).toString();
 			response.StopR.add(each);
     	}
     	return response;
@@ -1202,13 +1210,16 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	@GET
 	@Path("/AgencySR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getASR(@QueryParam("x") double x, @QueryParam("key") double key) throws JSONException {
+	public Object getASR(@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
 		if (Double.isNaN(x) || x <= 0) {
 	        x = STOP_SEARCH_RADIUS;
 	    }
-		x = x * 1609.34;	
+		x = x * 1609.34;
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
 		AgencyList allagencies = new AgencyList();
-		allagencies.agencies = GtfsHibernateReaderExampleMain.QueryAllAgencies();            
+		allagencies.agencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);            
 	    AgencySRList response = new AgencySRList();    
 	    int index =0;
 		int totalLoad = allagencies.agencies.size();
@@ -1221,12 +1232,12 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    	each.URL = instance.getUrl();
 	    	each.FareURL = instance.getFareUrl(); 
 	    	//changed/////////////////////////////////////////////////////////////////////////////////
-	    	List<Route> routes = GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance);
+	    	List<Route> routes = GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance, dbindex);
 	    	each.RoutesCount = String.valueOf(routes.size());
 	    	float sumFare=0; 
 	    	List<Float> fares = new ArrayList<Float>();
 	    	for(Route route: routes){
-	    		List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route);
+	    		List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route, dbindex);
 	    		if(fareRules.size()!=0){
 	    			sumFare+=fareRules.get(0).getFare().getPrice();
 	    			fares.add(fareRules.get(0).getFare().getPrice());
@@ -1242,7 +1253,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    	}
 	    	////////////////////////////////////////////////////////////////////////////////////////////
 			//each.RoutesCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance).size()) ;
-	    	List <Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(instance.getId());
+	    	List <Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(instance.getId(), dbindex);
 	        each.StopsCount = String.valueOf(stops.size());        
 	       /* long pop = 0;	        
 			List <Coordinate> stopcoords = new ArrayList<Coordinate>();
@@ -1278,17 +1289,20 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	@GET
 	@Path("/RoutesR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getTAR(@QueryParam("agency") String agency, @QueryParam("x") double x, @QueryParam("day") String date, @QueryParam("key") double key) throws JSONException {
+	public Object getTAR(@QueryParam("agency") String agency, @QueryParam("x") double x, @QueryParam("day") String date, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
 		if (Double.isNaN(x) || x <= 0) {
 	        x = STOP_SEARCH_RADIUS;
 	    }
 		x = x * 1609.34;
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
 		String[] dates = date.split(",");
 		int[][] days = daysOfWeek(dates);
 		
-		List <Trip> alltrips = GtfsHibernateReaderExampleMain.QueryTripsforAgency_RouteSorted(agency);	
+		List <Trip> alltrips = GtfsHibernateReaderExampleMain.QueryTripsforAgency_RouteSorted(agency, dbindex);	
 		RouteListR response = new RouteListR();
-		response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency).getName()+"";
+		response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName()+"";
 		Route thisroute =  alltrips.get(0).getRoute();
 		String routeId =thisroute.getId().getId();
 		RouteR each = new RouteR();
@@ -1305,15 +1319,15 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 		each.RouteLName = thisroute.getLongName()+"";
 		each.RouteDesc = thisroute.getDesc()+"";
 		each.RouteType = String.valueOf(thisroute.getType());
-		each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyRoute(thisroute.getId()).size());	 
+		each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyRoute(thisroute.getId(), dbindex).size());	 
 		int index =0;
 		int totalLoad = alltrips.size();
 		
 		String serviceAgency = alltrips.get(0).getServiceId().getAgencyId();
 	    int startDate;
 	    int endDate;
-		List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(serviceAgency);
-	    List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(serviceAgency);
+		List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(serviceAgency, dbindex);
+	    List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(serviceAgency, dbindex);
 	    
 		for (Trip instance: alltrips){
 			index ++;
@@ -1330,13 +1344,13 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 		        if (!instance.getUid().equals(uid)){
 		        	uid = instance.getUid();
 		        	pop =0;
-			        List <Stop> Rstops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(instance.getRoute().getId());
+			        List <Stop> Rstops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(instance.getRoute().getId(), dbindex);
 					List <Coordinate> Rstopcoords = new ArrayList<Coordinate>();				
 					for (Stop stop: Rstops){
 						Rstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 					}
 			        try {
-						pop =EventManager.getunduppopbatch(x, Rstopcoords);
+						pop =EventManager.getunduppopbatch(x, Rstopcoords, dbindex);
 					} catch (FactoryException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -1360,7 +1374,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 				each.RouteLName = thisroute.getLongName()+"";
 				each.RouteDesc = thisroute.getDesc()+"";
 				each.RouteType = String.valueOf(thisroute.getType());
-				each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyRoute(thisroute.getId()).size());
+				each.StopsCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryStopsbyRoute(thisroute.getId(), dbindex).size());
 				
 			}
 			double TL = Math.max(instance.getLength(),instance.getEstlength());			
@@ -1443,13 +1457,13 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 			if (frequency>0 && !instance.getUid().equals(tripuid)){
 				trippop = 0;
 				tripuid = instance.getUid();
-				List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTrip(instance.getId());
+				List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTrip(instance.getId(), dbindex);
 	    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();    		
 	    		for (Stop stop: tripstops){
 	    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 	    		}
 	            try {
-	    			trippop =EventManager.getunduppopbatch(x, tripstopcoords);
+	    			trippop =EventManager.getunduppopbatch(x, tripstopcoords, dbindex);
 	    		} catch (FactoryException e) {
 	    			// TODO Auto-generated catch block
 	    			e.printStackTrace();
@@ -1470,13 +1484,13 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    each.PopStopportunity = String.valueOf(Math.round(PopStopportunity))+"";	    
 	    //this is population for the last trip which cannot be computed in the above loop
 	    pop = 0;
-        List <Stop> Rstops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(alltrips.get(alltrips.size()-1).getRoute().getId());
+        List <Stop> Rstops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(alltrips.get(alltrips.size()-1).getRoute().getId(), dbindex);
 		List <Coordinate> Rstopcoords = new ArrayList<Coordinate>();
 		for (Stop stop: Rstops){
 			Rstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		}
         try {
-			pop =EventManager.getunduppopbatch(x, Rstopcoords);
+			pop =EventManager.getunduppopbatch(x, Rstopcoords, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1503,23 +1517,25 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     @GET
     @Path("/ScheduleR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getSchedule(@QueryParam("agency") String agency, @QueryParam("route") String routeid, @QueryParam("day") String date, @QueryParam("key") double key) throws JSONException {
-    	
+    public Object getSchedule(@QueryParam("agency") String agency, @QueryParam("route") String routeid, @QueryParam("day") String date, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	ScheduleList response = new ScheduleList();
     	String[] dates = date.split(",");
 		int[][] days = daysOfWeek(dates);
 		//System.out.println(days[0][0]);
     	AgencyAndId routeId = new AgencyAndId(agency,routeid);
-    	response.Agency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency).getName()+"";
-    	Route route = GtfsHibernateReaderExampleMain.QueryRoutebyid(routeId);
+    	response.Agency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName()+"";
+    	Route route = GtfsHibernateReaderExampleMain.QueryRoutebyid(routeId, dbindex);
     	response.Route = route.getId().getId()+"";
-    	List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route);
+    	List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route, dbindex);
     	if(fareRules.size()==0){
     		response.Fare = "N/A";
     	}else{
     		response.Fare = fareRules.get(0).getFare().getPrice()+"";
     	}
-    	List <Trip> routeTrips = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(route);
+    	List <Trip> routeTrips = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(route, dbindex);
     	int totalLoad = routeTrips.size();
     	/*Schedule[] schedules = new Schedule[2]; 
     	schedules[0] = new Schedule();
@@ -1532,8 +1548,8 @@ daysLoop:   for (int i=0; i<dates.length; i++){
     	String serviceAgency = routeTrips.get(0).getServiceId().getAgencyId();
 	    int startDate;
 	    int endDate;
-		List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(serviceAgency);
-	    List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(serviceAgency);
+		List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(serviceAgency, dbindex);
+	    List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(serviceAgency, dbindex);
 Loop:  	for (Trip trip: routeTrips){
     		index++;
     		boolean isIn = false;
@@ -1609,7 +1625,7 @@ Loop:  	for (Trip trip: routeTrips){
 			if(isIn){
 				//System.out.println("yes");
 	    		AgencyAndId agencyandtrip = trip.getId();
-	    		List <StopTime> stopTimes = GtfsHibernateReaderExampleMain.Querystoptimebytrip(agencyandtrip);
+	    		List <StopTime> stopTimes = GtfsHibernateReaderExampleMain.Querystoptimebytrip(agencyandtrip, dbindex);
 	    		TripSchedule ts = new TripSchedule();
 	    		for (StopTime st: stopTimes){
 	    			if(st.isArrivalTimeSet()){
@@ -1673,10 +1689,13 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoCSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCSR(@QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+	public Object getGCSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex ) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
 		List<County> allcounties = new ArrayList<County> ();
 		try {
-			allcounties = EventManager.getcounties();
+			allcounties = EventManager.getcounties(dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -1700,7 +1719,7 @@ Loop:  	for (Trip trip: routeTrips){
 	    	each.population = String.valueOf(instance.getPopulation());
 	    	each.TractsCount = "0";
 	    	try {
-	    		each.TractsCount = String.valueOf(EventManager.gettractscountbycounty(instance.getCountyId()));
+	    		each.TractsCount = String.valueOf(EventManager.gettractscountbycounty(instance.getCountyId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -1729,7 +1748,7 @@ Loop:  	for (Trip trip: routeTrips){
 	    	}*/
 	    	each.StopsCount = String.valueOf(0);
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId()));
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -1739,7 +1758,7 @@ Loop:  	for (Trip trip: routeTrips){
 			}	
 	    	each.RoutesCount = String.valueOf(0);
 	    	try {
-	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbycounty(instance.getCountyId()));
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbycounty(instance.getCountyId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -1765,24 +1784,27 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
     @Path("/CountiesXR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getCXR(@QueryParam("county") String county, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key) throws JSONException {
+    public Object getCXR(@QueryParam("county") String county, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
     	
        	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
-       	x = x * 1609.34;    	
+       	x = x * 1609.34;
+       	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	String[] dates = date.split(",");
     	int[][] days = daysOfWeek(dates);
     	String[] fulldates = fulldate(dates);
     	    	
     	GeoXR response = new GeoXR();
     	response.AreaId = county;
-    	County instance = EventManager.QueryCountybyId(county);
+    	County instance = EventManager.QueryCountybyId(county, dbindex);
     	response.AreaName = instance.getName();
     	long StopsCount = 0;
     	List<GeoStop> stops = new ArrayList<GeoStop>();
     	try {
-    		stops = EventManager.getstopsbycounty(instance.getCountyId());
+    		stops = EventManager.getstopsbycounty(instance.getCountyId(), dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -1798,7 +1820,7 @@ Loop:  	for (Trip trip: routeTrips){
 			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		}
         try {
-			pop =EventManager.getcountyunduppopbatch(x,county, stopcoords);
+			pop =EventManager.getcountyunduppopbatch(x,county, stopcoords, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1808,7 +1830,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
         List<String> connectedCounties = new ArrayList<String>();
         try {
-        	connectedCounties =EventManager.getconnectedcounties(county);
+        	connectedCounties =EventManager.getconnectedcounties(county, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1829,7 +1851,7 @@ Loop:  	for (Trip trip: routeTrips){
 		response.PopUnServed = String.valueOf(Math.round(1E4-((1E4*pop/instance.getPopulation())))/100.0);
 		List<CountyTripMap> trips = new ArrayList<CountyTripMap>();
 		try {
-			trips = EventManager.gettripsbycounty(county);
+			trips = EventManager.gettripsbycounty(county, dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -1866,8 +1888,8 @@ Loop:  	for (Trip trip: routeTrips){
     		if (TL > length) 
     			length = TL;
         	if (!agencyId.equals(inst.getagencyId_def())){     		
-        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def());
-        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def()); 
+        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def(), dbindex);
+        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def(), dbindex); 
         		agencyId = inst.getagencyId_def();
         	} 
         	if (!routeId.equals(inst.getRouteId())){
@@ -1983,14 +2005,14 @@ Loop:  	for (Trip trip: routeTrips){
     			trippop = 0;
     			uid = inst.getUid();
     			AgencyAndId trip = new AgencyAndId(agencyId, inst.getTripId());    			
-	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripCounty(trip,county);
+	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripCounty(trip,county, dbindex);
 	    		if (tripstops.size()>0 && tripstops.get(0)!=null){
 		    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();
 		    		for (Stop stop: tripstops){
 		    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		    		}
 		            try {
-		    			trippop =EventManager.getcountyunduppopbatch(x,county, tripstopcoords);
+		    			trippop =EventManager.getcountyunduppopbatch(x,county, tripstopcoords, dbindex);
 		    		} catch (FactoryException e) {
 		    			// TODO Auto-generated catch block
 		    			e.printStackTrace();
@@ -2018,7 +2040,7 @@ Loop:  	for (Trip trip: routeTrips){
         	svcdays += str+"; ";
         }
         if (activeTrips.size()>0) {
-        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips);
+        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
         	response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
         }
         if (svcdays.length()>2){
@@ -2028,7 +2050,7 @@ Loop:  	for (Trip trip: routeTrips){
         float sumfare =0;        
         List<Float> fprices = new ArrayList<Float>();
         if (routes.size()>0)
-        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes);
+        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes, dbindex);
         if (fprices.size()>0){        	        
             for (Float price: fprices){
             	sumfare +=price;
@@ -2055,10 +2077,13 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoCTSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCTSR(@QueryParam("county") String county, @QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+	public Object getGCTSR(@QueryParam("county") String county, @QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
 		List<Tract> alltracts = new ArrayList<Tract> ();
 		try {
-			alltracts = EventManager.gettractsbycounty(county);
+			alltracts = EventManager.gettractsbycounty(county, dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2079,38 +2104,21 @@ Loop:  	for (Trip trip: routeTrips){
 	    	each.landArea = String.valueOf(Math.round(instance.getLandarea()/2.58999e4)/100.0);
 	    	each.population = String.valueOf(instance.getPopulation());
 	    	each.RoutesCount = String.valueOf(0);
-	    	each.BlocksCount = "0";
+	    	/*each.BlocksCount = "0";
 	    	try {
-	    		each.BlocksCount = String.valueOf(EventManager.getblockscountbytract(instance.getTractId()));
+	    		each.BlocksCount = String.valueOf(EventManager.getblockscountbytract(instance.getTractId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} catch (TransformException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			}	    		    	
+			}*/	    		    	
 	    	each.AverageFare = "0";
-	    	each.MedianFare = "0";
-	    	/*float sumFare=0; 
-	    	List<Float> fares = new ArrayList<Float>();
-	    	for(Route route: routes){
-	    		List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route);
-	    		if(fareRules.size()!=0){
-	    			sumFare+=fareRules.get(0).getFare().getPrice();
-	    			fares.add(fareRules.get(0).getFare().getPrice());
-	    		}
-	    	}
-	    	Collections.sort(fares);
-	    	if (fares.size()>0){
-	    		each.AverageFare = String.valueOf(sumFare/fares.size());
-	    		each.MedianFare = String.valueOf(fares.get((int)Math.floor(fares.size()/2)));
-	    	} else {
-	    		each.AverageFare = "NA";
-		    	each.MedianFare =  "NA";
-	    	}*/
+	    	each.MedianFare = "0";	    	
 	    	each.StopsCount = String.valueOf(0);
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbytract(instance.getTractId()));
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbytract(instance.getTractId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2120,7 +2128,7 @@ Loop:  	for (Trip trip: routeTrips){
 			}	
 	    	each.RoutesCount = String.valueOf(0);
 	    	try {
-	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbytract(instance.getTractId()));
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbytract(instance.getTractId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2146,25 +2154,28 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
     @Path("/TractsXR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getTXR(@QueryParam("tract") String tract, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key) throws JSONException {
+    public Object getTXR(@QueryParam("tract") String tract, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
     	
        	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
-       	x = x * 1609.34;    	
+       	x = x * 1609.34;
+       	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	String[] dates = date.split(",");
     	int[][] days = daysOfWeek(dates);
     	String[] fulldates = fulldate(dates);
     	    	
     	GeoXR response = new GeoXR();    	
-    	Tract instance = EventManager.QueryTractbyId(tract);    	
+    	Tract instance = EventManager.QueryTractbyId(tract, dbindex);    	
     	response.AreaId = instance.getTractId();
     	response.AreaName = instance.getName();
     	response.AreaLongName = instance.getLongname();
     	long StopsCount = 0;
     	List<GeoStop> stops = new ArrayList<GeoStop>();
     	try {
-    		stops = EventManager.getstopsbytract(instance.getTractId());
+    		stops = EventManager.getstopsbytract(instance.getTractId(), dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2180,7 +2191,7 @@ Loop:  	for (Trip trip: routeTrips){
 			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		}
         try {
-			pop =EventManager.gettractunduppopbatch(x, instance.getTractId(), stopcoords);
+			pop =EventManager.gettractunduppopbatch(x, instance.getTractId(), stopcoords, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2190,7 +2201,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
         List<String> connectedTracts = new ArrayList<String>();
         try {
-        	connectedTracts =EventManager.getconnectedtracts(instance.getTractId());
+        	connectedTracts =EventManager.getconnectedtracts(instance.getTractId(), dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2209,7 +2220,7 @@ Loop:  	for (Trip trip: routeTrips){
 		response.PopUnServed = String.valueOf(Math.round(1E4-((1E4*pop/instance.getPopulation())))/100.0);
 		List<TractTripMap> trips = new ArrayList<TractTripMap>();
 		try {
-			trips = EventManager.gettripsbytract(instance.getTractId());
+			trips = EventManager.gettripsbytract(instance.getTractId(), dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2246,8 +2257,8 @@ Loop:  	for (Trip trip: routeTrips){
     		if (TL > length) 
     			length = TL;
         	if (!agencyId.equals(inst.getagencyId_def())){     		
-        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def());
-        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def()); 
+        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def(), dbindex);
+        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def(), dbindex); 
         		agencyId = inst.getagencyId_def();
         	} 
         	if (!routeId.equals(inst.getRouteId())){
@@ -2363,14 +2374,14 @@ Loop:  	for (Trip trip: routeTrips){
     			trippop = 0;
     			uid = inst.getUid();
     			AgencyAndId trip = new AgencyAndId(agencyId, inst.getTripId());    			
-	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripTract(trip,tract);
+	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripTract(trip,tract, dbindex);
 	    		if (tripstops.size()>0 && tripstops.get(0)!=null){
 		    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();
 		    		for (Stop stop: tripstops){
 		    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		    		}
 		            try {
-		    			trippop =EventManager.gettractunduppopbatch(x,tract, tripstopcoords);
+		    			trippop =EventManager.gettractunduppopbatch(x,tract, tripstopcoords, dbindex);
 		    		} catch (FactoryException e) {
 		    			// TODO Auto-generated catch block
 		    			e.printStackTrace();
@@ -2398,7 +2409,7 @@ Loop:  	for (Trip trip: routeTrips){
         	svcdays += str+"; ";
         }
         if (activeTrips.size()>0) {
-        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips);
+        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
             response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));            
         }
         if (svcdays.length()>2){
@@ -2408,7 +2419,7 @@ Loop:  	for (Trip trip: routeTrips){
         float sumfare =0;        
         List<Float> fprices = new ArrayList<Float>();
         if (routes.size()>0)
-        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes);
+        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes, dbindex);
         if (fprices.size()>0){        	        
             for (Float price: fprices){
             	sumfare +=price;
@@ -2435,10 +2446,13 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoCPSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCPSR(@QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+	public Object getGCPSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
 		List<Place> allplaces = new ArrayList<Place> ();
 		try {
-			allplaces = EventManager.getplaces();
+			allplaces = EventManager.getplaces(dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2480,7 +2494,7 @@ Loop:  	for (Trip trip: routeTrips){
 	    	}*/
 	    	each.StopsCount = String.valueOf(0);
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbyplace(instance.getPlaceId()));
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbyplace(instance.getPlaceId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2490,7 +2504,7 @@ Loop:  	for (Trip trip: routeTrips){
 			}	
 	    	each.RoutesCount = String.valueOf(0);
 	    	try {
-	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyplace(instance.getPlaceId()));
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyplace(instance.getPlaceId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2516,24 +2530,27 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
     @Path("/PlacesXR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getPXR(@QueryParam("place") String place, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key) throws JSONException {
+    public Object getPXR(@QueryParam("place") String place, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
     	
        	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
-       	x = x * 1609.34;    	
+       	x = x * 1609.34;
+       	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	String[] dates = date.split(",");
     	int[][] days = daysOfWeek(dates);
     	String[] fulldates = fulldate(dates);
     	    	
     	GeoXR response = new GeoXR();
     	response.AreaId = place;
-    	Place instance = EventManager.QueryPlacebyId(place);
+    	Place instance = EventManager.QueryPlacebyId(place, dbindex);
     	response.AreaName = instance.getName();
     	long StopsCount = 0;
     	List<GeoStop> stops = new ArrayList<GeoStop>();
     	try {
-    		stops = EventManager.getstopsbyplace(instance.getPlaceId());
+    		stops = EventManager.getstopsbyplace(instance.getPlaceId(), dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2549,7 +2566,7 @@ Loop:  	for (Trip trip: routeTrips){
 			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		}
         try {
-			pop =EventManager.getplaceunduppopbatch(x, instance.getPlaceId(), stopcoords);
+			pop =EventManager.getplaceunduppopbatch(x, instance.getPlaceId(), stopcoords, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2559,7 +2576,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
         List<String> connectedPlaces = new ArrayList<String>();
         try {
-        	connectedPlaces =EventManager.getconnectedplaces(instance.getPlaceId());
+        	connectedPlaces =EventManager.getconnectedplaces(instance.getPlaceId(), dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2580,7 +2597,7 @@ Loop:  	for (Trip trip: routeTrips){
 		response.PopUnServed = String.valueOf(Math.round(1E4-((1E4*pop/instance.getPopulation())))/100.0);
 		List<PlaceTripMap> trips = new ArrayList<PlaceTripMap>();
 		try {
-			trips = EventManager.gettripsbyplace(instance.getPlaceId());
+			trips = EventManager.gettripsbyplace(instance.getPlaceId(), dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2617,8 +2634,8 @@ Loop:  	for (Trip trip: routeTrips){
     		if (TL > length) 
     			length = TL;
         	if (!agencyId.equals(inst.getagencyId_def())){     		
-        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def());
-        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def()); 
+        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def(), dbindex);
+        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def(), dbindex); 
         		agencyId = inst.getagencyId_def();
         	} 
         	if (!routeId.equals(inst.getRouteId())){
@@ -2734,14 +2751,14 @@ Loop:  	for (Trip trip: routeTrips){
     			trippop = 0;
     			uid = inst.getUid();
     			AgencyAndId trip = new AgencyAndId(agencyId, inst.getTripId());    			
-	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripPlace(trip,place);
+	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripPlace(trip,place, dbindex);
 	    		if (tripstops.size()>0 && tripstops.get(0)!=null){
 		    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();
 		    		for (Stop stop: tripstops){
 		    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		    		}
 		            try {
-		    			trippop =EventManager.getplaceunduppopbatch(x,place, tripstopcoords);
+		    			trippop =EventManager.getplaceunduppopbatch(x,place, tripstopcoords, dbindex);
 		    		} catch (FactoryException e) {
 		    			// TODO Auto-generated catch block
 		    			e.printStackTrace();
@@ -2769,7 +2786,7 @@ Loop:  	for (Trip trip: routeTrips){
         	svcdays += str+"; ";
         }
         if (activeTrips.size()>0) {
-        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips);
+        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
             response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
         }
         if (svcdays.length()>2){
@@ -2779,7 +2796,7 @@ Loop:  	for (Trip trip: routeTrips){
         float sumfare =0;        
         List<Float> fprices = new ArrayList<Float>();
         if (routes.size()>0)
-        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes);
+        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes, dbindex);
         if (fprices.size()>0){        	        
             for (Float price: fprices){
             	sumfare +=price;
@@ -2806,10 +2823,13 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoUASR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGUASR(@QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+	public Object getGUASR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
 		List<Urban> allurbanareas = new ArrayList<Urban> ();
 		try {
-			allurbanareas = EventManager.geturban();
+			allurbanareas = EventManager.geturban(dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2831,7 +2851,7 @@ Loop:  	for (Trip trip: routeTrips){
 	    	each.population = String.valueOf(instance.getPopulation());
 	    	each.RoutesCount = String.valueOf(0);	    	
 	    	try {
-	    		each.RoutesCount = String.valueOf(EventManager.getroutescountbyurban(instance.getUrbanId()));
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountbyurban(instance.getUrbanId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2841,7 +2861,7 @@ Loop:  	for (Trip trip: routeTrips){
 			}
 	    	each.StopsCount = String.valueOf(0);	    	
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbyurban(instance.getUrbanId()));
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbyurban(instance.getUrbanId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2887,24 +2907,27 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
     @Path("/UrbansXR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getUXR(@QueryParam("urban") String urban, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key) throws JSONException {
+    public Object getUXR(@QueryParam("urban") String urban, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
     	
        	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
-       	x = x * 1609.34;    	
+       	x = x * 1609.34;
+       	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	String[] dates = date.split(",");
     	int[][] days = daysOfWeek(dates);
     	String[] fulldates = fulldate(dates);
     	    	
     	GeoXR response = new GeoXR();
     	response.AreaId = urban;
-    	Urban instance = EventManager.QueryUrbanbyId(urban);
+    	Urban instance = EventManager.QueryUrbanbyId(urban, dbindex);
     	response.AreaName = instance.getName();
     	long StopsCount = 0;
     	List<GeoStop> stops = new ArrayList<GeoStop>();
     	try {
-    		stops = EventManager.getstopsbyurban(instance.getUrbanId());
+    		stops = EventManager.getstopsbyurban(instance.getUrbanId(),dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2920,7 +2943,7 @@ Loop:  	for (Trip trip: routeTrips){
 			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		}
         try {
-			pop =EventManager.geturbanunduppopbatch(x, instance.getUrbanId(), stopcoords);
+			pop =EventManager.geturbanunduppopbatch(x, instance.getUrbanId(), stopcoords, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2930,7 +2953,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
         List<String> connectedUrbans = new ArrayList<String>();
         try {
-        	connectedUrbans =EventManager.getconnectedurbans(instance.getUrbanId());
+        	connectedUrbans =EventManager.getconnectedurbans(instance.getUrbanId(), dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2950,7 +2973,7 @@ Loop:  	for (Trip trip: routeTrips){
 		response.PopUnServed = String.valueOf(Math.round(1E4-((1E4*pop/instance.getPopulation())))/100.0);
 		List<UrbanTripMap> trips = new ArrayList<UrbanTripMap>();
 		try {
-			trips = EventManager.gettripsbyurban(instance.getUrbanId());
+			trips = EventManager.gettripsbyurban(instance.getUrbanId(), dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2987,8 +3010,8 @@ Loop:  	for (Trip trip: routeTrips){
     		if (TL > length) 
     			length = TL;
         	if (!agencyId.equals(inst.getagencyId_def())){     		
-        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def());
-        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def()); 
+        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def(), dbindex);
+        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def(), dbindex); 
         		agencyId = inst.getagencyId_def();
         	} 
         	if (!routeId.equals(inst.getRouteId())){
@@ -3104,14 +3127,14 @@ Loop:  	for (Trip trip: routeTrips){
     			trippop = 0;
     			uid = inst.getUid();
     			AgencyAndId trip = new AgencyAndId(agencyId, inst.getTripId());    			
-	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripUrban(trip,urban);
+	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripUrban(trip,urban, dbindex);
 	    		if (tripstops.size()>0 && tripstops.get(0)!=null){
 		    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();
 		    		for (Stop stop: tripstops){
 		    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		    		}
 		            try {
-		    			trippop =EventManager.geturbanunduppopbatch(x,urban, tripstopcoords);
+		    			trippop =EventManager.geturbanunduppopbatch(x,urban, tripstopcoords, dbindex);
 		    		} catch (FactoryException e) {
 		    			// TODO Auto-generated catch block
 		    			e.printStackTrace();
@@ -3139,7 +3162,7 @@ Loop:  	for (Trip trip: routeTrips){
         	svcdays += str+"; ";
         }
         if (activeTrips.size()>0) {
-        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips);
+        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
             response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
         }
         if (svcdays.length()>2){
@@ -3149,7 +3172,7 @@ Loop:  	for (Trip trip: routeTrips){
         float sumfare =0;        
         List<Float> fprices = new ArrayList<Float>();
         if (routes.size()>0)
-        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes);
+        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes, dbindex);
         if (fprices.size()>0){        	        
             for (Float price: fprices){
             	sumfare +=price;
@@ -3176,10 +3199,13 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoCDSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCDSR(@QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+	public Object getGCDSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
 		List<CongDist> allcongdists = new ArrayList<CongDist> ();
 		try {
-			allcongdists = EventManager.getcongdist();
+			allcongdists = EventManager.getcongdist(dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -3201,7 +3227,7 @@ Loop:  	for (Trip trip: routeTrips){
 	    	each.population = String.valueOf(instance.getPopulation());
 	    	each.RoutesCount = String.valueOf(0);	    	
 	    	try {
-	    		each.RoutesCount = String.valueOf(EventManager.getroutescountbycongdist(instance.getCongdistId()));
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountbycongdist(instance.getCongdistId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -3211,7 +3237,7 @@ Loop:  	for (Trip trip: routeTrips){
 			}
 	    	each.StopsCount = String.valueOf(0);	    	
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycongdist(instance.getCongdistId()));
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycongdist(instance.getCongdistId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -3257,24 +3283,27 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
     @Path("/CongdistsXR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getCDXR(@QueryParam("congdist") String congdist, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key) throws JSONException {
+    public Object getCDXR(@QueryParam("congdist") String congdist, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
     	
        	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
-       	x = x * 1609.34;    	
+       	x = x * 1609.34;
+       	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	String[] dates = date.split(",");
     	int[][] days = daysOfWeek(dates);
     	String[] fulldates = fulldate(dates);
     	    	
     	GeoXR response = new GeoXR();
     	response.AreaId = congdist;
-    	CongDist instance = EventManager.QueryCongdistbyId(congdist);
+    	CongDist instance = EventManager.QueryCongdistbyId(congdist, dbindex);
     	response.AreaName = instance.getName();
     	long StopsCount = 0;
     	List<GeoStop> stops = new ArrayList<GeoStop>();
     	try {
-    		stops = EventManager.getstopsbycongdist(instance.getCongdistId());
+    		stops = EventManager.getstopsbycongdist(instance.getCongdistId(), dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -3290,7 +3319,7 @@ Loop:  	for (Trip trip: routeTrips){
 			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		}
         try {
-			pop =EventManager.getcongdistunduppopbatch(x, instance.getCongdistId(), stopcoords);
+			pop =EventManager.getcongdistunduppopbatch(x, instance.getCongdistId(), stopcoords, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -3300,7 +3329,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
         List<String> connectedCongdists = new ArrayList<String>();
         try {
-        	connectedCongdists =EventManager.getconnectedcongdists(instance.getCongdistId());
+        	connectedCongdists =EventManager.getconnectedcongdists(instance.getCongdistId(), dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -3321,7 +3350,7 @@ Loop:  	for (Trip trip: routeTrips){
 		response.PopUnServed = String.valueOf(Math.round(1E4-((1E4*pop/instance.getPopulation())))/100.0);
 		List<CongdistTripMap> trips = new ArrayList<CongdistTripMap>();
 		try {
-			trips = EventManager.gettripsbycongdist(instance.getCongdistId());
+			trips = EventManager.gettripsbycongdist(instance.getCongdistId(), dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -3358,8 +3387,8 @@ Loop:  	for (Trip trip: routeTrips){
     		if (TL > length) 
     			length = TL;
         	if (!agencyId.equals(inst.getagencyId_def())){     		
-        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def());
-        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def()); 
+        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def(), dbindex);
+        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def(), dbindex); 
         		agencyId = inst.getagencyId_def();
         	} 
         	if (!routeId.equals(inst.getRouteId())){
@@ -3475,14 +3504,14 @@ Loop:  	for (Trip trip: routeTrips){
     			trippop = 0;
     			uid = inst.getUid();
     			AgencyAndId trip = new AgencyAndId(agencyId, inst.getTripId());    			
-	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripCongdist(trip,congdist);
+	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripCongdist(trip,congdist, dbindex);
 	    		if (tripstops.size()>0 && tripstops.get(0)!=null){
 		    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();
 		    		for (Stop stop: tripstops){
 		    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		    		}
 		            try {
-		    			trippop =EventManager.getcongdistunduppopbatch(x,congdist, tripstopcoords);
+		    			trippop =EventManager.getcongdistunduppopbatch(x,congdist, tripstopcoords, dbindex);
 		    		} catch (FactoryException e) {
 		    			// TODO Auto-generated catch block
 		    			e.printStackTrace();
@@ -3510,7 +3539,7 @@ Loop:  	for (Trip trip: routeTrips){
         	svcdays += str+"; ";
         }
         if (activeTrips.size()>0) {
-        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips);
+        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
             response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
         }
         if (svcdays.length()>2){
@@ -3521,7 +3550,7 @@ Loop:  	for (Trip trip: routeTrips){
         float sumfare =0;        
         List<Float> fprices = new ArrayList<Float>();
         if (routes.size()>0)
-        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes);
+        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes, dbindex);
         if (fprices.size()>0){        	        
             for (Float price: fprices){
             	sumfare +=price;
@@ -3548,10 +3577,13 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoORSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGORSR(@QueryParam("key") double key, @QueryParam("type") String type ) throws JSONException {
+	public Object getGORSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
 		List<County> allcounties = new ArrayList<County> ();
 		try {
-			allcounties = EventManager.getcounties();
+			allcounties = EventManager.getcounties(dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -3585,7 +3617,7 @@ Loop:  	for (Trip trip: routeTrips){
 			    	each.MedianFare = "0";
 			    	each.StopsCount = String.valueOf(0);
 			    	try {
-			    		each.StopsCount = String.valueOf(EventManager.getstopscountbyregion(regionId));
+			    		each.StopsCount = String.valueOf(EventManager.getstopscountbyregion(regionId, dbindex));
 					} catch (FactoryException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -3595,7 +3627,7 @@ Loop:  	for (Trip trip: routeTrips){
 					}
 			    	each.RoutesCount = String.valueOf(0);
 			    	try {
-			    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyregion(regionId));
+			    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyregion(regionId, dbindex));
 					} catch (FactoryException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -3633,7 +3665,7 @@ Loop:  	for (Trip trip: routeTrips){
     	each.MedianFare = "0";
     	each.StopsCount = String.valueOf(0);
     	try {
-    		each.StopsCount = String.valueOf(EventManager.getstopscountbyregion(regionId));
+    		each.StopsCount = String.valueOf(EventManager.getstopscountbyregion(regionId, dbindex));
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -3643,7 +3675,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
     	each.RoutesCount = String.valueOf(0);
     	try {
-    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyregion(regionId));
+    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyregion(regionId, dbindex));
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -3667,24 +3699,27 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
     @Path("/OdotregionsXR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getOTXR(@QueryParam("region") String region, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key) throws JSONException {
+    public Object getOTXR(@QueryParam("region") String region, @QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
     	
        	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
-       	x = x * 1609.34;    	
+       	x = x * 1609.34;
+       	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
     	String[] dates = date.split(",");
     	int[][] days = daysOfWeek(dates);
     	String[] fulldates = fulldate(dates);
     	    	
     	GeoXR response = new GeoXR();
     	response.AreaId = region;
-    	List<County> instances = EventManager.QueryOdotregionsbyId(region);
+    	List<County> instances = EventManager.QueryOdotregionsbyId(region, dbindex);
     	response.AreaName = instances.get(0).getRegionName();
     	long StopsCount = 0;
     	List<GeoStop> stops = new ArrayList<GeoStop>();    	
     	try {
-    		stops.addAll(EventManager.getstopsbyregion(region));
+    		stops.addAll(EventManager.getstopsbyregion(region, dbindex));
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -3706,7 +3741,7 @@ Loop:  	for (Trip trip: routeTrips){
 			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		}
         try {
-			pop =EventManager.getregionunduppopbatch(x,region, stopcoords);
+			pop =EventManager.getregionunduppopbatch(x,region, stopcoords, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -3716,7 +3751,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
         List<String> connectedRegions = new ArrayList<String>();
         try {
-        	connectedRegions =EventManager.getconnectedregions(region);
+        	connectedRegions =EventManager.getconnectedregions(region, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -3736,7 +3771,7 @@ Loop:  	for (Trip trip: routeTrips){
 		response.PopUnServed = String.valueOf(Math.round(1E4-((1E4*pop/RegionPop)))/100.0);
 		List<CountyTripMap> trips = new ArrayList<CountyTripMap>();
 		try {
-			trips = EventManager.gettripsbyregion(region);
+			trips = EventManager.gettripsbyregion(region, dbindex);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -3773,8 +3808,8 @@ Loop:  	for (Trip trip: routeTrips){
     		if (TL > length) 
     			length = TL;
         	if (!agencyId.equals(inst.getagencyId_def())){     		
-        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def());
-        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def()); 
+        		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def(), dbindex);
+        		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def(), dbindex); 
         		agencyId = inst.getagencyId_def();
         	} 
         	if (!routeId.equals(inst.getRouteId())){
@@ -3890,14 +3925,14 @@ Loop:  	for (Trip trip: routeTrips){
     			trippop = 0;
     			uid = inst.getUid();
     			AgencyAndId trip = new AgencyAndId(agencyId, inst.getTripId());    			
-	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripRegion(trip,region);
+	    		List <Stop> tripstops = GtfsHibernateReaderExampleMain.QueryStopsbyTripRegion(trip,region, dbindex);
 	    		if (tripstops.size()>0 && tripstops.get(0)!=null){
 		    		List <Coordinate> tripstopcoords = new ArrayList<Coordinate>();
 		    		for (Stop stop: tripstops){
 		    			tripstopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
 		    		}
 		            try {
-		    			trippop =EventManager.getregionunduppopbatch(x,region, tripstopcoords);
+		    			trippop =EventManager.getregionunduppopbatch(x,region, tripstopcoords, dbindex);
 		    		} catch (FactoryException e) {
 		    			// TODO Auto-generated catch block
 		    			e.printStackTrace();
@@ -3925,7 +3960,7 @@ Loop:  	for (Trip trip: routeTrips){
         	svcdays += str+"; ";
         }
         if (activeTrips.size()>0) {
-        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips);
+        	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
         	response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
         }
         if (svcdays.length()>2){
@@ -3935,7 +3970,7 @@ Loop:  	for (Trip trip: routeTrips){
         float sumfare =0;        
         List<Float> fprices = new ArrayList<Float>();
         if (routes.size()>0)
-        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes);
+        	fprices = GtfsHibernateReaderExampleMain.QueryFarePriceByRoutes(routes, dbindex);
         if (fprices.size()>0){        	        
             for (Float price: fprices){
             	sumfare +=price;
