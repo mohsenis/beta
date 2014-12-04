@@ -168,11 +168,11 @@ function showOnMapReport(lat, lon, date, x){
 	var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
 	$('#displayTransitReport').empty();
 	$('#displayGeoReport').empty();
-	$("#overlay").show();
+	$("#overlay").show();	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex'+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex,
 		async: true,
 		success: function(data){
 			$('#ts').html(numberWithCommas(data.MapTr.TotalStops));
