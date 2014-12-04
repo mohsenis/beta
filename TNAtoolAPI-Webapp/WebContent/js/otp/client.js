@@ -477,13 +477,15 @@ function onMapBeforeSubmit(lat,lng,mlat,mlng){
 	area = Math.pow(x,2)*Math.PI;
 	drawCentroid[0]= (Math.round(drawCentroid[0] * 1000000) / 1000000).toString();
 	drawCentroid[1]= (Math.round(drawCentroid[1] * 1000000) / 1000000).toString();
-	area = Math.round(area * 100) / 100;	
+	area = Math.round(area * 100) / 100;
 	var that = drawControl._toolbars[L.DrawToolbar.TYPE]._modes.circle.handler;
 	that.enable();
 	that._startLatLng = [lat,lng];
 	that._shape = new L.Circle([lat,lng], x*1609.34, that.options.shapeOptions);
 	that._map.addLayer(that._shape);	
+	that._fireCreatedEvent();
 	that.disable();	
+	
 	onMapSubmit();
 }
 
