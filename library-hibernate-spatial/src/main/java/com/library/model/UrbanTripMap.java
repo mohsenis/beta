@@ -9,9 +9,10 @@ public final class UrbanTripMap {
   private String agencyId_def;
   private String tripId; 
   private String routeId;
-  private String urbanId;
+  //private String urbanId;
   private String serviceId;
   private double length;
+  private int tlength;
   private int stopscount;
   private MultiLineString shape;
   private String uid;
@@ -27,8 +28,9 @@ public UrbanTripMap(UrbanTripMap a) {
     this.agencyId_def = a.agencyId_def;
     this.tripId = a.tripId;
     this.routeId = a.routeId;
-    this.urbanId = a.urbanId;
+    //this.urbanId = a.urbanId;
     this.length = a.length;
+    this.tlength = a.tlength;
     this.shape = a.shape;
     this.uid = a.uid;
     this.urban = a.urban;
@@ -49,6 +51,14 @@ public UrbanTripMap(UrbanTripMap a) {
   public void setTripId(String tripId) {
 	    this.tripId= tripId;
 	  }
+  
+  /*public String getUrbanId() {
+	    return urbanId;
+	  }
+
+  public void setUrbanId(String urbanId) {
+	    this.urbanId= urbanId;
+	  }*/
   
   public String getRouteId() {
 		return routeId;
@@ -74,14 +84,6 @@ public UrbanTripMap(UrbanTripMap a) {
     this.agencyId_def = agencyId_def;
   }
   
-  public String getUrbanId() {
-    return urbanId;
-  }
-
-  public void setUrbanId(String urbanId) {
-    this.urbanId = urbanId;
-  }
-  
   public String getServiceId() {
 	    return serviceId;
 	  }
@@ -105,6 +107,14 @@ public UrbanTripMap(UrbanTripMap a) {
  public void setLength(double length) {
   this.length = length;
  	 }
+ 
+ public int getTlength() {
+	    return tlength;
+	  }
+
+public void setTlength(int tlength) {
+	this.tlength = tlength;
+	 }
 
   public MultiLineString getShape(){
 	  return shape;
@@ -131,6 +141,6 @@ public void setUrban(Urban urban) {
 }
 
 public String toString() {
-    return "<Trip " + this.tripId + "Intersects with urban area "+ this.urbanId+ ">";
+    return "<Trip " + this.tripId + "Intersects with urban area "+ this.urban.getUrbanId()+ ">";
   }
 }

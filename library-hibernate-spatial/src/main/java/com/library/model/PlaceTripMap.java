@@ -12,6 +12,7 @@ public final class PlaceTripMap {
   private String placeId;
   private String serviceId;
   private double length;
+  private int tlength;
   private int stopscount;
   private MultiLineString shape;
   private String uid;
@@ -29,6 +30,7 @@ public PlaceTripMap(PlaceTripMap a) {
     this.routeId = a.routeId;
     this.placeId = a.placeId;
     this.length = a.length;
+    this.tlength = a.tlength;
     this.shape = a.shape;
     this.uid = a.uid;
     this.place = a.place;
@@ -105,6 +107,14 @@ public PlaceTripMap(PlaceTripMap a) {
  public void setLength(double length) {
   this.length = length;
  	 }
+ 
+ public int getTlength() {
+	    return tlength;
+	  }
+
+public void setTlength(int tlength) {
+this.tlength = tlength;
+	 }
 
   public MultiLineString getShape(){
 	  return shape;

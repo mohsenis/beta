@@ -25,18 +25,31 @@ em{
 	vertical-align:middle;
 }
 .button {
-	align: right;
+	align: left;
 	float: none;	
-	padding: 4px;
+	padding	: 3px;
+	margin-left: 2px;
 }
 
 .tbox {
-	height: 30px;	
+	height: 25px;	
 	width: 45px;		
+	padding-top:1px;
+	padding-bottom:1px;
+	padding-right:0px;
+	padding-left:4px;
+	margin-left: 3px;
+	margin-top: 2px;	
+}
+
+.utbox {
+	height: 25px;	
+	width: 75px;		
 	padding-top:0px;
 	padding-bottom:0px;
-	padding-right:5px;
-	padding-left:5px;
+	padding-right:0px;
+	padding-left:4px;
+	margin-left: 3px;		
 }
 
 .ui-tooltip {
@@ -110,7 +123,16 @@ td.details-control {
     cursor: pointer;
 }
 tr.shown td.details-control {
+    background: url('js/lib/DataTables/images/details_close.png') no-repeat center center;    
+}
+td.details-control-cc {
+    background: url('js/lib/DataTables/images/details_open.png') no-repeat center center;
+    background-color:#C0C0C0;
+    cursor: pointer;
+}
+tr.shown td.details-control-cc {
     background: url('js/lib/DataTables/images/details_close.png') no-repeat center center;
+    background-color:#C0C0C0;
 }
 ul.ColVis_collection {
 	width: auto;
@@ -246,6 +268,23 @@ div.headerL {
 	width: 25%;
 	margin: 0px;
 	height: 35px;
+}
+
+div.headerBR {
+	float: right;
+	text-align: left;	
+}
+
+div.LHScontrols {
+	float: right;
+	text-align: left;
+	margin-right: 2px;
+	line-height: 30px;
+}
+
+div.RHScontrols {
+	float: right;
+	text-align: left;
 }
 
 div.headerR {

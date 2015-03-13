@@ -2,7 +2,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Congressional Districts Extended Report</title>
+	<title>Aggregated Urban Areas Extended Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -35,6 +35,7 @@ var html = '<div id="dtcontainer"><table id="RT" class="display" align="center">
 var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Name of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Fare<em title="If available, this field points to the fare information published by the transit agencies in their GTFS data."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Communities <em title="List of geographic areas of the same type that are connected to the area of interest through routes."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route Miles <em title="Summation of the lengths of the longest trips within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops Per Square Mile <em title="Stop count in the given geographic area divided by the area of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops Per Service Mile <em title="Stop count in the given geographic area divided by service miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -49,14 +50,15 @@ var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated w
 '<th>Service Stops <em title="Total stops within the given geographic area multiplied by the number of times each stop is being served for the given date(s). Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Population Served By Service <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. Population served by service is calculated as service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Days <em title="Set of days (from the selected days) in which at least one trip within the given geographic area is served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Communities <em title="List of geographic areas of the same type that are connected to the area of interest through routes."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Hours of Service<em title="Earliest and latest arrival and departure times of all transit stops within the given geographic area"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Average Fare<em title="If available, this field points to the fare average for the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Median Fare<em title="If available, this field points to the fare median for the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Communities <em title="List of geographic areas of the same type that are connected to the area of interest through routes."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '</tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 var fAverage = new Array();
 var fMedian = new Array();
+var connectedcommunities = '';
 var key = Math.random();
 
 $(document).ready(function(){
@@ -84,22 +86,27 @@ $(document).ready(function(){
 		    select.selectedIndex = dbindex;		    				    
 		}			
 	});
-	go(key);	
+	go(key);
+	document.getElementById("Upop").value = w_qstring;
+	jQuery('#Upop').on('input', function() {		
+		$("#submit").trigger('mouseenter');		
+	});
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/CongdistsXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/UrbanrXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
 		async: true,
 		success: function(item){			
-			$('h2').append(item.AreaName+' Extended Report <br><hr>');	
-			html = html + '<tr><td>' + item.AreaId +'</td><td>' + item.AreaName +'</td><td class="details-control"></td><td>' + numberconv(item.RouteMiles) +'</td><td>'+ numberconv(item.StopsPersqMile) 
+			$('h2').append('Aggregated Urban Area Extended Report <br><hr>');	
+			html = html + '<tr><td>' + item.AreaId +'</td><td>' + item.AreaName +'</td><td class="details-control"></td><td class="details-control-cc"></td><td>' + numberconv(item.RouteMiles) +'</td><td>'+ numberconv(item.StopsPersqMile) 
 			+'</td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) +'</td><td class="serviceCol">'+ numberconv(item.ServiceHours) +'</td><td class="serviceCol">'+ numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'
 			+ numberconv(item.ServiceMilesPersqMile) +'</td><td  class="serviceCol">'+numberconv(item.MilesofServicePerCapita)+'</td><td class="serviceCol">' + numberconv(item.PopWithinX) 
-			+'</td><td class="serviceCol">' + numberconv(item.PopServed)+'</td><td class="serviceCol">' + numberconv(item.PopServedAtLoService)+'</td><td class="serviceCol">' + numberconv(item.PopUnServed)+'</td><td class="serviceCol">' +
-			numberconv(item.ServiceStops)+'</td><td class="serviceCol">' + numberconv(item.PopServedByService)+'</td><td class="serviceCol">'+ item.ServiceDays+'</td><td>'+
-			item.ConnectedCommunities+'</td><td class="serviceCol">'+ item.HoursOfService+'</td><td>$'+item.AverageFare+'</td><td>$'+item.MedianFare+'</td>';
+			+'</td><td class="serviceCol">' + numberconv(item.PopServed)+'</td><td class="serviceCol">' + numberconv(item.PopServedAtLoService)+'</td><td class="serviceCol">' + numberconv(item.PopUnServed)+'</td><td class="serviceCol">'+
+			numberconv(item.ServiceStops)+'</td><td class="serviceCol">' + numberconv(item.PopServedByService)+'</td><td class="serviceCol">'+ item.ServiceDays+'</td><td class="serviceCol">'
+			+ item.HoursOfService+'</td><td>$'+item.AverageFare+'</td><td>$'+item.MedianFare+'</td><td>'+item.ConnectedCommunities+'</td>';
 			fAverage.push(item.AverageFare);
-			fMedian.push(item.MedianFare);							    
+			fMedian.push(item.MedianFare);
+			connectedcommunities = item.ConnectedCommunities;
 			html = html + '</tr></tbody></table>';
 			$('#displayReport').append($(html));	
 			progressbar.remove();
@@ -115,7 +122,7 @@ $(document).ready(function(){
 				//"iDisplayWidth": 10,
 				"aoColumnDefs": [
 				                 {
-				                	 "targets": [19,20],
+				                	 "targets": [19,20,21],
                						 "visible": false
             					}				               
 				               ],
@@ -167,18 +174,33 @@ $(document).ready(function(){
 			});
 			$('.ColVis').css("float", "left");
 			$('#RT tbody').on('click', 'td.details-control', function () {
+				var td = $(this).parents('td');
 		        var tr = $(this).parents('tr');
 		        var row = table.row( tr );
 		        var pos = row.index();
 		        if ( row.child.isShown() ) {
 		            row.child.hide("slow");
-		            tr.removeClass('shown');
+		            td.removeClass('shown');
 		        }
 		        else {
 		            row.child(format(pos)).show();
-		            tr.addClass('shown');
+		            td.addClass('shown');
 		        }
-		    } );	
+		    } );
+			$('#RT tbody').on('click', 'td.details-control-cc', function () {
+				var td = $(this).parents('td');
+		        var tr = $(this).parents('tr');
+		        var row = table.row( tr );
+		        var pos = row.index();
+		        if ( row.child.isShown() ) {
+		            row.child.hide("slow");
+		            td.removeClass('shown');
+		        }
+		        else {
+		            row.child(formatcc(pos)).show();
+		            td.addClass('shown');
+		        }
+		    } );
 			function format ( p ) {
 		        //var html;
 		        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
@@ -192,6 +214,15 @@ $(document).ready(function(){
 		            '</tr>'+            
 		        '</table>';
 		    }
+			function formatcc ( p ) {
+		        //var html;
+		        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+		            '<tr>'+
+		                '<td>Connected Communities: </td>'+
+		                '<td>'+connectedcommunities+'</td>'+
+		            '</tr>'+		                       
+		        '</table>';
+		    }
 			//$('#RT_wrapper').css("width", "");
 			$('#RT_wrapper').css("width", $('#RT').css("width"));
 		    $('#RT_wrapper').css("margin", "auto");
@@ -201,8 +232,7 @@ $(document).ready(function(){
 			$("#RT_info").remove();
 			//$( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
 			//$( '#RT'+'_wrapper .dataTables_scrollHeadInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
-    }});
-		    	
+    }});	    	
 });
 function dbchange(){
 	if (document.getElementById("dbselect").selectedIndex !=dbindex){
@@ -217,7 +247,7 @@ function dbchange(){
 				<h1>Transit Network Analysis Tool Reports</h1>
 			</div>
 			
-			<div class="headerR">				
+			<div class="headerR">
 				<select id='dbselect' onchange='dbchange()'></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
@@ -251,11 +281,16 @@ function dbchange(){
 				</div>
 			  </td> 
 			  <td id="td3">
-			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
-			    	<input id="submit" type="button" onclick="reloadG()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
-			    	Minimum Level of Service (times) <input type="text" name="LoS" id="LoS" class="tbox" onkeypress="return isWholeNumber(event)"/>		    	    	
-		    	</div>
+			   <div class="RHScontrols">			  	
+			  	<input id="submit" type="button" onclick="reloadUG()" title="Click submit to refresh the report"  value="Submit" class="button" /><br> 
+			    <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/><br>			    	
+			    <input type="text" name="LoS" id="LoS" class="tbox" onkeypress="return isWholeNumber(event)"/>
+			  	</div>
+			  	<div class="LHScontrols">
+			  	Urban Population Filter <input type="text" name="Upop" id="Upop" class="utbox" onkeypress="return isWholeNumber(event)"/><br>
+			  	Population Search Radius (miles)<br>
+			  	Minimum Level of Service (times)
+			  	</div>			  				  	
 			  </td>
 			</tr>
 		</table>

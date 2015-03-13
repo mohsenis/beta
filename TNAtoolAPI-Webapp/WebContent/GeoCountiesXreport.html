@@ -20,11 +20,12 @@
 <script type="text/javascript">
 var qstring = '';
 var qstringx = '0.1';
-var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
+var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[4],"");
+var w_qstringl = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
 var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
 var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
-var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
-var dbindex = parseInt(document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1));
+var keyName = document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1);
+var dbindex = parseInt(document.URL.split("&")[5].substr(document.URL.split("&")[5].indexOf("=")+1));
 var dateID;
 var boo;
 var gg = 1.0/1.1;
@@ -37,11 +38,13 @@ var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated w
 '<th>Route Miles <em title="Summation of the lengths of the longest trips within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops Per Square Mile <em title="Stop count in the given geographic area divided by the area of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops Per Service Mile <em title="Stop count in the given geographic area divided by service miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Service Hours <em title="Total hours a transit agency spends on serving all round trips of routes within the given geographic area. Service hours may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Miles <em title="Total miles driven over all round trips of routes within the given geographic area. Service miles may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Miles Per Square Mile <em title="Service miles divided by the area of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Miles of Service Per Capita <em title="Service miles divided by the population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Population Served (Unduplicated) <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Percent of Population Served <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total population of the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Percent of Population Served at Level of Service <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total population of the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Population Unserved <em title="100 minus percent of population served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Stops <em title="Total stops within the given geographic area multiplied by the number of times each stop is being served for the given date(s). Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Population Served By Service <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. Population served by service is calculated as service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -90,9 +93,9 @@ $(document).ready(function(){
 		success: function(item){			
 			$('h2').append(item.AreaName+' Extended Report <br><hr>');	
 			html = html + '<tr><td>' + item.AreaId +'</td><td>' + item.AreaName +'</td><td class="details-control"></td><td>' + numberconv(item.RouteMiles) +'</td><td>'+ numberconv(item.StopsPersqMile) 
-			+'</td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) +'</td><td class="serviceCol">'+ numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'
+			+'</td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) + '</td><td class="serviceCol">'+ numberconv(item.ServiceHours)+ '</td><td class="serviceCol">'+ numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'
 			+ numberconv(item.ServiceMilesPersqMile) +'</td><td  class="serviceCol">'+numberconv(item.MilesofServicePerCapita)+'</td><td class="serviceCol">' + numberconv(item.PopWithinX) 
-			+'</td><td class="serviceCol">' + numberconv(item.PopServed)+'</td><td class="serviceCol">' + numberconv(item.PopUnServed)+'</td><td class="serviceCol">' +
+			+'</td><td class="serviceCol">' + numberconv(item.PopServed)+'</td><td class="serviceCol">' + numberconv(item.PopServedAtLoService)+'</td><td class="serviceCol">'+ numberconv(item.PopUnServed)+'</td><td class="serviceCol">' +
 			numberconv(item.ServiceStops)+'</td><td class="serviceCol">' + numberconv(item.PopServedByService)+'</td><td class="serviceCol">'+ item.ServiceDays+'</td><td>'+
 			item.ConnectedCommunities+'</td><td class="serviceCol">'+ item.HoursOfService+'</td><td>$'+item.AverageFare+'</td><td>$'+item.MedianFare+'</td>';
 			fAverage.push(item.AverageFare);
@@ -103,6 +106,7 @@ $(document).ready(function(){
 			
 			
 			var table = $('#RT').DataTable({
+				"bSort" : false,
 				"paging": false,
 				"sScrollX": "100%",				
 				"width": "auto",
@@ -111,7 +115,7 @@ $(document).ready(function(){
 				//"iDisplayWidth": 10,
 				"aoColumnDefs": [
 				                 {
-				                	 "targets": [17,18],
+				                	 "targets": [19,20],
                						 "visible": false
             					}				               
 				               ],
@@ -212,9 +216,7 @@ function dbchange(){
 				<h1>Transit Network Analysis Tool Reports</h1>
 			</div>
 			
-			<div class="headerR">
-				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
-				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
+			<div class="headerR">				
 				<select id='dbselect' onchange='dbchange()'></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
@@ -249,9 +251,9 @@ function dbchange(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
-			    	<input id="submit" type="button" onclick="reload()" title="Click submit to refresh the report"  value="Submit" class="button" />
-		    	    	
+			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>			    	
+			    	<input id="submit" type="button" onclick="reloadG()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
+			    	Minimum Level of Service (times) <input type="text" name="LoS" id="LoS" class="tbox" onkeypress="return isWholeNumber(event)"/>		    	    	
 		    	</div>
 			  </td>
 			</tr>

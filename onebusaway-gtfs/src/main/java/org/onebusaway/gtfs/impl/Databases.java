@@ -1,5 +1,6 @@
 package org.onebusaway.gtfs.impl;
 
+
 public class Databases {
 	public final static int dbsize =2;
 	public final static int defaultDBIndex = 0;

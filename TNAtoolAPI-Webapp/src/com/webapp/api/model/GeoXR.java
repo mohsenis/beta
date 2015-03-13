@@ -56,6 +56,14 @@ public class GeoXR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String MinFare;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String MaxFare;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String MedianFare;
 	
 	@XmlAttribute
@@ -96,5 +104,13 @@ public class GeoXR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String PopServedByService;	
+    public String ServiceHours;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String PopServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String PopServedAtLoService;
 }

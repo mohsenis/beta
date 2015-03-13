@@ -31,6 +31,7 @@ import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -79,12 +80,15 @@ public interface GtfsRelationalDao extends GtfsDao {
   
   public List<Stop> getStopsForTripUrban(AgencyAndId trip, String urban);
   
+  public List<Stop> getStopsForTripUrbans(AgencyAndId trip, List<String>urbans);
+  
   public List<Stop> getStopsForTripCongdist(AgencyAndId trip, String congdist);
   
   public List<Stop> getStopsForTripRegion(AgencyAndId trip, String region);
   
   public List<Stop> getStopsForStation(Stop station);
   
+  public HashMap<String, Integer> getCounts();
   /****
    * Stop Methods
    * Alireza: 
@@ -93,6 +97,8 @@ public interface GtfsRelationalDao extends GtfsDao {
   public List<ServiceCalendarDate> getCalendarDatesForAgency(String agency);
   public List<FareRule> getFareRuleForRoute(Route route);
   public List<Float> getFarePriceForRoutes(List<String> routes);
+  public HashMap<String, Float> getFareDataForAgency(String agencyId);
+  public HashMap<String, Float> getFareDataForState();
   /****
    * {@link Trip} Methods
    ****/

@@ -13,17 +13,22 @@
 
 package com.webapp.api.model;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.webapp.api.model.RouteType;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement(name = "CountyR")
-public class GeoR {
+@XmlRootElement(name = "ClusterR")
+public class ClusterR {
 	
 	
 	@XmlAttribute
     @JsonSerialize
-	public String Name;
+	public String name;
 	
 	@XmlAttribute
     @JsonSerialize
@@ -31,78 +36,34 @@ public class GeoR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String population;
+    public String size;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String urbanpop;
+    public String minGap;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String ruralpop;
+    public String maxGap;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String landArea;
+    public String meanGap;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String waterArea;
+    public String ids;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String ODOTRegion;
+    public String names;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String ODOTRegionName;
+    public String distances;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String AgenciesCount;	
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String StopsCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String RoutesCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String UrbansCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String CountiesCount;
-		
-	@XmlAttribute
-    @JsonSerialize
-    public String TractsCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String PlacesCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String RegionsCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String CongDistsCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String BlocksCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String AverageFare;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String MedianFare;
-       	
+    public String connections;
+	       	
 }
