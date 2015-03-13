@@ -539,6 +539,7 @@ if (document.URL.split("&").length<2){
 	history.pushState('data', '', document.URL+'?&dbindex=0');
 }
 var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
+
 var menucontent = '<ul id="rmenu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">';
 $.ajax({
 	type: 'GET',

@@ -18,6 +18,7 @@ package org.onebusaway.gtfs.model;
 
 import org.onebusaway.csv_entities.schema.annotations.CsvField;
 import org.onebusaway.csv_entities.schema.annotations.CsvFields;
+import org.onebusaway.gtfs.serialization.mappings.DefaultAgencyIdTranslator;
 import org.onebusaway.gtfs.serialization.mappings.EntityFieldMappingFactory;
 
 @CsvFields(filename = "transfers.txt", required = false)
@@ -49,6 +50,9 @@ public final class Transfer extends IdentityBean<Integer> {
   private Trip toTrip;
 
   private int transferType;
+  
+  @CsvField(name = "from_stop_id", optional = true, mapping = DefaultAgencyIdTranslator.class)
+  private String defaultId;
 
   @CsvField(optional = true)
   private int minTransferTime = MISSING_VALUE;
@@ -67,6 +71,7 @@ public final class Transfer extends IdentityBean<Integer> {
     this.toTrip = obj.toTrip;
     this.transferType = obj.transferType;
     this.minTransferTime = obj.minTransferTime;
+    this.defaultId = obj.defaultId;
   }
 
   @Override
@@ -145,6 +150,14 @@ public final class Transfer extends IdentityBean<Integer> {
 
   public void setMinTransferTime(int minTransferTime) {
     this.minTransferTime = minTransferTime;
+  }
+  
+  public String getDefaultId() {
+    return defaultId;
+  }
+
+  public void setDefaultId(String defaultId) {
+    this.defaultId = defaultId;
   }
 
   public void clearMinTransferTime() {

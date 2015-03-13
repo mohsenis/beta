@@ -18,7 +18,11 @@ package org.onebusaway.gtfs.model;
 import org.onebusaway.csv_entities.schema.annotations.CsvField;
 import org.onebusaway.csv_entities.schema.annotations.CsvFields;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.serialization.mappings.DefaultAgencyIdTranslator;
 import org.onebusaway.gtfs.serialization.mappings.ServiceDateFieldMappingFactory;
+import org.onebusaway.gtfs.serialization.mappings.AgencyListTranslator;
+import org.onebusaway.gtfs.serialization.mappings.AgencyNamesTranslator;
+
 
 @CsvFields(filename = "feed_info.txt", required = false, prefix = "feed_")
 public final class FeedInfo extends IdentityBean<Integer> {
@@ -28,6 +32,18 @@ public final class FeedInfo extends IdentityBean<Integer> {
   @CsvField(ignore = true)
   private int id;
 
+  @CsvField(name = "feed_lang", optional = true, mapping = DefaultAgencyIdTranslator.class)
+  private String defaultId;
+  
+  @CsvField(name = "feed_lang", optional = true, mapping = AgencyListTranslator.class)
+  private String agencyIds;
+  
+  @CsvField(name = "feed_lang", optional = true, mapping = AgencyNamesTranslator.class)
+  private String agencyNames;
+  
+  @CsvField(optional = true)
+  private String feedName;
+  
   private String publisherName;
 
   private String publisherUrl;
@@ -42,7 +58,7 @@ public final class FeedInfo extends IdentityBean<Integer> {
 
   @CsvField(optional = true)
   private String version;
-
+  
   public String getPublisherName() {
     return publisherName;
   }
@@ -104,4 +120,37 @@ public final class FeedInfo extends IdentityBean<Integer> {
   public void setId(Integer id) {
     this.id = id;
   }
+  
+  public String getDefaultId() {
+    return defaultId;
+  }
+
+  public void setDefaultId(String defaultId) {
+    this.defaultId = defaultId;
+  }
+  
+  public String getAgencyIds() {
+    return agencyIds;
+  }
+
+  public void setAgencyIds(String agencyIds) {
+    this.agencyIds = agencyIds;
+  }
+  
+  public String getAgencyNames() {
+    return agencyNames;
+  }
+
+  public void setAgencyNames(String agencyNames) {
+    this.agencyNames = agencyNames;
+  }
+  
+  public String getFeedName() {
+    return feedName;
+  }
+
+  public void setFeedName(String feedName) {
+    this.feedName = feedName;
+  }
+  
 }

@@ -17,6 +17,7 @@ package org.onebusaway.gtfs.model;
 
 import org.onebusaway.csv_entities.schema.annotations.CsvField;
 import org.onebusaway.csv_entities.schema.annotations.CsvFields;
+import org.onebusaway.gtfs.serialization.mappings.DefaultAgencyIdTranslator;
 import org.onebusaway.gtfs.serialization.mappings.RouteAgencyIdFieldMappingFactory;
 import org.onebusaway.gtfs.serialization.mappings.RouteAgencyFieldMappingFactory;
 
@@ -51,6 +52,9 @@ public final class Route extends IdentityBean<AgencyAndId> {
   @CsvField(optional = true)
   private String textColor;
   
+  @CsvField(name = "agency_id", optional = true, mapping = DefaultAgencyIdTranslator.class)
+  private String defaultId;
+  
   @Deprecated
   @CsvField(name="route_bikes_allowed", optional = true, defaultValue = "0")
   private int routeBikesAllowed = 0;
@@ -76,6 +80,7 @@ public final class Route extends IdentityBean<AgencyAndId> {
     this.color = r.color;
     this.textColor = r.textColor;
     this.bikesAllowed = r.bikesAllowed;
+    this.defaultId = r.defaultId;
   }
 
   public AgencyAndId getId() {
@@ -148,6 +153,14 @@ public final class Route extends IdentityBean<AgencyAndId> {
 
   public void setTextColor(String textColor) {
     this.textColor = textColor;
+  }
+  
+  public String getDefaultId() {
+    return defaultId;
+  }
+
+  public void setDefaultId(String defaultId) {
+    this.defaultId = defaultId;
   }
   
   @Deprecated

@@ -27,6 +27,7 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FareAttribute;
 import org.onebusaway.gtfs.model.FareRule;
+import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.ServiceCalendarDate;
@@ -39,7 +40,6 @@ import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
 import org.onebusaway.gtfs.services.HibernateGtfsFactory;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
-
 import org.onebusaway.gtfs.impl.Databases;
 
 public class GtfsHibernateReaderExampleMain {
@@ -48,7 +48,7 @@ public class GtfsHibernateReaderExampleMain {
 
   private static final String KEY_FILE = "file:";
   
-  public static HibernateGtfsFactory[] factory = new HibernateGtfsFactory[2];
+  public static HibernateGtfsFactory[] factory = new HibernateGtfsFactory[Databases.dbsize];
   static{
 	  for (int k=0; k<Databases.dbsize; k++){
 		  factory[k] = createHibernateGtfsFactory(Databases.ConfigPaths[k]);
@@ -150,6 +150,11 @@ public class GtfsHibernateReaderExampleMain {
   public static Trip getTrip(AgencyAndId id, int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	  return dao.getTripForId(id);
+  }
+  
+  public static Collection<FeedInfo> QueryAllFeedInfos (int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
+	  return dao.getAllFeedInfos();
   }
   
   public static Collection<Agency> QueryAllAgencies (int dbindex){

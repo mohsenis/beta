@@ -1,0 +1,135 @@
+pg_restore: connecting to database for restore
+pg_restore: creating TABLE census_blocks
+pg_restore: creating TABLE census_blocks_reference
+pg_restore: creating TABLE census_congdists
+pg_restore: creating TABLE census_congdists_reference
+pg_restore: creating TABLE census_counties
+pg_restore: creating TABLE census_counties_reference
+pg_restore: creating TABLE census_places
+pg_restore: creating TABLE census_places_reference
+pg_restore: creating TABLE census_tracts
+pg_restore: creating TABLE census_tracts_reference
+pg_restore: creating TABLE census_urbans
+pg_restore: creating TABLE census_urbans_reference
+pg_restore: creating SEQUENCE tl_2010_41_cd111_gid_seq
+pg_restore: creating SEQUENCE OWNED BY tl_2010_41_cd111_gid_seq
+pg_restore: creating SEQUENCE tl_2010_41_county10_gid_seq
+pg_restore: creating SEQUENCE OWNED BY tl_2010_41_county10_gid_seq
+pg_restore: creating SEQUENCE tl_2010_41_place10_gid_seq
+pg_restore: creating SEQUENCE OWNED BY tl_2010_41_place10_gid_seq
+pg_restore: creating SEQUENCE tl_2010_41_tabblock10_gid_seq
+pg_restore: creating SEQUENCE OWNED BY tl_2010_41_tabblock10_gid_seq
+pg_restore: creating SEQUENCE tl_2010_41_tract10_gid_seq
+pg_restore: creating SEQUENCE OWNED BY tl_2010_41_tract10_gid_seq
+pg_restore: creating SEQUENCE tl_2010_us_uac10_gid_seq1
+pg_restore: creating SEQUENCE OWNED BY tl_2010_us_uac10_gid_seq1
+pg_restore: creating DEFAULT gid
+pg_restore: creating DEFAULT gid
+pg_restore: creating DEFAULT gid
+pg_restore: creating DEFAULT gid
+pg_restore: creating DEFAULT gid
+pg_restore: creating DEFAULT gid
+pg_restore: processing data for table "census_blocks"
+pg_restore: processing data for table "census_blocks_reference"
+pg_restore: processing data for table "census_congdists"
+pg_restore: processing data for table "census_congdists_reference"
+pg_restore: processing data for table "census_counties"
+pg_restore: processing data for table "census_counties_reference"
+pg_restore: processing data for table "census_places"
+pg_restore: processing data for table "census_places_reference"
+pg_restore: processing data for table "census_tracts"
+pg_restore: processing data for table "census_tracts_reference"
+pg_restore: processing data for table "census_urbans"
+pg_restore: processing data for table "census_urbans_reference"
+pg_restore: executing SEQUENCE SET tl_2010_41_cd111_gid_seq
+pg_restore: executing SEQUENCE SET tl_2010_41_county10_gid_seq
+pg_restore: executing SEQUENCE SET tl_2010_41_place10_gid_seq
+pg_restore: executing SEQUENCE SET tl_2010_41_tabblock10_gid_seq
+pg_restore: executing SEQUENCE SET tl_2010_41_tract10_gid_seq
+pg_restore: executing SEQUENCE SET tl_2010_us_uac10_gid_seq1
+pg_restore: creating CONSTRAINT census_congdists_pkey
+pg_restore: creating CONSTRAINT census_tracts_pkey
+pg_restore: creating CONSTRAINT census_urbans_pkey
+pg_restore: creating CONSTRAINT gtfs_census_data_spatial_pkey
+pg_restore: creating CONSTRAINT gtfs_counties_pkey
+pg_restore: creating CONSTRAINT gtfs_places_pkey
+pg_restore: creating CONSTRAINT tl_2010_41_cd111_pkey
+pg_restore: creating CONSTRAINT tl_2010_41_county10_pkey
+pg_restore: creating CONSTRAINT tl_2010_41_place10_pkey
+pg_restore: creating CONSTRAINT tl_2010_41_tabblock10_pkey
+pg_restore: creating CONSTRAINT tl_2010_41_tract10_pkey
+pg_restore: creating CONSTRAINT tl_2010_us_uac10_pkey1
+pg_restore: creating INDEX idx_location
+pg_restore: creating INDEX tl_2010_41_cd111_geom_gist
+pg_restore: creating INDEX tl_2010_41_county10_geom_gist
+pg_restore: creating INDEX tl_2010_41_place10_geom_gist
+pg_restore: creating INDEX tl_2010_41_tabblock10_geom_gist
+pg_restore: creating INDEX tl_2010_41_tract10_geom_gist
+pg_restore: creating INDEX tl_2010_us_uac10_geom_gist
+pg_restore: setting owner and privileges for TABLE census_blocks
+pg_restore: setting owner and privileges for TABLE census_blocks_reference
+pg_restore: setting owner and privileges for TABLE census_congdists
+pg_restore: setting owner and privileges for TABLE census_congdists_reference
+pg_restore: setting owner and privileges for TABLE census_counties
+pg_restore: setting owner and privileges for TABLE census_counties_reference
+pg_restore: setting owner and privileges for TABLE census_places
+pg_restore: setting owner and privileges for TABLE census_places_reference
+pg_restore: setting owner and privileges for TABLE census_tracts
+pg_restore: setting owner and privileges for TABLE census_tracts_reference
+pg_restore: setting owner and privileges for TABLE census_urbans
+pg_restore: setting owner and privileges for TABLE census_urbans_reference
+pg_restore: setting owner and privileges for SEQUENCE tl_2010_41_cd111_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE OWNED BY tl_2010_41_cd111_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE tl_2010_41_county10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE OWNED BY tl_2010_41_county10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE tl_2010_41_place10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE OWNED BY tl_2010_41_place10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE tl_2010_41_tabblock10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE OWNED BY tl_2010_41_tabblock10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE tl_2010_41_tract10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE OWNED BY tl_2010_41_tract10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE tl_2010_us_uac10_gid_seq1
+pg_restore: setting owner and privileges for SEQUENCE OWNED BY tl_2010_us_uac10_gid_seq1
+pg_restore: setting owner and privileges for DEFAULT gid
+pg_restore: setting owner and privileges for DEFAULT gid
+pg_restore: setting owner and privileges for DEFAULT gid
+pg_restore: setting owner and privileges for DEFAULT gid
+pg_restore: setting owner and privileges for DEFAULT gid
+pg_restore: setting owner and privileges for DEFAULT gid
+pg_restore: setting owner and privileges for TABLE DATA census_blocks
+pg_restore: setting owner and privileges for TABLE DATA census_blocks_reference
+pg_restore: setting owner and privileges for TABLE DATA census_congdists
+pg_restore: setting owner and privileges for TABLE DATA census_congdists_reference
+pg_restore: setting owner and privileges for TABLE DATA census_counties
+pg_restore: setting owner and privileges for TABLE DATA census_counties_reference
+pg_restore: setting owner and privileges for TABLE DATA census_places
+pg_restore: setting owner and privileges for TABLE DATA census_places_reference
+pg_restore: setting owner and privileges for TABLE DATA census_tracts
+pg_restore: setting owner and privileges for TABLE DATA census_tracts_reference
+pg_restore: setting owner and privileges for TABLE DATA census_urbans
+pg_restore: setting owner and privileges for TABLE DATA census_urbans_reference
+pg_restore: setting owner and privileges for SEQUENCE SET tl_2010_41_cd111_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE SET tl_2010_41_county10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE SET tl_2010_41_place10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE SET tl_2010_41_tabblock10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE SET tl_2010_41_tract10_gid_seq
+pg_restore: setting owner and privileges for SEQUENCE SET tl_2010_us_uac10_gid_seq1
+pg_restore: setting owner and privileges for CONSTRAINT census_congdists_pkey
+pg_restore: setting owner and privileges for CONSTRAINT census_tracts_pkey
+pg_restore: setting owner and privileges for CONSTRAINT census_urbans_pkey
+pg_restore: setting owner and privileges for CONSTRAINT gtfs_census_data_spatial_pkey
+pg_restore: setting owner and privileges for CONSTRAINT gtfs_counties_pkey
+pg_restore: setting owner and privileges for CONSTRAINT gtfs_places_pkey
+pg_restore: setting owner and privileges for CONSTRAINT tl_2010_41_cd111_pkey
+pg_restore: setting owner and privileges for CONSTRAINT tl_2010_41_county10_pkey
+pg_restore: setting owner and privileges for CONSTRAINT tl_2010_41_place10_pkey
+pg_restore: setting owner and privileges for CONSTRAINT tl_2010_41_tabblock10_pkey
+pg_restore: setting owner and privileges for CONSTRAINT tl_2010_41_tract10_pkey
+pg_restore: setting owner and privileges for CONSTRAINT tl_2010_us_uac10_pkey1
+pg_restore: setting owner and privileges for INDEX idx_location
+pg_restore: setting owner and privileges for INDEX tl_2010_41_cd111_geom_gist
+pg_restore: setting owner and privileges for INDEX tl_2010_41_county10_geom_gist
+pg_restore: setting owner and privileges for INDEX tl_2010_41_place10_geom_gist
+pg_restore: setting owner and privileges for INDEX tl_2010_41_tabblock10_geom_gist
+pg_restore: setting owner and privileges for INDEX tl_2010_41_tract10_geom_gist
+pg_restore: setting owner and privileges for INDEX tl_2010_us_uac10_geom_gist

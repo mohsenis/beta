@@ -156,6 +156,7 @@ public class Queries {
     	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
+    	//JOptionPane.showMessageDialog(null, dbindex);
     	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         } 
@@ -557,7 +558,6 @@ public class Queries {
     	
     	while(T1.isAlive() || T2.isAlive()){continue;}
     	//JOptionPane.showMessageDialog(null, mapResponse.MapTr.TotalRoutes);
-    	
     	return mapResponse;
     }
 	/**

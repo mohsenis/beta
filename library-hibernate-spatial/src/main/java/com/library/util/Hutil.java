@@ -5,7 +5,7 @@ import org.hibernate.cfg.*;
 import org.onebusaway.gtfs.impl.Databases;
 
 public class Hutil {
-	private static final SessionFactory[] sessionFactory = new SessionFactory[2];	
+	private static final SessionFactory[] sessionFactory = new SessionFactory[Databases.dbsize];	
 
     static {
     	for (int k=0; k<Databases.dbsize; k++)
