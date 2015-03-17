@@ -13,13 +13,8 @@
 
 package com.webapp.api.model;
 
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import com.webapp.api.model.RouteType;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @XmlRootElement(name = "CountyR")
@@ -40,6 +35,14 @@ public class GeoR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String urbanpop;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String ruralpop;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String landArea;
 	
 	@XmlAttribute
@@ -56,6 +59,10 @@ public class GeoR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String AgenciesCount;	
+	
+	@XmlAttribute
+    @JsonSerialize
     public String StopsCount;
 	
 	@XmlAttribute
@@ -64,11 +71,27 @@ public class GeoR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String UrbansCount;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String CountiesCount;
 		
 	@XmlAttribute
     @JsonSerialize
     public String TractsCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String PlacesCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RegionsCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String CongDistsCount;
 	
 	@XmlAttribute
     @JsonSerialize

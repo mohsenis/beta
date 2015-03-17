@@ -779,7 +779,7 @@ $mylist
 	        .css( "right", 1 + "px" )
 	        .css( "top", 55 + "%" )
 	        .appendTo(div);        
-		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
+		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="SSR" href="#">Statewide Report</a></li><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CNSR" href="#">Connected Networks Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
 			div.appendTo(titlebar);
 			$('.ui-dialog-titlebar-other').dropdown();			
 			$mylist.dialogExtend("collapse");
@@ -789,9 +789,14 @@ $mylist
 				if ($(this).attr('id') != undefined) {
 				casestring = $(this).attr('id');
 				}
-			    if (casestring=="ASR"){
+				if (casestring=="SSR"){			    	
+			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex);
+			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.1';
 			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex);
+			    }else if (casestring=="CNSR"){
+			    	var qstringx = '500';
+			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex);
 			    }else if(casestring=="CSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex);	    		
 			    }else if(casestring=="CPSR"){
@@ -799,7 +804,7 @@ $mylist
 			    }else if(casestring=="CDSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex);	    		
 			    }else if(casestring=="UASR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html'+'?&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex);	    		
 			    }else if(casestring=="ORSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex);	    		
 			    }else if(casestring.substring(0,2)=="DB"){

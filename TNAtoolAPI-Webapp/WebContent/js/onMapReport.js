@@ -168,7 +168,7 @@ function showOnMapReport(lat, lon, date, x){
 	var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
 	$('#displayTransitReport').empty();
 	$('#displayGeoReport').empty();
-	$("#overlay").show();
+	$("#overlay").show();	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',

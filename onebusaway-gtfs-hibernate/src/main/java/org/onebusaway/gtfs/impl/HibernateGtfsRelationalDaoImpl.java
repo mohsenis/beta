@@ -20,6 +20,7 @@ package org.onebusaway.gtfs.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -319,6 +320,14 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
 	  return _ops.findByNamedQueryAndNamedParams("stopsForTripUrban", names,
 		        values);
   }
+  
+  public List<Stop> getStopsForTripUrbans(AgencyAndId trip, List<String> urbans) {	  
+	  String[] names = {"agency", "trip", "urbans"};
+	  Object[] values = {trip.getAgencyId(), trip.getId(), urbans};
+	  return _ops.findByNamedQueryAndNamedParams("stopsForTripUrbans", names,
+		        values);
+  }
+  
   @Override
   public List<Trip> getTripsForRoute(Route route) {
     return _ops.findByNamedQueryAndNamedParam("tripsByRoute", "route", route);
@@ -383,6 +392,28 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     return _ops.findByNamedQueryAndNamedParam("fareRuleForRoute", "route", route);
   }
   
+  public HashMap<String, Float> getFareDataForAgency(String agencyId) {
+	  HashMap<String, Float> response = new HashMap<String, Float>();	  
+	  List results=  _ops.findByNamedQueryAndNamedParam("fareDataForAgency", "agency", agencyId);
+	  Object[] data = (Object[]) results.get(0);
+	  Object test = new Object();	  
+	  response.put("avg", (float)(Math.round(((Double)data[0])*100)/100.0));
+	  response.put("min", (float)(Math.round(((Float)data[1])*100)/100.0));
+	  response.put("max", (float)(Math.round(((Float)data[2])*100)/100.0));
+	  response.put("count", (float)((Long)data[3]));
+	  return response;
+	  }
+  public HashMap<String, Float> getFareDataForState() {
+	  HashMap<String, Float> response = new HashMap<String, Float>();	  
+	  List results=  _ops.findByNamedQuery("fareDataForState");
+	  Object[] data = (Object[]) results.get(0);
+	  response.put("avg", (float)(Math.round(((Double)data[0])*100)/100.0));
+	  response.put("min", (float)(Math.round(((Float)data[1])*100)/100.0));
+	  response.put("max", (float)(Math.round(((Float)data[2])*100)/100.0));
+	  response.put("count", (float)((Long)data[3]));
+	  return response;
+	  }
+  
   @Override
   public List<Float> getFarePriceForRoutes(List<String> routes){
 	  return _ops.findByNamedQueryAndNamedParam("farePriceForRoutes", "routes", routes);	 
@@ -391,6 +422,18 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   @Override
   public List<AgencyAndId> getAllShapeIds() {
     return _ops.findByNamedQuery("allShapeIds");
+  }
+  
+  @Override
+  public HashMap<String, Integer> getCounts() {
+	  HashMap<String, Integer> response = new HashMap<String, Integer>();
+	  List results = _ops.findByNamedQuery("counts");
+	  Object[] counts = (Object[]) results.get(0);
+	  response.put("agency", ((Long)counts[0]).intValue());
+	  response.put("stop", ((Long)counts[1]).intValue());
+	  response.put("route", ((Long)counts[2]).intValue());
+	  
+    return response;
   }
 
   @Override

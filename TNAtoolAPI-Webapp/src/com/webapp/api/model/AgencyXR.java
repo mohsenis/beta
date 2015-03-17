@@ -72,5 +72,9 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String HoursOfService;	
+    public String HoursOfService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String ServiceHours;
 }

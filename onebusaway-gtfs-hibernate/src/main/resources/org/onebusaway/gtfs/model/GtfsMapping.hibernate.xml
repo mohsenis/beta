@@ -330,6 +330,7 @@
         <property name="epshape" type="org.hibernate.type.TextType" column="epshape"/>
         <property name="length"/>
         <property name="estlength"/>
+        <property name="tlength"/>
         <property name="stopscount"/>
         <property name="uid"/>
     </class>

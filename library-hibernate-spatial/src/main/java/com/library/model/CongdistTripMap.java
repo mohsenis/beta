@@ -12,6 +12,7 @@ public final class CongdistTripMap {
   private String congdistId;
   private String serviceId;
   private double length;
+  private int tlength;
   private int stopscount;
   private MultiLineString shape;
   private String uid;
@@ -29,6 +30,7 @@ public CongdistTripMap(CongdistTripMap a) {
     this.routeId = a.routeId;
     this.congdistId = a.congdistId;
     this.length = a.length;
+    this.tlength = a.tlength;
     this.shape = a.shape;
     this.uid = a.uid;
     this.congdist = a.congdist;
@@ -105,6 +107,14 @@ public CongdistTripMap(CongdistTripMap a) {
  public void setLength(double length) {
   this.length = length;
  	 }
+ 
+ public int getTlength() {
+	    return tlength;
+	  }
+
+public void setTlength(int tlength) {
+this.tlength = tlength;
+	 }
 
   public MultiLineString getShape(){
 	  return shape;

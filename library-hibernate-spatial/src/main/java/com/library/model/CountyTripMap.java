@@ -13,6 +13,7 @@ public final class CountyTripMap {
   private String regionId;
   private String serviceId;
   private double length;
+  private int tlength; 
   private int stopscount;
   private MultiLineString shape;
   private String uid;
@@ -30,6 +31,7 @@ public CountyTripMap(CountyTripMap a) {
     this.routeId = a.routeId;
     this.countyId = a.countyId;
     this.length = a.length;
+    this.tlength = a.tlength;
     this.shape = a.shape;
     this.uid = a.uid;
     this.county = a.county;
@@ -115,6 +117,14 @@ public void setRegionId(String regionId) {
  public void setLength(double length) {
   this.length = length;
  	 }
+ 
+ public int getTlength() {
+	    return tlength;
+	  }
+
+public void setTlength(int tlength) {
+this.tlength = tlength;
+	 }
 
   public MultiLineString getShape(){
 	  return shape;

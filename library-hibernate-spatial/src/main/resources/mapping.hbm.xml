@@ -6,7 +6,9 @@
     <class name="Census" table="census_blocks">
         <id name="blockId" column="blockid" type="string" length="15" />
         <property name="placeId" column="placeid" type="string" length="7" />
-        <property name="urbanId" column="urbanid" type="string" length="5" />
+        <many-to-one name="urban" not-null="true" update="false">
+            <column name="urbanId" />                                    
+        </many-to-one>        
         <property name="regionId" column="regionid" type="string" length="2" />
         <property name="congdistId" column="congdistid" type="string" length="4" />        
         <property name="population" type="integer" column="population"/>       
@@ -98,7 +100,9 @@
         <property name="blockId" column="blockid"/> 
         <property name="placeId" column="placeid" /> 
         <property name="regionId" column="regionid"/> 
-        <property name="urbanId" column="urbanid"/>
+        <many-to-one name="urban" not-null="true" update="false">
+            <column name="urbanId" />                                    
+        </many-to-one>
         <property name="congdistId" column="congdistid"/>
         <property name="location" type="org.hibernatespatial.GeometryUserType"  column="location"/>       
     </class>
@@ -124,6 +128,7 @@
         <property name="tripId" update="false"/>  
         <property name="routeId" update="false"/>                       
         <property name="length" update="false"/>
+        <property name="tlength" update="false"/>
         <property name="stopscount" update="false"/>
         <property name="serviceId" update="false"/>
         <property name="shape" type="org.hibernatespatial.GeometryUserType" />
@@ -142,6 +147,7 @@
         <property name="tripId" update="false"/>  
         <property name="routeId" update="false"/>                       
         <property name="length" update="false"/>
+        <property name="tlength" update="false"/>
         <property name="stopscount" update="false"/>
         <property name="serviceId" update="false"/>
         <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
@@ -159,6 +165,7 @@
         <property name="tripId" update="false"/>  
         <property name="routeId" update="false"/>                       
         <property name="length" update="false"/>
+        <property name="tlength" update="false"/>
         <property name="stopscount" update="false"/>
         <property name="serviceId" update="false"/>
         <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
@@ -176,11 +183,12 @@
         <property name="tripId" update="false"/>  
         <property name="routeId" update="false"/>                       
         <property name="length" update="false"/>
+        <property name="tlength" update="false"/>
         <property name="stopscount" update="false"/>
         <property name="serviceId" update="false"/>
         <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
         <property name="uid" update="false"/>
-        <many-to-one name="Urban" not-null="true" update="false">
+        <many-to-one name="urban" not-null="true" update="false">
             <column name="urbanId" />            
         </many-to-one>       
     </class>
@@ -193,6 +201,7 @@
         <property name="tripId" update="false"/>  
         <property name="routeId" update="false"/>                       
         <property name="length" update="false"/>
+        <property name="tlength" update="false"/>
         <property name="stopscount" update="false"/>
         <property name="serviceId" update="false"/>
         <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
@@ -273,6 +282,9 @@
 	<query name = "All_URBANS">
     <![CDATA[from Urban]]>
 	</query>
+	<query name = "URBANS_BYPOP">
+    <![CDATA[from Urban where population >= :pop]]>
+	</query>
 	<query name = "All_CONGDISTS">
     <![CDATA[from CongDist]]>
 	</query>
@@ -310,7 +322,10 @@
     <![CDATA[from GeoStop where placeId=:id]]>
 	</query>
 	<query name = "STOPSL_BY_URBAN">
-    <![CDATA[from GeoStop where urbanId=:id]]>
+    <![CDATA[from GeoStop gsp where gsp.urban.urbanId=:id]]>
+	</query>
+	<query name = "STOPSL_BY_URBANPOP">
+    <![CDATA[from GeoStop stops where stops.urban.population>=:pop]]>
 	</query>
 	<query name = "STOPSL_BY_CONGDIST">
     <![CDATA[from GeoStop where congdistId=:id]]>
@@ -354,6 +369,9 @@
 	<query name = "TRIPS_BY_URBAN">
     <![CDATA[from UrbanTripMap where urbanId=:id order by agencyId_def, routeId, uid]]>
 	</query>
+	<query name = "TRIPS_BY_URBANPOP">
+    <![CDATA[from UrbanTripMap map where map.urban.urbanId in (select urbans.urbanId from Urban urbans where urbans.population >= :pop) order by map.agencyId_def, map.routeId, map.uid]]>
+	</query>
 	<query name = "ROUTES_BY_PLACE">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.placeId=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
@@ -361,7 +379,7 @@
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,11)=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
 	<query name = "ROUTES_BY_URBAN">
-    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.urbanId=:id group by gsr.routeId, gsr.agencyId]]>
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
 	<query name = "ROUTES_BY_CONGDIST">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.congdistId=:id group by gsr.routeId, gsr.agencyId]]>
@@ -380,6 +398,9 @@
 	</query>
 	<query name = "URBAN_POP_UNDUP_BATCH">
     <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and urbanId=:id )]]>
+	</query>
+	<query name = "URBAN_POP_UNDUP_BATCH_BYPOP">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census cns where dwithin(location, :allpoints ,:radius)=true and cns.urban.population>:pop )]]>
 	</query>
 	<query name = "CONGDIST_POP_UNDUP_BATCH">
     <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and congdistId=:id )]]>
@@ -415,12 +436,17 @@
     <![CDATA[select map.Place.name from PlaceTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from PlaceTripMap where placeId =:id ) group by map.Place.placeId, map.Place.name order by map.Place.name ]]>
 	</query>
 	<query name = "CONNECTED_URBANS">
-    <![CDATA[select map.Urban.name from UrbanTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from UrbanTripMap where urbanId =:id ) group by map.Urban.urbanId, map.Urban.name order by map.Urban.name ]]>
+    <![CDATA[select map.urban.name from UrbanTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from UrbanTripMap where urbanId =:id ) group by map.urban.urbanId, map.urban.name order by map.urban.name ]]>
+	</query>
+	<query name = "CONNECTED_URBANS_BYPOP">
+    <![CDATA[select map.urban.name from UrbanTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from UrbanTripMap where urbanId in (select urbanId from Urban where population>=:pop)) group by map.urban.urbanId, map.urban.name order by map.urban.name ]]>
 	</query>
 	<query name = "CONNECTED_CONGDISTS">
     <![CDATA[select map.Congdist.name from CongdistTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from CongdistTripMap where congdistId =:id ) group by map.Congdist.congdistId, map.Congdist.name order by map.Congdist.name ]]>
 	</query>
 	<query name = "CONNECTED_REGIONS">
     <![CDATA[select map.regionId from CountyTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from CountyTripMap where regionId =:id ) group by map.regionId order by map.regionId ]]>
-	</query>	
+	</query>
+	<query name = "GEO_COUNTS">
+    <![CDATA[select (select count(countyId) from County) as county, (select count(tractId) from Tract) as tract, (select count(placeId) from Place) as place, (select count(urbanId) from Urban) as urban, (select count(congdistId) from CongDist) as congdist, (select count(distinct regionId) from County) as region, sum(population), sum(landarea), (select sum(population) from Census where poptype='U'), (select sum(population) from Census where poptype='R') from County]]>	</query>		
 </hibernate-mapping>
