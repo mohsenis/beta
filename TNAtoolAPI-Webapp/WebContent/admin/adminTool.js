@@ -68,7 +68,7 @@ function addModifyDB(j, index){
 	    var pass = $('#'+dbInfo[0][6]).val();
 	    var cURL = "jdbc:postgresql://"+$('#'+dbInfo[0][4]).val()+":"+$('#'+dbInfo[0][4]+"p").val()+"/";
 	    var db = $('#'+dbInfo[0][4]+"n").val();
-	    var regex = new RegExp("^[A-Za-z0-9\-\_]+$");
+	    var regex = new RegExp("^[a-z][a-z0-9\_]+$");
 	    var oldURL = info[4];
 	    var olddbname = info[1];
 	    if (!regex.test(db)) {

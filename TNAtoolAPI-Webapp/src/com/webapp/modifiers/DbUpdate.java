@@ -52,6 +52,7 @@ import org.xml.sax.SAXException;
 @XmlRootElement
 public class DbUpdate {
 	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
+	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	@GET
     @Path("/updatetrips")
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -377,8 +378,8 @@ public class DbUpdate {
 			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/restoreCensus.bat", pass, usrn, name,
 					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/census.backup",
 					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/addCensusErr.txt",
-					"C:/Program Files/PostgreSQL/9.3/bin/psql.exe",
-					"C:/Program Files/PostgreSQL/9.3/bin/pg_restore.exe");
+					psqlPath+"psql.exe",
+					psqlPath+"pg_restore.exe");
 			pb.redirectErrorStream(true);
 			pr = pb.start();
 			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
@@ -604,7 +605,8 @@ public class DbUpdate {
 		
 		try {
 			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/dbUpdate.bat", pass, usrn, name,
-					"C:/Program Files/PostgreSQL/9.3/bin/psql.exe");
+					psqlPath+"psql.exe",
+					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
 			pb.redirectErrorStream(true);
 			pr = pb.start();
 		} catch (IOException e) {

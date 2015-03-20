@@ -2964,16 +2964,23 @@ Loop:  	for (Trip trip: routeTrips){
     	long landarea=0;
     	long waterarea = 0;
     	long population = 0;
-    	int routescount = 0;
+    	//int routescount = 0;
     	int stopscount = 0;
+    	List<String> routeL = new ArrayList<String>();
 	    for (Urban instance : allurbanareas){   
 	    	index++;
 	    	landarea+=instance.getLandarea();	    			
 	    	waterarea +=instance.getWaterarea();
 	    	population += instance.getPopulation();
-	    	int routescnt = 0;
+	    	//int routescnt = 0;
 	    	try {
-	    		routescnt = EventManager.getroutescountbyurban(instance.getUrbanId(), dbindex);
+	    		List<GeoStopRouteMap> routesL = EventManager.getroutesbyurban(instance.getUrbanId(), dbindex);
+	    		for(int x=0;x<routesL.size();x++){
+	    			String routeID = routesL.get(x).getrouteId()+routesL.get(x).getagencyId();
+	    			if(!routeL.contains(routeID)){
+	    				routeL.add(routeID);
+	    			}
+	    		}
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2981,7 +2988,7 @@ Loop:  	for (Trip trip: routeTrips){
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-	    	routescount += routescnt;
+	    	//routescount += routescnt;
 	    	int stopscnt = 0;
 	    	try {
 	    		stopscnt = (int)EventManager.getstopscountbyurban(instance.getUrbanId(), dbindex);
@@ -3004,7 +3011,8 @@ Loop:  	for (Trip trip: routeTrips){
 	    each.waterArea = String.valueOf(Math.round(waterarea/2.58999e4)/100.0);
     	each.landArea = String.valueOf(Math.round(landarea/2.58999e4)/100.0);
     	each.population = String.valueOf(population);
-    	each.RoutesCount = String.valueOf(routescount);	    	
+    	//each.RoutesCount = String.valueOf(routescount);
+    	each.RoutesCount = String.valueOf(routeL.size());
     	each.StopsCount = String.valueOf(stopscount);
     	response.GeoR.add(each);
 	    return response;

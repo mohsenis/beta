@@ -1,4 +1,4 @@
-drop table if exists census_tracts_trip_map;
+﻿drop table if exists census_tracts_trip_map;
 
 CREATE TABLE census_tracts_trip_map
 (
@@ -11,6 +11,7 @@ CREATE TABLE census_tracts_trip_map
   serviceid character varying(255),
   stopscount integer,  
   length float,
+  tlength int,
   shape geometry(multilinestring),
   uid varchar(512),
   CONSTRAINT census_tracts_trip_map_pkey PRIMARY KEY (gid),
@@ -36,3 +37,13 @@ on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id group by stim
 where tractid =  res.cid and agencyid = res.aid and tripid=res.tid;
 
 update census_tracts_trip_map set stopscount=0 where stopscount IS NULL;
+
+update census_tracts_trip_map map set tlength=res.ttime from (
+select max(stimes.departuretime)-min(stimes.arrivaltime) as ttime, 
+stimes.agencyid, stimes.tripid, stimes.geoid from (
+select stime.arrivaltime, stime.departuretime, stime.trip_agencyid as agencyid, stime.trip_id as tripid, substring(stop.blockid,1,11) as geoid
+from gtfs_stop_times stime inner join gtfs_stops stop on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id) as stimes
+where stimes.arrivaltime>0 and stimes.departuretime>0 group by stimes.agencyid, stimes.tripid, stimes.geoid) as res 
+where res.agencyid = map.agencyid and res.tripid=map.tripid and res.geoid=map.tractid;
+
+update census_tracts_trip_map set tlength=0 where tlength isnull;

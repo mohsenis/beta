@@ -1,4 +1,4 @@
-/*uncomment if the shapes table has its default wierd name*/
+﻿/*uncomment if the shapes table has its default wierd name*/
 /*alter table tl_2010_41_tabblock10 rename to census_blocks_reference;*/
 /*uncomment if the table does not already have the blockId column*/
 /*alter table gtfs_stops add column blockid varchar(15);*/

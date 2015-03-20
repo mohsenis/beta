@@ -711,7 +711,19 @@ static{
 		List<GeoStopRouteMap> result = q.list();
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
-	    }	
+	    }
+/**
+ * returns list of routes for a given urban area for Aggregated urban area report
+ */
+	public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_AURBAN");
+		q.setParameter("id", urbanId);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result;
+	    }
 	
 /**
  * returns list of routes for a given congressional district

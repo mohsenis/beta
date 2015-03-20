@@ -381,6 +381,9 @@
 	<query name = "ROUTES_BY_URBAN">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
+	<query name = "ROUTES_BY_AURBAN">
+	<![CDATA[from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id]]>
+	</query>
 	<query name = "ROUTES_BY_CONGDIST">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.congdistId=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>

@@ -1,4 +1,4 @@
-drop table if exists gtfs_stop_route_map;
+﻿drop table if exists gtfs_stop_route_map;
 
 CREATE TABLE gtfs_stop_route_map
 (
