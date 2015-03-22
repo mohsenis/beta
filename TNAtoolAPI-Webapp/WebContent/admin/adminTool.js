@@ -72,7 +72,7 @@ function addModifyDB(j, index){
 	    var oldURL = info[4];
 	    var olddbname = info[1];
 	    if (!regex.test(db)) {
-	       alert("The \"Name\" under the \"Connection URL\" can only accept letters, digits, dashes, and underscore.");
+	       alert("The \"Name\" under the \"Connection URL\" can only accept lower-case letters, digits, and underscore, starting with a letter.");
 	       return;
 	    }
 	    $.ajax({

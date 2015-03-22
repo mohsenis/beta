@@ -52,7 +52,7 @@ public final class Route extends IdentityBean<AgencyAndId> {
   @CsvField(optional = true)
   private String textColor;
   
-  @CsvField(name = "agency_id", optional = true, mapping = DefaultAgencyIdTranslator.class)
+  @CsvField(name = "route_id", optional = true, mapping = DefaultAgencyIdTranslator.class)
   private String defaultId;
   
   @Deprecated

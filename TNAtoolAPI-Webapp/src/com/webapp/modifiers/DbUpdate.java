@@ -537,6 +537,16 @@ public class DbUpdate {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			
 			statement = c.createStatement();
+			rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where defaultid IS NULL;");
+			if ( rs.next() ) {
+				String tmpAgencyId = rs.getString("id");
+				rs = statement.executeQuery("SELECT * FROM gtfs_routes where agencyid = '"+tmpAgencyId+"' limit 1;");
+				if ( rs.next() ) {
+					defaultId = rs.getString("defaultid");
+				}
+				statement.executeUpdate("UPDATE gtfs_agencies SET defaultid = '"+defaultId+"' WHERE defaultid IS NULL;");
+			}
+			
 			rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where added IS NULL;");
 			
 			while ( rs.next() ) {
