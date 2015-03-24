@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -3119,6 +3121,18 @@ Loop:  	for (Trip trip: routeTrips){
 		List<UrbanTripMap> trips = new ArrayList<UrbanTripMap>();
 		try {
 			trips = EventManager.gettripsbyurbanpop(upop, dbindex);
+			JOptionPane.showMessageDialog(null, trips.size());
+			LinkedHashMap<String, UrbanTripMap> tmpHashSet = new LinkedHashMap<String, UrbanTripMap>();
+			String tmpKey;
+			for(UrbanTripMap t: trips){
+				tmpKey = t.getagencyId_def()+t.getTripId();
+				tmpHashSet.put(tmpKey, t);
+			}
+			trips.clear();
+			for(Entry<String, UrbanTripMap> entry : tmpHashSet.entrySet()){
+				trips.add(entry.getValue());
+			}
+			JOptionPane.showMessageDialog(null, trips.size());
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -3161,15 +3175,19 @@ Loop:  	for (Trip trip: routeTrips){
         		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def(), dbindex);
         		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def(), dbindex); 
         		agencyId = inst.getagencyId_def();
-        	} 
+        	}
+        	if (!agencyId.equals(inst.getagencyId()) || !routeId.equals(inst.getRouteId())){
+        		RouteMiles += length; 
+        		length = 0;
+        	}
         	if (!routeId.equals(inst.getRouteId())){
         		if (!routes.contains(inst.getagencyId_def()+","+inst.getRouteId()))
         			routes.add(inst.getagencyId_def()+","+inst.getRouteId());
-    			RouteMiles += length;  	        
+    			 	        
     			//initialize all again    			
-    			routeId = inst.getRouteId();   			
-    			length = 0;    						
+    			routeId = inst.getRouteId();   						
     		}
+        	
         	ServiceCalendar sc = null;
     		if(agencyServiceCalendar!=null){
     			for(ServiceCalendar scs: agencyServiceCalendar){
