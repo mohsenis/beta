@@ -3121,7 +3121,6 @@ Loop:  	for (Trip trip: routeTrips){
 		List<UrbanTripMap> trips = new ArrayList<UrbanTripMap>();
 		try {
 			trips = EventManager.gettripsbyurbanpop(upop, dbindex);
-			JOptionPane.showMessageDialog(null, trips.size());
 			LinkedHashMap<String, UrbanTripMap> tmpHashSet = new LinkedHashMap<String, UrbanTripMap>();
 			String tmpKey;
 			for(UrbanTripMap t: trips){
@@ -3132,7 +3131,6 @@ Loop:  	for (Trip trip: routeTrips){
 			for(Entry<String, UrbanTripMap> entry : tmpHashSet.entrySet()){
 				trips.add(entry.getValue());
 			}
-			JOptionPane.showMessageDialog(null, trips.size());
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

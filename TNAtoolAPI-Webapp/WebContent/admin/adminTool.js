@@ -101,7 +101,7 @@ function runQueries(index){
         dataType: "json",
         async: false,
         success: function(d) {
-        	
+        	location.reload(true);
         }
 	});
 	

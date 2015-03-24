@@ -451,6 +451,8 @@ public class DbUpdate {
 		Statement statement = null;
 		ResultSet rs = null;
 		String agencyId = "";
+		String agencyIds = "";
+		String[] agencyIdList;
 		
 		String[][] defAgencyIds  = {{"census_congdists_trip_map","agencyid_def"},
 									{"census_places_trip_map","agencyid_def"},
@@ -484,14 +486,25 @@ public class DbUpdate {
 			
 			statement = c.createStatement();
 			rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info where feedname = '"+feedname+"';");
-			
 			if ( rs.next() ) {
 				agencyId = rs.getString("defaultid");
 			}
 			
+			rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname = '"+feedname+"';");
+			if ( rs.next() ) {
+				agencyIds = rs.getString("agencyids");
+			}
+			agencyIdList = agencyIds.split(",");
+			
 			for(int i=0;i<defAgencyIds.length;i++){
 				try{
-					statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+defAgencyIds[i][1]+"='"+agencyId+"';");
+					if(defAgencyIds[i][0].startsWith("temp")){
+						statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+sqlString(agencyIdList,defAgencyIds[i][1])+"';");
+						
+					}else{
+						statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+defAgencyIds[i][1]+"='"+agencyId+"';");
+					}
+					
 				}catch (SQLException e) {
 					System.out.println(e.getMessage());
 				}
@@ -509,6 +522,15 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		error.DBError = "done";
 		return error;
+	}
+	
+	public String sqlString(String[] ids, String column){
+		String sql = "";
+		for(int i=0;i<ids.length-1;i++){
+			sql += column+" = '"+ids[i]+"' OR ";
+		}
+		sql += column+" = '"+ids[ids.length-1];
+		return sql;
 	}
 	
 	@GET
