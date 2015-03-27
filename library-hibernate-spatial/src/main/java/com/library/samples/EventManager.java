@@ -191,7 +191,7 @@ static{
         return results;
     }
 /**
- * returns number of all geo areas in the DB
+ * returns number of all geo areas in the DB: keys are : county, tract, place, urban, congdist, region, pop, landarea, urbanpop, ruralpop
  */
 	public static HashMap<String, Long> getGeoCounts(int sessionindex) throws FactoryException, TransformException {			
 		session[sessionindex].beginTransaction();

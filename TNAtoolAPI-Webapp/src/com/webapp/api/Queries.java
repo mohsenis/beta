@@ -792,6 +792,9 @@ public class Queries {
     	}
     }
     
+    /**
+     * Returns a 2D array , [0][i] is date is YYYYMMDD format, [1][i] is day of week as integer 1(sunday) to 7(friday)
+     */    
     public int[][] daysOfWeek(String[] dates){
     	Calendar calendar = Calendar.getInstance();
     	SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
@@ -807,8 +810,28 @@ public class Queries {
     	}
     	return days;
     }
+    
     /**
-     * Returns full date for the dates selected on calendar
+     * Returns a 2D array , [0][i] is date in YYYYMMDD format, [1][i] is day of week string (all lower case): sunday, monday, tuesday, wednesday, friday
+     */
+    public String[][] daysOfWeekString(String[] dates){
+    	Calendar calendar = Calendar.getInstance();
+    	String[] weekdays = {"sunday","monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
+    	SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+    	String[][] days = new String[2][dates.length];
+    	for(int i=0; i<dates.length; i++){
+    		days[0][i] = dates[i].split("/")[2] + dates[i].split("/")[0] + dates[i].split("/")[1];
+    		try {
+				calendar.setTime(sdf.parse(dates[i]));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+    		days[1][i] = weekdays[calendar.get(Calendar.DAY_OF_WEEK)-1];
+    	}
+    	return days;
+    }
+    /**
+     * Returns full date for the dates selected on calendar in EEE dd MMM yyyy fromat
      */
     public String[] fulldate(String[] dates){
     	//Calendar calendar = Calendar.getInstance();
@@ -3073,8 +3096,8 @@ Loop:  	for (Trip trip: routeTrips){
     	StopsCount = stops.size();
     	response.StopsPersqMile = String.valueOf(Math.round((StopsCount*2.58999e8)/landarea)/100.0);
     	long pop = 0;
-    	PgisEventManager.makeConnection(dbindex);
-    	pop =PgisEventManager.UrbanCensusbyPop(upop);
+    	//PgisEventManager.makeConnection(dbindex);
+    	pop =PgisEventManager.UrbanCensusbyPop(upop, dbindex);
 		/*List <Coordinate> stopcoords = new ArrayList<Coordinate>();
 		for (GeoStop stop: stops){
 			stopcoords.add(new Coordinate(stop.getLat(),stop.getLon()));
@@ -3357,7 +3380,7 @@ Loop:  	for (Trip trip: routeTrips){
 			e.printStackTrace();
 		}        
         progVal.remove(key); 
-        PgisEventManager.dropConnection();
+        //PgisEventManager.dropConnection();
     	return response;
     }
     
@@ -4657,9 +4680,9 @@ Loop:  	for (Trip trip: routeTrips){
 		gap = gap / 3.28084;
 		ClusterRList response = new ClusterRList();
 		response.type = "GapReport";
-		PgisEventManager.makeConnection(dbindex);
+		//PgisEventManager.makeConnection(dbindex);
 		List<agencyCluster> results= new ArrayList<agencyCluster>();
-		results = PgisEventManager.agencyCluster(gap);
+		results = PgisEventManager.agencyCluster(gap, dbindex);
 		int totalLoad = results.size();
 		int index = 0;
 		for (agencyCluster acl: results){
@@ -4674,7 +4697,7 @@ Loop:  	for (Trip trip: routeTrips){
 			response.ClusterR.add(instance);
 			setprogVal(key, (int) Math.round(index*100/totalLoad));
 		}
-		PgisEventManager.dropConnection();
+		//PgisEventManager.dropConnection();
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -4703,9 +4726,9 @@ Loop:  	for (Trip trip: routeTrips){
 		ClusterRList response = new ClusterRList();
 		response.type = "ExtendedGapReport";
 		response.agency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agencyId, dbindex).getName();
-		PgisEventManager.makeConnection(dbindex);
+		//PgisEventManager.makeConnection(dbindex);
 		List<agencyCluster> results= new ArrayList<agencyCluster>();
-		results = PgisEventManager.agencyClusterDetails(gap, agencyId);
+		results = PgisEventManager.agencyClusterDetails(gap, agencyId, dbindex);
 		int totalLoad = results.size();
 		int index = 0;
 		for (agencyCluster acl: results){
@@ -4721,7 +4744,7 @@ Loop:  	for (Trip trip: routeTrips){
 			response.ClusterR.add(instance);
 			setprogVal(key, (int) Math.round(index*100/totalLoad));
 		}
-		PgisEventManager.dropConnection();
+		//PgisEventManager.dropConnection();
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -4808,20 +4831,97 @@ Loop:  	for (Trip trip: routeTrips){
 		if (L==null || L<0){
        		L = LEVEL_OF_SERVICE;
        	}
-		/*String[] dates = date.split(",");
-    	int[][] days = daysOfWeek(dates);
-    	String[] fulldates = fulldate(dates);*/
+		String[] dates = date.split(",");
+    	String[][] days = daysOfWeekString(dates);
+    	String[] fulldates = fulldate(dates);
     	GeoXR response = new GeoXR();
-    	int totalLoad = 2;
+    	int totalLoad = 6 + days[0].length;
 		int index = 0;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
-		
+		response.AreaName = "Oregon";
 		HashMap<String, Float> FareData = new HashMap<String, Float>();
-		FareData = GtfsHibernateReaderExampleMain.QueryFareData(null, dbindex);		
+		FareData = GtfsHibernateReaderExampleMain.QueryFareData(null, dbindex);
+		index ++;
+		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.MinFare = String.valueOf(FareData.get("min"));
 		response.AverageFare = String.valueOf(FareData.get("avg"));
 		response.MaxFare = String.valueOf(FareData.get("max"));
+		int FareCount = FareData.get("count").intValue();
+		float FareMedian = GtfsHibernateReaderExampleMain.QueryFareMedian(null, FareCount, dbindex);
+		index ++;
+		setprogVal(key, (int) Math.round(index*100/totalLoad));
+		response.MedianFare = String.valueOf(FareMedian);
+		Double RouteMiles = GtfsHibernateReaderExampleMain.QueryRouteMiles(dbindex);
+		index ++;
+		setprogVal(key, (int) Math.round(index*100/totalLoad));
+		response.RouteMiles = String.valueOf(RouteMiles);
+		Long StopsCount = GtfsHibernateReaderExampleMain.QueryStopsCount(dbindex);
+		index ++;
+		setprogVal(key, (int) Math.round(index*100/totalLoad));
+		HashMap<String, Long> geocounts = new HashMap<String, Long>();
+		try {
+			geocounts = EventManager.getGeoCounts(dbindex);
+		} catch (FactoryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		long ServiceHours = 0;
+		double ServiceMiles = 0;
+		long PopatLOS = 0;
+		long svcPop = 0;
+		long svcStops = 0;
+		int HOSstart = Integer.MAX_VALUE;
+		int HOSend = Integer.MIN_VALUE;
+		String ServiceDays = "";
+		//PgisEventManager.makeConnection(dbindex);
+		response.StopsPersqMile = String.valueOf(Math.round(StopsCount*25899752356.00/geocounts.get("landarea"))/10000.00);
+		for (int i=0; i<days[0].length; i++){
+			long svchours=PgisEventManager.ServiceHours(days[0][i], days[1][i], dbindex);
+			if (svchours>0){
+				ServiceHours +=svchours;
+				ServiceDays+=fulldates[i]+"; ";
+				ServiceMiles+=PgisEventManager.ServiceMiles(days[0][i], days[1][i], dbindex);
+				PopatLOS += PgisEventManager.PopServedatLOS(x, days[0][i], days[1][i], L, dbindex);
+				HashMap<String, Long> svc= PgisEventManager.ServiceStopsPop(x, days[0][i], days[1][i], dbindex);
+				svcPop += svc.get("svcpop");
+				svcStops +=svc.get("svcstops");
+				int[] HOS = PgisEventManager.HoursofService(days[0][i], days[1][i], dbindex);
+				if (HOS[0]<HOSstart)
+					HOSstart = HOS[0];
+				if (HOS[1]>HOSend)
+					HOSend = HOS[1];
+			}
+			index ++;
+			setprogVal(key, (int) Math.round(index*100/totalLoad));
+		}
+		long PopWithinX = PgisEventManager.PopWithinX(x, dbindex);
+		index ++;
+		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		
+		response.ServiceHours = String.valueOf(Math.round(ServiceHours/36.0)/100.0);
+		response.ServiceMiles = String.valueOf(Math.round(ServiceMiles*100.0)/100.0);
+		if (ServiceDays.length()>2){
+			ServiceDays= ServiceDays.substring(0,ServiceDays.length()-2);
+        }
+		response.ServiceDays = ServiceDays;
+		response.StopPerServiceMile = (ServiceMiles>0.01)? String.valueOf(Math.round((StopsCount*100)/ServiceMiles)/100.0): "NA";   
+		response.ServiceMilesPersqMile = (geocounts.get("landarea")>0.01) ? String.valueOf(Math.round((ServiceMiles*258999752.356)/geocounts.get("landarea"))/10000.00):"NA";
+		response.MilesofServicePerCapita = (geocounts.get("pop")>0) ? String.valueOf(Math.round((ServiceMiles*10000.00)/geocounts.get("pop"))/10000.00): "NA";
+		response.PopWithinX = String.valueOf(PopWithinX);
+		response.PopServed = String.valueOf(Math.round((10000.00*PopWithinX/geocounts.get("pop")))/100.00);
+		response.PopUnServed = String.valueOf(Math.round(1E4-((10000.00*PopWithinX/geocounts.get("pop"))))/100.0);
+		response.PopServedAtLoService = String.valueOf(Math.round(10000.0*PopatLOS/geocounts.get("pop"))/100.0);
+        response.ServiceStops = String.valueOf(svcStops); 
+        response.PopServedByService = String.valueOf(svcPop);
+        if (HOSstart==Integer.MAX_VALUE)
+        	HOSstart = 0;
+        if (HOSend==Integer.MIN_VALUE)
+        	HOSend = 0;
+        response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(HOSstart * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(HOSend * 1000L));		
+		//PgisEventManager.dropConnection();
 		/*GeoR each = new GeoR();
 		each.Name = "Oregon";
 		each.CountiesCount = String.valueOf(geocounts.get("county"));
@@ -4842,8 +4942,6 @@ Loop:  	for (Trip trip: routeTrips){
 		each.RoutesCount = String.valueOf(transcounts.get("route"));
 		each.AgenciesCount = String.valueOf(transcounts.get("agency"));
 		response.GeoR.add(each);*/
-		index++;
-		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {

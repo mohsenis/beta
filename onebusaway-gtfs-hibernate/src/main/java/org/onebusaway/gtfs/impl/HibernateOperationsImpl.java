@@ -126,6 +126,11 @@ public class HibernateOperationsImpl implements HibernateOperations {
   public <T> List<T> findByNamedQuery(String namedQuery) {
     return findByNamedQueryAndNamedParams(namedQuery, null, null);
   }
+  
+  @Override
+  public <T> List<T> findByNamedQueryLimited(String namedQuery, final int limit, final int offset) {
+    return findByNamedQueryAndNamedParamsLimited(namedQuery, null, null, limit, offset);
+  }
 
   @Override
   public <T> List<T> findByNamedQueryAndNamedParam(final String namedQuery,
@@ -134,6 +139,13 @@ public class HibernateOperationsImpl implements HibernateOperations {
         new Object[] {paramValue});
   }
 
+  @Override
+  public <T> List<T> findByNamedQueryAndNamedParamLimited(final String namedQuery,
+      String paramName, Object paramValue, final int limit, final int offset) {
+    return findByNamedQueryAndNamedParamsLimited(namedQuery, new String[] {paramName},
+        new Object[] {paramValue}, limit, offset);
+  }
+  
   @SuppressWarnings("unchecked")
   public <T> List<T> findByNamedQueryAndNamedParams(final String namedQuery,
       final String[] paramNames, final Object[] values) {
@@ -144,6 +156,23 @@ public class HibernateOperationsImpl implements HibernateOperations {
           for (int i = 0; i < values.length; i++)
             applyNamedParameterToQuery(queryObject, paramNames[i], values[i]);
         }
+        return queryObject.list();
+      }
+    });
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <T> List<T> findByNamedQueryAndNamedParamsLimited(final String namedQuery,
+      final String[] paramNames, final Object[] values, final int limit, final int offset) {
+    return (List<T>) execute(new HibernateOperation() {
+      public Object doInHibernate(Session session) throws HibernateException {
+        Query queryObject = session.getNamedQuery(namedQuery);
+        if (values != null) {
+          for (int i = 0; i < values.length; i++)
+            applyNamedParameterToQuery(queryObject, paramNames[i], values[i]);
+        }
+        queryObject.setFirstResult(offset);
+        queryObject.setMaxResults(limit);
         return queryObject.list();
       }
     });

@@ -146,6 +146,20 @@ public class GtfsHibernateReaderExampleMain {
 	  }
   }
   
+  public static Double QueryRouteMiles(int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  return dao.getRouteMiles();
+  }
+  
+  public static Float QueryFareMedian(String agencyId,int farecount, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  if (agencyId!=null){
+		  return dao.getFareMedianForAgency(agencyId, farecount);
+	  } else {
+		  return dao.getFareMedianForState(farecount);
+	  }
+  }
+  
   public static List<Float> QueryFarePriceByRoutes(List <String> routes, int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  	  
 	  return dao.getFarePriceForRoutes(routes);
@@ -247,6 +261,11 @@ public class GtfsHibernateReaderExampleMain {
   public static List<Stop> QueryStopsbyTripCongdist (AgencyAndId trip, String congdist, int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
 	  return dao.getStopsForTripCongdist(trip,congdist);
+  }
+  
+  public static Long QueryStopsCount(int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  return dao.getStopsCount();
   }
   public static String QueryServiceHours (List<String> trips, int dbindex){
 	  //String resource = "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";

@@ -35,13 +35,21 @@ public interface HibernateOperations {
       String[] paramNames, final Object[] values);
 
   public <T> List<T> findByNamedQuery(String namedQuery);
+  
+  public <T> List<T> findByNamedQueryLimited(String namedQuery, final int limit, final int offset);
 
   public <T> List<T> findByNamedQueryAndNamedParam(String namedQuery,
       String paramName, Object paramValue);
+  
+  public <T> List<T> findByNamedQueryAndNamedParamLimited(String namedQuery,
+	      String paramName, Object paramValue, final int limit, final int offset);
 
   public <T> List<T> findByNamedQueryAndNamedParams(final String namedQuery,
       String[] paramNames, Object[] values);
-
+  
+  public <T> List<T> findByNamedQueryAndNamedParamsLimited(final String namedQuery,
+	      String[] paramNames, Object[] values, final int limit, final int offset);
+  
   public void update(Object entity);
 
   public void save(Object entity);

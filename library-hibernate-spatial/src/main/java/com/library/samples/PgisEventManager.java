@@ -13,9 +13,9 @@ import java.util.List;
 import com.library.model.*;
 
 public class PgisEventManager {
-	public static Connection connection;
+	//public static Connection connection;
 	
-	public static void makeConnection(int dbindex){
+	private static Connection makeConnection(int dbindex){
 		String url = "";
 		switch (dbindex){
 		case 0:
@@ -25,18 +25,20 @@ public class PgisEventManager {
 			url = "gtfsdb1";
 			break;
 		}
+		Connection response = null;
 		try {
 		Class.forName("org.postgresql.Driver");
-		connection = DriverManager
+		response = DriverManager
            .getConnection("jdbc:postgresql://localhost:5432/"+url,
            "postgres", "123123");
 		}catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
 	        System.exit(0);
 	      }
+		return response;
 	}
 	
-	public static void dropConnection(){
+	private static void dropConnection(Connection connection){
 		try {
 			connection.close();
 		} catch (SQLException e) {
@@ -81,8 +83,9 @@ public class PgisEventManager {
       }
       System.out.println("Operation done successfully");
     } */
-	public static long UrbanCensusbyPop(int pop) 
-    {
+	public static long UrbanCensusbyPop(int pop, int dbindex) 
+    {	
+		Connection connection = makeConnection(dbindex);
       //Connection c = null;
       Statement stmt = null;
       long population = 0;
@@ -101,7 +104,7 @@ public class PgisEventManager {
         		+ "as pops;" );        
         while ( rs.next() ) {
            population = rs.getLong("pop");           
-           System.out.println( "population = " + population );           
+           //System.out.println( "population = " + population );           
         }
         rs.close();
         stmt.close();
@@ -110,14 +113,16 @@ public class PgisEventManager {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
         System.exit(0);
       }
-      System.out.println("Operation done successfully");
+      dropConnection(connection);
+      //System.out.println("Operation done successfully");
       return population;
     }
 	/*
 	 *Queries agency clusters (connected transit networks) and returns a list of all transit agencies with their connected agencies
 	 */
-	public static List<agencyCluster> agencyCluster(double dist){
+	public static List<agencyCluster> agencyCluster(double dist, int dbindex){
 		List<agencyCluster> response = new ArrayList<agencyCluster>();
+		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
@@ -148,13 +153,15 @@ public class PgisEventManager {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
 	        System.exit(0);
 	      }
+		dropConnection(connection);
 		return response;
 	}
 	/*
 	 *Queries connected transit agencies and list of connections for a given transit agency
 	 */
-	public static List<agencyCluster> agencyClusterDetails(double dist, String agencyId){
+	public static List<agencyCluster> agencyClusterDetails(double dist, String agencyId, int dbindex){
 		List<agencyCluster> response = new ArrayList<agencyCluster>();
+		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
@@ -187,46 +194,169 @@ public class PgisEventManager {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
 	        System.exit(0);
 	      }
+		dropConnection(connection);
 		return response;
 	}
-	/*
-	 *returns average, min and Max of fare for the whole state
+	
+	/**
+	 *returns service hours in seconds for the whole state for a single day in YYYYMMDD format and day of week in all lower case
 	 */
-	/*public static HashMap<String, Float> FareInfo(double dist, String agencyId){
-		HashMap<String, Float> response = new HashMap<String, Float>();
+	public static long ServiceHours(String date, String day, int dbindex){
+		long response = 0;
+		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery( "select name as name, aid2 as aid, count(aid2)as size, min(dist) as mingap, max(dist) as maxgap, round(avg(dist),2) as meangap, "
-					+ "array_agg(sname1||'-'||sname2||':'||dist::text) as connection from "
-					+ "(select stop2.name as name, stop2.agencyid as aid2, stop1.sname as sname1,stop2.sname as sname2, "
-					+ "round((3.28084*st_distance(stop1.location,stop2.location))::numeric, 2) as dist from "
-					+ "(select map.agencyid as agencyid, stop.location as location, stop.id as id, stop.name as sname from gtfs_stops stop inner join gtfs_stop_service_map map "
-					+ "on map.agencyid_def=stop.agencyid and map.stopid=stop.id) as stop1 inner join "
-					+ "(select agency.name as name, stp.name as sname, stp.agencyid as agencyid, stp.location as location, stp.id as id from gtfs_agencies agency inner join "
-					+ "(select map.agencyid as agencyid, stop.location as location, stop.id as id, stop.name as name from gtfs_stops stop inner join gtfs_stop_service_map map "
-					+ "on map.agencyid_def=stop.agencyid and map.stopid=stop.id) as stp on stp.agencyid=agency.id) as stop2 on st_dwithin(stop1.location, stop2.location,"
-					+ String.valueOf(dist)
-					+ ")=true where stop1.agencyid!=stop2.agencyid and stop1.agencyid='"
-					+ agencyId
-					+ "' order by stop2.agencyid,dist, stop2.sname) as recs group by name, aid2 order by aid2");
+			ResultSet rs = stmt.executeQuery( "select sum(tlength) as svchours from gtfs_trips where serviceid_agencyid||serviceid_id in ("+
+					"select  serviceid_agencyid||serviceid_id from gtfs_calendars where startdate::int<="
+					+ date + " and enddate::int>=" + date + " and "	+ day + " = 1 "+
+					"and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"
+					+ date + "' and exceptiontype=2)"+ " union	select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"
+					+ date + "' and exceptiontype=1)");	
 			while ( rs.next() ) {
-				agencyCluster instance = new agencyCluster();
-				instance.agencyId = rs.getString("aid");
-				instance.agencyName = rs.getString("name");
-				instance.clusterSize = rs.getLong("size");
-				instance.minGap = rs.getFloat("mingap");
-				instance.maxGap = rs.getFloat("maxgap");
-				instance.meanGap = rs.getFloat("meangap");
-				String[] connections = (String[]) rs.getArray("connection").getArray();
-				instance.connections= Arrays.asList(connections);				
-		        response.add(instance);
-		        }
+				response = rs.getLong("svchours");
+			}
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
 	        System.exit(0);
 	      }
+		dropConnection(connection);
 		return response;
-	}*/
-
+	}
+	
+	/**
+	 *returns service miles in miles for the whole state for a single day in YYYYMMDD format and day of week in all lower case
+	 */
+	public static double ServiceMiles(String date, String day, int dbindex){
+		double response = 0;
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		try{
+			stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery( "select sum(length+estlength) as svcmiles from gtfs_trips where serviceid_agencyid||serviceid_id in ("+
+			"select  serviceid_agencyid||serviceid_id from gtfs_calendars where startdate::int<="
+			+ date + " and enddate::int>=" + date + " and "	+ day + " = 1"+ 
+			"and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"
+			+ date + "' and exceptiontype=2)"+ "union select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"
+			+ date + "' and exceptiontype=1)");	
+			while ( rs.next() ) {
+				response = rs.getDouble("svcmiles");
+			}
+		} catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        System.exit(0);
+	      }
+		dropConnection(connection);
+		return response;
+	}
+	
+	/**
+	 *returns sum of population within x distance of all stops 
+	 */
+	public static long PopWithinX(double x, int dbindex){
+		long response = 0;
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		try{
+			stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery( "select sum(population) as pop from (select population from census_blocks block inner join gtfs_stops stop "
+					+ "on st_dwithin(block.location,stop.location, "+ String.valueOf(x) + ")=true group by block.blockid) as pop");	
+			while ( rs.next() ) {
+				response = rs.getLong("pop");
+			}
+		} catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        System.exit(0);
+	      }
+		dropConnection(connection);
+		return response;
+	}
+	
+	/**
+	 *returns sum of population served at specified level of service
+	 */
+	public static long PopServedatLOS(double x, String date, String day, int l, int dbindex){
+		long response = 0;
+		Statement stmt = null;
+		Connection connection = makeConnection(dbindex);
+		try{
+			stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery( "select sum(population) as pop from (select population from census_blocks block inner join "
+					+ "(select stop.location as location, stimes.stop_agencyid as aid, stimes.stop_id as sid, count(stimes.stop_id) as frequency from "
+					+ "gtfs_stops stop inner join gtfs_stop_times stimes on stop.id = stimes.stop_id and stop.agencyid = stimes.stop_agencyid inner join "
+					+ "(select agencyid, id from gtfs_trips where serviceid_agencyid||serviceid_id in "
+					+ "(select  serviceid_agencyid||serviceid_id from gtfs_calendars where startdate::int<="
+					+ date + " and enddate::int>=" + date + " and "	+ day + " = 1 "
+					+ "and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"
+					+ date + "' and exceptiontype=2)union select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + date
+					+ "' and exceptiontype=1))as trips "
+					+ "on trips.agencyid = stimes.trip_agencyid and trips.id = stimes.trip_id group by stop_agencyid, stop_id, stop.location having count(stimes.stop_id)>="
+					+ l	+ ") as svstop on st_dwithin(svstop.location, block.location, " + String.valueOf(x)+ ")=true group by blockid) as pops");	
+			while ( rs.next() ) {
+				response = rs.getLong("pop");
+			}
+		} catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        System.exit(0);
+	      }
+		dropConnection(connection);
+		return response;
+	}
+	
+	/**
+	 *returns population served by service and service stops. Keys are svcstops and svcpop
+	 */
+	public static HashMap<String, Long> ServiceStopsPop(double x, String date, String day, int dbindex){
+		HashMap<String, Long> response = new HashMap<String, Long>();
+		Statement stmt = null;
+		Connection connection = makeConnection(dbindex);
+		try{
+			stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery( "select sum(frequency) as svcstops, sum(svcpop) as svcpop from (select frequency, frequency*sum(population) as svcpop from "
+					+ "census_blocks block inner join (select stop.location as location, stimes.stop_agencyid as aid, stimes.stop_id as sid, count(stimes.stop_id) as frequency "
+					+ "from gtfs_stops stop inner join gtfs_stop_times stimes on stop.id = stimes.stop_id and stop.agencyid = stimes.stop_agencyid inner join "
+					+ "(select agencyid, id from gtfs_trips where serviceid_agencyid||serviceid_id in (select  serviceid_agencyid||serviceid_id from gtfs_calendars where "
+					+ "startdate::int<="+ date + " and enddate::int>=" + date + " and "	+ day+ " = 1 and serviceid_agencyid||serviceid_id not in "
+					+ "(select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + date + "' and exceptiontype=2) union select "
+					+ "serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + date + "' and exceptiontype=1))as trips on trips.agencyid = stimes.trip_agencyid "
+					+ "and trips.id = stimes.trip_id group by stop_agencyid, stop_id, stop.location) as svstop on st_dwithin(svstop.location, block.location, "
+					+ String.valueOf(x)	+ ")=true group by "+ "svstop.aid, svstop.sid, frequency) as result");	
+			while ( rs.next() ) {
+				response.put("svcstops", (long)rs.getInt("svcstops")); 
+				response.put("svcpop", rs.getLong("svcpop")); 
+			}
+		} catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        System.exit(0);
+	      }
+		dropConnection(connection);
+		return response;
+	}
+	
+	/**
+	 *returns min and max Hours of service in int time (epoch) fromat for a given date and day of week in an integer array
+	 */
+	public static int[] HoursofService(String date, String day, int dbindex){
+		int[] response = new int[2];
+		Statement stmt = null;
+		Connection connection = makeConnection(dbindex);
+		try{
+			stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery( "select min(arrivaltime) as start, max(departuretime) as finish from gtfs_stop_times stimes inner join "
+					+ "(select agencyid, id from gtfs_trips where serviceid_agencyid||serviceid_id in "
+					+ "(select  serviceid_agencyid||serviceid_id from gtfs_calendars where startdate::int<=" + date	+ " and enddate::int>="	+ date + " and " + day + " = 1 "
+					+ "and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + date
+					+ "' and exceptiontype=2) union select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + date + "' and exceptiontype=1))as trips "
+					+ "on trips.agencyid = stimes.trip_agencyid and trips.id = stimes.trip_id where arrivaltime>=0 and departuretime>=0");	
+			while ( rs.next() ) {
+				response[0] = rs.getInt("start"); 
+				response[1] = rs.getInt("finish"); 
+			}
+		} catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        System.exit(0);
+	      }
+		dropConnection(connection);
+		return response;
+	}
 }

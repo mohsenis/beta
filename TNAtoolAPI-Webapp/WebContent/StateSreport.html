@@ -135,12 +135,11 @@ $(document).ready(function(){
 			$('a').click(function(e){
 				var d = new Date();
 			    if ($(this).attr('type')=="SXR"){
-			    	/* qstring = $(this).attr('id');
 			    	qstringx = '0.1';
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    	var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex); */
+			    	window.open('/TNAtoolAPI-Webapp/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex);			    	   
 			    }else if($(this).attr('type')=="ASR"){
 		    		qstringx = '0.1';
 		    		window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex);	    		
