@@ -21,9 +21,12 @@ Project team members are:
 </p>
 
 ---
-Saeed Ghanbartehrani
-PhD Candidate in Industrial Engineering
-Oregon State University
+<p><img width=110 height=110 src="http://saeed.undo.it/images/Saeed_Personal.jpg" alt="Saeed Ghanbartehrani" style="float:left;" title="Saeed Ghanbartehrani">
+<span style="margin-left:100px; display:block;">Saeed Ghanbartehrani</span></b>
+<span style="margin-left:100px; display:block;">PhD Candidate in Industrial Engineering</span></b>
+<span style="margin-left:100px; display:block;">Oregon State University</span></b>
+<span style="margin-left:100px; display:block;">Home page : http://saeed.undo.it</span></b>
+</p>
 
 ---
 Alireza Mohseni

@@ -41,5 +41,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/onebusaway-gtfs-hibernate-cli"/>
+	<classpathentry kind="lib" path="lib/jts-1.11.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
