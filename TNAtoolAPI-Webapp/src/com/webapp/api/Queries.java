@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -2987,16 +2988,23 @@ Loop:  	for (Trip trip: routeTrips){
     	long landarea=0;
     	long waterarea = 0;
     	long population = 0;
-    	int routescount = 0;
+    	//int routescount = 0;
     	int stopscount = 0;
+    	List<String> routeL = new ArrayList<String>();
 	    for (Urban instance : allurbanareas){   
 	    	index++;
 	    	landarea+=instance.getLandarea();	    			
 	    	waterarea +=instance.getWaterarea();
 	    	population += instance.getPopulation();
-	    	int routescnt = 0;
+	    	//int routescnt = 0;
 	    	try {
-	    		routescnt = EventManager.getroutescountbyurban(instance.getUrbanId(), dbindex);
+	    		List<GeoStopRouteMap> routesL = EventManager.getroutesbyurban(instance.getUrbanId(), dbindex);
+	    		for(int x=0;x<routesL.size();x++){
+	    			String routeID = routesL.get(x).getrouteId()+routesL.get(x).getagencyId();
+	    			if(!routeL.contains(routeID)){
+	    				routeL.add(routeID);
+	    			}
+	    		}
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -3004,7 +3012,7 @@ Loop:  	for (Trip trip: routeTrips){
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-	    	routescount += routescnt;
+	    	//routescount += routescnt;
 	    	int stopscnt = 0;
 	    	try {
 	    		stopscnt = (int)EventManager.getstopscountbyurban(instance.getUrbanId(), dbindex);
@@ -3027,7 +3035,8 @@ Loop:  	for (Trip trip: routeTrips){
 	    each.waterArea = String.valueOf(Math.round(waterarea/2.58999e4)/100.0);
     	each.landArea = String.valueOf(Math.round(landarea/2.58999e4)/100.0);
     	each.population = String.valueOf(population);
-    	each.RoutesCount = String.valueOf(routescount);	    	
+    	//each.RoutesCount = String.valueOf(routescount);
+    	each.RoutesCount = String.valueOf(routeL.size());
     	each.StopsCount = String.valueOf(stopscount);
     	response.GeoR.add(each);
 	    return response;
@@ -3134,6 +3143,16 @@ Loop:  	for (Trip trip: routeTrips){
 		List<UrbanTripMap> trips = new ArrayList<UrbanTripMap>();
 		try {
 			trips = EventManager.gettripsbyurbanpop(upop, dbindex);
+			LinkedHashMap<String, UrbanTripMap> tmpHashSet = new LinkedHashMap<String, UrbanTripMap>();
+			String tmpKey;
+			for(UrbanTripMap t: trips){
+				tmpKey = t.getagencyId_def()+t.getTripId();
+				tmpHashSet.put(tmpKey, t);
+			}
+			trips.clear();
+			for(Entry<String, UrbanTripMap> entry : tmpHashSet.entrySet()){
+				trips.add(entry.getValue());
+			}
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -3176,15 +3195,19 @@ Loop:  	for (Trip trip: routeTrips){
         		agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(inst.getagencyId_def(), dbindex);
         		agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(inst.getagencyId_def(), dbindex); 
         		agencyId = inst.getagencyId_def();
-        	} 
+        	}
+        	if (!agencyId.equals(inst.getagencyId()) || !routeId.equals(inst.getRouteId())){
+        		RouteMiles += length; 
+        		length = 0;
+        	}
         	if (!routeId.equals(inst.getRouteId())){
         		if (!routes.contains(inst.getagencyId_def()+","+inst.getRouteId()))
         			routes.add(inst.getagencyId_def()+","+inst.getRouteId());
-    			RouteMiles += length;  	        
+    			 	        
     			//initialize all again    			
-    			routeId = inst.getRouteId();   			
-    			length = 0;    						
+    			routeId = inst.getRouteId();   						
     		}
+        	
         	ServiceCalendar sc = null;
     		if(agencyServiceCalendar!=null){
     			for(ServiceCalendar scs: agencyServiceCalendar){

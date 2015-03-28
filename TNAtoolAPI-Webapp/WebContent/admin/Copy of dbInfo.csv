@@ -1,0 +1,3 @@
+databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2
+0,Database 1,hibernate.cfg.xml,classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml,jdbc:postgresql://localhost:5432/gtfsdb,postgres,123123,mapping.hbm.xml,org/onebusaway/gtfs/model/GtfsMapping.hibernate.xml,org/onebusaway/gtfs/impl/HibernateGtfsRelationalDaoImpl.hibernate.xml
+1,Database 2,hibernate1.cfg.xml,classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples1.xml,jdbc:postgresql://localhost:5432/gtfsdb1,postgres,123123,mapping.hbm.xml,org/onebusaway/gtfs/model/GtfsMapping.hibernate.xml,org/onebusaway/gtfs/impl/HibernateGtfsRelationalDaoImpl.hibernate.xml

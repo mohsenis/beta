@@ -18,6 +18,7 @@ package org.onebusaway.gtfs.model;
 
 import org.onebusaway.csv_entities.schema.annotations.CsvField;
 import org.onebusaway.csv_entities.schema.annotations.CsvFields;
+import org.onebusaway.gtfs.serialization.mappings.DefaultAgencyIdTranslator;
 import org.onebusaway.gtfs.serialization.mappings.EntityFieldMappingFactory;
 import org.onebusaway.gtfs.serialization.mappings.StopTimeFieldMappingFactory;
 
@@ -37,6 +38,9 @@ public final class Frequency extends IdentityBean<Integer> {
 
   @CsvField(mapping = StopTimeFieldMappingFactory.class)
   private int endTime;
+  
+  @CsvField(name = "trip_id", optional = true, mapping = DefaultAgencyIdTranslator.class)
+  private String defaultId;
 
   private int headwaySecs;
 
@@ -57,6 +61,7 @@ public final class Frequency extends IdentityBean<Integer> {
     this.endTime = f.endTime;
     this.headwaySecs = f.headwaySecs;
     this.exactTimes = f.exactTimes;
+    this.defaultId = f.defaultId;
   }
 
   @Override
@@ -115,6 +120,14 @@ public final class Frequency extends IdentityBean<Integer> {
 
   public void setLabelOnly(int labelOnly) {
     this.labelOnly = labelOnly;
+  }
+  
+  public String getDefaultId() {
+    return defaultId;
+  }
+
+  public void setDefaultId(String defaultId) {
+    this.defaultId = defaultId;
   }
 
   public String toString() {
