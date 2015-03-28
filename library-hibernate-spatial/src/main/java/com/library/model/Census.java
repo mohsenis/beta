@@ -15,6 +15,7 @@ public class Census {
     private int waterarea;
     private String poptype;
     private Point location;
+    private Urban urban;
     
     public Census(){    	
     }
@@ -33,6 +34,7 @@ public class Census {
 		this.waterarea = c.waterarea;
 		this.poptype = c.poptype;
 		this.location = c.location;
+		this.urban = c.urban;
 	}
 
 
@@ -74,7 +76,15 @@ public class Census {
 
 	public void setUrbanId(String urbanId) {
 		this.urbanId = urbanId;
-	}	    
+	}	
+	
+	public Urban getUrban() {
+		return urban;
+	}
+
+	public void setUrban(Urban urban) {
+		this.urban = urban;
+	}
 
     public Integer getPopulation() {
         return population;

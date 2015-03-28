@@ -29,9 +29,9 @@ public final class GeoStop implements Serializable {
   private String blockId;  
   private String placeId;
   private String regionId;
-  private String urbanId;
   private String congdistId;
   private Point location;
+  private Urban urban;
   
   public GeoStop(){
 	}  
@@ -56,9 +56,9 @@ public GeoStop(GeoStop obj) {
     this.blockId = obj.blockId;
     this.placeId = obj.placeId;
     this.regionId = obj.regionId;
-    this.urbanId = obj.urbanId;
     this.location = obj.location;
     this.congdistId = obj.congdistId;
+    this.urban = obj.urban;
   }
 
   public String getAgencyId() {
@@ -194,20 +194,20 @@ public void setPlaceId(String placeId) {
 	this.placeId = placeId;
 }
 
-public String getRegionId() {
-	return regionId;
-}
-
 public void setRegionId(String regionId) {
 	this.regionId = regionId;
 }
 
-public String getUrbanId() {
-	return urbanId;
+public String getRegionId() {
+	return regionId;
 }
 
-public void setUrbanId(String urbanId) {
-	this.urbanId = urbanId;
+public Urban getUrban() {
+	return urban;
+}
+
+public void setUrban(Urban urban) {
+	this.urban = urban;
 }
 
 public String getCongdistId() {

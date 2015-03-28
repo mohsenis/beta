@@ -31,6 +31,8 @@
         <property name="phone" />
         <property name="timezone" />
         <property name="url" />
+        <property name="defaultId" type="string" length="50" />
+        <property name="added" type="string" length="20" />
     </class>
 
     <class name="org.onebusaway.gtfs.model.FareAttribute" table="gtfs_fare_attributes">
@@ -112,6 +114,10 @@
         <property name="startDate" type="org.onebusaway.gtfs.impl.ServiceDateUserType" length="8"/>
         <property name="endDate" type="org.onebusaway.gtfs.impl.ServiceDateUserType" length="8"/>
         <property name="version" />
+        <property name="defaultId" type="string" length="50" />
+        <property name="agencyIds" type="text"/>
+        <property name="agencyNames" type="text"/>
+        <property name="feedName" type="text"/>
     </class>
 
     <class name="org.onebusaway.gtfs.model.Frequency" table="gtfs_frequencies">
@@ -127,6 +133,7 @@
         <property name="exactTimes" />
         <property name="headwaySecs" />
         <property name="labelOnly" />
+        <property name="defaultId" type="string" length="50" />
     </class>
 
     <class name="org.onebusaway.gtfs.model.Pathway" table="gtfs_pathways">
@@ -159,6 +166,7 @@
         <property name="color" />
         <property name="textColor" />
         <many-to-one name="agency" not-null="true" />
+        <property name="defaultId" type="string" length="50" />
     </class>
 
     <class name="org.onebusaway.gtfs.model.ServiceCalendar" table="gtfs_calendars">
@@ -288,6 +296,7 @@
         </many-to-one>
         <property name="transferType" />
         <property name="minTransferTime" />
+        <property name="defaultId" type="string" length="50" />
     </class>
   
     <class name="org.onebusaway.gtfs.model.Trip" table="gtfs_trips">
@@ -321,6 +330,7 @@
         <property name="epshape" type="org.hibernate.type.TextType" column="epshape"/>
         <property name="length"/>
         <property name="estlength"/>
+        <property name="tlength"/>
         <property name="stopscount"/>
         <property name="uid"/>
     </class>

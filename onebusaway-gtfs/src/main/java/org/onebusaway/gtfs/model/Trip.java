@@ -46,6 +46,9 @@ public final class Trip extends IdentityBean<AgencyAndId> {
   
   @CsvField(optional = true)
   private double estlength;
+  
+  @CsvField(optional = true)
+  private int tlength;
 
   @CsvField(optional = true)
   private String tripHeadsign;
@@ -102,6 +105,7 @@ public final class Trip extends IdentityBean<AgencyAndId> {
     this.epshape = obj.epshape;
     this.length = obj.length;
     this.estlength = obj.estlength;
+    this.tlength = obj.tlength;
     this.uid = obj.uid;
   }
 
@@ -149,6 +153,10 @@ public final class Trip extends IdentityBean<AgencyAndId> {
 	  return estlength;
   }
   
+  public int getTlength(){
+	  return tlength;
+  }
+  
   public void setEpshape(String epshape){
 	  this.epshape = epshape;
   }
@@ -159,6 +167,10 @@ public final class Trip extends IdentityBean<AgencyAndId> {
   
  public void setEstlength(double estlength){
 	 this.estlength = estlength;
+ }
+ 
+ public void setTlength(int tlength){
+	 this.tlength = tlength;
  }
  
   public void setTripShortName(String tripShortName) {

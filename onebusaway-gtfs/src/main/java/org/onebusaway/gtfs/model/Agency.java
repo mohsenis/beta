@@ -19,6 +19,7 @@ package org.onebusaway.gtfs.model;
 import org.onebusaway.csv_entities.schema.annotations.CsvField;
 import org.onebusaway.csv_entities.schema.annotations.CsvFields;
 import org.onebusaway.gtfs.serialization.mappings.AgencyIdTranslationFieldMappingFactory;
+import org.onebusaway.gtfs.serialization.mappings.DefaultAgencyIdForAgency;
 
 @CsvFields(filename = "agency.txt", prefix = "agency_")
 public final class Agency extends IdentityBean<String> {
@@ -42,6 +43,12 @@ public final class Agency extends IdentityBean<String> {
 
   @CsvField(optional = true)
   private String fareUrl;
+  
+  @CsvField(name = "agency_id", optional = true, mapping = DefaultAgencyIdForAgency.class)
+  private String defaultId;
+  
+  @CsvField(optional = true)
+  private String added;
 
   public Agency() {
 
@@ -54,6 +61,7 @@ public final class Agency extends IdentityBean<String> {
     this.timezone = a.timezone;
     this.lang = a.lang;
     this.phone = a.phone;
+    this.defaultId = a.defaultId;
   }
 
   public String getId() {
@@ -110,6 +118,22 @@ public final class Agency extends IdentityBean<String> {
 
   public void setFareUrl(String fareUrl) {
     this.fareUrl = fareUrl;
+  }
+  
+  public String getDefaultId() {
+    return defaultId;
+  }
+
+  public void setDefaultId(String defaultId) {
+    this.defaultId = defaultId;
+  }
+  
+  public String getAdded() {
+    return added;
+  }
+
+  public void setAdded(String added) {
+    this.added = added;
   }
 
   public String toString() {

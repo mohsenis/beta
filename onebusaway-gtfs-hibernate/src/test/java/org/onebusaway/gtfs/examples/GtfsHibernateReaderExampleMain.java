@@ -18,6 +18,7 @@ package org.onebusaway.gtfs.examples;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FareAttribute;
 import org.onebusaway.gtfs.model.FareRule;
+import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.ServiceCalendarDate;
@@ -39,7 +41,6 @@ import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
 import org.onebusaway.gtfs.services.HibernateGtfsFactory;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
-
 import org.onebusaway.gtfs.impl.Databases;
 
 public class GtfsHibernateReaderExampleMain {
@@ -48,7 +49,7 @@ public class GtfsHibernateReaderExampleMain {
 
   private static final String KEY_FILE = "file:";
   
-  public static HibernateGtfsFactory[] factory = new HibernateGtfsFactory[2];
+  public static HibernateGtfsFactory[] factory = new HibernateGtfsFactory[Databases.dbsize];
   static{
 	  for (int k=0; k<Databases.dbsize; k++){
 		  factory[k] = createHibernateGtfsFactory(Databases.ConfigPaths[k]);
@@ -137,6 +138,29 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getFareRuleForRoute(route);
   }
   
+  public static HashMap<String, Float> QueryFareData(String agencyId, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  if (agencyId!=null){
+	  return dao.getFareDataForAgency(agencyId);
+	  } else {
+		  return dao.getFareDataForState();
+	  }
+  }
+  
+  public static Double QueryRouteMiles(int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  return dao.getRouteMiles();
+  }
+  
+  public static Float QueryFareMedian(String agencyId,int farecount, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  if (agencyId!=null){
+		  return dao.getFareMedianForAgency(agencyId, farecount);
+	  } else {
+		  return dao.getFareMedianForState(farecount);
+	  }
+  }
+  
   public static List<Float> QueryFarePriceByRoutes(List <String> routes, int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  	  
 	  return dao.getFarePriceForRoutes(routes);
@@ -150,6 +174,11 @@ public class GtfsHibernateReaderExampleMain {
   public static Trip getTrip(AgencyAndId id, int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	  return dao.getTripForId(id);
+  }
+  
+  public static Collection<FeedInfo> QueryAllFeedInfos (int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
+	  return dao.getAllFeedInfos();
   }
   
   public static Collection<Agency> QueryAllAgencies (int dbindex){
@@ -225,15 +254,30 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getStopsForTripUrban(trip,urban);
   }
   
+  public static List<Stop> QueryStopsbyTripUrbans (AgencyAndId trip, List<String> urbans, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
+	  return dao.getStopsForTripUrbans(trip,urbans);
+  }
+  
+  public static HashMap<String, Integer> QueryCounts (int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
+	  return dao.getCounts();
+  }
+  
   public static List<Stop> QueryStopsbyTripCongdist (AgencyAndId trip, String congdist, int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
 	  return dao.getStopsForTripCongdist(trip,congdist);
+  }
+  
+  public static Long QueryStopsCount(int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  return dao.getStopsCount();
   }
   public static String QueryServiceHours (List<String> trips, int dbindex){
 	  //String resource = "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";
 	  //HibernateGtfsFactory factory = createHibernateGtfsFactory(resource);
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
-	  String tripList = "";
+	  //String tripList = "";
 	  /*for (String str:trips ){
 		  tripList += "'"+ str+"'"+", ";
 	  }*/
