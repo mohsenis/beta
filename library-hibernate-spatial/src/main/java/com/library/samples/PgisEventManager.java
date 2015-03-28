@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.onebusaway.gtfs.impl.Databases;
+
 import com.library.model.*;
 
 public class PgisEventManager {
@@ -29,8 +31,8 @@ public class PgisEventManager {
 		try {
 		Class.forName("org.postgresql.Driver");
 		response = DriverManager
-           .getConnection("jdbc:postgresql://localhost:5432/"+url,
-           "postgres", "123123");
+           .getConnection(Databases.connectionURLs[dbindex],
+           Databases.usernames[dbindex], Databases.passwords[dbindex]);
 		}catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
 	        System.exit(0);
