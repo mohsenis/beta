@@ -1,4 +1,4 @@
-﻿drop table if exists census_congdists_trip_map;
+drop table if exists census_congdists_trip_map;
 
 CREATE TABLE census_congdists_trip_map
 (

@@ -195,6 +195,7 @@ insert into tempstopcodes(stopid, agencyid,rank) select stop.id, stop.agencyid, 
 update tempstopcodes set uid= makeuid(rank);
 
 /*alter table gtfs_trips add column uid varchar(512);*/
+alter table gtfs_trips alter column uid type varchar(512);
 update gtfs_trips set uid = stpt.uid from 
 (select string_agg(tmp.uid,'!' order by tmp.uid) as uid, stime.trip_id, stime.trip_agencyid from 
 gtfs_stop_times stime inner join tempstopcodes tmp on tmp.agencyid=stime.stop_agencyid and tmp.stopid=stime.stop_id
