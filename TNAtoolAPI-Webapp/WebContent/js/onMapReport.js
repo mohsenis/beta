@@ -7,7 +7,6 @@ function addShapefile(coords){
 	for(var i=0;i<coords.length;i++){
 		that.addVertex(coords[i]);
 	}
-	//that._markers[0].click();
 	that._finishShape();
 	that.disable();
 }
