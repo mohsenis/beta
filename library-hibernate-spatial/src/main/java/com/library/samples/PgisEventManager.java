@@ -2,13 +2,17 @@ package com.library.samples;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement; 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.TreeSet;
 
 import org.onebusaway.gtfs.impl.Databases;
 
@@ -119,7 +123,7 @@ public class PgisEventManager {
       //System.out.println("Operation done successfully");
       return population;
     }
-	/*
+	/**
 	 *Queries agency clusters (connected transit networks) and returns a list of all transit agencies with their connected agencies
 	 */
 	public static List<agencyCluster> agencyCluster(double dist, int dbindex){
@@ -158,7 +162,7 @@ public class PgisEventManager {
 		dropConnection(connection);
 		return response;
 	}
-	/*
+	/**
 	 *Queries connected transit agencies and list of connections for a given transit agency
 	 */
 	public static List<agencyCluster> agencyClusterDetails(double dist, String agencyId, int dbindex){
@@ -358,6 +362,105 @@ public class PgisEventManager {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
 	        System.exit(0);
 	      }
+		dropConnection(connection);
+		return response;
+	}
+	/**
+	 *Queries stop clusters (connected transit networks) and returns a list of all transit agencies with their connected agencies
+	 */
+	public static TreeSet<StopCluster> stopClusters(String[] dates, String[] days, double dist, int dbindex){	
+		HashMap<String, Integer> serviceMap = stopFrequency(dates, days, dbindex);
+		TreeSet<StopCluster> response = new ClusterPriorityQueue();
+		Connection connection = makeConnection(dbindex);
+		String mainquery = "select cluster.cid as cid, cluster.sid as sid , cluster.aid as aid, cluster.name as name, map.agencies as agencies, map.routes as routes from "
+				+ "(select stp1.id as cid, stp2.id as sid, stp2.name as name, stp2.agencyid as aid from gtfs_stops stp1 inner join gtfs_stops stp2 "
+				+ "on st_dwithin(stp1.location, stp2.location, ?)) as cluster inner join (select agencyid_def as aid, array_agg(distinct agencyid) as agencies, stopid as sid, "
+				+ "array_agg(distinct routeid) as routes from gtfs_stop_route_map group by agencyid_def, stopid ) as map on map.sid = cluster.sid and map.aid = cluster.aid "
+				+ "order by cluster.cid, cluster.sid";
+		
+		try{
+			//System.out.println("Starting Query");
+			PreparedStatement stmt = connection.prepareStatement(mainquery);
+			stmt.setDouble(1, dist);
+			ResultSet rs = stmt.executeQuery();
+			//System.out.println("Query: "+stmt);
+			String cid = "";
+			int count = 0;
+			StopCluster inst = new StopCluster();
+			//System.out.println("Number of records in results: "+rs.getFetchSize());
+			//System.out.println("Query Done, collecting results");
+			while (rs.next()) {
+				count++;
+				ClusteredStop instance = new ClusteredStop();
+				String clid = rs.getString("cid");	
+				instance.agencyId = rs.getString("aid");				
+				instance.id = rs.getString("sid");				
+				instance.name = rs.getString("name");
+				instance.visits = serviceMap.get(instance.agencyId+instance.id);
+				String[] agencies = (String[]) rs.getArray("agencies").getArray();
+				instance.agencies= Arrays.asList(agencies);
+				String[] routes = (String[]) rs.getArray("routes").getArray();
+				instance.routes= Arrays.asList(routes);
+				clid+=instance.agencyId;
+				if (count ==1){
+					cid =clid;					
+				}
+				if (cid.equals(clid)){
+					inst.addStop(instance);
+				} else {
+					cid=clid;
+					inst.syncParams();
+					response.add(inst);					
+					inst = new StopCluster();					
+					inst.addStop(instance);					
+					}
+		        }
+			rs.close();
+			stmt.close();
+		} catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        System.exit(0);
+	      }		
+		dropConnection(connection);
+		//System.out.println("Processing Clusters");
+		return response;
+	}
+	/**
+	 *Queries frequency of service for all stops in the database for a set of dates and days
+	 */
+	public static HashMap<String, Integer> stopFrequency(String[] date, String[] day, int dbindex){				
+		HashMap<String, Integer> response = new HashMap<String, Integer>();
+		Connection connection = makeConnection(dbindex);
+		String[] mainquery = new String[date.length];
+		String id = "";
+		for (int i=0; i<date.length; i++){
+			mainquery[i]= "select aid_def||stopid as id, svc from (select stimes.stop_id as stopid, stimes.stop_agencyid as aid_def, sum(service) as svc from "
+					+ "(select trip.agencyid as aid, trip.id as tripid, count(svc.sid) as service from gtfs_trips trip left join "
+					+ "(select  serviceid_agencyid as aid, serviceid_id as sid from gtfs_calendars where startdate::int<="+date[i]+" and enddate::int>="+date[i]+" and "+day[i]+" = 1 "
+					+ "and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date[i]+"' and exceptiontype=2) "
+					+ "union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates where date='"+date[i]+"' and exceptiontype=1)as svc on "
+					+ "trip.serviceid_id = svc.sid and trip.serviceid_agencyid= svc.aid group by trip.agencyid, trip.id ) as svcmap inner join gtfs_stop_times stimes on "
+					+ "svcmap.aid = stimes.trip_agencyid and svcmap.tripid = stimes.trip_id group by aid_def, stopid) as stopids inner join gtfs_stops stop on "
+					+ "stop.agencyid = stopids.aid_def and stop.id= stopids.stopid";
+			try{
+				PreparedStatement stmt = connection.prepareStatement(mainquery[i]);
+				ResultSet rs = stmt.executeQuery();
+				while (rs.next()) {
+					//count++;
+					if (i==0){
+						response.put(rs.getString("id"), rs.getInt("svc"));
+					} else {
+						id = rs.getString("id");
+						response.put(id, response.get(id)+rs.getInt("svc"));
+					}					
+			        }
+				rs.close();
+				stmt.close();
+			} catch ( Exception e ) {
+		        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+		        System.exit(0);
+		      }
+		}				
 		dropConnection(connection);
 		return response;
 	}

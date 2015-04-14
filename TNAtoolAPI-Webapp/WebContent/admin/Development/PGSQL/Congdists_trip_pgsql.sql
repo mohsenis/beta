@@ -1,4 +1,4 @@
-﻿drop table if exists census_congdists_trip_map;
+drop table if exists census_congdists_trip_map;
 
 CREATE TABLE census_congdists_trip_map
 (
@@ -48,4 +48,4 @@ from gtfs_stop_times stime inner join gtfs_stops stop on stime.stop_agencyid = s
 where stimes.arrivaltime>0 and stimes.departuretime>0 group by stimes.agencyid, stimes.tripid, stimes.geoid) as res 
 where res.agencyid = map.agencyid and res.tripid=map.tripid and res.geoid=map.congdistid;
 
-update census_congdists set tlength=0 where tlength isnull;
+update census_congdists_trip_map set tlength=0 where tlength isnull;

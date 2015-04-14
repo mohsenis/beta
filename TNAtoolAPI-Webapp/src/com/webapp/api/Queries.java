@@ -1,6 +1,7 @@
 package com.webapp.api;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import javax.swing.JOptionPane;
 import javax.ws.rs.GET;
@@ -717,6 +719,8 @@ public class Queries {
     		shape.headSign = tp.getTripHeadsign();
     	}
     	shape.estlength = tp.getEstlength();
+    	Agency agencyObject = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex);
+    	shape.agencyName = agencyObject.getName();
 		return shape;
     }
   
@@ -1056,7 +1060,9 @@ daysLoop:   for (int i=0; i<dates.length; i++){
         	response.StopPerRouteMile = "NA";
         if (activeTrips.size()>0) {
         	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
-        	response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
+        	int HOSstart =  Integer.parseInt(Hos.split("-")[0]);
+        	int HOSend = Integer.parseInt(Hos.split("-")[1]);        	
+        	response.HoursOfService = StringUtils.timefromint(HOSstart)+"-"+ StringUtils.timefromint(HOSend);
         }
         
         try {
@@ -1829,8 +1835,8 @@ Loop:  	for (Trip trip: routeTrips){
         }       	
        	if (L==null || L<0){
        		L = LEVEL_OF_SERVICE;
-       	}       
-    	String[] dates = date.split(",");
+       	}
+       	String[] dates = date.split(",");
     	int[][] days = daysOfWeek(dates);
     	String[] fulldates = fulldate(dates);
     	    	
@@ -2095,7 +2101,9 @@ Loop:  	for (Trip trip: routeTrips){
         }
         if (activeTrips.size()>0) {
         	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
-        	response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
+        	int HOSstart =  Integer.parseInt(Hos.split("-")[0]);
+        	int HOSend = Integer.parseInt(Hos.split("-")[1]);        	
+        	response.HoursOfService = StringUtils.timefromint(HOSstart)+"-"+ StringUtils.timefromint(HOSend);       	
         }
         if (svcdays.length()>2){
         	svcdays= svcdays.substring(0,svcdays.length()-2);
@@ -2119,6 +2127,7 @@ Loop:  	for (Trip trip: routeTrips){
         	if (entry.getValue()>=L)
         		StopswithLOS.add(entry.getKey());
         }
+        System.out.println("Stops at LOS is : "+StopswithLOS.size());
         double popatLOS = 0;		
         try {
         	popatLOS =EventManager.getcountyunduppopbatch(x,county, StopswithLOS, dbindex);
@@ -2129,6 +2138,7 @@ Loop:  	for (Trip trip: routeTrips){
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        System.out.println("Pop at LOS is: "+popatLOS);
         response.PopServedAtLoService = String.valueOf(Math.round(10000.0*popatLOS/instance.getPopulation())/100.0);
         try {
 			Thread.sleep(1000);
@@ -2498,7 +2508,9 @@ Loop:  	for (Trip trip: routeTrips){
         }
         if (activeTrips.size()>0) {
         	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
-            response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));            
+        	int HOSstart =  Integer.parseInt(Hos.split("-")[0]);
+        	int HOSend = Integer.parseInt(Hos.split("-")[1]);        	
+        	response.HoursOfService = StringUtils.timefromint(HOSstart)+"-"+ StringUtils.timefromint(HOSend);                       
         }
         if (svcdays.length()>2){
         	svcdays= svcdays.substring(0,svcdays.length()-2);
@@ -2909,7 +2921,9 @@ Loop:  	for (Trip trip: routeTrips){
         }
         if (activeTrips.size()>0) {
         	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
-            response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
+        	int HOSstart =  Integer.parseInt(Hos.split("-")[0]);
+        	int HOSend = Integer.parseInt(Hos.split("-")[1]);        	
+        	response.HoursOfService = StringUtils.timefromint(HOSstart)+"-"+ StringUtils.timefromint(HOSend);        	
         }
         if (svcdays.length()>2){
         	svcdays= svcdays.substring(0,svcdays.length()-2);
@@ -3362,7 +3376,9 @@ Loop:  	for (Trip trip: routeTrips){
         }
         if (activeTrips.size()>0) {
         	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
-            response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
+        	int HOSstart =  Integer.parseInt(Hos.split("-")[0]);
+        	int HOSend = Integer.parseInt(Hos.split("-")[1]);        	
+        	response.HoursOfService = StringUtils.timefromint(HOSstart)+"-"+ StringUtils.timefromint(HOSend);            
         }
         if (svcdays.length()>2){
         	svcdays= svcdays.substring(0,svcdays.length()-2);
@@ -3774,7 +3790,9 @@ Loop:  	for (Trip trip: routeTrips){
         }
         if (activeTrips.size()>0) {
         	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
-            response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
+        	int HOSstart =  Integer.parseInt(Hos.split("-")[0]);
+        	int HOSend = Integer.parseInt(Hos.split("-")[1]);        	
+        	response.HoursOfService = StringUtils.timefromint(HOSstart)+"-"+ StringUtils.timefromint(HOSend);            
         }
         if (svcdays.length()>2){
         	svcdays= svcdays.substring(0,svcdays.length()-2);
@@ -4186,7 +4204,9 @@ Loop:  	for (Trip trip: routeTrips){
         }
         if (activeTrips.size()>0) {
         	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
-            response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
+        	int HOSstart =  Integer.parseInt(Hos.split("-")[0]);
+        	int HOSend = Integer.parseInt(Hos.split("-")[1]);        	
+        	response.HoursOfService = StringUtils.timefromint(HOSstart)+"-"+ StringUtils.timefromint(HOSend);            
         }
         if (svcdays.length()>2){
         	svcdays= svcdays.substring(0,svcdays.length()-2);
@@ -4642,7 +4662,9 @@ Loop:  	for (Trip trip: routeTrips){
         }
         if (activeTrips.size()>0) {
         	String Hos = GtfsHibernateReaderExampleMain.QueryServiceHours(activeTrips, dbindex);
-        	response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[1]) * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(Integer.parseInt(Hos.split("-")[0]) * 1000L));
+        	int HOSstart =  Integer.parseInt(Hos.split("-")[0]);
+        	int HOSend = Integer.parseInt(Hos.split("-")[1]);        	
+        	response.HoursOfService = StringUtils.timefromint(HOSstart)+"-"+ StringUtils.timefromint(HOSend);        	
         }
         if (svcdays.length()>2){
         	svcdays= svcdays.substring(0,svcdays.length()-2);
@@ -4913,9 +4935,9 @@ Loop:  	for (Trip trip: routeTrips){
 				svcStops +=svc.get("svcstops");
 				int[] HOS = PgisEventManager.HoursofService(days[0][i], days[1][i], dbindex);
 				if (HOS[0]<HOSstart)
-					HOSstart = HOS[0];
+					HOSstart = HOS[0];				
 				if (HOS[1]>HOSend)
-					HOSend = HOS[1];
+					HOSend = HOS[1];				
 			}
 			index ++;
 			setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -4943,7 +4965,7 @@ Loop:  	for (Trip trip: routeTrips){
         	HOSstart = 0;
         if (HOSend==Integer.MIN_VALUE)
         	HOSend = 0;
-        response.HoursOfService = new SimpleDateFormat("hh:mm aa").format(new Date(HOSstart * 1000L))+"-"+new SimpleDateFormat("hh:mm aa").format(new Date(HOSend * 1000L));		
+        response.HoursOfService = StringUtils.timefromint(HOSstart)+"-"+ StringUtils.timefromint(HOSend);		
 		//PgisEventManager.dropConnection();
 		/*GeoR each = new GeoR();
 		each.Name = "Oregon";
@@ -4966,6 +4988,63 @@ Loop:  	for (Trip trip: routeTrips){
 		each.AgenciesCount = String.valueOf(transcounts.get("agency"));
 		response.GeoR.add(each);*/
 		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}        
+        progVal.remove(key);		
+		return response;
+		
+    }
+	/**
+	 * Generates The multimodal hubs report
+	 */
+	    
+	@GET
+	@Path("/hubsR")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object gethubsR(@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+		if (Double.isNaN(x) || x <= 0) {
+            x = STOP_SEARCH_RADIUS;
+        }
+       	x = x * 1609.34;		
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+       	dbindex = default_dbindex;
+        }		
+		date = "04/08/2015";
+		String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	//String[] fulldates = fulldate(dates);
+    	String[] fulldates = datedays[0];
+    	String[] days = datedays[1];
+    	int index = 0;
+    	int progress = 0;
+    	HubRList response = new HubRList();
+    	setprogVal(key, 40);
+    	TreeSet<StopCluster> clusterList = new TreeSet<StopCluster>();    	
+    	clusterList = PgisEventManager.stopClusters(fulldates, days, x, dbindex);   
+    	int totalLoad = clusterList.size();
+    	while (!clusterList.isEmpty()){    		
+    		StopCluster instance = clusterList.pollLast();
+    		progress++;
+    		if (instance.stops.size()>0){    			
+	    		index++;	
+	    		HubR res = new HubR();
+	    		res.addCluster(instance, index);
+	    		response.HubR.add(res);
+	    		for (StopCluster scluster: clusterList){
+	    			StopCluster temp = scluster;
+	    			boolean result = scluster.removeStops(instance.getStops());
+	    			if (result){
+	    				clusterList.remove(temp);
+	    				scluster.syncParams();
+	    				clusterList.add(scluster);
+	    			}
+	    		}
+    		}
+    		setprogVal(key, 40+(int) Math.round(progress*60/totalLoad));
+    	}         
+        try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
