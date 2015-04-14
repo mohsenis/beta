@@ -1,4 +1,4 @@
-﻿/*************************************************************
+/*************************************************************
  * First of two methods. Pass in a geometry (LINESTRING only).
  * Returns ASCII-encoded point array for use in Google Maps.
  ************************************************************/
