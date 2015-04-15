@@ -33,10 +33,10 @@ var progVal = 0;
 var w_qstringd = localStorage.getItem(keyName);
 var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 var tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based on its importnace. (lower id means higher importance)"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Agencies <em title="Unduplicated list of transit agencies that serve stops cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Routes <em title="Unduplicated list of routes that server stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Agencies <em title="Unduplicated list of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Routes <em title="Unduplicated list of routes that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops <em title="Detailed list of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Agency Count <em title="Total number of transit agenciesthat that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Agency Count <em title="Total number of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route Count <em title="Total number of routes that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Visit Count <em title="Total number of times all stops in the cluster are served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stop Count <em title="Total number of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -229,7 +229,7 @@ function dbchange(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>			    	
+			    	Stop Cluster Radius(miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reload()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>			    			    	    	
 		    	</div>
 			  </td>

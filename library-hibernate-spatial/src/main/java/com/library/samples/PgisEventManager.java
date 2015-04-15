@@ -373,7 +373,7 @@ public class PgisEventManager {
 		TreeSet<StopCluster> response = new ClusterPriorityQueue();
 		Connection connection = makeConnection(dbindex);
 		String mainquery = "select cluster.cid as cid, cluster.sid as sid , cluster.aid as aid, cluster.name as name, map.agencies as agencies, map.routes as routes from "
-				+ "(select stp1.id as cid, stp2.id as sid, stp2.name as name, stp2.agencyid as aid from gtfs_stops stp1 inner join gtfs_stops stp2 "
+				+ "(select stp1.agencyid||stp1.id as cid, stp2.id as sid, stp2.name as name, stp2.agencyid as aid from gtfs_stops stp1 inner join gtfs_stops stp2 "
 				+ "on st_dwithin(stp1.location, stp2.location, ?)) as cluster inner join (select agencyid_def as aid, array_agg(distinct agencyid) as agencies, stopid as sid, "
 				+ "array_agg(distinct routeid) as routes from gtfs_stop_route_map group by agencyid_def, stopid ) as map on map.sid = cluster.sid and map.aid = cluster.aid "
 				+ "order by cluster.cid, cluster.sid";
@@ -400,18 +400,19 @@ public class PgisEventManager {
 				String[] agencies = (String[]) rs.getArray("agencies").getArray();
 				instance.agencies= Arrays.asList(agencies);
 				String[] routes = (String[]) rs.getArray("routes").getArray();
-				instance.routes= Arrays.asList(routes);
-				clid+=instance.agencyId;
+				instance.routes= Arrays.asList(routes);								
 				if (count ==1){
-					cid =clid;					
+					cid =clid;
+					inst.setClid(clid);
 				}
 				if (cid.equals(clid)){
 					inst.addStop(instance);
 				} else {
-					cid=clid;
+					cid=clid;					
 					inst.syncParams();
 					response.add(inst);					
-					inst = new StopCluster();					
+					inst = new StopCluster();
+					inst.setClid(clid);
 					inst.addStop(instance);					
 					}
 		        }

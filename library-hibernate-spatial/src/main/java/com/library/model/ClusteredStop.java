@@ -51,5 +51,12 @@ public class ClusteredStop {
 	}
 	public void setVisits(int visits) {
 		this.visits = visits;
-	}	
+	}
+	public boolean equals(Object o) {
+		  if (!(o instanceof ClusteredStop)) {
+		    return false;
+		  }
+		  ClusteredStop other = (ClusteredStop) o;
+		  return agencyId.equals(other.agencyId) && id.equals(other.id);
+		}
 }

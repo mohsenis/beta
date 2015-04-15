@@ -4,12 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StopCluster implements Comparable<StopCluster> {
+	public String clid;	
 	public List<String>agencies;
 	public List<String>routes;
 	public int size;
 	public int visits;
 	public List<ClusteredStop>stops = new ArrayList<ClusteredStop>();
 	
+	public String getClid() {
+		return clid;
+	}
+	public void setClid(String clid) {
+		this.clid = clid;
+	}
 	public List<String> getAgencies() {
 		return agencies;
 	}
@@ -45,8 +52,9 @@ public class StopCluster implements Comparable<StopCluster> {
 	}
 	public boolean removeStops(List<ClusteredStop> stoplist){
 		boolean response = false;
+		
 		for (ClusteredStop stop: stoplist){
-			response |=stops.remove(stop);
+			response = response|stops.remove(stop);
 		}
 		return response;
 	}
@@ -76,11 +84,19 @@ public class StopCluster implements Comparable<StopCluster> {
 		if (this.agencies.size()==o.agencies.size()){
 			if (this.routes.size()==o.routes.size()){
 				if (this.visits==o.visits){
-					if (this.stops.size()==o.stops.size()){
+					if (this.size==o.size){
 						return this.agencies.get(0).toString().compareTo(o.agencies.get(0).toString());
 					} else return (this.stops.size()>o.stops.size() ? 1:-1);
 				} else return (this.visits>o.visits ? 1:-1);
 			} else return (this.routes.size()>o.routes.size() ? 1:-1);
 		} else return (this.agencies.size()>o.agencies.size() ? 1:-1);		
 	}
+	
+	public boolean equals(Object o) {
+		  if (!(o instanceof StopCluster)) {
+		    return false;
+		  }
+		  StopCluster other = (StopCluster) o;
+		  return clid.equals(other.clid);
+		}
 }

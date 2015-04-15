@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -5018,29 +5019,38 @@ Loop:  	for (Trip trip: routeTrips){
     	int index = 0;
     	int progress = 0;
     	HubRList response = new HubRList();
-    	setprogVal(key, 40);
+    	setprogVal(key, 5);
     	TreeSet<StopCluster> clusterList = new TreeSet<StopCluster>();    	
-    	clusterList = PgisEventManager.stopClusters(fulldates, days, x, dbindex);   
+    	clusterList = PgisEventManager.stopClusters(fulldates, days, x, dbindex);  
+    	setprogVal(key, 40);
     	int totalLoad = clusterList.size();
-    	while (!clusterList.isEmpty()){    		
-    		StopCluster instance = clusterList.pollLast();
+    	int ctn =  clusterList.size();
+    	while (!clusterList.isEmpty()){     		
+    		StopCluster instance = clusterList.pollLast();    		
     		progress++;
     		if (instance.stops.size()>0){    			
 	    		index++;	
 	    		HubR res = new HubR();
 	    		res.addCluster(instance, index);
 	    		response.HubR.add(res);
-	    		for (StopCluster scluster: clusterList){
-	    			StopCluster temp = scluster;
-	    			boolean result = scluster.removeStops(instance.getStops());
+	    		TreeSet<StopCluster> tempClusterList =  new TreeSet<StopCluster>(); 
+	    		Iterator<StopCluster> iter = clusterList.iterator();
+	    		while(iter.hasNext()){
+	    			StopCluster temp = iter.next();
+	    			boolean result = temp.removeStops(instance.getStops());    			
 	    			if (result){
-	    				clusterList.remove(temp);
-	    				scluster.syncParams();
-	    				clusterList.add(scluster);
+	    				//System.out.println("Cluster # "+index+ " Result is "+result);
+	    				iter.remove();
+	    				if (temp.stops.size()>0){
+	    					temp.syncParams();
+	    					tempClusterList.add(temp);
+	    				}	    				
 	    			}
 	    		}
+	    		clusterList.addAll(tempClusterList);
     		}
-    		setprogVal(key, 40+(int) Math.round(progress*60/totalLoad));
+    		ctn = clusterList.size();
+    		setprogVal(key, 40+((int) Math.round(progress*60/totalLoad)));
     	}         
         try {
 			Thread.sleep(1000);
