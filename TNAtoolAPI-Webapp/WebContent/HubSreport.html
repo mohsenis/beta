@@ -32,7 +32,7 @@ var gg = 1.0/1.1;
 var progVal = 0; 
 var w_qstringd = localStorage.getItem(keyName);
 var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
-var tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based on its importnace. (lower id means higher importance)"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+var tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based on its importnace. (Lower ID means higher importance)"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Agencies <em title="Unduplicated list of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Routes <em title="Unduplicated list of routes that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops <em title="Detailed list of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -163,7 +163,7 @@ $(document).ready(function(){
 		    });	
 			function format ( p ) {
 		        //var html;
-		        var subTable = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;"><tr><th>Agency Id</th><th>Stop Id</th><th>Stop Name</th><th>Agency Ids</th><th>Route Ids</th><th>Visits</th></tr>'
+		        var subTable = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;"><tr><th>Agency Id</th><th>Stop Id</th><th>Stop Name</th><th>Agency Ids Served</th><th>Route Ids</th><th>Visits</th></tr>'
 		        	var displayedStops = stops[p];
 		        	for (var i=0; i<displayedStops.length; i++){
 		        		subTable+='<tr><td>'+displayedStops[i].agencyId+'</td><td>'+displayedStops[i].id+'</td><td>'+displayedStops[i].name+'</td><td>'+displayedStops[i].agencies+'</td><td>'+displayedStops[i].routes+'</td><td>'+displayedStops[i].visits+'</td></tr>';
