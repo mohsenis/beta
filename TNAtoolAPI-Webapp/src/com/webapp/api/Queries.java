@@ -5010,7 +5010,6 @@ Loop:  	for (Trip trip: routeTrips){
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
        	dbindex = default_dbindex;
         }		
-		date = "04/08/2015";
 		String[] dates = date.split(",");
     	String[][] datedays = daysOfWeekString(dates);
     	//String[] fulldates = fulldate(dates);

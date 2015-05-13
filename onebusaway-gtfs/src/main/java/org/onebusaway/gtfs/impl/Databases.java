@@ -42,7 +42,7 @@ public class Databases {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+		System.out.println("The database size is : "+String.valueOf(infoMap.get("databaseIndex").length));
 		return infoMap;
 	}
 	
