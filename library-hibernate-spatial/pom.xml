@@ -39,7 +39,7 @@
   </build>
   <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <geotools.version>10-SNAPSHOT</geotools.version>
+        <geotools.version>12-SNAPSHOT</geotools.version>
     </properties>
   <dependencies>
 
@@ -48,6 +48,12 @@
             <groupId>org.hibernatespatial</groupId>
             <artifactId>hibernate-spatial-postgis</artifactId>
             <version>1.1</version>
+            <!-- <exclusions>
+            	<exclusion>
+            		<artifactId>hibernate-core</artifactId>
+            		<groupId>org.hibernate</groupId>
+            	</exclusion>
+            </exclusions> -->
         </dependency>
 		<dependency>
 		  <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -69,11 +75,11 @@
         </dependency> -->
 
         <!-- Hibernate uses slf4j for logging, for our purposes here use the simple backend -->
-               <dependency>
+               <!-- <dependency>
                    <groupId>org.slf4j</groupId>
                    <artifactId>slf4j-simple</artifactId>
                    <version>1.5.11</version>
-               </dependency>
+               </dependency> -->
                <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-swing</artifactId>
@@ -96,10 +102,18 @@
 	</dependency>
     </dependencies>
     <repositories>
-        <repository>
+        <!-- <repository>
             <id>OSGEO GeoTools repo</id>
             <url>http://download.osgeo.org/webdav/geotools</url>
-        </repository>
+        </repository> -->
+        <repository>
+      		<snapshots>
+        		<enabled>true</enabled>
+     		 </snapshots>
+      		<id>boundless</id>
+      		<name>Boundless Maven Repository</name>
+      		<url>http://repo.boundlessgeo.com/main</url>
+   		 </repository>
         <repository>
             <id>maven2-repository.dev.java.net</id>
             <name>Java.net repository</name>
