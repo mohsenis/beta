@@ -1,4 +1,4 @@
-package com.webapp.api.model;
+package com.library.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,23 +9,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement(name = "MapA")
-public class MapAgency {
+@XmlRootElement(name = "MapTR")
+public class MapTransit {
 	@XmlAttribute
 	@JsonSerialize
-	public String Id;
+	public String TotalStops;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String Name;
+	public String TotalRoutes;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int ServiceStop=0;
+	public String AverageFare;
 	
-	@XmlElement(name = "MapRL")
-    public Collection<MapRoute> MapRoutes = new ArrayList<MapRoute>();
-
-	@XmlElement(name = "MapSL")
-    public Collection<MapStop> MapStops = new ArrayList<MapStop>();
+	@XmlAttribute
+	@JsonSerialize
+	public String MedianFare;
+	
+	@XmlElement(name = "MapAL")
+    public Collection<MapAgency> MapAgencies = new ArrayList<MapAgency>();
 }

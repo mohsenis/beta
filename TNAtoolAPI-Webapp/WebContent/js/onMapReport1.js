@@ -165,7 +165,6 @@ function showOnMapReport(lat, lon, date, x){
 	blockCluster = new Array();
 	tractCluster = new Array();
 	var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
-	var GcolorArray=['blockscluster', 'tractscluster'];
 	$('#displayTransitReport').empty();
 	$('#displayGeoReport').empty();
 	$("#overlay").show();	
@@ -289,33 +288,41 @@ function showOnMapReport(lat, lon, date, x){
 						'<td>'+numberWithCommas(item.MapBlocks.length)+'</td>'+
 						'<td>'+numberWithCommas(item.UrbanPopulation)+'</td>'+
 						'<td>'+numberWithCommas(item.RuralPopulation)+'</td></tr>';
-				//var tmpBlockCluster = new L.FeatureGroup();
-				//var tmpTractCluster = new L.FeatureGroup();
+				var tmpBlockCluster = new L.FeatureGroup();
+				var tmpTractCluster = new L.FeatureGroup();
 				onMapIcon = L.icon({
 				    iconUrl: 'js/lib/leaflet-0.7/images/block.png',
 				    //iconSize:     [40, 55], // size of the icon
 				    iconAnchor:   [15, 29], // point of the icon which will correspond to marker's location
 				    popupAnchor:  [0, -20] // point from which the popup should open relative to the iconAnchor
 				});
-				//var tmpBlockCluster = new L.MarkerClusterGroup();
-				var tmpBlockCluster = new L.MarkerClusterGroup({
-					/*maxClusterRadius: 120,*/
-					iconCreateFunction: function (cluster) {
-						return new L.DivIcon({ html: cluster.getChildCount(), className: GcolorArray[0], iconSize: new L.Point(30, 30) });						
-					},
-					spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
-				});
-				var tmpTractCluster = new L.MarkerClusterGroup({
-					maxClusterRadius: 80,
-					iconCreateFunction: function (cluster) {
-						return new L.DivIcon({ html: cluster.getChildCount(), className: GcolorArray[1], iconSize: new L.Point(30, 30) });						
-					},
-					spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false
-				});
-				$.each(item.MapBlocks, function(j,jtem){						
-						var marker = L.marker([jtem.Lat,jtem.Lng], {icon: onMapIcon});
-						marker.bindPopup('<b>Block ID:</b> '+jtem.ID+'<br><b>Type:</b> '+jtem.Type+'<br><b>Population:</b> '+numberWithCommas(jtem.Population)+'<br><b>County:</b> '+jtem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>');
-						tmpBlockCluster.addLayer(marker);								
+				//var points = [];
+				//var popups = [];
+				var colorset = ["#6ECC39","#FF33FF","#05FAFC","#FE0A0A", "#7A00F5", "#CC6600"];
+				var BlockMarkerOptions = {
+						stroke: false,
+					    radius: 8,
+					    fillColor: colorset[1],
+					    color: "#000",
+					    weight: .9,
+					    opacity: .5,
+					    fillOpacity: 0.6
+					};
+				var TractMarkerOptions = {
+						stroke: false,
+					    radius: 8,
+					    fillColor: colorset[4],
+					    color: "#000",
+					    weight: .9,
+					    opacity: .5,
+					    fillOpacity: 0.6
+					};
+				$.each(item.MapBlocks, function(j,jtem){
+					//points.push([new L.LatLng(Number(jtem.Lat), Number(jtem.Lng)),stop.stopName]);
+					//popups.push('<b>Block ID:</b> '+jtem.ID+'<br><b>Type:</b> '+jtem.Type+'<br><b>Population:</b> '+numberWithCommas(jtem.Population)+'<br><b>County:</b> '+jtem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>');					
+					var blocmarker = L.circleMarker(new L.LatLng(Number(jtem.Lat), Number(jtem.Lng)), BlockMarkerOptions);
+					blocmarker.bindPopup('<b>Block ID:</b> '+jtem.ID+'<br><b>Type:</b> '+jtem.Type+'<br><b>Population:</b> '+numberWithCommas(jtem.Population)+'<br><b>County:</b> '+jtem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>');
+					tmpBlockCluster.addLayer(blocmarker);
 					/*var blocmarker = L.marker([jtem.Lat,jtem.Lng], {icon: onMapIcon});
 					blocmarker.bindPopup('<b>Block ID:</b> '+jtem.ID+'<br><b>Type:</b> '+jtem.Type+'<br><b>Population:</b> '+numberWithCommas(jtem.Population)+'<br><b>County:</b> '+jtem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>');
 					tmpBlockCluster.addLayer(blocmarker);*/
@@ -328,7 +335,8 @@ function showOnMapReport(lat, lon, date, x){
 				    popupAnchor:  [0, -30] // point from which the popup should open relative to the iconAnchor
 				});
 				$.each(item.MapTracts, function(k,ktem){
-					var tractmarker = L.marker([ktem.Lat,ktem.Lng], {icon: onMapIcon});
+					/*var tractmarker = L.marker([ktem.Lat,ktem.Lng], {icon: onMapIcon});*/
+					var tractmarker = L.circleMarker(new L.LatLng(Number(ktem.Lat), Number(ktem.Lng)), TractMarkerOptions);
 					tractmarker.bindPopup('<b>Tract ID:</b> '+ktem.ID+'<br><b>Population:</b> '+numberWithCommas(ktem.Population)+'<br><b>County:</b> '+ktem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(ktem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>');
 					tmpTractCluster.addLayer(tractmarker);
 				});
@@ -374,6 +382,51 @@ function showOnMapReport(lat, lon, date, x){
 	});
 	
 }
+
+function disponmap2(layerid,k,points,popups){	
+	//alert (points.length);
+	//alert (k);
+	var geojsonMarkerOptions = {
+		    radius: 5,
+		    fillColor: colorset[k],
+		    color: "#000",
+		    weight: 1,
+		    opacity: 1,
+		    fillOpacity: 0.6
+		};
+	var geojsonFeature = {
+		    "type": "Feature",
+		    "properties": {
+		        "name": "stop",
+		        "popupContent": popups
+		    },
+		    "geometry": {
+		        "type": "MultiPoint",
+		        "coordinates": points
+		    }
+		};
+	
+	function onEachFeature(feature, layer) {
+		var popupContent = "";
+
+		if (feature.properties && feature.properties.popupContent) {
+			popupContent += feature.properties.popupContent;
+		}
+
+		layer.bindPopup(popupContent);
+	}
+	var mylayer = new L.geoJson(geojsonFeature, {
+	    pointToLayer: function (feature, latlng) {
+	        return L.circleMarker(latlng, geojsonMarkerOptions);
+	    },
+	    onEachFeature: onEachFeature
+	});
+	
+	mylayer._leaflet_id = layerid;
+	//mylayer.bindpopup("test");
+	onMapBlockCluster.addLayer(mylayer);	
+	//stops.bringToFront();
+};
 
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");

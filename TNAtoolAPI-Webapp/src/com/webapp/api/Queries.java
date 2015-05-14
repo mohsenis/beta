@@ -149,423 +149,52 @@ public class Queries {
         return new TransitError("Sum of Population is: "+ response+" Som of centroids is: "+sum);
     }
 	
-	static MapDisplay mapResponse;
+	//static MapDisplay mapResponse;
 	//static Map<String, TmpMapRoute> tripKey;
+	
 	/**
-     * Generates a sorted by agency id list of routes for the LHS menu
-     *  
-     */
-    @GET
-    @Path("/onmapreport")
-    @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Object getSecondmenu(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex) throws JSONException { 
-    	if (Double.isNaN(x) || x <= 0) {
-            x = STOP_SEARCH_RADIUS;
-        }
-    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
-        	dbindex = default_dbindex;
-        } 
-    	final int sdbindex = dbindex;
-//    	x = x * 1609.34;
-    	String[] latss = lats.split(",");
-    	double[] lat = new double[latss.length];
-    	int ind = 0;
-    	for(String la: latss){
-    		lat[ind]=Double.parseDouble(la);
-    		ind++;
-    	}
-    	String[] lonss = lons.split(",");
-    	double[] lon = new double[lonss.length];
-    	ind = 0;
-    	for(String ln: lonss){
-    		lon[ind]=Double.parseDouble(ln);
-    		ind++;
-    	}
-    	String[] dates = date.split(",");
-    	int[][] days = daysOfWeek(dates);
-    	mapResponse = new MapDisplay();
-    	
-    	class TransitR extends Thread {
-    		private double[] lat;
-    		private double[] lon;
-    		private double x;
-    		private String date;
-    		private String[] dates;
-    		private int[][] days;
-    		
-    		public TransitR(double[] lat, double[] lon, double x, String date, String[] dates, int[][] days){
-    			this.lat = lat;
-    			this.lon = lon;
-    			this.x = x;
-    			this.date = date;
-    			this.dates = dates;
-    			this.days = days;
-    		}
-    		
-    		public void run() {
-    			System.out.println("Running 1 running");
-    			MapTransit mtr = new MapTransit();
-    			int totalRoutes=0;
-    			int totalStops=0;
-    			float averageFare=0;
-    			List<Float> medianFare= new ArrayList<Float>();
-    			
-    			List<GeoStop> stops;
-    			Collection<Agency> agencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(sdbindex);
-    			Map<String, Agency> agencyRef = new HashMap<String, Agency>();
-    			for(Agency agency: agencies){
-    				agencyRef.put(agency.getId(), agency);
-    			}
-    			Collection<Route> routes = GtfsHibernateReaderExampleMain.QueryAllRoutes(sdbindex);
-  		        Map<String, Route> routeRef= new HashMap<String, Route>();
-  		        for(Route route: routes){
-  		        	routeRef.put(route.getAgency().getId()+route.getId().getId(), route);
-  		        }
-  		        Map<String, TmpMapRoute> tripKey = new HashMap<String, TmpMapRoute>();
-  		        List<Trip> trips = (List<Trip>) GtfsHibernateReaderExampleMain.QueryAllTrips(sdbindex);
-				String currentAgency  = trips.get(0).getId().getAgencyId();
-				List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(currentAgency, sdbindex);
-				List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(currentAgency, sdbindex);
-				for(Trip trip: trips){
-					String ai = trip.getId().getAgencyId();
-					
-					String tk = ai+trip.getRoute().getId().getId();
-					if(!tripKey.containsKey(tk)){
-						TmpMapRoute tmpr = new TmpMapRoute();
-						tripKey.put(tk, tmpr);
-					}
-					TmpMapRoute value = tripKey.get(tk);
-					int startDate;
-			        int endDate;
-			        
-			        if(!ai.equals(currentAgency)){
-				        agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(trip.getServiceId().getAgencyId(), sdbindex);
-				        agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(trip.getServiceId().getAgencyId(), sdbindex);
-				        currentAgency = ai;
-			        }
-			        double TL = Math.max(trip.getLength(),trip.getEstlength());	
-			        if(trip.getDirectionId()==null){
-			        	if (TL > value.getLength()){ 
-			    			value.setLength(TL);
-			    			value.setShape(trip.getEpshape());
-			    		}
-			        }else{
-			        	if(trip.getDirectionId().equals("0")){
-				        	if (TL > value.getLength0()){ 
-				    			value.setLength0(TL);
-				    			value.setShape0(trip.getEpshape());
-				    		}  
-				        }else{
-				        	if (TL > value.getLength1()){ 
-				    			value.setLength1(TL);
-				    			value.setShape1(trip.getEpshape());
-				    		} 
-				        }
-			        }
-		    		 		
-		    		ServiceCalendar sc = null;
-		    		if(agencyServiceCalendar!=null){
-		    			for(ServiceCalendar scs: agencyServiceCalendar){
-		    				if(scs.getServiceId().getId().equals(trip.getServiceId().getId())){
-		    					sc = scs;
-		    					break;
-		    				}
-		    			}  
-		    		}
-		    		
-		      		List <ServiceCalendarDate> scds = new ArrayList<ServiceCalendarDate>();
-		    		for(ServiceCalendarDate scdss: agencyServiceCalendarDates){
-		    			if(scdss.getServiceId().getId().equals(trip.getServiceId().getId())){
-		    				scds.add(scdss);
-		    			}
-		    		}	   		    		
-		daysLoop:   for (int i=0; i<dates.length; i++){  
-						for(ServiceCalendarDate scd: scds){
-							if(days[0][i]==Integer.parseInt(scd.getDate().getAsString())){
-								if(scd.getExceptionType()==1){
-									
-									value.incrementFrequency();
-								}
-								continue daysLoop;
-							}
-						}
-						if (sc!=null){
-							startDate = Integer.parseInt(sc.getStartDate().getAsString());
-			        		endDate = Integer.parseInt(sc.getEndDate().getAsString());
-			        		if(!(days[0][i]>=startDate && days[0][i]<=endDate)){
-		    					continue;
-		    				}
-			        		switch (days[1][i]){
-								case 1:
-									if (sc.getSunday()==1){
-										value.incrementFrequency();											
-									}
-									break;
-								case 2:
-									if (sc.getMonday()==1){
-										value.incrementFrequency();
-									}
-									break;
-								case 3:
-									if (sc.getTuesday()==1){
-										value.incrementFrequency();
-									}
-									break;
-								case 4:
-									if (sc.getWednesday()==1){
-										value.incrementFrequency();
-									}
-									break;
-								case 5:
-									if (sc.getThursday()==1){
-										value.incrementFrequency();
-									}
-									break;
-								case 6:
-									if (sc.getFriday()==1){
-										value.incrementFrequency();
-									}
-									break;
-								case 7:
-									if (sc.getSaturday()==1){
-										value.incrementFrequency();
-									}
-									break;
-							}
-						}
-					}
-					
-				}
-				Map<String, MapAgency> agencyKey = new HashMap<String, MapAgency>();
-	            Map<String, MapRoute> routeKey = new HashMap<String, MapRoute>();
-    			try {
-    				List <GeoStopRouteMap> asrms = EventManager.getstoproutemaps(sdbindex);
-					Map<String, List<GeoStopRouteMap>> stopRouteMapKey = new HashMap<String, List<GeoStopRouteMap>>();
-					String kk="";
-					for(GeoStopRouteMap gstm: asrms){
-						kk = gstm.getstopId()+gstm.getagencyId_def();
-						if(!stopRouteMapKey.containsKey(kk)){
-							stopRouteMapKey.put(kk, new ArrayList<GeoStopRouteMap>());
-						}
-						stopRouteMapKey.get(kk).add(gstm);
-					}
-					if(lat.length==1){
-						stops = EventManager.getstopswithincircle(x, lat[0], lon[0], sdbindex);
-					}else{
-						stops = EventManager.getstopswithinrectangle(lat, lon, sdbindex);
-						//stops = EventManager.getstopswithincircle(x, lat[0], lon[0]);
-					}
-    				
-    				//mtr.TotalStops = stops.size()+"";
-    				/////////////////
-    				for(GeoStop stop: stops){
-		    			kk = stop.getStopId()+stop.getAgencyId();
-		    			if(!stopRouteMapKey.containsKey(kk)){
-		    				continue;
-		    			}
-		    			List <GeoStopRouteMap> srms = stopRouteMapKey.get(kk);
-		    			if(srms.size()==0){
-		    				continue;
-		    			}
-		    			MapStop ms = new MapStop();
-		    			ms.Id = stop.getStopId()+"";
-		    			ms.AgencyId = srms.get(0).getagencyId()+"";
-		    			ms.Name = stop.getName()+"";
-		    			ms.Lat = stop.getLat()+"";
-		    			ms.Lng = stop.getLon()+"";
-		    			ms.Frequency = 0;
-		    			
-		    			if(!agencyKey.containsKey(ms.AgencyId)){
-		    				MapAgency ma = new MapAgency();
-		    				Agency ag = agencyRef.get(ms.AgencyId);
-		    				ma.Id = ag.getId()+"";
-		    				ma.Name = ag.getName()+"";
-		    				agencyKey.put(ms.AgencyId, ma);
-		    			}
-		    			MapAgency tmpMA = agencyKey.get(ms.AgencyId);
-		    		
-		    			for(GeoStopRouteMap srm: srms){
-		    				String k = srm.getagencyId()+srm.getrouteId();
-    		    			ms.RouteIds.add(srm.getrouteId()+"");
-    		    			if(!routeKey.containsKey(k)){
-    		    				TmpMapRoute tmr = tripKey.get(k);
-    		    				if(tmr.getFrequency()==0){
-    		    					continue;
-    		    				}
-    		    				MapRoute mr = new MapRoute();
-    		    				Route rou = routeRef.get(k);
-    		    				mr.Id = rou.getId().getId()+"";
-    		    				mr.Name = rou.getShortName()+"";
-    		    				mr.AgencyId = rou.getAgency().getId()+"";
-    		    				if(tmr.getLength()==0){
-    		    					mr.hasDirection = true;
-    		    					mr.Shape0 = tmr.getShape0()+"";
-    		    					mr.Shape1 = tmr.getShape1()+"";
-    		    					mr.Length = (tmr.getLength0()+tmr.getLength1())+"";
-    		    				}else{
-    		    					mr.hasDirection = false;
-    		    					mr.Shape = tmr.getShape()+"";
-        		    				mr.Length = tmr.getLength()+"";
-    		    				}
-    		    				
-    		    				mr.Frequency = tmr.getFrequency();
-    		    				List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(rou, sdbindex);
-    					    	if(fareRules.size()==0){
-    					    		mr.Fare = "N/A";
-    					    	}else{
-    					    		mr.Fare = fareRules.get(0).getFare().getPrice()+"";
-    					    		averageFare+=fareRules.get(0).getFare().getPrice();
-        			    			medianFare.add(fareRules.get(0).getFare().getPrice());
-    					    	}
-    					    	totalRoutes++;
-    		    				routeKey.put(k, mr);
-    		    				tmpMA.MapRoutes.add(mr);
-    		    			}
-    		    			ms.Frequency += routeKey.get(k).Frequency;
-    		    			
-    		    		}
-		    			if(ms.Frequency==0){
-		    				continue;
-		    			}
-		    			tmpMA.MapStops.add(ms);
-		    			tmpMA.ServiceStop += ms.Frequency;
-		    			
-		    		}
-    				mtr.TotalRoutes = totalRoutes+"";
-	    			Collections.sort(medianFare);
-			    	if (medianFare.size()>0){
-			    		mtr.AverageFare = averageFare/medianFare.size()+"";
-			    		mtr.MedianFare = medianFare.get((int)Math.floor(medianFare.size()/2))+"";
-			    	} else {
-			    		mtr.AverageFare = "NA";
-				    	mtr.MedianFare = "NA";
-			    	}
-			    	for(Entry<String, MapAgency> entry : agencyKey.entrySet()){
-			    		if(entry.getValue().ServiceStop==0){
-			    			continue;
-			    		}
-						mtr.MapAgencies.add(entry.getValue());
-						totalStops+=entry.getValue().MapStops.size();
-		            }
-			    	mtr.TotalStops=totalStops+"";
-    			} catch (FactoryException e) {
-    				e.printStackTrace();
-    			} catch (TransformException e) {
-    				e.printStackTrace();
-    			}
-    		      
-    		     System.out.println("Thread 1 exiting.");
-    		     mapResponse.MapTr = mtr;
-    		     
-    		}
-    	}
-    	
-    	class GeoR extends Thread {
-    		private double[] lat;
-    		private double[] lon;
-    		private double x;
-    		
-    		public GeoR(double[] lat, double[] lon, double x){
-    			this.lat = lat;
-    			this.lon = lon;
-    			this.x = x;
-    		}
-    		
-    		public void run() {
-    		    System.out.println("Running 2 running");
-    		    
-    		    MapGeo mg = new MapGeo();
-    		    int totalLand=0;
-    		    int totalPop=0;
-    		    int totalTract=0;
-    		    List<County> counties;
-    		    List<Tract> tracts;
-  		        List<Census> centroids;
-  		        Map<String, County> countyRef = new HashMap<String, County>();
-  		        Map<String, Tract> tractRef= new HashMap<String, Tract>();
-		        try {
-		        	if(lat.length==1){
-		        		centroids =EventManager.getcentroids(x, lat[0], lon[0], sdbindex);
-		        	}else{
-		        		centroids =EventManager.getcentroidswithinrectangle(lat, lon, sdbindex);
-		        		//centroids =EventManager.getcentroids(x, lat[0], lon[0]);
-		        	}
-		            
-		            mg.TotalBlocks = centroids.size()+"";
-		            tracts = EventManager.gettracts(sdbindex);
-		            counties = EventManager.getcounties(sdbindex);
-		            for(County cou: counties){
-		            	countyRef.put(cou.getCountyId(), cou);
-		            }
-		            for(Tract tra: tracts){
-		            	tractRef.put(tra.getTractId(), tra);
-		            }
-		            Map<String, MapCounty> countyKey = new HashMap<String, MapCounty>();
-		            Map<String, MapTract> tractKey = new HashMap<String, MapTract>();
-		            for (Census c : centroids){
-		            	MapBlock mb = new MapBlock();
-		            	mb.ID = c.getBlockId()+"";
-		            	mb.LandArea = c.getLandarea()+"";
-		            	mb.Lat = c.getLatitude()+"";
-		            	mb.Lng = c.getLongitude()+"";
-		            	mb.Population = c.getPopulation()+"";
-		            	totalLand+= c.getLandarea();
-		            	totalPop+= c.getPopulation();
-		            	String tmpCountyId = c.getBlockId().substring(0, 5);
-		            	if(!countyKey.containsKey(tmpCountyId)){
-		            		MapCounty mc = new MapCounty();
-		            		County county = countyRef.get(tmpCountyId);
-		            		mc.Id = county.getCountyId()+"";
-		            		mc.Poopulation = 0;
-		            		mc.Name = county.getName()+"";
-		            		countyKey.put(tmpCountyId, mc);
-		            	}
-		            	String tmpTractId = c.getBlockId().substring(0, 11);
-		            	MapCounty tmpMC = countyKey.get(tmpCountyId);
-		            	mb.County = tmpMC.Name+"";
-		            	if(!tractKey.containsKey(tmpTractId)){
-		            		MapTract mt = new MapTract();
-		            		Tract tract = tractRef.get(tmpTractId);
-		            		mt.ID = tract.getTractId()+"";
-		            		mt.LandArea = tract.getLandarea()+"";
-		            		mt.Lat = tract.getLatitude()+"";
-		            		mt.Lng = tract.getLongitude()+"";
-		            		mt.Population = tract.getPopulation()+"";
-		            		mt.County = tmpMC.Name+"";
-		            		tractKey.put(tmpTractId, mt);
-		            		tmpMC.MapTracts.add(mt);
-		            		totalTract++;
-		            	}
-		            	tmpMC.MapBlocks.add(mb);
-		            	tmpMC.Poopulation+=c.getPopulation(); //this is the only double field 
-			        }
-		            mg.TotalLandArea = totalLand+"";
-		            mg.TotalPopulation = totalPop+"";
-		            mg.TotalTracts = totalTract+"";
-		            for(Entry<String, MapCounty> entry : countyKey.entrySet()){
-						mg.MapCounties.add(entry.getValue());
-		            }
-		        } catch (FactoryException e) {
-		            e.printStackTrace();
-		        } catch (TransformException e) {
-		            e.printStackTrace();
-		        }
-		            		     
-    		    System.out.println("Thread 2 exiting.");
-    		    mapResponse.MapG = mg;
-    		}
-    	}
-    	
-    	TransitR T1 = new TransitR(lat, lon, x, date, dates, days);
-    	GeoR T2 = new GeoR(lat, lon, x);
-        T1.start();
-        T2.start();
-    	
-    	while(T1.isAlive() || T2.isAlive()){continue;}
-    	//JOptionPane.showMessageDialog(null, mapResponse.MapTr.TotalRoutes);
-    	
-    	return mapResponse;
+    * Generates The on map report
+    *  
+    */
+   @GET
+   @Path("/onmapreport")
+   @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+   public Object getOnMapReport(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex) throws JSONException { 
+   	if (Double.isNaN(x) || x <= 0) {
+           x = 0;
+       }
+   	//x = Math.round(x*100.00)/100.00;
+   	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+       	dbindex = default_dbindex;
+       } 
+   	//final int sdbindex = dbindex;
+//   	x = x * 1609.34;
+   	String[] latss = lats.split(",");
+   	double[] lat = new double[latss.length];
+   	int ind = 0;
+   	for(String la: latss){
+   		lat[ind]=Double.parseDouble(la);
+   		ind++;
+   	}
+   	String[] lonss = lons.split(",");
+   	double[] lon = new double[lonss.length];
+   	ind = 0;
+   	for(String ln: lonss){
+   		lon[ind]=Double.parseDouble(ln);
+   		ind++;
+   	}
+   	String[] dates = date.split(",");
+   	String[][] datedays = daysOfWeekString(dates);
+   	String[] fulldates = datedays[0];
+   	String[] days = datedays[1];	   	
+   	MapDisplay response = new MapDisplay();
+   	MapTransit stops = PgisEventManager.onMapStops(fulldates,days, x, lat, lon, dbindex);
+   	MapGeo blocks = PgisEventManager.onMapBlocks(x, lat, lon, dbindex);
+   	response.MapTr = stops;
+   	response.MapG = blocks;
+   	return response;
     }
+	
 	/**
      * Generates a sorted by agency id list of routes for the LHS menu
      *  
@@ -5010,7 +4639,6 @@ Loop:  	for (Trip trip: routeTrips){
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
        	dbindex = default_dbindex;
         }		
-		date = "04/08/2015";
 		String[] dates = date.split(",");
     	String[][] datedays = daysOfWeekString(dates);
     	//String[] fulldates = fulldate(dates);
