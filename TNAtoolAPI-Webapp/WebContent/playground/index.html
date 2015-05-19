@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+  <title>GTFS Playground Log-In</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+  <script src="playground.js"></script>
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="playgournd.css">
+
+  <script >
+	  $(document).ready(function(){
+		  
+		  
+		  $('#oregonFeeds').html(listOfOregonFeed());
+		  $( "#oregonAccordion" ).accordion({
+			      collapsible: true
+		  });
+			
+		  $('#publicFeeds').html(listOfPublicFeed());
+		  $( "#publicAccordion" ).accordion({
+			      collapsible: true
+		  });
+		  $( ".ui-accordion-header" ).click();
+		  
+		  $( "#guestDialog" ).dialog({
+			  autoOpen: false,
+			  width: '40%',
+			  position: { my: "top", at: "top", of: ".login-card" },
+			  modal: true
+		  });
+	  });
+  </script>
+</head>
+
+<body>
+	
+	
+	<br>
+	<div class="login-card" style="width:350px">
+		<h1>Welcome to TNA Software Tool Playground</h1><br>
+	    <h3>Login to continue</h3>
+	  <form onsubmit="event.preventDefault(); return PGlogin()">
+	    <input type="text" id="user" placeholder="Username or Email" required>
+	    <input type="password" id="pass" placeholder="Password" required>
+	    <input type="submit" id="login" class="login login-submit" value="login">
+	  </form>
+	
+	  <div class="login-help">
+	    <a href="register.html"><u>Register</u></a> or 
+	    <a href="#" onclick="guestUser()"><u>Enter as a guest</u></a>
+	  </div>
+	</div>
+	
+	<div id="guestDialog" title="Enter as a guest:" style="text-align:center">
+		<br>
+    	<p id="launchTNA" onclick="launchTNAguest()">
+			<span class="btn btn-success fileinput-button">Launch TNA Software Tool</span>
+		</p>
+		
+		<br>
+		<br>
+		<br>
+		<div id="oregonAccordion" class="accordion" style="font-size:90%;width:80%;margin:auto;text-align:left">
+    		<h3>Oregon GTFS feeds. Last updated on 03/15/2015.</h3>
+    		<div id="oregonFeeds"></div>
+    	</div>
+    	<br>
+    	<div id="publicAccordion" class="accordion" style="font-size:90%;width:80%;margin:auto;text-align:left">
+    		<h3>Feeds added by other users.</h3>
+    		<div id="publicFeeds"></div>
+    	</div>
+        <br>
+		<br>
+	</div>
+
+</body>
+
+</html>

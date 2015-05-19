@@ -1,6 +1,11 @@
 package com.webapp.api;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,6 +43,7 @@ import com.library.model.*;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FareRule;
+import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.ServiceCalendarDate;
@@ -692,6 +698,88 @@ public class Queries {
 		//response.stops = GtfsHibernateReaderExampleMain.QueryStops(agency);
 		
 		return response;
+    }
+    
+    /**
+     * Get calendar rage for agency
+     */
+    @GET
+    @Path("/agencyCalendarRange")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object agencyCalendarRange(@QueryParam("agency") String agency, @QueryParam("dbindex") Integer dbindex){
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	StartEndDates seDates = new StartEndDates();
+    	String defaultAgency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getDefaultId();
+    	Connection c = null;
+		Statement statement = null;
+		String dbURL = Databases.connectionURLs[dbindex];
+		String dbUSER = Databases.username[dbindex];
+		String dbPASS = Databases.password[dbindex];
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_feed_info where defaultid = '"+defaultAgency+"';");
+			if(rs.next()){
+				seDates.Startdate = rs.getString("startdate");
+				seDates.Enddate = rs.getString("enddate");
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+    	
+		return seDates;
+    }
+    
+    /**
+     * Get overall calendar rage
+     */
+    @GET
+    @Path("/calendarRange")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object calendarRange(@QueryParam("dbindex") Integer dbindex){
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	StartEndDates seDates = new StartEndDates();
+    	Connection c = null;
+		Statement statement = null;
+		String dbURL = Databases.connectionURLs[dbindex];
+		String dbUSER = Databases.username[dbindex];
+		String dbPASS = Databases.password[dbindex];
+		int start = 100000000;
+		int end = 0;
+		String s;
+		String f;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_feed_info;");
+			while(rs.next()){
+				s = rs.getString("startdate");
+				if(Integer.parseInt(s)<start){
+					start = Integer.parseInt(s);
+					seDates.Startdateunion = s;
+				}
+				
+				f = rs.getString("enddate");
+				if(Integer.parseInt(f)>end){
+					end = Integer.parseInt(f);
+					seDates.Enddateunion = f;
+				}
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+    	
+		return seDates;
     }
     
  	/**

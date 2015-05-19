@@ -3,13 +3,20 @@ package com.webapp.modifiers;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -17,9 +24,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -29,10 +48,27 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
+
 import com.webapp.api.model.*;
 import com.webapp.api.utils.PolylineEncoder;
 import com.webapp.api.utils.SphericalDistance;
 
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.io.ZipOutputStream;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
+
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.apache.tomcat.util.http.fileupload.RequestContext;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.onebusaway.gtfs.impl.Databases;
@@ -53,65 +89,150 @@ import org.xml.sax.SAXException;
 public class DbUpdate {
 	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
-	@GET
-    @Path("/updatetrips")
-   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object dbshapesforagency(@QueryParam("agency") String agency, @QueryParam("dbindex") int dbindex){
-    	ShapeList response = new ShapeList();
-		List<Trip> triplist = GtfsHibernateReaderExampleMain.QueryTripsforAgency(agency, dbindex);
-		String shapeId = "";		    	
-    	String pe = "";
-    	double length = 0;
-    	double estlength = 0;
-    	String Desc = "";
-
-		for (Trip trip: triplist){
-
-			AgencyAndId agencyandtrip = trip.getId();	
-
-	    	Trip tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip, dbindex);
-	    	List<ShapePoint> shapes = GtfsHibernateReaderExampleMain.Queryshapebytrip(agencyandtrip, dbindex);
-	    	
-	    	//computing the shape length
-	    	if (shapes.size()>1) {
-		    	if (!(trip.getShapeId().getId().equals(shapeId))){		    		
-		    		pe = PolylineEncoder.createEncodings(shapes, 1);
-			    	length = SphericalDistance.sLength(shapes);
-			    	shapeId = trip.getShapeId().getId();
-			    	//stopCount = GtfsHibernateReaderExampleMain.queryst
-		    	}	    		
-		    	Desc = "Trip" + tp.getId().getId() + "has shape data";
-	    	} else {
-	    		//estimating the trip length and shape (straight line distance) in case there is no shape data
-	    		List<StopTime> st = GtfsHibernateReaderExampleMain.Querystoptimebytrip(agencyandtrip, dbindex);		    		
-	        	List<ShapePoint> stops = new ArrayList<ShapePoint>();
-	        	for (StopTime instance: st){
-	        		Stop stop =instance.getStop();
-	        		ShapePoint sp = new ShapePoint();
-	        		sp.setLat(stop.getLat());
-	        		sp.setLon(stop.getLon());
-	        		stops.add(sp);
-	        	}
-	        	pe = PolylineEncoder.createEncodings(stops, 1);
-	        	estlength = SphericalDistance.sLength(stops);	        		        	
-	    		Desc = "Trip" + tp.getId().getId() + "does not have shape data";
-	    	}		
-    	Rshape shape = new Rshape();
-    	shape.points = pe;
-    	shape.length = SphericalDistance.sLength(shapes);    		 
-    	shape.estlength = estlength;
-    	shape.description = Desc;
-    	response.shapelist.add(shape);
-    	
-    	// now setting the new values for the trip and updating the DB
-    	tp.setEpshape(pe);
-    	tp.setLength(length);
-    	tp.setEstlength(estlength);
-    	GtfsHibernateReaderExampleMain.updateTrip(tp, dbindex);
+	private final static int USER_COUNT = 10;
+	private final static int QUOTA = 10000000;
+	
+	
+	/*@GET
+    @Path("/testCSV")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object testCSV(@QueryParam("feeds") String feed, @QueryParam("username") String username) throws IOException, ZipException{
+		String path = "C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/"
+				+ "Feeds/cascadespoint-or-us-test/test/swanisland-or-us";
+		int feedIndex = 0;
+		String username = "mohsenis";
+		
+		start unzipping
+		File zipF = new File(path+".zip");
+		ZipFile zipFile = new ZipFile(zipF);
+		File folder = new File(path);
+        zipFile.extractAll(path);
+        zipF.delete();
+        end unzipping
+        
+        start csv manipulation of feed's name, agency id, and agency name
+        File input = new File(path+"/agency.txt");
+        File output = new File(path+"/agencyTmp.txt");
+		CSVReader reader = new CSVReader(new FileReader(input));
+		CSVWriter writer = new CSVWriter(new FileWriter(path+"/agencyTmp.txt"), ',', CSVWriter.NO_QUOTE_CHARACTER);
+		String [] nextLine;
+		
+		int agencyIdIndex=-1;
+		String agencyId="";
+		String agnecyName="";
+		int agencyNameIndex=-1;
+		List<String> lineAsList = new ArrayList<String>(Arrays.asList(reader.readNext()));
+		for(String s: lineAsList){
+			if(s.equals("agency_id") || s.equals("\"agency_id\"")){
+	    		agencyIdIndex = lineAsList.indexOf(s);
+	    	}else if(s.equals("agency_name") || s.equals("\"agency_name\"")){
+	    		agencyNameIndex = lineAsList.indexOf(s);
+	    	}
 		}
-		return response;
-    }
+		if(agencyIdIndex==-1){
+			lineAsList.add("agency_id");
+		}
+		
+		String[] CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
+	    writer.writeNext(CSVarray);
+		
+		while ((nextLine = reader.readNext()) != null) {
+		    lineAsList = new ArrayList<String>(Arrays.asList(nextLine));
+		    agnecyName = lineAsList.get(agencyNameIndex);
+		    
+		    if(agencyIdIndex!=-1){
+		    	agencyId = lineAsList.get(agencyIdIndex);
+		    	if(lineAsList.get(agencyIdIndex)==null || agencyId.equals("")){
+		    		lineAsList.set(agencyIdIndex, agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
+		    	}else{
+		    		lineAsList.set(agencyIdIndex, agencyId+"_"+username+"_"+feedIndex);
+		    	}
+		    }else{
+		    	lineAsList.add(agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
+		    }
+		    
+		    CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
+		    writer.writeNext(CSVarray);
+		}
+		writer.close();
+		reader.close();
+		input.delete();
+		output.renameTo(input);
+		
+		//Agency id modification in routes.txt
+		File inputRoute = new File(path+"/routes.txt");
+        File outputRoute = new File(path+"/routesTmp.txt");
+		reader = new CSVReader(new FileReader(inputRoute));
+		writer = new CSVWriter(new FileWriter(path+"/routesTmp.txt"), ',', CSVWriter.NO_QUOTE_CHARACTER);
+		
+		lineAsList = new ArrayList<String>(Arrays.asList(reader.readNext()));
+		for(String s: lineAsList){
+	    	if(s.equals("agency_id") || s.equals("\"agency_id\"")){
+	    		agencyIdIndex = lineAsList.indexOf(s);
+	    	}
+		}
+		if(agencyIdIndex==-1){
+			lineAsList.add("agency_id");
+		}
+		
+		CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
+	    writer.writeNext(CSVarray);
+	    
+	    while ((nextLine = reader.readNext()) != null) {
+		    lineAsList = new ArrayList<String>(Arrays.asList(nextLine));
+		    
+		    if(agencyIdIndex!=-1){
+		    	agencyId = lineAsList.get(agencyIdIndex);
+		    	if(lineAsList.get(agencyIdIndex)==null || agencyId.equals("")){
+		    		lineAsList.set(agencyIdIndex, agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
+		    	}else{
+		    		lineAsList.set(agencyIdIndex, agencyId+"_"+username+"_"+feedIndex);
+		    	}
+		    }else{
+		    	lineAsList.add(agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
+		    }
+		    
+		    CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
+		    writer.writeNext(CSVarray);
+		}
+		writer.close();
+		reader.close();
+		inputRoute.delete();
+		outputRoute.renameTo(inputRoute);
+        end csv manipulation feed
+        
+        start zipping
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipF));
+        InputStream in = null;
+        
+        File[] sfiles = folder.listFiles();
+        
+        ZipParameters parameters = new ZipParameters();
+        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
+        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        
+        for(File f: sfiles){
+        	out.putNextEntry(f, parameters);
+        	
+        	in = new FileInputStream(f);
+            byte[] readBuff = new byte[4096];
+            int readLen = -1;
 
+            while ((readLen = in.read(readBuff)) != -1) {
+            	out.write(readBuff, 0, readLen);
+            }
+        	
+            out.closeEntry();
+        	in.close();
+        }
+        out.finish();
+        out.close();
+        FileUtils.deleteDirectory(folder);
+        end zipping
+	    
+		return "done";
+	}  */  
+	
 	@GET
     @Path("/getIndex")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -128,6 +249,400 @@ public class DbUpdate {
 		reader.close();
 		
 		return j+"";
+	}
+	
+	@GET
+    @Path("/userCount")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object userCount(){
+		Connection c = null;
+		Statement statement = null;
+		PDBerror error = new PDBerror();
+		int count=0;
+		error.DBError = "true";
+		try {
+			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			statement = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = statement.executeQuery("select * from users;");
+			rs.last();
+			count = rs.getRow();
+			if ( count>=USER_COUNT ) {
+				error.DBError = "false";
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = "error";
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
+	}
+	
+	@GET
+    @Path("/activateUser")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object activateUser(@QueryParam("key") String key, @QueryParam("user") String username) throws IOException, NoSuchAlgorithmException, UnsupportedEncodingException{
+		String root = new File(".").getAbsolutePath();
+        root = removeLastChar(root);
+        File passFile = new File(root + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+        BufferedReader bf; 
+        String passkey = "";
+        String pass ="";
+        try{
+        	bf = new BufferedReader(new FileReader(passFile));
+            passkey = bf.readLine();
+            
+            byte[] passByte = passkey.getBytes("UTF-8");
+    		MessageDigest md = MessageDigest.getInstance("MD5");
+    		passByte = md.digest(passByte);
+    		pass = new String(passByte, "UTF-8");
+    		bf.close();
+        }catch(IOException e){
+        	e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+        
+        String email="";
+        String lastname="";
+		if(passkey.equals(key)){
+			Connection c = null;
+			Statement statement = null;
+			try {
+				c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+				statement = c.createStatement();
+				statement.executeUpdate("UPDATE users SET active=true WHERE username='"+username+"';");
+				ResultSet rs = statement.executeQuery("select email,lastname from users where username='"+username+"';");
+				if(rs.next()){
+					email = rs.getString("email");
+					lastname = rs.getString("lastname");
+				}
+				
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+			} finally {
+				if (statement != null) try { statement.close(); } catch (SQLException e) {}
+				if (c != null) try { c.close(); } catch (SQLException e) {}
+			}
+		}else{
+			return "exit";
+		}
+		
+		  String to = email;
+	      final String emailUser = "tnatooltech";
+	      final String emailPass = "OSUteam007";
+	      String host = "smtp.gmail.com";
+	
+	      Properties properties = System.getProperties();
+	      properties.put("mail.smtp.host", host); 
+	      properties.put("mail.smtp.user", emailUser);
+	      properties.put("mail.smtp.password", emailPass);
+	      properties.put("mail.smtp.port", "587"); 
+	      properties.put("mail.smtp.auth", "true");  
+	      //properties.put("mail.debug", "true");              
+	      properties.put("mail.smtp.starttls.enable", "true");
+	      //properties.put("mail.smtp.EnableSSL.enable", "true");
+	      
+	      Session session = Session.getInstance(properties,null);
+	      System.out.println("Port: "+session.getProperty("mail.smtp.port"));
+	
+	      Transport trans=null;
+	
+	      try{
+	         MimeMessage message = new MimeMessage(session);
+	         InternetAddress addressFrom = new InternetAddress(emailUser+"@gmail.com");  
+	         message.setFrom(addressFrom);
+	         
+	         InternetAddress[] addressesTo = {new InternetAddress(to)}; 
+	         message.setRecipients(Message.RecipientType.TO, addressesTo);
+	         
+	         Multipart multipart = new MimeMultipart("alternative");
+	         BodyPart messageBodyPart = new MimeBodyPart();
+	         String htmlMessage = lastname+",<br><br>"+"Your GTFS Playground account has been successfully activated!<br>"
+	         		+ "You can now log into the website using your credentials.";
+	         messageBodyPart.setContent(htmlMessage, "text/html");
+	         multipart.addBodyPart(messageBodyPart);
+	         message.setContent(multipart);
+	         
+	         message.setSubject("GTFS Playground Account Activated");
+	         trans = session.getTransport("smtp");
+	         trans.connect(host,emailUser,emailPass);
+	         //message.saveChanges();
+	         trans.sendMessage(message, message.getAllRecipients()); 
+	      }catch (MessagingException mex) {
+	         mex.printStackTrace();
+	      }
+		
+		return "done";
+	}
+	
+	@GET
+    @Path("/validatePass")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object validatePass(@QueryParam("pass") String pass) throws IOException, NoSuchAlgorithmException, UnsupportedEncodingException{
+		String tmpPath = basePath+"TNAtoolAPI-Webapp/WebContent/playground/";
+		File inputFile = new File(tmpPath + "pass.txt");
+	
+		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+		PDBerror b = new PDBerror();
+		String passkey = reader.readLine();
+		if(passkey.equals(pass)){
+			b.DBError = "true";
+		}else{
+			b.DBError = "false";
+		}
+		reader.close();
+		
+		return b;
+	}
+	
+	@GET
+    @Path("/getUserInfo")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getUserInfo(@QueryParam("user") String user){
+		Connection c = null;
+		Statement statement = null;
+		UserInfo userInfo = new UserInfo();
+		try {
+			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("select * from users where username='"+user+"' or email='"+user+"';");
+			if ( rs.next() ) {
+				userInfo.Firstname = rs.getString("firstname");
+				userInfo.Lastname = rs.getString("lastname");
+				userInfo.Username = rs.getString("username");
+				userInfo.Quota = rs.getString("quota");
+				userInfo.Usedspace = rs.getString("usedspace");
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return userInfo;
+	}
+	
+	@GET
+    @Path("/checkUser")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkUser(@QueryParam("user") String user){
+		Connection c = null;
+		PreparedStatement statement = null;
+		PDBerror error = new PDBerror();
+		error.DBError = "false";
+		try {
+			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			statement = c.prepareStatement("select * from users where username=? or email=?;");
+			statement.setString(1, user);
+			statement.setString(2, user);
+			ResultSet rs = statement.executeQuery();
+			if ( rs.next() ) {
+				error.DBError = "true";
+			}else{
+				error.DBError = "false";
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = "error";
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
+	}
+	
+	@GET
+    @Path("/changePublic")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object changePublic(@QueryParam("isPublic") String p, @QueryParam("feedname") String feedname){
+		Connection c = null;
+		Statement statement = null;
+		PDBerror error = new PDBerror();
+		error.DBError = "";
+		try {
+			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			statement = c.createStatement();
+			statement.executeUpdate("UPDATE feeds SET public = '"+p+"' WHERE feedname = '"+feedname+"';");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = "error";
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
+	}
+	
+	@GET
+    @Path("/isActive")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object isActive(@QueryParam("user") String username){
+		Connection c = null;
+		Statement statement = null;
+		PDBerror error = new PDBerror();
+		error.DBError = "false";
+		try {
+			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM users WHERE username = '"+username+"';");
+			if(rs.next()){
+				error.DBError = rs.getString("active");
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = "error";
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
+	}
+	
+	@POST
+    @Path("/uploadfeed")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.MULTIPART_FORM_DATA })
+    public Object uploadFeed(RequestContext request){
+		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+		FileItemFactory factory = new DiskFileItemFactory();
+		ServletFileUpload upload = new ServletFileUpload(factory);
+		try {
+			List<FileItem> items = upload.parseRequest(request);
+			System.out.println(items.size());
+		}catch (FileUploadException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println(request);
+
+		PDBerror error = new PDBerror();
+		
+		
+		return error;
+	}
+	
+	/**
+	 * Changes the playground passkey. Delete this method from the server!!
+	 * @param password
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 */
+	@GET
+    @Path("/makePassKey")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object makePassKey(@QueryParam("pass") String password) 
+    				throws UnsupportedEncodingException, NoSuchAlgorithmException, IOException{
+		
+		byte[] passByte = password.getBytes("UTF-8");
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		passByte = md.digest(passByte);
+		String pass = new String(passByte, "UTF-8");
+		
+		String root = new File(".").getAbsolutePath();
+        root = removeLastChar(root);
+        File passFile = new File(root + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+		BufferedWriter writer = new BufferedWriter(new FileWriter(passFile));
+		
+		writer.write(pass);
+		
+		writer.close();
+		return "";
+	}
+	
+	@GET
+    @Path("/validateUser")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object validateUser(@QueryParam("user") String user, @QueryParam("pass") String password) 
+    				throws UnsupportedEncodingException, NoSuchAlgorithmException{
+		
+		byte[] passByte = password.getBytes("UTF-8");
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		passByte = md.digest(passByte);
+		String pass = new String(passByte, "UTF-8");
+		
+		Connection c = null;
+		PreparedStatement statement = null;
+		PDBerror error = new PDBerror();
+		error.DBError = "false";
+		try {
+			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			statement = c.prepareStatement("SELECT * FROM users WHERE (username = ? or email = ?) and password = ?;");
+			statement.setString(1, user);
+			statement.setString(2, user);
+			statement.setString(3, pass);
+			ResultSet rs = statement.executeQuery();
+			
+			if(rs.next()){
+				error.DBError = rs.getString("username");
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = e.getMessage();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
+	}
+	
+	@GET
+    @Path("/addUser")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object addUser(@QueryParam("user") String user, @QueryParam("pass") String password, @QueryParam("email") String email,
+    		@QueryParam("firstname") String firstname, @QueryParam("lastname") String lastname) 
+    				throws UnsupportedEncodingException, NoSuchAlgorithmException{
+		
+		byte[] passByte = password.getBytes("UTF-8");
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		passByte = md.digest(passByte);
+		String pass = new String(passByte, "UTF-8");
+		
+		Connection c = null;
+		PreparedStatement statement = null;
+		PDBerror error = new PDBerror();
+		error.DBError = "";
+		try {
+			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			statement = c.prepareStatement("INSERT INTO users (username,password,email,firstname,lastname,quota,usedspace,active) "
+					+ "VALUES (?,?,?,?,?,?,?,?);");
+			statement.setString(1, user);
+			statement.setString(2, pass);
+			statement.setString(3, email);
+			statement.setString(4, firstname);
+			statement.setString(5, lastname);
+			statement.setInt(6, QUOTA);
+			statement.setInt(7, 0);
+			statement.setBoolean(8, false);
+			statement.executeUpdate();
+			error.DBError = "true";
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = e.getMessage();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
 	}
 	
 	@GET
@@ -464,21 +979,21 @@ public class DbUpdate {
 									{"gtfs_stop_service_map","agencyid_def"},
 									{"gtfs_route_serviceid_map","agencyid_def"},
 									{"gtfs_stop_route_map","agencyid_def"},
-									{"gtfs_calendar_dates","serviceid_agencyid"},
-									{"gtfs_calendars","serviceid_agencyid"},
 									{"gtfs_frequencies","defaultid"},
 									{"gtfs_pathways","agencyid"},
 									{"gtfs_shape_points","shapeid_agencyid"},
 									{"gtfs_stop_times","stop_agencyid"},
 									{"gtfs_transfers","defaultid"},
-									{"gtfs_trips","serviceid_agencyid"},
-									{"gtfs_stops","agencyid"},
-									{"gtfs_routes","defaultid"},
-									{"gtfs_agencies","defaultid"},
 									{"tempstopcodes","agencyid"},
 									{"tempetriptimes","agencyid"},
 									{"tempestshapes","agencyid"},
 									{"tempshapes","agencyid"},
+									{"gtfs_trips","serviceid_agencyid"},
+									{"gtfs_calendar_dates","serviceid_agencyid"},
+									{"gtfs_calendars","serviceid_agencyid"},
+									{"gtfs_stops","agencyid"},
+									{"gtfs_routes","defaultid"},
+									{"gtfs_agencies","defaultid"},
 									{"gtfs_feed_info","defaultid"}};
 		
 		try {
@@ -497,6 +1012,7 @@ public class DbUpdate {
 			agencyIdList = agencyIds.split(",");
 			
 			for(int i=0;i<defAgencyIds.length;i++){
+				System.out.println(defAgencyIds[i][0]);
 				try{
 					if(defAgencyIds[i][0].startsWith("temp")){
 						statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+sqlString(agencyIdList,defAgencyIds[i][1])+"';");
@@ -509,8 +1025,9 @@ public class DbUpdate {
 					System.out.println(e.getMessage());
 				}
 			}
+			/*System.out.println("start");
 			statement.executeUpdate("VACUUM FULL ANALYZE");
-			
+			System.out.println("finish");*/
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			
@@ -663,11 +1180,13 @@ public class DbUpdate {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			
 			statement = c.createStatement();
-			rs = statement.executeQuery("SELECT feedname, agencynames FROM gtfs_feed_info;");
+			rs = statement.executeQuery("SELECT * FROM gtfs_feed_info;");
 			
 			while ( rs.next() ) {
 				fn.feeds.add(rs.getString("feedname"));
 				fn.names.add(rs.getString("agencynames"));
+				fn.startdates.add(rs.getString("startdate"));
+				fn.enddates.add(rs.getString("enddate"));
 			}
 			
 		} catch (SQLException e) {
@@ -688,6 +1207,37 @@ public class DbUpdate {
 	    	return error;
 	    }
 	   
+	}    
+	
+	@GET
+    @Path("/selectedFeeds")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object selectedFeeds(@QueryParam("feeds") String feed, @QueryParam("username") String username){
+		
+		String[] feeds = feed.split(",");
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		try {
+			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			statement = c.createStatement();
+			statement.executeUpdate("DELETE FROM selected_feeds WHERE username = '"+username+"';");
+					
+			for(String f: feeds){
+				statement.executeUpdate("INSERT INTO selected_feeds (username,feedname) "
+						+ "VALUES ('"+username+"','"+f+"');");
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+	    
+	   return "done";
 	}    
 	
 	@GET

@@ -494,9 +494,8 @@ function dispronmap(k,d,name,node){
 	var polyline = L.Polyline.fromEncoded(d.points, {	
 		weight: 5,
 		color: colorset[k],
-		smoothFactor: 10,
 		opacity: .5,
-		smoothFactor: 1
+		smoothFactor: 9
 		});	
 		polyline.bindPopup('<b>Agency ID:</b> '+d.agency+'<br><b>Trip Name:</b> '+d.headSign);
 		polyline._leaflet_id = name;	

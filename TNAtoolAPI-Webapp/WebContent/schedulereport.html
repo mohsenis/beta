@@ -70,7 +70,22 @@ $(document).ready(function(){
 		heightStyle: "content"
 	});
 	$("#accordion").accordion("refresh");
-	$("#accordion > h3").html(w_qstringd);
+	
+	//check if the selected date is within the agency's start and end date.
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/agencyCalendarRange?&dbindex='+dbindex+'&agency='+w_qstring,
+		async: false,
+		success: function(d){
+			startDate = d.Startdate;
+			endDate = d.Enddate;
+		}			
+	});
+	if(!(startDate<=dateToString(w_qstringd)) || !(dateToString(w_qstringd)<=endDate)){
+		w_qstringd=stringToDate(endDate);
+	}
+	//*****************//
 	
 	$( "#datepicker" ).datepicker({
 		altField: "#alternate",
@@ -81,6 +96,7 @@ $(document).ready(function(){
 			reload();
 	    }
 	});
+	$("#accordion > h3").html("Date selected: "+w_qstringd+"<span style='margin-left:3em;font-size:80%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>");
 	$( "#datepicker" ).datepicker( "setDate", w_qstringd );
 	$('.ui-datepicker').css("margin", "auto");
 	$( "#progressbar" ).progressbar({
@@ -402,12 +418,12 @@ function dbchange(){
 		
 		<table id="controls">
 			<tr>
-			  <td id="td1">
+			  <td id="td1" style="width:40%">
 			  	<div class="headerBL"  >
 				<h2 style="margin:0px;"></h2>
 				</div>
 			  </td>
-			  <td id="td2" style="width:15%"> 
+			  <td id="td2" style="width:40%"> 
 			  	<div class="headerBC" id="accordion" >
 					<h3></h3>
 					<div>

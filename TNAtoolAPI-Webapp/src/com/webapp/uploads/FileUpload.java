@@ -1,0 +1,883 @@
+package com.webapp.uploads;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Random;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.mail.*;
+import javax.mail.internet.*;
+import javax.activation.*;
+
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.io.ZipOutputStream;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
+
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+
+import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webapp.api.model.FeedNames;
+import com.webapp.api.model.FileMeta;
+import com.webapp.api.model.PDBerror;
+import com.webapp.api.model.TransitError;
+
+
+
+/**
+ * Servlet implementation class FileUpload
+ */
+@MultipartConfig
+public class FileUpload extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	private static final String dbURL = "jdbc:postgresql://localhost:5432/playground";
+	private static final String dbUSER = "postgres";
+	private static final String dbPASS = "123123";
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public FileUpload() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		
+		response.setContentType("application/json");
+	    PrintWriter out = response.getWriter();
+	    JSONObject obj = new JSONObject();
+	    
+	    String username = request.getParameter("username");
+		String feedDel = request.getParameter("feedname");
+		String listName = request.getParameter("list");
+		String sessionUser = request.getParameter("sessionUser");
+		String email = request.getParameter("email");
+		String firstname = request.getParameter("firstname");
+		String lastname = request.getParameter("lastname");
+		
+		/*if(falsesessionUser!=null){
+			HttpSession session = request.getSession();
+            session.setAttribute("username", sessionUser);
+            session.setMaxInactiveInterval(10*60);
+            Cookie userName = new Cookie("username", sessionUser);
+            userName.setMaxAge(30*60);
+            userName.
+            response.addCookie(userName);
+            try {
+	    		obj.put("names", fn.names);
+	    		out.print(obj);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+            
+		}else */if(email!=null){
+		      String to = email;
+		      final String emailUser = "tnatooltech";
+		      final String emailPass = "OSUteam007";
+		      String host = "smtp.gmail.com";
+		 
+		      Properties properties = System.getProperties();
+		      properties.put("mail.smtp.host", host); 
+		      properties.put("mail.smtp.user", emailUser);
+		      properties.put("mail.smtp.password", emailPass);
+		      properties.put("mail.smtp.port", "587"); 
+		      properties.put("mail.smtp.auth", "true");  
+		      //properties.put("mail.debug", "true");              
+		      properties.put("mail.smtp.starttls.enable", "true");
+		      //properties.put("mail.smtp.EnableSSL.enable", "true");
+		      
+		      Session session = Session.getInstance(properties,null);
+		      System.out.println("Port: "+session.getProperty("mail.smtp.port"));
+
+		      Transport trans=null;
+		      response.setContentType("text/html");
+
+		      try{
+		         MimeMessage message = new MimeMessage(session);
+		         InternetAddress addressFrom = new InternetAddress(emailUser+"@gmail.com");  
+		         message.setFrom(addressFrom);
+		         
+		         InternetAddress[] addressesTo = {/*new InternetAddress(to),*/ new InternetAddress(emailUser+"@gmail.com")}; 
+		         message.setRecipients(Message.RecipientType.TO, addressesTo);
+		         
+		         Multipart multipart = new MimeMultipart("alternative");
+		         BodyPart messageBodyPart = new MimeBodyPart();
+		         String htmlMessage = setMessage(username, email, firstname, lastname);
+		         messageBodyPart.setContent(htmlMessage, "text/html");
+		         multipart.addBodyPart(messageBodyPart);
+		         message.setContent(multipart);
+		         
+		         message.setSubject("New GTFS Playground User Account Confirmation ("+username+")");
+		         trans = session.getTransport("smtp");
+		         trans.connect(host,emailUser,emailPass);
+		         //message.saveChanges();
+		         trans.sendMessage(message, message.getAllRecipients()); 
+		      }catch (MessagingException mex) {
+		         mex.printStackTrace();
+		      }
+		}else if(listName!=null){
+			FeedNames fn = new FeedNames();
+			
+			Boolean b = true;
+			try {
+				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+				
+				statement = c.createStatement();
+				rs = statement.executeQuery("SELECT feedname, agencynames FROM gtfs_feed_info "
+						+ "where feedname not in "
+						+ "(select feedname from feeds)");
+				
+				while ( rs.next() ) {
+					fn.feeds.add(rs.getString("feedname"));
+					fn.names.add(rs.getString("agencynames"));
+				}
+				b=true;
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+				
+			} finally {
+				if (rs != null) try { rs.close(); } catch (SQLException e) {}
+				if (statement != null) try { statement.close(); } catch (SQLException e) {}
+				if (c != null) try { c.close(); } catch (SQLException e) {}
+			}
+			
+	    	try {
+	    		if(b){
+	    			obj.put("names", fn.names);
+					obj.put("feeds", fn.feeds);
+	    		}else{
+	    			obj.put("DBError", "");
+	    		}
+	    		out.print(obj);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}else if(username==null){
+			FeedNames fn = new FeedNames();
+			
+			Boolean b = true;
+			try {
+				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+				
+				statement = c.createStatement();
+				rs = statement.executeQuery("SELECT feeds.username, feeds.feedname, agencynames, firstname, lastname FROM gtfs_feed_info "
+						+ "JOIN feeds "
+						+ "ON gtfs_feed_info.feedname=feeds.feedname "
+						+ "JOIN users "
+						+ "On feeds.username=users.username "
+						+ "where public = 't';");
+				
+				while ( rs.next() ) {
+					fn.ownerUsername.add(rs.getString("username"));
+					fn.feeds.add(rs.getString("feedname"));
+					fn.names.add(rs.getString("agencynames"));
+					fn.ownerFirstname.add(rs.getString("firstname"));
+					fn.ownerLastname.add(rs.getString("lastname"));
+				}
+				b=true;
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+				
+			} finally {
+				if (rs != null) try { rs.close(); } catch (SQLException e) {}
+				if (statement != null) try { statement.close(); } catch (SQLException e) {}
+				if (c != null) try { c.close(); } catch (SQLException e) {}
+			}
+			
+	    	try {
+	    		if(b){
+	    			obj.put("names", fn.names);
+					obj.put("feeds", fn.feeds);
+					obj.put("ownerFirstname", fn.ownerFirstname);
+					obj.put("ownerLastname", fn.ownerLastname);
+					obj.put("ownerUsername", fn.ownerUsername);
+	    		}else{
+	    			obj.put("DBError", "");
+	    		}
+	    		out.print(obj);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}else if(feedDel!=null){
+			String agencyId = "";
+			String agencyIds = "";
+			String[] agencyIdList;
+			
+			String root = new File(".").getAbsolutePath();
+            root = removeLastChar(root)+getServletContext().getContextPath();
+            File path = new File(root + "/WebContent/playground/upload/uploaded/"+username);
+            File uploadedFile = new File(path + "/" + feedDel + ".zip");
+             
+			
+			String[][] defAgencyIds  = {{"census_congdists_trip_map","agencyid_def"},
+										{"census_places_trip_map","agencyid_def"},
+										{"census_urbans_trip_map","agencyid_def"},
+										{"census_counties_trip_map","agencyid_def"},
+										{"census_tracts_trip_map","agencyid_def"},
+										{"gtfs_fare_rules","fare_agencyid"},
+										{"gtfs_fare_attributes","agencyid"},
+										{"gtfs_stop_service_map","agencyid_def"},
+										{"gtfs_route_serviceid_map","agencyid_def"},
+										{"gtfs_stop_route_map","agencyid_def"},
+										{"gtfs_frequencies","defaultid"},
+										{"gtfs_pathways","agencyid"},
+										{"gtfs_shape_points","shapeid_agencyid"},
+										{"gtfs_stop_times","stop_agencyid"},
+										{"gtfs_transfers","defaultid"},
+										{"tempstopcodes","agencyid"},
+										{"tempetriptimes","agencyid"},
+										{"tempestshapes","agencyid"},
+										{"tempshapes","agencyid"},
+										{"gtfs_trips","serviceid_agencyid"},
+										{"gtfs_calendar_dates","serviceid_agencyid"},
+										{"gtfs_calendars","serviceid_agencyid"},
+										{"gtfs_stops","agencyid"},
+										{"gtfs_routes","defaultid"},
+										{"gtfs_agencies","defaultid"},
+										{"gtfs_feed_info","defaultid"}};
+			
+			try {
+				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+				statement = c.createStatement();
+				
+				statement.executeUpdate("DELETE FROM feeds WHERE feedname = '"+feedDel+"';");
+				updateQuota(username);
+				
+				rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info where feedname = '"+feedDel+"';");
+				if ( rs.next() ) {
+					agencyId = rs.getString("defaultid");
+				}
+				
+				rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname = '"+feedDel+"';");
+				if ( rs.next() ) {
+					agencyIds = rs.getString("agencyids");
+				}
+				agencyIdList = agencyIds.split(",");
+				
+				for(int i=0;i<defAgencyIds.length;i++){
+					System.out.println(defAgencyIds[i][0]);
+					try{
+						if(defAgencyIds[i][0].startsWith("temp")){
+							statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+sqlString(agencyIdList,defAgencyIds[i][1])+"';");
+							
+						}else{
+							statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+defAgencyIds[i][1]+"='"+agencyId+"';");
+						}
+						
+					}catch (SQLException e) {
+						System.out.println(e.getMessage());
+					}
+				}
+				
+				uploadedFile.delete();
+				/*System.out.println("start");
+				statement.executeUpdate("VACUUM FULL ANALYZE");
+				System.out.println("finish");*/
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+				
+			} finally {
+				if (rs != null) try { rs.close(); } catch (SQLException e) {}
+				if (statement != null) try { statement.close(); } catch (SQLException e) {}
+				if (c != null) try { c.close(); } catch (SQLException e) {}
+			}
+			try {
+				obj.put("DBError", "");
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			out.print(obj);
+		}else{
+			FeedNames fn = new FeedNames();
+			
+			Boolean b = true;
+			try {
+				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+				
+				statement = c.createStatement();
+				rs = statement.executeQuery("SELECT feeds.feedname, agencynames, public "
+						+ "FROM gtfs_feed_info JOIN feeds "
+						+ "ON gtfs_feed_info.feedname=feeds.feedname "
+						+ "where username = '"+username+"';");
+				
+				while ( rs.next() ) {
+					fn.feeds.add(rs.getString("feedname"));
+					fn.names.add(rs.getString("agencynames"));
+					fn.isPublic.add(rs.getString("public"));
+				}
+				b=true;
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+				
+			} finally {
+				if (rs != null) try { rs.close(); } catch (SQLException e) {}
+				if (statement != null) try { statement.close(); } catch (SQLException e) {}
+				if (c != null) try { c.close(); } catch (SQLException e) {}
+			}
+			
+	    	try {
+	    		if(b){
+	    			obj.put("names", fn.names);
+					obj.put("feeds", fn.feeds);
+					obj.put("isPublic", fn.isPublic);
+	    		}else{
+	    			obj.put("DBError", "");
+	    		}
+	    		out.print(obj);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	    out.flush();
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setContentType("application/json");
+	    PrintWriter out = response.getWriter();
+	    JSONArray json = new JSONArray();
+	    JSONObject rs = new JSONObject();
+		String feed = "";
+		String error = "";
+		String username = "";
+		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+	    
+        if (isMultipart) {
+	         // Create a factory for disk-based file items
+	        FileItemFactory factory = new DiskFileItemFactory();
+	
+	         // Create a new file upload handler
+	        ServletFileUpload upload = new ServletFileUpload(factory);
+	 
+	        try {
+	             // Parse the request
+		        List<FileItem> items = upload.parseRequest(new ServletRequestContext(request));
+		        
+		        for(FileItem item: items){
+		        	if (item.isFormField()) {
+		        		username = item.getString();
+		        	}
+		        }
+		        
+		        for(FileItem item: items){
+		            if (!item.isFormField()) {
+		                String fileName = item.getName();
+		                fileName=changeFeedName(fileName, username);
+		                String root = new File(".").getAbsolutePath();
+		                root = removeLastChar(root)+getServletContext().getContextPath();
+		                //root = root.replace('\\', '/');
+		                File path = new File(root + "/WebContent/playground/upload/uploaded/"+username);
+		                if (!path.exists()) {
+		                	boolean status = path.mkdirs();
+		                }
+		                File uploadedFile = new File(path + "/" + fileName);
+		                feed = uploadedFile.getAbsolutePath();
+		                item.write(uploadedFile);
+		                
+		                changeCSV(feed, username);
+		                
+		                JSONObject jsono = new JSONObject();
+                        jsono.put("name", fileName);
+                        jsono.put("size", item.getSize());
+                        jsono.put("url", "upload?getfile=" + fileName);
+                        jsono.put("thumbnail_url", "upload?getthumb=" + fileName);
+                        jsono.put("delete_url", "upload?delfile=" + fileName);
+                        jsono.put("delete_type", "GET");
+                        json.put(jsono);
+                        
+		                error = addFeed(feed, fileName, item.getSize(),username);
+		                System.out.println(error);
+		                
+		                //uploadedFile.delete();
+		            }
+		        }
+	        } catch (FileUploadException e) {
+	        	e.printStackTrace();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        } 
+	        
+	        updateQuota(username);
+	        
+	        try {
+				rs.put("files", json);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			out.print(rs);
+			out.flush();
+			out.close();
+			
+	        error = updateFeeds();
+            System.out.println(error);
+        }
+	}
+	
+	public String setMessage(String username, String email, String firstname, String lastname){
+		String message = "The following user has recently registered in the GTFS Playground website<br><br>"
+				+ "FIRST NAME: "+firstname+"<br>"
+				+ "LAST NAME: "+lastname+"<br>"
+				+ "EMAIL ADDRESS: "+email+"<br><br><br><br>";
+		
+		String root = new File(".").getAbsolutePath();
+        root = removeLastChar(root);
+        File passFile = new File(root + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+        BufferedReader bf; 
+        String passkey="";
+        String pass ="";
+        try{
+        	bf = new BufferedReader(new FileReader(passFile));
+            passkey = bf.readLine();
+            
+            byte[] passByte = passkey.getBytes("UTF-8");
+    		MessageDigest md = MessageDigest.getInstance("MD5");
+    		passByte = md.digest(passByte);
+    		pass = new String(passByte, "UTF-8");
+    		bf.close();
+        }catch(IOException e){
+        	e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+        
+		String activate = "http://localhost:8080/TNAtoolAPI-Webapp/modifiers/dbupdate/activateUser?&key="+passkey+"&user="+username;
+		message += "Click on the following link to activate the account:<br><br>"+activate+"<br><br><br><br>";
+		String deny = "http://localhost:8080/TNAtoolAPI-Webapp/modifiers/dbupdate/denyUser?&key="+pass+"&user="+username;
+		message += "Click on the following link to deny the account's activation:<br><br>"+deny;
+		
+		return message;
+	}
+	
+	public String changeFeedName(String feedName, String username){
+		String newName="";
+		int index = 0;
+		
+		for(int i=0;i<4;i++){
+			feedName = removeLastChar(feedName);
+		}
+		
+		Connection c = null;
+		Statement statement = null;
+		List<String> names = new ArrayList<String>();
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT feedname FROM gtfs_feed_info INNER JOIN feeds "
+					+ "ON gtfs_feed_info.feedname=feeds.feedname "
+					+ "WHERE feeds.username='"+username+"';");
+			while ( rs.next() ) {
+				names.add(rs.getString("feedname"));
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		while(true){
+			newName = feedName+"-"+index;
+			if(names.contains(newName)){
+				index++;
+			}else{
+				break;
+			}
+		}
+		
+		return newName+".zip";
+	}
+	
+	public String addFeed(String feed, String feedName, long fileSize, String username) throws IOException{
+		String [] args = new String[5];
+		for(int i=0;i<4;i++){
+			feedName = removeLastChar(feedName);
+		}
+		
+		args[0] = "--driverClass=\"org.postgresql.Driver\"";
+		args[1] = "--url=\""+dbURL+"\"";
+		args[2] = "--username=\""+dbUSER+"\"";
+		args[3] = "--password=\""+dbPASS+"\"";
+		args[4] = feed;
+		
+		boolean b = true;
+		try{
+			GtfsDatabaseLoaderMain.main(args);
+			b = false;
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		if(b){
+			return "Upload unsuccessful";
+		}
+		
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		String defaultId = "";
+		String agencyNames = "";
+		String agencyIds = "";
+		
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			
+			statement = c.createStatement();
+			rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where defaultid IS NULL;");
+			if ( rs.next() ) {
+				String tmpAgencyId = rs.getString("id");
+				rs = statement.executeQuery("SELECT * FROM gtfs_routes where agencyid = '"+tmpAgencyId+"' limit 1;");
+				if ( rs.next() ) {
+					defaultId = rs.getString("defaultid");
+				}
+				statement.executeUpdate("UPDATE gtfs_agencies SET defaultid = '"+defaultId+"' WHERE defaultid IS NULL;");
+			}
+			
+			rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where added IS NULL;");
+			
+			while ( rs.next() ) {
+				defaultId = rs.getString("defaultid");
+				agencyNames += rs.getString("name")+",";
+				agencyIds += rs.getString("id")+",";
+			}
+			agencyNames = removeLastChar(agencyNames);
+			agencyIds = removeLastChar(agencyIds);
+			statement.executeUpdate("UPDATE gtfs_agencies SET added='added' WHERE added IS NULL;");
+			
+			rs = statement.executeQuery("SELECT * FROM gtfs_feed_info Where defaultid = '"+defaultId+"';");
+			if (!rs.next() ){
+				rs = statement.executeQuery("SELECT gid FROM gtfs_feed_info;");
+				List<String> ids = new ArrayList<String>();
+				while ( rs.next() ) {
+					ids.add(rs.getString("gid"));
+				}
+				int gid;
+				int Low = 10000;
+				int High = 99999;
+				do {
+					Random r = new Random();
+					gid = r.nextInt(High-Low) + Low;
+				} while (ids.contains(Integer.toString(gid)));
+				String sql = "INSERT INTO gtfs_feed_info "+
+							 "(gid,publishername,publisherurl,lang,startdate,enddate,version,defaultid,agencyids,agencynames,feedname) "+
+							 "VALUES ("+Integer.toString(gid)+",'N/A','N/A','N/A','N/A','N/A','N/A','"+defaultId+"','"+agencyIds+"','"+agencyNames+"','"+feedName+"')";
+				statement.executeUpdate(sql);
+			}else{
+				statement.executeUpdate("UPDATE gtfs_feed_info SET feedname = '"+feedName+"' WHERE defaultid = '"+defaultId+"';");
+			}
+			statement.executeUpdate("INSERT INTO feeds (feedname,username,public,feedsize) "
+					+ "VALUES ('"+feedName+"','"+username+"',FALSE,'"+fileSize+"');");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return "Feed added";
+	}
+	
+	public void changeCSV(String feed, String username) throws IOException, ZipException{
+		String path=feed;
+		for(int j=0;j<4;j++){
+			path = removeLastChar(path); 
+		}
+		
+		int feedIndex = 0;
+		
+		/*start unzipping*/
+		File zipF = new File(path+".zip");
+		ZipFile zipFile = new ZipFile(zipF);
+		File folder = new File(path);
+        zipFile.extractAll(path);
+        zipF.delete();
+        /*end unzipping*/
+        
+        /*start csv manipulation of feed's name, agency id, and agency name*/
+        File input = new File(path+"/agency.txt");
+        File output = new File(path+"/agencyTmp.txt");
+		CSVReader reader = new CSVReader(new FileReader(input));
+		CSVWriter writer = new CSVWriter(new FileWriter(path+"/agencyTmp.txt"), ',', CSVWriter.NO_QUOTE_CHARACTER);
+		String [] nextLine;
+		
+		int agencyIdIndex=-1;
+		String agencyId="";
+		String agnecyName="";
+		int agencyNameIndex=-1;
+		List<String> lineAsList = new ArrayList<String>(Arrays.asList(reader.readNext()));
+		for(String s: lineAsList){
+			if(s.equals("agency_id") || s.equals("\"agency_id\"")){
+	    		agencyIdIndex = lineAsList.indexOf(s);
+	    	}else if(s.equals("agency_name") || s.equals("\"agency_name\"")){
+	    		agencyNameIndex = lineAsList.indexOf(s);
+	    	}
+		}
+		if(agencyIdIndex==-1){
+			lineAsList.add("agency_id");
+		}
+		
+		String[] CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
+	    writer.writeNext(CSVarray);
+		
+		while ((nextLine = reader.readNext()) != null) {
+		    lineAsList = new ArrayList<String>(Arrays.asList(nextLine));
+		    agnecyName = lineAsList.get(agencyNameIndex);
+		    
+		    if(agencyIdIndex!=-1){
+		    	agencyId = lineAsList.get(agencyIdIndex);
+		    	if(lineAsList.get(agencyIdIndex)==null || agencyId.equals("")){
+		    		feedIndex = getFeedIndex(agnecyName, username);
+		    		lineAsList.set(agencyIdIndex, agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
+		    	}else{
+		    		feedIndex = getFeedIndex(agencyId, username);
+		    		lineAsList.set(agencyIdIndex, agencyId+"_"+username+"_"+feedIndex);
+		    	}
+		    }else{
+		    	feedIndex = getFeedIndex(agnecyName, username);
+		    	lineAsList.add(agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
+		    }
+		    
+		    CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
+		    writer.writeNext(CSVarray);
+		}
+		writer.close();
+		reader.close();
+		input.delete();
+		output.renameTo(input);
+		
+		//Agency id modification in routes.txt
+		File inputRoute = new File(path+"/routes.txt");
+        File outputRoute = new File(path+"/routesTmp.txt");
+		reader = new CSVReader(new FileReader(inputRoute));
+		writer = new CSVWriter(new FileWriter(path+"/routesTmp.txt"), ',', CSVWriter.NO_QUOTE_CHARACTER);
+		
+		lineAsList = new ArrayList<String>(Arrays.asList(reader.readNext()));
+		for(String s: lineAsList){
+	    	if(s.equals("agency_id") || s.equals("\"agency_id\"")){
+	    		agencyIdIndex = lineAsList.indexOf(s);
+	    	}
+		}
+		if(agencyIdIndex==-1){
+			lineAsList.add("agency_id");
+		}
+		
+		CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
+	    writer.writeNext(CSVarray);
+	    
+	    while ((nextLine = reader.readNext()) != null) {
+		    lineAsList = new ArrayList<String>(Arrays.asList(nextLine));
+		    
+		    if(agencyIdIndex!=-1){
+		    	agencyId = lineAsList.get(agencyIdIndex);
+		    	if(lineAsList.get(agencyIdIndex)==null || agencyId.equals("")){
+		    		lineAsList.set(agencyIdIndex, agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
+		    	}else{
+		    		lineAsList.set(agencyIdIndex, agencyId+"_"+username+"_"+feedIndex);
+		    	}
+		    }else{
+		    	lineAsList.add(agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
+		    }
+		    
+		    CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
+		    writer.writeNext(CSVarray);
+		}
+		writer.close();
+		reader.close();
+		inputRoute.delete();
+		outputRoute.renameTo(inputRoute);
+        /*end csv manipulation feed*/
+        
+        /*start zipping*/
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipF));
+        InputStream in = null;
+        
+        File[] sfiles = folder.listFiles();
+        
+        ZipParameters parameters = new ZipParameters();
+        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
+        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        
+        for(File f: sfiles){
+        	out.putNextEntry(f, parameters);
+        	
+        	in = new FileInputStream(f);
+            byte[] readBuff = new byte[4096];
+            int readLen = -1;
+
+            while ((readLen = in.read(readBuff)) != -1) {
+            	out.write(readBuff, 0, readLen);
+            }
+        	
+            out.closeEntry();
+        	in.close();
+        }
+        out.finish();
+        out.close();
+        FileUtils.deleteDirectory(folder);
+        /*end zipping*/
+	}
+	
+	public int getFeedIndex(String agencyId, String username){
+		int index =0;
+		
+		Connection c = null;
+		Statement statement = null;
+		List<String> feedNames = new ArrayList<String>();
+		List<String> names;
+		String name;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info INNER JOIN feeds "
+					+ "ON gtfs_feed_info.feedname=feeds.feedname "
+					+ "WHERE feeds.username='"+username+"';");
+			while ( rs.next() ) {
+				names = Arrays.asList(rs.getString("agencyids").split(","));
+				feedNames.addAll(names);
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		while(true){
+			name = agencyId.replace(' ', '-')+"_"+username+"_"+index;
+			if(feedNames.contains(name)){
+				index++;
+			}else{
+				break;
+			}
+		}
+		
+		return index;
+	}
+	
+	public void updateQuota(String username){
+		Connection c = null;
+		Statement statement = null;
+		String usedspace="";
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT SUM(feedsize) FROM feeds where username = '"+username+"';");
+			if ( rs.next() ) {
+				usedspace = rs.getString("sum");
+			}
+			if(usedspace==null || usedspace.equals("")){
+				usedspace = 0+"";
+			}
+			
+			statement.executeUpdate("UPDATE users SET usedspace='"+usedspace+"' WHERE username='"+username+"';");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+	}
+	
+	public String updateFeeds(){
+		String basePath = "C:/Users/Administrator/git/TNAsoftware/";
+		String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
+		Process pr;
+		ProcessBuilder pb;
+		String[] dbname = dbURL.split("/");
+		String name = dbname[dbname.length-1];
+		
+		try {
+			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/dbUpdate.bat", dbPASS, dbUSER, name,
+					psqlPath+"psql.exe",
+					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
+			pb.redirectErrorStream(true);
+			pr = pb.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return "Feed updated";
+	}
+  	
+	public String removeLastChar(String str) {
+    	if (str.length() > 0) {
+            str = str.substring(0, str.length()-1);
+        }
+        return str;
+    }
+	
+	public String sqlString(String[] ids, String column){
+		String sql = "";
+		for(int i=0;i<ids.length-1;i++){
+			sql += column+" = '"+ids[i]+"' OR ";
+		}
+		sql += column+" = '"+ids[ids.length-1];
+		return sql;
+	}
+
+}

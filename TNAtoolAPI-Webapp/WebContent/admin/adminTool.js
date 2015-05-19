@@ -72,7 +72,7 @@ function addModifyDB(j, index){
 	    var oldURL = info[4];
 	    var olddbname = info[1];
 	    if (!regex.test(db)) {
-	       alert("The \"Name\" under the \"Connection URL\" can only accept lower-case letters, digits, and underscore, starting with a letter.");
+	       alert("The \"Name\" under the \"Connection URL\" can only accept lower-case letters, digits, and underscores, starting with a letter.");
 	       return;
 	    }
 	    $.ajax({
@@ -147,6 +147,17 @@ function addDB(){
 	} 
 }
 
+function stringToDate(str){
+	if(str==null){
+		return "";
+	}
+	var sArr = new Array();
+	sArr.push(str.substring(4, 6));
+	sArr.push(str.substring(6, 8));
+	sArr.push(str.substring(0, 4));
+	return sArr.join("/");
+}
+
 function listOfAgencies(index){
 	var db = dbInfo[index].toString();
 	var indexx = 1001+index;
@@ -168,11 +179,12 @@ function listOfAgencies(index){
 	        	$.each(d.feeds, function(i,item){
 	        		if(d.names[i]!=null){
 		        		var agencynames = d.names[i].split(",");
-		        		var html1 = "";
+		        		var html1 = "<br><span style='margin-left:3.5em'>Agencie(s):</span>";
 		        		for(var k=0; k<agencynames.length; k++){
 		        			html1 += "<br><span style='margin-left:6em'>"+agencynames[k]+"<span>";
 		        		}
-		        		html += "<p><input type='checkbox' class='selectFeed"+indexx+"' id='"+item+"' style='margin-right:2em'><span>"+item+"</span>"+html1+"</p>";
+		        		html += "<p><input type='checkbox' class='selectFeed"+indexx+"' id='"+item+"' ><span style='margin-left:2em'>"+item+"</span>"
+		        		+"<br><span style='margin-left:3.5em'>Start Date: "+stringToDate(d.startdates[i])+"</span>"+"<br><span style='margin-left:3.5em'>End Date: "+stringToDate(d.enddates[i])+"</span>"+html1+"</p>";
 	        		}
 	        	});
 	        	html += "<br><input type='button' value='Delete feeds from database' onclick='deleteFeed("+index+")'>";
@@ -231,7 +243,6 @@ function deleteFeed(index){
 	        dataType: "json",
 	        async: false,
 	        success: function(d) {
-	        	alert(d.DBError);
 	        }
 		});
 	}
