@@ -286,9 +286,9 @@ public class DbUpdate {
     @Path("/activateUser")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object activateUser(@QueryParam("key") String key, @QueryParam("user") String username) throws IOException, NoSuchAlgorithmException, UnsupportedEncodingException{
-		String root = new File(".").getAbsolutePath();
-        root = removeLastChar(root);
-        File passFile = new File(root + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+		/*String root = new File(".").getAbsolutePath();
+        root = removeLastChar(root);*/
+        File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
         BufferedReader bf; 
         String passkey = "";
         String pass ="";
@@ -553,9 +553,9 @@ public class DbUpdate {
 		passByte = md.digest(passByte);
 		String pass = new String(passByte, "UTF-8");
 		
-		String root = new File(".").getAbsolutePath();
-        root = removeLastChar(root);
-        File passFile = new File(root + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+		/*String root = new File(".").getAbsolutePath();
+        root = removeLastChar(root);*/
+        File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
 		BufferedWriter writer = new BufferedWriter(new FileWriter(passFile));
 		
 		writer.write(pass);

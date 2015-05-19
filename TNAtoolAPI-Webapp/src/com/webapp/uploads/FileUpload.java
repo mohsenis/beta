@@ -76,6 +76,8 @@ import com.webapp.api.model.TransitError;
  */
 @MultipartConfig
 public class FileUpload extends HttpServlet {
+	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
+	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private static final long serialVersionUID = 1L;
 	private static final String dbURL = "jdbc:postgresql://localhost:5432/playground";
 	private static final String dbUSER = "postgres";
@@ -256,9 +258,9 @@ public class FileUpload extends HttpServlet {
 			String agencyIds = "";
 			String[] agencyIdList;
 			
-			String root = new File(".").getAbsolutePath();
-            root = removeLastChar(root)+getServletContext().getContextPath();
-            File path = new File(root + "/WebContent/playground/upload/uploaded/"+username);
+			/*String root = new File(".").getAbsolutePath();
+            root = removeLastChar(root)+getServletContext().getContextPath();*/
+            File path = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/upload/uploaded/"+username);
             File uploadedFile = new File(path + "/" + feedDel + ".zip");
              
 			
@@ -419,10 +421,10 @@ public class FileUpload extends HttpServlet {
 		            if (!item.isFormField()) {
 		                String fileName = item.getName();
 		                fileName=changeFeedName(fileName, username);
-		                String root = new File(".").getAbsolutePath();
-		                root = removeLastChar(root)+getServletContext().getContextPath();
+		                /*String root = new File(".").getAbsolutePath();
+		                root = removeLastChar(root)+getServletContext().getContextPath();*/
 		                //root = root.replace('\\', '/');
-		                File path = new File(root + "/WebContent/playground/upload/uploaded/"+username);
+		                File path = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/upload/uploaded/"+username);
 		                if (!path.exists()) {
 		                	boolean status = path.mkdirs();
 		                }
@@ -475,9 +477,9 @@ public class FileUpload extends HttpServlet {
 				+ "LAST NAME: "+lastname+"<br>"
 				+ "EMAIL ADDRESS: "+email+"<br><br><br><br>";
 		
-		String root = new File(".").getAbsolutePath();
-        root = removeLastChar(root);
-        File passFile = new File(root + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+		/*String root = new File(".").getAbsolutePath();
+        root = removeLastChar(root);*/
+        File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
         BufferedReader bf; 
         String passkey="";
         String pass ="";
