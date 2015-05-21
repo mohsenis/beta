@@ -92,146 +92,45 @@ public class DbUpdate {
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
 	
+	public static List<String> getSelectedAgencies(String username){
+		List<String> selectedAgencies = new ArrayList<String>();
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
+					+ "JOIN selected_feeds "
+					+ "ON gtfs_feed_info.feedname=selected_feeds.feedname "
+					+ "WHERE selected_feeds.username = '"+username+"';");
+			while(rs.next()){
+				selectedAgencies.add(rs.getString("defaultid"));
+				/*String[] aIds = rs.getString("agencyids").split(",");
+				for(String aId: aIds){
+					selectedAgencies.add(aId);
+				}*/
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return selectedAgencies;
+	}
 	
-	/*@GET
-    @Path("/testCSV")
+	@POST
+    @Path("/correctAjax")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object testCSV(@QueryParam("feeds") String feed, @QueryParam("username") String username) throws IOException, ZipException{
-		String path = "C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/"
-				+ "Feeds/cascadespoint-or-us-test/test/swanisland-or-us";
-		int feedIndex = 0;
-		String username = "mohsenis";
+    public Object tests(@QueryParam("x") String x){
 		
-		start unzipping
-		File zipF = new File(path+".zip");
-		ZipFile zipFile = new ZipFile(zipF);
-		File folder = new File(path);
-        zipFile.extractAll(path);
-        zipF.delete();
-        end unzipping
-        
-        start csv manipulation of feed's name, agency id, and agency name
-        File input = new File(path+"/agency.txt");
-        File output = new File(path+"/agencyTmp.txt");
-		CSVReader reader = new CSVReader(new FileReader(input));
-		CSVWriter writer = new CSVWriter(new FileWriter(path+"/agencyTmp.txt"), ',', CSVWriter.NO_QUOTE_CHARACTER);
-		String [] nextLine;
+		PDBerror b = new PDBerror();
+		b.DBError = x;
+		System.out.println(x);
 		
-		int agencyIdIndex=-1;
-		String agencyId="";
-		String agnecyName="";
-		int agencyNameIndex=-1;
-		List<String> lineAsList = new ArrayList<String>(Arrays.asList(reader.readNext()));
-		for(String s: lineAsList){
-			if(s.equals("agency_id") || s.equals("\"agency_id\"")){
-	    		agencyIdIndex = lineAsList.indexOf(s);
-	    	}else if(s.equals("agency_name") || s.equals("\"agency_name\"")){
-	    		agencyNameIndex = lineAsList.indexOf(s);
-	    	}
-		}
-		if(agencyIdIndex==-1){
-			lineAsList.add("agency_id");
-		}
-		
-		String[] CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
-	    writer.writeNext(CSVarray);
-		
-		while ((nextLine = reader.readNext()) != null) {
-		    lineAsList = new ArrayList<String>(Arrays.asList(nextLine));
-		    agnecyName = lineAsList.get(agencyNameIndex);
-		    
-		    if(agencyIdIndex!=-1){
-		    	agencyId = lineAsList.get(agencyIdIndex);
-		    	if(lineAsList.get(agencyIdIndex)==null || agencyId.equals("")){
-		    		lineAsList.set(agencyIdIndex, agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
-		    	}else{
-		    		lineAsList.set(agencyIdIndex, agencyId+"_"+username+"_"+feedIndex);
-		    	}
-		    }else{
-		    	lineAsList.add(agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
-		    }
-		    
-		    CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
-		    writer.writeNext(CSVarray);
-		}
-		writer.close();
-		reader.close();
-		input.delete();
-		output.renameTo(input);
-		
-		//Agency id modification in routes.txt
-		File inputRoute = new File(path+"/routes.txt");
-        File outputRoute = new File(path+"/routesTmp.txt");
-		reader = new CSVReader(new FileReader(inputRoute));
-		writer = new CSVWriter(new FileWriter(path+"/routesTmp.txt"), ',', CSVWriter.NO_QUOTE_CHARACTER);
-		
-		lineAsList = new ArrayList<String>(Arrays.asList(reader.readNext()));
-		for(String s: lineAsList){
-	    	if(s.equals("agency_id") || s.equals("\"agency_id\"")){
-	    		agencyIdIndex = lineAsList.indexOf(s);
-	    	}
-		}
-		if(agencyIdIndex==-1){
-			lineAsList.add("agency_id");
-		}
-		
-		CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
-	    writer.writeNext(CSVarray);
-	    
-	    while ((nextLine = reader.readNext()) != null) {
-		    lineAsList = new ArrayList<String>(Arrays.asList(nextLine));
-		    
-		    if(agencyIdIndex!=-1){
-		    	agencyId = lineAsList.get(agencyIdIndex);
-		    	if(lineAsList.get(agencyIdIndex)==null || agencyId.equals("")){
-		    		lineAsList.set(agencyIdIndex, agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
-		    	}else{
-		    		lineAsList.set(agencyIdIndex, agencyId+"_"+username+"_"+feedIndex);
-		    	}
-		    }else{
-		    	lineAsList.add(agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
-		    }
-		    
-		    CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
-		    writer.writeNext(CSVarray);
-		}
-		writer.close();
-		reader.close();
-		inputRoute.delete();
-		outputRoute.renameTo(inputRoute);
-        end csv manipulation feed
-        
-        start zipping
-        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipF));
-        InputStream in = null;
-        
-        File[] sfiles = folder.listFiles();
-        
-        ZipParameters parameters = new ZipParameters();
-        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
-        
-        for(File f: sfiles){
-        	out.putNextEntry(f, parameters);
-        	
-        	in = new FileInputStream(f);
-            byte[] readBuff = new byte[4096];
-            int readLen = -1;
-
-            while ((readLen = in.read(readBuff)) != -1) {
-            	out.write(readBuff, 0, readLen);
-            }
-        	
-            out.closeEntry();
-        	in.close();
-        }
-        out.finish();
-        out.close();
-        FileUtils.deleteDirectory(folder);
-        end zipping
-	    
-		return "done";
-	}  */  
+		return b;
+	}
 	
 	@GET
     @Path("/getIndex")

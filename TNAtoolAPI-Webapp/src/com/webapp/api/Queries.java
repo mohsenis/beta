@@ -36,6 +36,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.webapp.api.model.*;
 import com.webapp.api.utils.PolylineEncoder;
 import com.webapp.api.utils.StringUtils;
+import com.webapp.modifiers.DbUpdate;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.library.samples.*;
 import com.library.model.*;
@@ -66,6 +67,7 @@ public class Queries {
 	private static final int default_dbindex = Databases.defaultDBIndex;
 	static AgencyRouteList[] menuResponse = new AgencyRouteList[Databases.dbsize];
 	static int dbsize = Databases.dbsize;	
+	
 	
 	@GET
     @Path("/DBList")
@@ -577,11 +579,25 @@ public class Queries {
     @GET
     @Path("/menu")
     @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Object getmenu(@QueryParam("dbindex") Integer dbindex) throws JSONException {  
-    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+    public Object getmenu(@QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {  
+    	if (dbindex!=2 && (dbindex==null || dbindex<0 || dbindex>dbsize-1)){
         	dbindex = default_dbindex;
         }
     	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);
+    	//query change
+    	System.out.println(username);
+    	
+    	if(!username.equals("null")){
+    		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+    	Collection <Agency> selectedagencies = GtfsHibernateReaderExampleMain.QuerySelectedAgencies(selectedAgencies, dbindex);
+    	
+    	
+    	
+    	allagencies = selectedagencies;}
+    	/*for(Agency agency: allagencies){
+    		System.out.println(agency.getId());
+    	}*/
+    	//end change
     	if (menuResponse[dbindex]==null || menuResponse[dbindex].data.size()!=allagencies.size() ){
     		menuResponse[dbindex] = new AgencyRouteList();
 	    	for (Agency instance : allagencies){    		
@@ -1305,7 +1321,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	@GET
 	@Path("/AgencySR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getASR(@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	public Object getASR(@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (Double.isNaN(x) || x <= 0) {
 	        x = STOP_SEARCH_RADIUS;
 	    }
@@ -1314,7 +1330,18 @@ daysLoop:   for (int i=0; i<dates.length; i++){
         	dbindex = default_dbindex;
         }
 		AgencyList allagencies = new AgencyList();
-		allagencies.agencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);            
+		allagencies.agencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);  
+		//query change
+		System.out.println(username);
+    	
+    	if(!username.equals("null")){
+    		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+    	Collection <Agency> selectedagencies = GtfsHibernateReaderExampleMain.QuerySelectedAgencies(selectedAgencies, dbindex);
+    	
+    	
+    	
+    	allagencies.agencies = selectedagencies;}
+		//end change
 	    AgencySRList response = new AgencySRList();    
 	    int index =0;
 		int totalLoad = allagencies.agencies.size();
@@ -1789,10 +1816,16 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoCSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex ) throws JSONException {
+	public Object getGCSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
+		
+		//query change
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+    	
+		//end change
+		
 		List<County> allcounties = new ArrayList<County> ();
 		try {
 			allcounties = EventManager.getcounties(dbindex);
@@ -1848,7 +1881,15 @@ Loop:  	for (Trip trip: routeTrips){
 	    	}*/
 	    	each.StopsCount = String.valueOf(0);
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId(), dbindex));
+	    		List<GeoStop> tmpGeo = EventManager.getstopsbycounty(instance.getCountyId(), dbindex);
+	    		int tmp=0;
+	    		for(GeoStop gs: tmpGeo){
+	    			if(selectedAgencies.contains(gs.getAgencyId())){
+	    				tmp ++;
+	    			}
+	    		}
+	    		each.StopsCount=tmp+"";
+	    		//each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId(), selectedAgencies, dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -1858,6 +1899,7 @@ Loop:  	for (Trip trip: routeTrips){
 			}	
 	    	each.RoutesCount = String.valueOf(0);
 	    	try {
+	    		//List<GeoStop> tmpR = EventManager.getstopsbycounty(instance.getCountyId(), dbindex);
 	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbycounty(instance.getCountyId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block

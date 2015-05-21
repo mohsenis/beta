@@ -92,6 +92,9 @@
     <query name="farePriceForRoutes" read-only="true">
         select fr.fare.price FROM FareRule fr WHERE concat(fr.route.id.agencyId,',',fr.route.id.id) in (:routes) order by fr.fare.price
     </query>
+    <query name="selectedAgenies" read-only="true">
+        FROM Agency a WHERE a.defaultId in (:selectedAgencies)
+    </query>
     <query name="tripsByServiceId" read-only="true">
         FROM Trip trip WHERE trip.serviceId = :serviceId
     </query>

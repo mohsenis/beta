@@ -110,10 +110,12 @@ $(document).ready(function(){
 	
 	//document.getElementById("Sradius").value = window.opener.qstringx;
 	
+	//session related
+	var username = sessionStorage.getItem("username");
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCSR?&key='+ key+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCSR?&key='+ key+'&dbindex='+dbindex+'&username='+username,
 		async: true,
 		success: function(d){			
 			$('h2').append('Counties Summary Report <br><hr>');

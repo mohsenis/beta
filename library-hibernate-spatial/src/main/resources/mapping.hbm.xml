@@ -312,6 +312,9 @@
 	<query name = "STOPS_BY_COUNTY">
     <![CDATA[select count(stopId) from GeoStop where substring(blockId,1,5)=:id]]>
 	</query>
+	<query name = "STOPS_BY_COUNTY_SEL_AGENCIES">
+    <![CDATA[select count(stopId) from GeoStop where (substring(blockId,1,5)=:id and agencyId in (:sa))]]>
+	</query>
 	<query name = "STOPSL_BY_COUNTY">
     <![CDATA[from GeoStop where substring(blockId,1,5)=:id]]>
 	</query>
@@ -350,6 +353,9 @@
 	</query>	
 	<query name = "ROUTES_BY_COUNTY">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_COUNTY_SEL_AGENCIES">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id and gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
 	</query>
 	<query name = "TRIPS_BY_COUNTY">
     <![CDATA[from CountyTripMap where countyId=:id order by agencyId_def, routeId, uid]]>

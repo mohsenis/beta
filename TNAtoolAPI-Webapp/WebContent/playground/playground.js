@@ -155,12 +155,15 @@ function launchTNAguest(){
 }
 
 function launchTNA(){
-	selectFeed();
-	
-	/*window.open(
+	var isEmpty = selectFeed();
+	if (isEmpty){
+		alert('You must at least select one feed.')
+		return;
+	}
+	window.open(
 	  'http://localhost:8080/TNAtoolAPI-Webapp/?&dbindex=2',
 	  '_blank'
-	);*/
+	);
 }
 
 function guestUser(){
@@ -283,13 +286,16 @@ function selectFeed(){
 		}
 	});
 	feeds = feeds.join(",");
+	if(feeds.length==0){
+		return true;
+	}
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/selectedFeeds?&feeds="+feeds+"&username="+username,
         dataType: "json",
         async: false,
         success: function(d) {
-        	
+        	return false;
         }
 	});
 }

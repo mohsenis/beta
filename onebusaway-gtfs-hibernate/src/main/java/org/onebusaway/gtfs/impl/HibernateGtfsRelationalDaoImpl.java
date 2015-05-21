@@ -420,6 +420,11 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     }
   
   @Override
+	public Collection<Agency> getSelectedAgencies(List<String> selectedAgencies) {
+		return _ops.findByNamedQueryAndNamedParam("selectedAgenies", "selectedAgencies", selectedAgencies);
+	}
+  
+  @Override
   public List<AgencyAndId> getAllShapeIds() {
     return _ops.findByNamedQuery("allShapeIds");
   }
@@ -551,6 +556,8 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   public <T> void clearAllEntitiesForType(Class<T> type) {
     _ops.clearAllEntitiesForType(type);
   }
+
+	
 
 /*//@Override
 public List<CensusData> getAllCensusData() {

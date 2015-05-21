@@ -99,6 +99,7 @@ public interface GtfsRelationalDao extends GtfsDao {
   public List<Float> getFarePriceForRoutes(List<String> routes);
   public HashMap<String, Float> getFareDataForAgency(String agencyId);
   public HashMap<String, Float> getFareDataForState();
+  public Collection<Agency> getSelectedAgencies(List<String> selectedAgencies);
   /****
    * {@link Trip} Methods
    ****/

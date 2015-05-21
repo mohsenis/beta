@@ -172,6 +172,11 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getAllAgencies();
   }
   
+  public static Collection<Agency> QuerySelectedAgencies (List<String> selectedAgencies, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
+	  return dao.getSelectedAgencies(selectedAgencies);
+  }
+  
   public static Collection<Route> QueryAllRoutes (int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
 	  return dao.getAllRoutes();
