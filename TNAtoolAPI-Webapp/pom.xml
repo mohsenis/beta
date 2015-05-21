@@ -98,7 +98,7 @@
 	<groupId>org.apache.tomcat</groupId>
 	<artifactId>tomcat-coyote</artifactId>
 	<version>7.0.39</version>
-</dependency>
+	</dependency>
 
 	<dependency>
 		<groupId>net.lingala.zip4j</groupId>

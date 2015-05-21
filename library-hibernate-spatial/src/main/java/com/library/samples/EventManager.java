@@ -326,6 +326,17 @@ static{
         return result;
 	    }
 	
+	public static long getstopscountbycounty(String countyId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_COUNTY_SEL_AGENCIES");
+		q.setParameter("id", countyId);
+		q.setParameter("sa", selectedAgencies);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result;
+	    }
+	
 /**
  * returns list of stops for a given county
  */
@@ -676,6 +687,18 @@ static{
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
+	
+	public static int getroutescountsbycounty(String countyId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_COUNTY_SEL_AGENCIES");
+		q.setParameter("id", countyId).setParameter("sa", selectedAgencies);
+		q.setParameter("sa", selectedAgencies);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result.size();
+	    }
+
 /**
  * returns list of routes for a given census place
  */

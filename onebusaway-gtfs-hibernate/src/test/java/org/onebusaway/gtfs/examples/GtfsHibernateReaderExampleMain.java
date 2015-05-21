@@ -278,6 +278,7 @@ public class GtfsHibernateReaderExampleMain {
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	  return dao.getStopsCount();
   }
+  
   public static String QueryServiceHours (List<String> trips, int dbindex){
 	  //String resource = "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";
 	  //HibernateGtfsFactory factory = createHibernateGtfsFactory(resource);
@@ -287,6 +288,11 @@ public class GtfsHibernateReaderExampleMain {
 		  tripList += "'"+ str+"'"+", ";
 	  }*/
 	  return dao.getServiceHours(trips);
+  }
+  
+  public static List<FeedInfo> QueryFeedInfoByDefAgencyId(String defaultAgency, int dbindex) {
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
+	  return dao.getFeedInfoByDefAgencyId(defaultAgency);
   }
  
   private static ServiceDate min(ServiceDate a, ServiceDate b) {
@@ -322,4 +328,5 @@ public class GtfsHibernateReaderExampleMain {
     SessionFactory sessionFactory = config.buildSessionFactory();
     return new HibernateGtfsFactory(sessionFactory);
   }
+
 }

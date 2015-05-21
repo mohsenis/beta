@@ -33,6 +33,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.webapp.api.model.*;
 import com.webapp.api.utils.PolylineEncoder;
 import com.webapp.api.utils.StringUtils;
+import com.webapp.modifiers.DbUpdate;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.library.samples.*;
 import com.library.model.*;
@@ -40,6 +41,7 @@ import com.library.model.*;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FareRule;
+import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.ServiceCalendarDate;
@@ -795,7 +797,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	@GET
 	@Path("/AgencySR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getASR(@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	public Object getASR(@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (Double.isNaN(x) || x <= 0) {
 	        x = STOP_SEARCH_RADIUS;
 	    }
@@ -804,7 +806,18 @@ daysLoop:   for (int i=0; i<dates.length; i++){
         	dbindex = default_dbindex;
         }
 		AgencyList allagencies = new AgencyList();
-		allagencies.agencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);            
+		allagencies.agencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);      
+		//query change
+				System.out.println(username);
+		    	
+		    	if(!username.equals("null")){
+		    		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		    	Collection <Agency> selectedagencies = GtfsHibernateReaderExampleMain.QuerySelectedAgencies(selectedAgencies, dbindex);
+		    	
+		    	
+		    	
+		    	allagencies.agencies = selectedagencies;}
+		//end change
 	    AgencySRList response = new AgencySRList();    
 	    int index =0;
 		int totalLoad = allagencies.agencies.size();
@@ -1279,11 +1292,16 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoCSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex ) throws JSONException {
+	public Object getGCSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
 		List<County> allcounties = new ArrayList<County> ();
+		
+		//query change
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		//end change
+		
 		try {
 			allcounties = EventManager.getcounties(dbindex);
 		} catch (FactoryException e1) {
@@ -1338,7 +1356,17 @@ Loop:  	for (Trip trip: routeTrips){
 	    	}*/
 	    	each.StopsCount = String.valueOf(0);
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId(), dbindex));
+	    		List<GeoStop> tmpGeo = EventManager.getstopsbycounty(instance.getCountyId(), dbindex);
+	    		int tmp=0;
+	    		for(GeoStop gs: tmpGeo){
+	    			if(selectedAgencies.contains(gs.getAgencyId())){
+	    				tmp ++;
+	    			}
+	    		}
+	    		each.StopsCount=tmp+"";
+	    		//each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId(), selectedAgencies, dbindex));
+	    		
+	    		//each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -1348,6 +1376,7 @@ Loop:  	for (Trip trip: routeTrips){
 			}	
 	    	each.RoutesCount = String.valueOf(0);
 	    	try {
+	    		//change the method here as well
 	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbycounty(instance.getCountyId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
@@ -4608,5 +4637,59 @@ Loop:  	for (Trip trip: routeTrips){
         progVal.remove(key);		
 		return response;
 		
+    }
+	
+	/**
+     * Get calendar range for agency
+     */
+    @GET
+    @Path("/agencyCalendarRange")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object agencyCalendarRange(@QueryParam("agency") String agency, @QueryParam("dbindex") Integer dbindex){
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	StartEndDates seDates = new StartEndDates();
+    	String defaultAgency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getDefaultId();
+    	FeedInfo feed = GtfsHibernateReaderExampleMain.QueryFeedInfoByDefAgencyId(defaultAgency, dbindex).get(0);
+    	
+    	seDates.Startdate = feed.getStartDate().getAsString();
+    	seDates.Enddate = feed.getEndDate().getAsString();
+    	
+		return seDates;
+    }
+    
+    /**
+     * Get overall calendar range
+     */
+    @GET
+    @Path("/calendarRange")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object calendarRange(@QueryParam("dbindex") Integer dbindex){
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	StartEndDates seDates = new StartEndDates();
+    	int start = 100000000;
+		int end = 0;
+		String s;
+		String e;
+		Collection<FeedInfo> feeds = GtfsHibernateReaderExampleMain.QueryAllFeedInfos(dbindex);
+		
+		for(FeedInfo feed: feeds){
+			s = feed.getStartDate().getAsString();
+			if(Integer.parseInt(s)<start){
+				start = Integer.parseInt(s);
+				seDates.Startdateunion = s;
+			}
+			
+			e = feed.getEndDate().getAsString();
+			if(Integer.parseInt(e)>end){
+				end = Integer.parseInt(e);
+				seDates.Enddateunion = e;
+			}
+		}
+    	
+		return seDates;
     }
 }

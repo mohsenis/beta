@@ -544,6 +544,16 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     return _ops.findByNamedQueryAndNamedParam("fareRulesForFareAttribute",
         "fareAttribute", fareAttribute);
   }
+  
+  @Override
+	public Collection<Agency> getSelectedAgencies(List<String> selectedAgencies) {
+		return _ops.findByNamedQueryAndNamedParam("selectedAgenies", "selectedAgencies", selectedAgencies);
+	}
+  
+  @Override
+	public List<FeedInfo> getFeedInfoByDefAgencyId(String defaultAgency) {
+		return _ops.findByNamedQueryAndNamedParam("feedInfoByDefAgency", "defaultAgencyId", defaultAgency);
+	}
 
   /****
    * Mutable Methods

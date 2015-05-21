@@ -21,6 +21,7 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FareAttribute;
 import org.onebusaway.gtfs.model.FareRule;
+import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.Frequency;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
@@ -105,6 +106,7 @@ public interface GtfsRelationalDao extends GtfsDao {
   public Collection<Agency> getSelectedAgencies(List<String> selectedAgencies);
   public Float getFareMedianForAgency(String agencyId, int farecount);
   public Float getFareMedianForState(int farecount);
+  public List<FeedInfo> getFeedInfoByDefAgencyId(String defaultAgency);
 
   /****
    * {@link Trip} Methods

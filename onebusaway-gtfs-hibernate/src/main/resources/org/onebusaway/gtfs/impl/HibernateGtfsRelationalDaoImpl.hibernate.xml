@@ -107,6 +107,9 @@
     <query name="selectedAgenies" read-only="true">
         FROM Agency a WHERE a.defaultId in (:selectedAgencies)
     </query>
+    <query name="feedInfoByDefAgency" read-only="true">
+        FROM FeedInfo fi WHERE fi.defaultId = :defaultAgencyId
+    </query>
     <query name="tripsByServiceId" read-only="true">
         FROM Trip trip WHERE trip.serviceId = :serviceId
     </query>
