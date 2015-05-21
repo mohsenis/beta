@@ -23,14 +23,8 @@ function openStreetView(lat, lon){
 	map.dragging.disable();
 	map.touchZoom.disable();
 	map.doubleClickZoom.disable();
-	map.scrollWheelZoom.disable();
-	/*map.removeControl(drawControl);
-	map.removeControl(miniMap);
-	map.removeControl(info);*/
+	map.scrollWheelZoom.disable();	
 	google.maps.event.addListener(panorama, 'closeclick', function() {
-		/*map.addControl(drawControl);
-		map.addControl(miniMap);
-		map.addControl(info);*/
 		map.dragging.enable();
 		map.touchZoom.enable();
 		map.doubleClickZoom.enable();
@@ -49,11 +43,7 @@ function openStreetView(lat, lon){
 		}
 	});
 	panorama.setVisible(true);
-	checkSVChange();
-	//panorama.setVisible(false);
-	//panorama.setVisible(true);
-	//alert();
-	
+	checkSVChange();	
 }
 
 function checkSVChange()
@@ -79,7 +69,7 @@ function onMapSubmit(){
 	
 	var index = $('#tabs a[href="#transit"]').parent().index();
 	$("#tabs").tabs("option", "active", index);
-	$('.bothCheck').prop('checked', true);
+	$('#blocksCheck').prop('checked', true);
 	//$('#blocksCheck').prop('checked', true);
 	$("#dialogDate").datepicker( "setDate", currentDate);
 	$("#tabs").hide();
@@ -144,7 +134,6 @@ function doNotDelete(){
 function showOnMapReport(lat, lon, date, x){
 	lat = lat.join(",");
 	lon = lon.join(",");
-	/*$( '#dialogDate').datepicker( "hide" );*/
 	var key =1;
 	var d0;
 	var d1;
@@ -158,7 +147,7 @@ function showOnMapReport(lat, lon, date, x){
 	onMapCluster.addLayer(onMapStopCluster);
 	onMapCluster.addLayer(onMapRouteCluster);
 	onMapCluster.addLayer(onMapBlockCluster);
-	onMapCluster.addLayer(onMapTractCluster);
+	//onMapCluster.addLayer(onMapTractCluster);
 	map.addLayer(onMapCluster);
 	stopCluster = new Array();
 	routeCluster = new Array();
@@ -180,16 +169,14 @@ function showOnMapReport(lat, lon, date, x){
 			$('#af').html('$'+Math.round(data.MapTr.AverageFare*100)/100);
 			$('#mff').html('$'+data.MapTr.MedianFare);
 			var html = '<table id="transitTable" class="display" align="center">';
-			var tmp = //'<tr><th>Agency ID</th>'+
-			'<th>Agency Name</th>'+
+			var tmp = '<th>Agency Name</th>'+
 			'<th>Routes</th>'+
 			'<th>Stops</th>'+
 			'<th>Service Stops</th></tr>';	
 			html += '<thead>'+tmp+'</thead><tbody>';
 			var html2 = '<tfoot>'+tmp+'</tfoot>';
 			$.each(data.MapTr.MapAgencies, function(i,item){
-				html += //'<tr><td>'+item.Id+'</td>'+
-						'<td>'+item.Name+'</td>'+
+				html += '<td>'+item.Name+'</td>'+
 						'<td>'+numberWithCommas(item.RoutesCount)+'</td>'+
 						'<td>'+numberWithCommas(item.MapStops.length)+'</td>'+
 						'<td>'+numberWithCommas(item.ServiceStop)+'</td></tr>';
@@ -244,7 +231,7 @@ function showOnMapReport(lat, lon, date, x){
 			$('#displayTransitReport').append($(html));
 			var transitTable = $('#transitTable').DataTable( {
 				"paging": false,
-				"bSort": false,
+				"bSort": true,
 				//"scrollY": "40%",
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
@@ -271,29 +258,22 @@ function showOnMapReport(lat, lon, date, x){
 			$('#tpu').html(numberWithCommas(data.MapG.UrbanPopulation));
 			$('#tpr').html(numberWithCommas(data.MapG.RuralPopulation));
 			$('#tb').html(numberWithCommas(data.MapG.TotalBlocks));
-			$('#tt').html(numberWithCommas(data.MapG.TotalTracts));
-			//$('#tl').html(Math.round(parseFloat(data.MapG.TotalLandArea)*0.0000386102)/100+' mi<sup>2</sup>');
-			
+			$('#tt').html(numberWithCommas(data.MapG.TotalTracts));					
 			html = '<table id="geoTable" class="display" align="center">';
-			tmp = //'<tr><th>County ID</th>'+
-			'<th>County Name</th>'+
+			tmp = '<th>County Name</th>'+
 			'<th>Tracts</th>'+
 			'<th>Blocks</th>'+
 			'<th>Urban Population (2010)</th>'+
 			'<th>Rural Population (2010)</th></tr>';	
 			html += '<thead>'+tmp+'</thead><tbody>';
 			$.each(data.MapG.MapCounties, function(i,item){
-				html += //'<tr><td>'+item.Id+'</td>'+
-						'<td>'+item.Name.replace(' County','')+'</td>'+
+				html += '<td>'+item.Name.replace(' County','')+'</td>'+
 						'<td>'+numberWithCommas(item.MapTracts.length)+'</td>'+
 						'<td>'+numberWithCommas(item.MapBlocks.length)+'</td>'+
 						'<td>'+numberWithCommas(item.UrbanPopulation)+'</td>'+
-						'<td>'+numberWithCommas(item.RuralPopulation)+'</td></tr>';
-				//var tmpBlockCluster = new L.FeatureGroup();
-				//var tmpTractCluster = new L.FeatureGroup();
+						'<td>'+numberWithCommas(item.RuralPopulation)+'</td></tr>';				
 				onMapIcon = L.icon({
 				    iconUrl: 'js/lib/leaflet-0.7/images/block.png',
-				    //iconSize:     [40, 55], // size of the icon
 				    iconAnchor:   [15, 29], // point of the icon which will correspond to marker's location
 				    popupAnchor:  [0, -20] // point from which the popup should open relative to the iconAnchor
 				});
@@ -303,17 +283,17 @@ function showOnMapReport(lat, lon, date, x){
 					iconCreateFunction: function (cluster) {
 						return new L.DivIcon({ html: cluster.getChildCount(), className: GcolorArray[0], iconSize: new L.Point(30, 30) });						
 					},
-					spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
+					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
 				});
 				var tmpTractCluster = new L.MarkerClusterGroup({
 					maxClusterRadius: 80,
 					iconCreateFunction: function (cluster) {
 						return new L.DivIcon({ html: cluster.getChildCount(), className: GcolorArray[1], iconSize: new L.Point(30, 30) });						
 					},
-					spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false
+					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true
 				});
 				$.each(item.MapBlocks, function(j,jtem){						
-						var marker = L.marker([jtem.Lat,jtem.Lng], {icon: onMapIcon});
+						var marker = L.marker([jtem.Lat,jtem.Lng]/*, {icon: onMapIcon}*/);
 						marker.bindPopup('<b>Block ID:</b> '+jtem.ID+'<br><b>Type:</b> '+jtem.Type+'<br><b>Population:</b> '+numberWithCommas(jtem.Population)+'<br><b>County:</b> '+jtem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>');
 						tmpBlockCluster.addLayer(marker);								
 					/*var blocmarker = L.marker([jtem.Lat,jtem.Lng], {icon: onMapIcon});
@@ -328,7 +308,7 @@ function showOnMapReport(lat, lon, date, x){
 				    popupAnchor:  [0, -30] // point from which the popup should open relative to the iconAnchor
 				});
 				$.each(item.MapTracts, function(k,ktem){
-					var tractmarker = L.marker([ktem.Lat,ktem.Lng], {icon: onMapIcon});
+					var tractmarker = L.marker([ktem.Lat,ktem.Lng]/*, {icon: onMapIcon}*/);
 					tractmarker.bindPopup('<b>Tract ID:</b> '+ktem.ID+'<br><b>Population:</b> '+numberWithCommas(ktem.Population)+'<br><b>County:</b> '+ktem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(ktem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>');
 					tmpTractCluster.addLayer(tractmarker);
 				});
@@ -338,7 +318,7 @@ function showOnMapReport(lat, lon, date, x){
 			$('#displayGeoReport').append($(html));
 			var geoTable = $('#geoTable').DataTable( {
 				"paging": false,
-				"bSort": false,
+				"bSort": true,
 				"bAutoWidth": false,
 				//"scrollY": "40%",
 				"dom": 'T<"clear">lfrtip',
@@ -352,17 +332,14 @@ function showOnMapReport(lat, lon, date, x){
 		    $("#geoTable_info").remove();
 		    geoTable.$('tr').click( function () {
 		        // data = oTable.fnGetData( this );
-		    	if($(this).hasClass('selected')){
-		    		
+		    	if($(this).hasClass('selected')){		    		
 		    		onMapBlockCluster.removeLayer(blockCluster[$(this).index()]);
 		    		onMapTractCluster.removeLayer(tractCluster[$(this).index()]);
-		    	}else{
-		    		
+		    	}else{		    		
 		    		onMapBlockCluster.addLayer(blockCluster[$(this).index()]);
 		    		onMapTractCluster.addLayer(tractCluster[$(this).index()]);
 		    	}
-		    });
-		    
+		    });		    
 		    //$('#displayGeoReport .dataTables_scrollHead table').css('width',$('#displayGeoReport .dataTables_scrollHead').css('width'));
 		    $('.dataTables_scrollHead thead th').css('text-align','center');
 			$('#dialogPreLoader').hide();

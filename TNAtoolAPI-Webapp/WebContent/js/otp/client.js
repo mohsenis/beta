@@ -1,5 +1,12 @@
 var INIT_LOCATION = new L.LatLng(44.141894, -121.783660); 
-
+var dialogheight = Math.round((window.innerHeight)*.9); 
+if (dialogheight > 1000){
+	dialogheight = 1000;
+}
+if (dialogheight < 400){
+	dialogheight = 400;
+}
+//alert ("windows height is: "+$(window).height()+" And doc height is: "+$(document).height()+ " Inner height is: "+window.innerHeight);
 var map = new L.Map('map', {	
 	minZoom : 6,
 	maxZoom : 19	
@@ -23,7 +30,7 @@ var dialogAgencies = new Array();
 var dialogAgenciesId = new Array();
 var dialog = $( "#dialog-form" ).dialog({
     autoOpen: false,
-    height: 870,
+    height: dialogheight,
     width: 420,
     modal: false,
     draggable: false,
@@ -731,7 +738,7 @@ $mylist
 	.dialog({ 
 		"title" : "Oregon Transit Agencies", 
 		width : 400,
-		height: 720,
+		height: dialogheight,
 		maxHeight: 820,
 		maxWidth: 600,
 		closeOnEscape: false,

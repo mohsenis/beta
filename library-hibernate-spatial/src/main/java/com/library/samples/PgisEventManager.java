@@ -20,6 +20,7 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.referencing.CRS;
 import org.onebusaway.gtfs.impl.Databases;
+import org.onebusaway.gtfs.model.StopTime;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -847,6 +848,153 @@ public class PgisEventManager {
 			response.TotalBlocks = TotalBlocks;
 			response.TotalLandArea = TotalLandArea;
 			response.TotalTracts = TotalTracts;					
+			rs.close();
+			stmt.close();
+		} catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        System.exit(0);
+	      }					
+		dropConnection(connection);
+		return response;
+	}
+	
+	/**
+	 *Queries the transit agency tree menu	  
+	 */
+	public static AgencyRouteList agencyMenu(String[] date, String[] day, int dbindex) {
+		AgencyRouteList response = new AgencyRouteList();		
+		AgencyRoute instance = new AgencyRoute();
+		RouteListm rinstance = new RouteListm();
+		VariantListm tinstance = new VariantListm();
+		Attr attribute = new Attr();
+		Connection connection = makeConnection(dbindex);		
+		String mainquery ="";		
+		if (day!=null){
+			//the query with dates
+			mainquery += "with svcids as (";
+			for (int i=0; i<date.length; i++){
+				mainquery+= "(select  serviceid_agencyid, serviceid_id from gtfs_calendars where startdate::int<="+date[i]+" and enddate::int>="+date[i]+
+						" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date[i]+
+						"' and exceptiontype=2)union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates where date='"+date[i]+"' and exceptiontype=1)";
+				if (i+1<date.length)
+					mainquery+=" union all ";
+			}
+			mainquery += "), trips as (select trip.agencyid as aid, trip.tripshortname as sname, trip.tripheadsign as sign, round((trip.length+trip.estlength)::numeric,2) as length, "
+					+ "trip.id as tripid, trip.uid as uid, trip.route_id as routeid, count(svcids.serviceid_id) as service from gtfs_trips trip inner join svcids "
+					+ "using(serviceid_agencyid, serviceid_id) group by trip.agencyid, trip.id having count(svcids.serviceid_id)>0),tripagency as (select trips.aid, "
+					+ "agency.name as agency, trips.sname, trips.sign, trips.length, trips.tripid, trips.uid, trips.routeid from trips inner join gtfs_agencies agency on "
+					+ "trips.aid=agency.id), tripstops as (select trip.aid, trip.agency, trip.tripid, trip.routeid, trip.sname, trip.sign, trip.length, trip.uid, "
+					+ "stop.stop_agencyid_origin, stop.stop_id_origin, stop.stop_name_origin, stop.stop_agencyid_destination, stop.stop_id_destination, stop.stop_name_destination "
+					+ "from tripagency trip inner join gtfs_trip_stops stop on trip.aid = stop.trip_agencyid and trip.tripid = stop.trip_id), triproute as (select trip.aid, "
+					+ "trip.agency, trip.tripid, trip.routeid, trip.sname, trip.sign, trip.length, trip.uid, trip.stop_agencyid_origin, trip.stop_id_origin, trip.stop_name_origin, "
+					+ "trip.stop_agencyid_destination, trip.stop_id_destination, trip.stop_name_destination, route.shortname as rsname, route.longname as rlname from tripstops trip "
+					+ "inner join gtfs_routes route on trip.aid = route.agencyid and trip.routeid = route.id) select * from triproute order by aid, routeid, length desc, tripid";
+		}else {	
+			mainquery += "with trips as (select trip.agencyid as aid, trip.tripshortname as sname, round((trip.length+trip.estlength)::numeric,2) as length, trip.tripheadsign as sign,"
+					+ " trip.id as tripid, trip.uid as uid, trip.route_id as routeid from gtfs_trips trip), tripagency as (select trips.aid, agency.name as agency, trips.sname, "
+					+ "trips.sign, trips.length, trips.tripid, trips.uid, trips.routeid from trips inner join gtfs_agencies agency on trips.aid=agency.id), tripstops as (select "
+					+ "trip.aid, trip.agency, trip.tripid, trip.routeid, trip.sname, trip.sign, trip.length, trip.uid, stop.stop_agencyid_origin, stop.stop_id_origin, "
+					+ "stop.stop_name_origin, stop.stop_agencyid_destination, stop.stop_id_destination, stop.stop_name_destination from tripagency trip inner join "
+					+ "gtfs_trip_stops stop on trip.aid = stop.trip_agencyid and trip.tripid = stop.trip_id), triproute as (select trip.aid, trip.agency, trip.tripid, trip.routeid, "
+					+ "trip.sname, trip.sign, trip.uid, trip.length, trip.stop_agencyid_origin, trip.stop_id_origin, trip.stop_name_origin, trip.stop_agencyid_destination, "
+					+ "trip.stop_id_destination, trip.stop_name_destination, route.shortname as rsname, route.longname as rlname from tripstops trip inner join gtfs_routes route on "
+					+ "trip.aid = route.agencyid and trip.routeid = route.id) select * from triproute order by aid, routeid, length desc, tripid";							
+		}		
+		//System.out.println(mainquery);
+		try{
+			PreparedStatement stmt = connection.prepareStatement(mainquery);
+			ResultSet rs = stmt.executeQuery();	
+			String aid = "";
+			String caid = "";
+			String rid = "";
+			String crid = "";
+			String rsname = "";
+			String rlname = "";
+			String uid = "";
+			String tsname = "";
+			String thsign = "";			
+			ArrayList<String> tripuids = new ArrayList<String>();			
+			//System.out.println("Query was ran successfully.");
+			int agencies_cntr = 0;
+			int routes_cntr = 0;
+			int trips_cntr = 0;
+			while (rs.next()) {	    			    		
+				aid = rs.getString("aid");					        	
+	        	if (!(caid.equals(aid))){
+					if (agencies_cntr>0){
+						///add some children to it and add it to the rfesponse
+						instance.children.add(rinstance);
+						response.data.add(instance);
+						instance = new AgencyRoute();
+						rinstance = new RouteListm();
+						attribute = new Attr();
+						routes_cntr = 0;
+						trips_cntr = 0;
+						tripuids = new ArrayList<String>();
+					}					
+					caid  = aid;				
+					instance.state = "closed";
+					instance.data = rs.getString("agency");
+					attribute.id = caid;
+					attribute.type = "agency";
+					instance.attr = attribute;					
+					agencies_cntr++;										
+	        	}
+	        	rid = rs.getString("routeid");					        	
+	        	if (!(crid.equals(rid))){
+					if (routes_cntr>0){
+						///add some children to it and add it to the rfesponse
+						instance.children.add(rinstance);
+						rinstance = new RouteListm();						
+					}
+					crid  = rid;				
+					rinstance.state = "closed";
+					attribute = new Attr();
+					attribute.id = rid;
+					attribute.type = "route";
+					rinstance.attr = attribute;					
+					rsname = rs.getString("rsname");
+					rlname = rs.getString("rlname");
+	                if (rlname!= null && !rlname.equals("")){
+	                	if ((rsname!= null) && !rsname.equals("")){
+		                	rinstance.data = rlname + "(" + rsname+ ")";		                		
+		                	} else {
+		                		rinstance.data = rlname;
+		                	}
+		                } else {
+		                	rinstance.data = rsname;
+		                }
+	                trips_cntr= 0;
+	                routes_cntr++;
+	                tripuids = new ArrayList<String>();
+	                }
+	        		uid = rs.getString("uid");
+	        		if (!tripuids.contains(uid)){
+	        			tripuids.add(uid);
+	        			tinstance = new VariantListm();
+	        			tinstance.state = "leaf";
+	        			attribute = new Attr();
+	        			attribute.type = "variant";
+	        			attribute.id = rs.getString("tripid");
+	        			thsign = rs.getString("sign");	        				        					
+                    	if (thsign!=null && !thsign.equals("")) {
+                    		tinstance.data = thsign;  
+                    		tsname = rs.getString("sname");
+                    	}else {
+                    		if (tsname!=null && !tsname.equals("")){
+                    			tinstance.data = tsname;                    			
+                    		}else{
+                    			tinstance.data = "From "+ rs.getString("stop_name_origin") + " to "+ rs.getString("stop_name_destination");
+                    		}
+                    	}
+                    	attribute.longest = (trips_cntr > 0 )? 0:1;                    		
+    	                tinstance.attr = attribute;       			
+	        			rinstance.children.add(tinstance);
+	        			trips_cntr++;
+	        		}					
+	        	}
+			instance.children.add(rinstance);
+			response.data.add(instance);
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {

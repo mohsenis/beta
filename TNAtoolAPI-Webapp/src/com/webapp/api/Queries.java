@@ -202,103 +202,23 @@ public class Queries {
     @GET
     @Path("/menu")
     @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Object getmenu(@QueryParam("dbindex") Integer dbindex) throws JSONException {  
+    public Object getmenu(@QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex) throws JSONException {  
     	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
+    	String[] fulldates = null;
+       	String[] days = null;       	
+    	if (date!=null && !date.equals("")){
+    		String[] dates = date.split(",");
+           	String[][] datedays = daysOfWeekString(dates);
+           	fulldates = datedays[0];
+           	days = datedays[1];
+    	}
     	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);
     	if (menuResponse[dbindex]==null || menuResponse[dbindex].data.size()!=allagencies.size() ){
-    		menuResponse[dbindex] = new AgencyRouteList();
-	    	for (Agency instance : allagencies){    		
-	    		AgencyRoute each = new AgencyRoute();
-	    		Attr attribute = new Attr();
-	    		attribute.id = instance.getId();
-	        	attribute.type = "agency";        	
-	        	each.state = "closed";        	
-	        	each.attr = attribute;
-	    		List <Route> routes = GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance, dbindex);	    		
-	    		for (Route route : routes){
-	    			RouteListm eachO = new RouteListm();
-	    			String str = null;
-	                if (route.getLongName()!= null) str = route.getLongName();		                
-	                if ((route.getShortName()!= null)){
-	                	if (str != null){
-	                		str = str + "(" + route.getShortName()+ ")";		                		
-	                	} else {
-	                		str = route.getShortName();
-	                	}
-	                }
-	                eachO.data = str;
-	                eachO.state = "closed";
-	                attribute = new Attr();
-	                attribute.id = route.getId().getId();
-	                attribute.type = "route";			                
-	                eachO.attr = attribute;
-	                List<Trip> trips = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(route, dbindex);
-	                List<String> shapeids = new ArrayList<String>();
-	                List<String> shapes = new ArrayList<String>();
-	                int counter = 0;
-	                for (Trip trip: trips){	                	
-	                	AgencyAndId sid = trip.getShapeId();
-	                	if (sid !=null) {
-	                		if (!(shapeids.contains(sid.getId()))){
-	                    		shapeids.add(sid.getId());
-	                    		VariantListm eachV = new VariantListm();
-	                        	attribute = new Attr();
-	                        	String name = "";
-	                        	if (trip.getTripHeadsign()!=null ) {
-	                        		name = trip.getTripHeadsign();
-	                        	}else {
-	                        		if (trip.getTripShortName()!=null){
-	                        			name = trip.getTripShortName();
-	                        		}else{
-	                        			List<StopTime> st = GtfsHibernateReaderExampleMain.Querystoptimebytrip(trip.getId(), dbindex);
-	                        			
-	                        			name = "From "+ st.get(0).getStop().getName() + " to "+ st.get(st.size()-1).getStop().getName();
-	                        		}
-	                        	}
-	        	                eachV.data = name;
-	        	                eachV.state = "leaf";
-	        	                attribute.id = trip.getId().getId();
-	        	                attribute.type = "variant";	
-	        	                attribute.longest = (counter > 0 )? 0:1;	        	                	
-	        	                eachV.attr = attribute;	        	                
-	        	            	eachO.children.add(eachV) ;	        	            	
-	                    	}
-	                	} else{
-	                		String shape = trip.getEpshape();
-	                		if (!(shapes.contains(shape))){
-	                    		shapes.add(shape);
-	                    		VariantListm eachV = new VariantListm();
-	                        	attribute = new Attr();
-	                        	String name = "";
-	                        	if (trip.getTripHeadsign()!=null ) {
-	                        		name = trip.getTripHeadsign();
-	                        	}else {
-	                        		if (trip.getTripShortName()!=null){
-	                        			name = trip.getTripShortName();
-	                        		}else{
-	                        			List<StopTime> st = GtfsHibernateReaderExampleMain.Querystoptimebytrip(trip.getId(), dbindex);
-	                        			name = "From "+ st.get(0).getStopHeadsign() + " to "+ st.get(st.size()-1).getStopHeadsign();
-	                        		}
-	                        	}
-	                        	eachV.data = name;
-	        	                eachV.state = "leaf";
-	        	                attribute.id = trip.getId().getId();
-	        	                attribute.type = "variant";
-	        	                attribute.longest = (counter > 0 )? 0:1;
-	        	                eachV.attr = attribute;
-	        	            	eachO.children.add(eachV) ; 
-	                    	}
-	                	}
-	                	counter++;
-	                }	                
-	                each.children.add(eachO);
-	    		}
-	    		each.data = instance.getName();
-	    		menuResponse[dbindex].data.add(each);
-	    	}
-    	}
+    		menuResponse[dbindex] = new AgencyRouteList();   	
+    		menuResponse[dbindex] = PgisEventManager.agencyMenu(fulldates, days, dbindex);
+    	}    	
     	return menuResponse[dbindex];    	
     }
     
