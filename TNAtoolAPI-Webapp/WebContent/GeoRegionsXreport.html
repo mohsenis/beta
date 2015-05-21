@@ -91,7 +91,7 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/OdotregionsXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
 		async: true,
 		success: function(item){			
-			$('h2').append(item.AreaLongName+' Extended Report <br><hr>');	
+			$('h2').append('ODOT Transit '+item.AreaName+' Extended Report <br><hr>');	
 			html = html + '<tr><td>' + item.AreaId +'</td><td>' + item.AreaName +'</td><td class="details-control"></td><td>' + numberconv(item.RouteMiles) +'</td><td>'+ numberconv(item.StopsPersqMile) 
 			+'</td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) +'</td><td class="serviceCol">'+ numberconv(item.ServiceHours)+'</td><td class="serviceCol">'+ numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'
 			+ numberconv(item.ServiceMilesPersqMile) +'</td><td  class="serviceCol">'+numberconv(item.MilesofServicePerCapita)+'</td><td class="serviceCol">' + numberconv(item.PopWithinX) 

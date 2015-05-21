@@ -74,8 +74,14 @@
     <query name="stopsForStation" read-only="true">
         FROM Stop stop WHERE stop.parentStation = :stationId AND stop.id.agencyId = :agencyId
     </query>
+    <query name="allStopsCount" read-only="true">
+        select count(*) FROM Stop 
+    </query>
     <query name="tripsByRoute" read-only="true">
         FROM Trip trip WHERE trip.route = :route order by trip.length+trip.estlength desc
+    </query>
+    <query name="RouteMilesForState" read-only="true">
+        select sum(length+estlength) from Trip where length+estlength in (select max(length+estlength) from Trip trip group by trip.route.id.agencyId, trip.route.id.id)
     </query>
     <query name="tripsByShapeId" read-only="true">
         FROM Trip trip WHERE trip.shapeId = :shapeId
@@ -89,6 +95,12 @@
     <query name="fareDataForState" read-only="true">
         select avg(fa.price), min(fa.price), max(fa.price), count(fa.price) FROM FareAttribute fa 
     </query>    
+    <query name="fareMedianForAgency" read-only="true">
+        select fr.fare.price FROM FareRule fr where fr.route.id.agencyId = :agency order by fr.fare.price desc
+    </query>
+    <query name="fareMedianForState" read-only="true">
+        select fa.price FROM FareAttribute fa order by fa.price desc 
+    </query>
     <query name="farePriceForRoutes" read-only="true">
         select fr.fare.price FROM FareRule fr WHERE concat(fr.route.id.agencyId,',',fr.route.id.id) in (:routes) order by fr.fare.price
     </query>

@@ -373,9 +373,9 @@ function gos(key){
 		$("#submit").trigger('mouseenter');		
 	});
 	
-	jQuery('#LoS').on('input', function() {		
+	/*jQuery('#LoS').on('input', function() {		
 		$("#submit").trigger('mouseenter');		
-	});
+	});*/
 	
 	$("#submit").tooltip({
 		  open: function () {		    	    

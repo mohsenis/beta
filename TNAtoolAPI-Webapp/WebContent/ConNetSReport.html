@@ -2,7 +2,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Connected Networks Summary Report</title>
+	<title>Connected Agencies Summary Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -127,7 +127,7 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/ConNetSR?&gap='+gap+'&key='+ key+'&dbindex='+dbindex,
 		async: true,
 		success: function(d){			
-			$('h2').append('Connected Transit Networks Summary Report <br><hr>');
+			$('h2').append('Connected Transit Agencies Summary Report <br><hr>');
 			$.each(d.ClusterR, function(i,item){
 				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +item.name+'</td><td>' +item.size +
 				'</td><td>' +item.ids +'</td>'+ '<td class="details-control"></td><td>'+item.names+'</td><td>'+item.distances+'</td>';

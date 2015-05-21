@@ -59,6 +59,7 @@ public interface GtfsRelationalDao extends GtfsDao {
    * Route Methods
    ****/
   public List<String> getRouteIdsForStop(Stop stop);
+  public Double getRouteMiles();
   
   public List<Route> getRoutesForAgency(Agency agency);
 
@@ -89,6 +90,8 @@ public interface GtfsRelationalDao extends GtfsDao {
   public List<Stop> getStopsForStation(Stop station);
   
   public HashMap<String, Integer> getCounts();
+  
+  public Long getStopsCount();
   /****
    * Stop Methods
    * Alireza: 
@@ -100,6 +103,9 @@ public interface GtfsRelationalDao extends GtfsDao {
   public HashMap<String, Float> getFareDataForAgency(String agencyId);
   public HashMap<String, Float> getFareDataForState();
   public Collection<Agency> getSelectedAgencies(List<String> selectedAgencies);
+  public Float getFareMedianForAgency(String agencyId, int farecount);
+  public Float getFareMedianForState(int farecount);
+
   /****
    * {@link Trip} Methods
    ****/

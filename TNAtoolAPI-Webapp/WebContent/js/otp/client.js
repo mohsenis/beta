@@ -1,5 +1,12 @@
 var INIT_LOCATION = new L.LatLng(44.141894, -121.783660); 
-
+var dialogheight = Math.round((window.innerHeight)*.9); 
+if (dialogheight > 1000){
+	dialogheight = 1000;
+}
+if (dialogheight < 400){
+	dialogheight = 400;
+}
+//alert ("windows height is: "+$(window).height()+" And doc height is: "+$(document).height()+ " Inner height is: "+window.innerHeight);
 var map = new L.Map('map', {	
 	minZoom : 6,
 	maxZoom : 19	
@@ -23,7 +30,7 @@ var dialogAgencies = new Array();
 var dialogAgenciesId = new Array();
 var dialog = $( "#dialog-form" ).dialog({
     autoOpen: false,
-    height: 870,
+    height: dialogheight,
     width: 420,
     modal: false,
     draggable: false,
@@ -457,7 +464,7 @@ function disponmap(layerid,k,points,popup,node){
 				'<p><b>Date:</b> <input readonly type="text" class="POPcal" id="'+marLat+'POPdatepicker'+marLng+'"></p>'+
 				'<p><b>Population Search Radius (miles):</b> <input type="text" value="0.1" id="'+marLat+'POPx'+marLng+'" style="width:40px"></p>'+
 				'<p><button type="button" id="'+marLat+'POPbutton'+marLng+'" style="width:100%" onclick="onMapBeforeSubmit('+p[0].lat+','+p[0].lng+','+marLat+','+marLng+')">Generate Report</button></p>'+
-				'<p><button type="button" style="width:100%" id="'+marLat+'streetViewButton" onclick="openStreetView('+p[0].lat+','+p[0].lng+')">Open Stree View</button></p>'				
+				'<p><button type="button" style="width:100%" id="'+marLat+'streetViewButton" onclick="openStreetView('+p[0].lat+','+p[0].lng+')">Open Street View</button></p>'				
 				,{closeOnClick:false,draggable:true});
 		markers.addLayer(marker);
 	}
@@ -497,7 +504,7 @@ function dispronmap(k,d,name,node){
 		opacity: .5,
 		smoothFactor: 9
 		});	
-		polyline.bindPopup('<b>Agency ID:</b> '+d.agency+'<br><b>Trip Name:</b> '+d.headSign);
+		polyline.bindPopup('<b>Agency Name:</b> '+d.agencyName+ '<br><b>Agency ID:</b> '+d.agency+'<br><b>Trip Name:</b> '+d.headSign);
 		polyline._leaflet_id = name;	
 		routes.addLayer(polyline);
 		$.jstree._reference($mylist).set_type("default", $(node));
@@ -569,7 +576,7 @@ var overlayMaps = {
 		"Stops": stops,
 		"Routes": routes,
 		"Counties": county,
-		"ODOT Regions": odot,
+		"ODOT Transit Regions": odot,
 		"Urbanized Areas 50k+": urban,
 		"Congressional Districts": congdist		
 	};
@@ -731,7 +738,7 @@ $mylist
 	.dialog({ 
 		"title" : "Oregon Transit Agencies", 
 		width : 400,
-		height: 720,
+		height: dialogheight,
 		maxHeight: 820,
 		maxWidth: 600,
 		closeOnEscape: false,
@@ -779,7 +786,7 @@ $mylist
 	        .css( "right", 1 + "px" )
 	        .css( "top", 55 + "%" )
 	        .appendTo(div);        
-		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="SSR" href="#">Statewide Report</a></li><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CNSR" href="#">Connected Networks Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
+		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="SSR" href="#">Statewide Report</a></li><li role="presentation"><a id="THR" href="#">Transit Hubs Report</a></li><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CNSR" href="#">Connected Agencies Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
 			div.appendTo(titlebar);
 			$('.ui-dialog-titlebar-other').dropdown();			
 			$mylist.dialogExtend("collapse");
@@ -789,7 +796,14 @@ $mylist
 				if ($(this).attr('id') != undefined) {
 				casestring = $(this).attr('id');
 				}
-				if (casestring=="SSR"){			    	
+				if (casestring=="THR"){
+					var d = new Date();
+					var qstringx = '0.064';
+					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+		    		var keyName = Math.random();
+		    		localStorage.setItem(keyName, qstringd);
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);
+			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex);
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.1';

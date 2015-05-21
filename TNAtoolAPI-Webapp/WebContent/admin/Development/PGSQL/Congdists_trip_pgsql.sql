@@ -1,4 +1,4 @@
-﻿drop table if exists census_congdists_trip_map;
+drop table if exists census_congdists_trip_map;
 
 CREATE TABLE census_congdists_trip_map
 (
@@ -37,8 +37,8 @@ on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id group by stim
 where congdistid =  res.cid and agencyid = res.aid and tripid=res.tid;
 
 update census_congdists_trip_map set stopscount=0 where stopscount IS NULL;
-update census_congdists_trip_map map set tlength=res.time form (select max(departuretime)-min(arrivaltime) as time, trip_agencyid as agencyid, trip_id as id from gtfs_stop_times where arrivaltime>0 and departuretime>0 group by trip_agencyid, trip_id) as res 
-wehre res.agencyid = map.agencyid and res.id=map.tripid;
+update census_congdists_trip_map map set tlength=res.time from (select max(departuretime)-min(arrivaltime) as time, trip_agencyid as agencyid, trip_id as id from gtfs_stop_times where arrivaltime>0 and departuretime>0 group by trip_agencyid, trip_id) as res 
+where res.agencyid = map.agencyid and res.id=map.tripid;
 
 update census_congdists_trip_map map set tlength=res.ttime from (
 select max(stimes.departuretime)-min(stimes.arrivaltime) as ttime, 
@@ -48,4 +48,4 @@ from gtfs_stop_times stime inner join gtfs_stops stop on stime.stop_agencyid = s
 where stimes.arrivaltime>0 and stimes.departuretime>0 group by stimes.agencyid, stimes.tripid, stimes.geoid) as res 
 where res.agencyid = map.agencyid and res.tripid=map.tripid and res.geoid=map.congdistid;
 
-update census_congdists set tlength=0 where tlength isnull;
+update census_congdists_trip_map set tlength=0 where tlength isnull;

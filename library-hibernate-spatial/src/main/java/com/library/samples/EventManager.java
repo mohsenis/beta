@@ -191,7 +191,7 @@ static{
         return results;
     }
 /**
- * returns number of all geo areas in the DB
+ * returns number of all geo areas in the DB: keys are : county, tract, place, urban, congdist, region, pop, landarea, urbanpop, ruralpop
  */
 	public static HashMap<String, Long> getGeoCounts(int sessionindex) throws FactoryException, TransformException {			
 		session[sessionindex].beginTransaction();
@@ -326,17 +326,6 @@ static{
         return result;
 	    }
 	
-	public static long getstopscountbycounty(String countyId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
-		session[sessionindex].beginTransaction();
-		Query q = session[sessionindex].getNamedQuery("STOPS_BY_COUNTY_SEL_AGENCIES");
-		q.setParameter("id", countyId);
-		q.setParameter("sa", selectedAgencies);
-		//@SuppressWarnings("unchecked")
-		long result = (Long) q.list().get(0);
-        Hutil.getSessionFactory()[sessionindex].close();
-        return result;
-	    }
-	
 /**
  * returns list of stops for a given county
  */
@@ -349,8 +338,6 @@ static{
         Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
-	
-	
 /**
  * returns list of stops for a given county
  */
@@ -689,17 +676,6 @@ static{
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
-	
-	public static int getroutescountsbycounty(String countyId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
-		session[sessionindex].beginTransaction();
-		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_COUNTY_SEL_AGENCIES");
-		q.setParameter("id", countyId).setParameter("sa", selectedAgencies);
-		q.setParameter("sa", selectedAgencies);
-		@SuppressWarnings("unchecked")
-		List<GeoStopRouteMap> result = q.list();
-        Hutil.getSessionFactory()[sessionindex].close();
-        return result.size();
-	    }
 /**
  * returns list of routes for a given census place
  */
@@ -735,19 +711,20 @@ static{
 		List<GeoStopRouteMap> result = q.list();
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
-	    }
+	    }	
+	
 /**
- * returns list of routes for a given urban area for Aggregated urban area report
- */
-	public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, int sessionindex) throws FactoryException, TransformException {			
+* returns list of routes for a given urban area for Aggregated urban area report
+*/
+	public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, int sessionindex) throws FactoryException, TransformException {
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_AURBAN");
 		q.setParameter("id", urbanId);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
-        Hutil.getSessionFactory()[sessionindex].close();
-        return result;
-	    }
+		Hutil.getSessionFactory()[sessionindex].close();
+		return result;
+	}
 	
 /**
  * returns list of routes for a given congressional district

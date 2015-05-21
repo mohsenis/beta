@@ -87,7 +87,7 @@ import org.xml.sax.SAXException;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
+	private final static String basePath = "C:/Users/tnatool/Development/Repository/test/";
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;

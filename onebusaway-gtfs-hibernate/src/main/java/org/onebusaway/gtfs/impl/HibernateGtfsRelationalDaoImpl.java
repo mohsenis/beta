@@ -387,11 +387,11 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     return _ops.findByNamedQueryAndNamedParam("stopTimesByStop", "stop", stop);
   }
   
-//  @Override
+  @Override
   public List<FareRule> getFareRuleForRoute(Route route) {
     return _ops.findByNamedQueryAndNamedParam("fareRuleForRoute", "route", route);
   }
-  
+  @Override
   public HashMap<String, Float> getFareDataForAgency(String agencyId) {
 	  HashMap<String, Float> response = new HashMap<String, Float>();	  
 	  List results=  _ops.findByNamedQueryAndNamedParam("fareDataForAgency", "agency", agencyId);
@@ -403,9 +403,11 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
 	  response.put("count", (float)((Long)data[3]));
 	  return response;
 	  }
+  
+  @Override
   public HashMap<String, Float> getFareDataForState() {
 	  HashMap<String, Float> response = new HashMap<String, Float>();	  
-	  List results=  _ops.findByNamedQuery("fareDataForState");
+	  List results =  _ops.findByNamedQuery("fareDataForState");
 	  Object[] data = (Object[]) results.get(0);
 	  response.put("avg", (float)(Math.round(((Double)data[0])*100)/100.0));
 	  response.put("min", (float)(Math.round(((Float)data[1])*100)/100.0));
@@ -420,14 +422,45 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
     }
   
   @Override
-	public Collection<Agency> getSelectedAgencies(List<String> selectedAgencies) {
-		return _ops.findByNamedQueryAndNamedParam("selectedAgenies", "selectedAgencies", selectedAgencies);
-	}
+  public Float getFareMedianForAgency(String agency, int farecount){
+	  if (farecount%2==0){		  
+		  List<Float> results= _ops.findByNamedQueryAndNamedParamLimited("fareMedianForAgency", "agency", agency,2 ,farecount/2);		  
+		  return (float)(Math.round((results.get(0)+results.get(1))*50.0)/100.0);
+	  }else {
+		  List<Float> results= _ops.findByNamedQueryAndNamedParamLimited("fareMedianForAgency", "agency", agency,1 ,(farecount/2)+1);		  
+		  return results.get(0);
+	  }	  
+    }
+  
+  @Override
+  public Float getFareMedianForState(int farecount){
+	  if (farecount%2==0){		  
+		  List<Float> results= _ops.findByNamedQueryLimited("fareMedianForState", 2 ,farecount/2);		  
+		  return (float)(Math.round((results.get(0)+results.get(1))*50.0)/100.0);
+	  }else {
+		  List<Float> results= _ops.findByNamedQueryLimited("fareMedianForState", 1 ,(farecount/2)+1);		  
+		  return results.get(0);
+	  }	  
+    }
   
   @Override
   public List<AgencyAndId> getAllShapeIds() {
     return _ops.findByNamedQuery("allShapeIds");
   }
+  
+  @Override
+  public Long getStopsCount() {
+     List<Long> results = _ops.findByNamedQuery("allStopsCount");
+     return results.get(0);
+  }
+  
+  @Override
+  public Double getRouteMiles() {
+    Double response = (Double)_ops.findByNamedQuery("RouteMilesForState").get(0);
+    response = Math.round(response*100.00)/100.00;
+    return response;
+  }
+  
   
   @Override
   public HashMap<String, Integer> getCounts() {
@@ -556,8 +589,6 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   public <T> void clearAllEntitiesForType(Class<T> type) {
     _ops.clearAllEntitiesForType(type);
   }
-
-	
 
 /*//@Override
 public List<CensusData> getAllCensusData() {

@@ -16,7 +16,7 @@ public class Databases {
 		
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
 		try {
-			BufferedReader reader =new BufferedReader(new FileReader("C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/dbInfo.csv"));
+			BufferedReader reader =new BufferedReader(new FileReader("TNAtoolAPI-Webapp/WebContent/admin/dbInfo.csv"));
 			String[] keys = reader.readLine().trim().split(",");
 			ArrayList<String[]> elem = new ArrayList<String[]>();
 			String line = reader.readLine();
@@ -42,7 +42,7 @@ public class Databases {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+		System.out.println("The database size is : "+String.valueOf(infoMap.get("databaseIndex").length));
 		return infoMap;
 	}
 	
@@ -52,9 +52,10 @@ public class Databases {
 	public static String[] ConfigPaths = infoMap.get("ConfigPaths");
 	public static String[] dbnames = infoMap.get("dbnames");
 	public static String[] connectionURLs = infoMap.get("connectionURL");
-	public static String[] username = infoMap.get("username");
-	public static String[] password = infoMap.get("password");
-	
+
+	public static String[] usernames = infoMap.get("username");
+	public static String[] passwords = infoMap.get("password");
+
 	static{
 		//list of configuration file names used in library-hibernate-spatial used in Hutil.java
 		//spatialConfigPaths[0]= "hibernate.cfg.xml";

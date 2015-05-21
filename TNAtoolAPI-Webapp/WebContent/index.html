@@ -19,6 +19,7 @@
 	<link rel="stylesheet" href="js/lib/MarkerCluster/MarkerCluster.Default.css" />
 	<script src="js/lib/simple-expand.min.js"></script>
 	<script src="js/lib/MarkerCluster/leaflet_markercluster-src.js"></script>
+	<!-- <script src="js/lib/MarkerCluster/leaflet.markercluster1.js"></script> -->
 	<script src="js/lib/jquery_dialogextend.js"></script>
 
 	<script type="text/javascript" src="js/otp/shapes.js"></script>	
@@ -108,9 +109,9 @@
 		  			<td class="onMapdata" id="mff"></td>
 		  		</tr>
 		  	</table>
+		  	<!-- <br>
 		  	<br>
-		  	<br>
-		  	<br>
+		  	<br> -->
 		  	<p id="displayTransitReport"></p>
 		  </div>
 		  <div id="geography">
@@ -119,8 +120,12 @@
 		  				 		<input type="radio" name="censusShow" class="bothCheck" value="both" style="margin-left:1em" checked onclick="geoRadio(this)">Both<br><br>
 		  	<table id="blockTract" style="border:none; font-size:100%">
 		  		<tr>
-		  			<td><b>Population (2010):</b></td>
-		  			<td class="onMapdata" id="tp"></td>
+		  			<td><b>Urban Population (2010):</b></td>
+		  			<td class="onMapdata" id="tpu"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Rural Population (2010):</b></td>
+		  			<td class="onMapdata" id="tpr"></td>
 		  		</tr>
 		  		<tr>
 		  			<td><b>Number of Census Blocks:</b></td>
@@ -131,9 +136,8 @@
 		  			<td class="onMapdata" id="tt"></td>
 		  		</tr>
 		  	</table>
-		  	<br>
-		  	<br>
-		  	<br>
+		  	<!-- <br>
+		  	<br> -->		  	
 		  	<p id="displayGeoReport"></p>
 		  </div>
 	  </div>
