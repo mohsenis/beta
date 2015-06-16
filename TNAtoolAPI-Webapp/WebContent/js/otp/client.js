@@ -12,6 +12,8 @@ var minimalLayer = new L.StamenTileLayer("toner");
 var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov">US Census Bureau</a> 2010';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
+/*var osmLayer = new L.TileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', 
+		{maxZoom: 19, attribution: osmAttrib});*/
 
 var aerialLayer = new L.TileLayer(aerialURL, 
 		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 19, attribution: osmAttrib});
