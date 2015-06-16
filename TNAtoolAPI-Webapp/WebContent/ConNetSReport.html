@@ -1,8 +1,7 @@
 <html>
-
 <head>
 	<meta charset="utf-8" />
-	<title>Connected Agencies Summary Report</title>
+	<title>Connected Networks Summary Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -18,20 +17,17 @@
 	
 <script type="text/javascript">
 var qstring = '';
-var qstringx = '0.1';
 var progVal = 0; 
 var qstringd = '';
 var gap = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
 var dbindex = parseInt(document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1));
 var d = new Date();
 var html = '<table id="RT" class="display" align="center">';
-var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th id="an">Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Number of Connected Networks<em title="Number of transit networks that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Network Ids<em title="Agency Ids corresponding with transit networks that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Network Details<em title="Name of transit networks that have at least one stop within the specified distance of the transit agency stops and minimum spatial gap in feet between between the transit networks listed and the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Network Names<em title="Name of transit networks that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Network Min Spatial Gaps<em title="Minimum spatial gap in feet between between the transit networks listed and the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+var tmp = '<tr><th id="aid">Cluster ID<em title="Transit network cluster ID."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Network Cluster Size<em title="Number of transit agencies that have at least one stop within the specified distance of at least one transit agency in the cluster"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency Ids<em title="Agency Ids corresponding with transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency Names<em title="Name of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
@@ -127,44 +123,41 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/ConNetSR?&gap='+gap+'&key='+ key+'&dbindex='+dbindex,
 		async: true,
 		success: function(d){			
-			$('h2').append('Connected Transit Agencies Summary Report <br><hr>');
+			$('h2').append('Connected Transit Networks Summary Report <br><hr>');
 			$.each(d.ClusterR, function(i,item){
-				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +item.name+'</td><td>' +item.size +
-				'</td><td>' +item.ids +'</td>'+ '<td class="details-control"></td><td>'+item.names+'</td><td>'+item.distances+'</td>';
-				html = html + '</tr>';
-				netNames.push(item.names);
-				minDistances.push(item.distances);
+				html += '<tr><td>' + item.id+'</td><td>' +item.size+'</td><td>';
+				var names = '<td>';
+				var aidlist = item.ids.split(';');
+				var anamelist = item.names.split(';');
+				for (i=0; i<aidlist.length; i++){
+					html+= '<a href="#" type="XR" id="'+aidlist[i]+'">'+ aidlist[i]+'</a>';
+					names +='<a href="#" type="XR" id="'+aidlist[i]+'">'+ anamelist[i]+'</a>';
+					if (i<aidlist.length-1){
+						html+="; ";
+						names+="; ";
+					}
+				}
+				html+= '</td>'+names+'</td><td>'+d.metadata+'</td></tr>';			
 			});		
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
-			progressbar.remove();
+			progressbar.remove();			
 			$('a').click(function(e){
 				if($(this).attr('type')=="XR"){
-		    		qstring = $(this).attr('id');
-		    		qstringx = '500';		    		
+		    		qstring = $(this).attr('id');		    				    		
 		    		var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);			    		
-		    		window.open('/TNAtoolAPI-Webapp/ConNetXReport.html?&gap='+qstringx+'&agency='+qstring+'&dbindex='+dbindex);
-				}
-				/* var d = new Date();
-			    if($(this).attr('type')=="XR"){
-			    		qstring = $(this).attr('id');
-			    		qstringx = '0.1';
-			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		var keyName = Math.random();
-			    		localStorage.setItem(keyName, qstringd);			    		
-			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
-			    } else if ($(this).attr('type')=="SR"){
-			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&dbindex='+dbindex);
-			    }; */
+		    		window.open('/TNAtoolAPI-Webapp/ConAgenXReport.html?&gap='+gap+'&agency='+qstring+'&dbindex='+dbindex);
+				}				
 			});
+			
 			
 			var table = $('#RT').DataTable( {
 				"paging": true,				
-				"iDisplayLength": 14,
+				"iDisplayLength": 4,
 				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [3,4,5,6 ] },
-				                 { "visible": false, "targets": [5,6]}
+				                 { "bSortable": false, "aTargets": [2,3] },
+				                 { "visible": false, "targets": [4]}
 				               ],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
@@ -178,9 +171,12 @@ $(document).ready(function(){
 		 		                {
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
-		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		 		                    				  "mColumns": 'visible'},
+		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": [ 0, 1, 2, 3, 4 ]},
+		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": [ 0, 1, 2, 3, 4 ]} ]
 		 		                } 
 		 		            ]
 		        }
@@ -204,11 +200,11 @@ $(document).ready(function(){
 		    function format ( p ) {
 		        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
 		            '<tr>'+
-		                '<td>Connected Network Names: </td>'+
+		                '<td>Connected Agency Names: </td>'+
 		                '<td>'+netNames[p]+'</td>'+
 		            '</tr>'+
 		            '<tr>'+
-		                '<td>Connected Network Min Spatial Gaps (ft.): </td>'+
+		                '<td>Connected Agency Min Spatial Gaps (ft.): </td>'+
 		                '<td>'+minDistances[p]+'</td>'+
 		            '</tr>'+		            
 		        '</table>';

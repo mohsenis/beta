@@ -33,7 +33,8 @@ var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated w
 '<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Routes <em title="Total number of routes serving stops in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Tracts <em title="Total number of census tracts within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>Tracts <em title="Total number of census tracts within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var fAverage = new Array();
@@ -118,15 +119,14 @@ $(document).ready(function(){
 		success: function(d){			
 			$('h2').append('Counties Summary Report <br><hr>');
 			$.each(d.GeoR, function(i,item){
-				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
+				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
 				item.Name + '</td><td>' + item.ODOTRegion + '</td><td>' + item.ODOTRegionName +'</td><td>' + numberconv(item.population) +
 				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>'+
 		   '<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
 				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td>'+ 
-				'<td><a href="#" type="TC" id="'+item.id+'" name="'+item.Name+'" >'+item.TractsCount+'</a></td>' ;
-				html = html + '</tr>';				   			
+				'<td><a href="#" type="TC" id="'+item.id+'" name="'+item.Name+'" >'+item.TractsCount+'</a></td><td>'+d.metadata+'</td></tr>';							   			
 			});		
-			html = html + '</tbody>'+html2+'</table>'
+			html +='</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			$('a').click(function(e){
@@ -137,7 +137,7 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/GeoCountiesXreport.html?&county='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoCountiesXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
 			    }else if($(this).attr('type')=="TC"){
 			    	qstring = $(this).attr('id');
 			    	qstringd =$(this).attr('name');
@@ -149,6 +149,7 @@ $(document).ready(function(){
 				//"scrollY": "76%",
 				"paging": true,				
 				"iDisplayLength": 14,
+				"aoColumnDefs": [{"visible": false, "targets": [10]}],
 				"order": [[ 1, "asc" ]],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
@@ -162,9 +163,12 @@ $(document).ready(function(){
 		 		                {
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
-		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		 		                    				  "mColumns": 'visible'},
+		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": 'all'},
+		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": 'all'} ]
 		 		                } 
 		 		            ]
 		        }
@@ -214,12 +218,7 @@ $(document).ready(function(){
 		    $( ".dataTables_filter" ).css( "float", "left");
 		    $( ".dataTables_filter" ).before( "<br>" );
     }});
-		
-	
-	
 });
-
-
 
 $(".export").on('click', function (event) {    
 	exportbutton.apply(this, ['export.csv']);

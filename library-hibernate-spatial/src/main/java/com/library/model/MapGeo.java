@@ -1,4 +1,4 @@
-package com.webapp.api.model;
+package com.library.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,24 +9,28 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement(name = "MapTR")
-public class MapTransit {
+@XmlRootElement(name = "MapG")
+public class MapGeo {
 	@XmlAttribute
 	@JsonSerialize
-	public String TotalStops;
+	public long UrbanPopulation;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String TotalRoutes;
+	public long RuralPopulation;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String AverageFare;
+	public int TotalBlocks;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String MedianFare;
+	public int TotalTracts;
 	
-	@XmlElement(name = "MapAL")
-    public Collection<MapAgency> MapAgencies = new ArrayList<MapAgency>();
+	@XmlAttribute
+	@JsonSerialize
+	public long TotalLandArea;
+	
+	@XmlElement(name = "MapCL")
+    public Collection<MapCounty> MapCounties = new ArrayList<MapCounty>();
 }

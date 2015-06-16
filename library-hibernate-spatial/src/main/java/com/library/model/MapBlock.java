@@ -1,4 +1,4 @@
-package com.webapp.api.model;
+package com.library.model;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -13,19 +13,23 @@ public class MapBlock {
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String Population;
+	public long Population;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String LandArea;
+	public String Type;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String Lat;
+	public long LandArea;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String Lng;
+	public double Lat;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public double Lng;
 	
 	@XmlAttribute
 	@JsonSerialize

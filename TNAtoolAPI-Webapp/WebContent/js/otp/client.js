@@ -1,5 +1,38 @@
+var key = Math.random();
+var dbindex = 0;
+var newdates = null;
+var URL = document.URL;
+if (URL.split("?").length >0){
+	URL = URL.split("?")[0];
+	if (document.URL.indexOf("n=")<1){
+		URL +="?&n="+key;
+	} else {
+		var index = (document.URL.split("n=")[1].indexOf("&")>0) ? document.URL.split("n=")[1].indexOf("&"):document.URL.split("n=")[1].length;
+		key = parseFloat(document.URL.split("n=")[1].substr(0,index));
+		URL +="?&n="+key;
+	}
+	if (document.URL.indexOf("dbindex=")<1){
+		URL +="&dbindex="+dbindex;
+	}else {
+		var index = (document.URL.split("dbindex=")[1].indexOf("&")>0) ? document.URL.split("dbindex=")[1].indexOf("&"):document.URL.split("dbindex=")[1].length;
+		dbindex = parseFloat(document.URL.split("dbindex=")[1].substr(0,index));
+		URL +="&dbindex="+dbindex;
+	}
+} else {
+	URL +="?&n="+key+"&dbindex="+dbindex;
+}
+history.pushState('data', '', URL);
+var w_qstringd = localStorage.getItem(key);
+/*alert(w_qstringd);*/
 var INIT_LOCATION = new L.LatLng(44.141894, -121.783660); 
-
+var dialogheight = Math.round((window.innerHeight)*.9); 
+if (dialogheight > 1000){
+	dialogheight = 1000;
+}
+if (dialogheight < 400){
+	dialogheight = 400;
+}
+//alert ("windows height is: "+$(window).height()+" And doc height is: "+$(document).height()+ " Inner height is: "+window.innerHeight);
 var map = new L.Map('map', {	
 	minZoom : 6,
 	maxZoom : 19	
@@ -25,7 +58,7 @@ var dialogAgencies = new Array();
 var dialogAgenciesId = new Array();
 var dialog = $( "#dialog-form" ).dialog({
     autoOpen: false,
-    height: 870,
+    height: dialogheight,
     width: 420,
     modal: false,
     draggable: false,
@@ -370,7 +403,10 @@ function disponmap2(layerid,k,points,popup){
 	mylayer._leaflet_id = layerid;	
 	stops.addLayer(mylayer);	
 };
-
+var popupOptions = {'offset': L.point(0, -8),
+		'closeOnClick':false,
+		'draggable':true
+		};
 function disponmap(layerid,k,points,popup,node){
 	
 	var markers;
@@ -429,7 +465,7 @@ function disponmap(layerid,k,points,popup,node){
 			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
 		});
 		break;
-	}
+	}	
 	for (var i = 0; i < points.length; i++) {
 		var p = points[i];
 		var marker = new L.Marker(p[0],{title:popup});
@@ -460,7 +496,7 @@ function disponmap(layerid,k,points,popup,node){
 				'<p><b>Population Search Radius (miles):</b> <input type="text" value="0.1" id="'+marLat+'POPx'+marLng+'" style="width:40px"></p>'+
 				'<p><button type="button" id="'+marLat+'POPbutton'+marLng+'" style="width:100%" onclick="onMapBeforeSubmit('+p[0].lat+','+p[0].lng+','+marLat+','+marLng+')">Generate Report</button></p>'+
 				'<p><button type="button" style="width:100%" id="'+marLat+'streetViewButton" onclick="openStreetView('+p[0].lat+','+p[0].lng+')">Open Street View</button></p>'				
-				,{closeOnClick:false,draggable:true});
+				,popupOptions);
 		markers.addLayer(marker);
 	}
 	markers._leaflet_id = layerid;
@@ -505,7 +541,26 @@ function dispronmap(k,d,name,node){
 		routes.addLayer(polyline);
 		$.jstree._reference($mylist).set_type("default", $(node));
 };
-     
+var dateID;
+function addDate(date){
+	$( "<li title='Click to remove.' id="+dateID+" onclick=\"dateRemove(this, '"+date+"')\">"+Date.parse(date).toString('dddd, MMMM d, yyyy')+"</li>" ).appendTo( "#datesarea" );
+	$("#"+dateID).css({"text-align":"center","border":"1px solid black","padding":"1px 5px 1px 5px", "font-size":"82%","display":"block","width":"90%","background-color":"grey","text-decoration":"none","color":"white","margin":"3px","border-radius":"5px"});
+	$("#"+dateID).hover(function(){
+		  $(this).css({"cursor":"pointer","-moz-transform":"scale(1.1,1.1)","-webkit-transform":"scale(1.1,1.1)","transform":"scale(1.1,1.1)"});
+	},function(){
+		  $(this).css({"cursor":"pointer","-moz-transform":"scale(1,1)","-webkit-transform":"scale(1,1)","transform":"scale(1,1)"});
+	});
+	if ($('#datepicker').multiDatesPicker('getDates').length>0){
+		$("#datepick").css({"border":"2px solid #900"});
+		};
+};
+function dateRemove(e, d){
+	$(e).remove();
+	$("#datepicker").multiDatesPicker('removeDates', d);	 
+	if ($('#datepicker').multiDatesPicker('getDates').length==0){
+			$("#datepick").css({"border":""});						
+		}
+}
 var initLocation = INIT_LOCATION;
 
 map.setView(initLocation,8);
@@ -534,14 +589,7 @@ minimalLayer.on('load', function(e) {
 var mmRecLat = 0;
 var mmRecLng = 0;
 var miniMap = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"], minZoom: 5, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright',toggleDisplay:true}).addTo(map);
-
 $('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'0px'});
-
-if (document.URL.split("&").length<2){		    	
-	history.pushState('data', '', document.URL+'?&dbindex=0');
-}
-var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-
 var menucontent = '<ul id="rmenu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">';
 $.ajax({
 	type: 'GET',
@@ -557,7 +605,7 @@ $.ajax({
 	    menucontent+='</ul>';
 	    if (dbindex<0 || dbindex>menusize-1){
 	    	dbindex =0;
-	    	history.pushState('data', '', document.URL.split("?")[0]+'?&dbindex=0');
+	    	history.pushState('data', '', document.URL.split("?")[0]+"?&n="+key+'&dbindex=0');	    	
 	    }
 	}			
 });
@@ -590,7 +638,7 @@ $mylist
      },
 	"json_data" : {
 		"ajax" : {
-            "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?dbindex="+dbindex,
+            "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?day="+w_qstringd+"&dbindex="+dbindex,
             "type" : "get",	                
             "success" : function(ops) {  
             	
@@ -733,7 +781,7 @@ $mylist
 	.dialog({ 
 		"title" : "Oregon Transit Agencies", 
 		width : 400,
-		height: 720,
+		height: dialogheight,
 		maxHeight: 820,
 		maxWidth: 600,
 		closeOnEscape: false,
@@ -758,32 +806,147 @@ $mylist
 	    },
 	    "load" : function(evt, dlg) {  	
 	    	$(".ui-dialog-titlebar-minimize:eq( 1 )").attr("title", "Minimize");
-	    	$(".ui-dialog-titlebar-buttonpane:eq( 1 )").css("right", 47 + "px");    	
+	    	$(".ui-dialog-titlebar-buttonpane:eq( 1 )").css("right", 68 + "px");    	
 		    var titlebar = $(".ui-dialog-titlebar:eq( 1 )");		
-			var div2 = $("<div/>");
+			var div2 = $("<div/>");			
 		    div2.addClass("ui-dialog-titlebar-other");	    
-		    var button2 = $( "<button/>" ).text( "Databases" );	    
-		    button2.attr("data-toggle", "dropdown");	    
+		    var button2 = $( "<button/>" ).text( "Databases" );	
+		    button2.attr("id", "dbb");
+		    button2.attr("data-toggle", "dropdown");		    
 		    button2.button( { icons: { primary: "ui-icon-gear" }, text: false } )	    
 	        .addClass( "ui-dialog-titlebar-other" )	       
-	        .css( "right", 22 + "px" )
+	        .css( "right", 43 + "px" )
 	        .css( "top", 55 + "%" )
 	        .appendTo(div2);
 		    div2.append(menucontent);
 		    div2.appendTo(titlebar);
+		    
+		    var div3 = $("<div/>");	
+		    //div3.attr("id", "datepickarea");
+		    div3.addClass("ui-dialog-titlebar-other");		    
+		    var button3 = $( "<button/>" ).text( "Date Picker" );
+		    button3.attr("id", "datepick");
+		    button3.attr("data-toggle", "dropdown");
+		    button3.button( { icons: { primary: "ui-icon-calculator" }, text: false } )	    
+	        .addClass( "ui-dialog-titlebar-other" )	       
+	        .css( "right", 22 + "px" )
+	        .css( "top", 55 + "%" )
+	        .appendTo(div3);
+		    div3.append('<div id="datepicker"><br></div>');
+		    div3.appendTo(titlebar);
+		    
+		    /*var div4 = $("<div/>");
+		    div4.attr("id", "datepickerdiv");
+		    div4.appendTo(titlebar);*/
+		    
 		    document.getElementById('DB'+dbindex).innerHTML = '&#9989 '+document.getElementById('DB'+dbindex).innerHTML;
 		    var div = $("<div/>");
 		    div.addClass("ui-dialog-titlebar-other");	    
-		    var button = $( "<button/>" ).text( "Reports" );	    
-		    button.attr("data-toggle", "dropdown");	    
+		    var button = $( "<button/>" ).text( "Reports" );	
+		    button.attr("id", "repb");
+		    button.attr("data-toggle", "dropdown");		    
 		    button.button( { icons: { primary: "ui-icon-document" }, text: false } )	    
 	        .addClass( "ui-dialog-titlebar-other" )	       
 	        .css( "right", 1 + "px" )
 	        .css( "top", 55 + "%" )
-	        .appendTo(div);        
-		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="SSR" href="#">Statewide Report</a></li><li role="presentation"><a id="THR" href="#">Transit Hubs Report</a></li><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CNSR" href="#">Connected Agencies Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
+	        .appendTo(div);		    
+		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="SSR" href="#">Statewide Report</a></li><li role="presentation"><a id="THR" href="#">Transit Hubs Report</a></li><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CNSR" href="#">Connected Networks Report</a></li><li role="presentation"><a id="CASR" href="#">Connected Agencies Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
 			div.appendTo(titlebar);
 			$('.ui-dialog-titlebar-other').dropdown();			
+			$("#datepicker").multiDatesPicker({
+				changeMonth: false,
+		      	changeYear: false,
+				  onSelect: function(date, inst) {					  
+					  dateID = date.replace("/","").replace("/","");					  
+						if($("#"+dateID).length==0){
+							//alert("add triggered");
+							addDate(date);							
+						}else{
+							//alert("del triggered");
+							$("#"+dateID).remove();							
+						}
+						if ($('#datepicker').multiDatesPicker('getDates').length>0){
+								$("#datepick").css({"border":"2px solid #900"});
+							} else {
+								$("#datepick").css({"border":""});
+							}
+			      }
+			});			
+			$("#datepicker").append("<div id='datesdiv'><ul id='datesarea'></ul></div>");
+			$("#datepicker").css({"display":"inline-block", "z-index":"1000", "position":"fixed"});
+			$("#datesdiv").css({"width":"100%"});
+			$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"}); 
+			$("#datepicker").hide();
+			
+			if (w_qstringd){				
+					$( "#datepicker" ).multiDatesPicker({
+						addDates: w_qstringd.split(","),
+						onSelect: function(date, inst) {					  
+							  dateID = date.replace("/","").replace("/","");					  
+								if($("#"+dateID).length==0){
+									//alert("add triggered");
+									addDate(date);							
+								}else{
+									//alert("del triggered");
+									$("#"+dateID).remove();							
+								}
+								if ($('#datepicker').multiDatesPicker('getDates').length>0){
+										$("#datepick").css({"border":"2px solid #900"});
+									} else {
+										$("#datepick").css({"border":""});
+									}
+					      }
+					});	
+					var cdate;
+					for(var i=0; i<w_qstringd.split(",").length; i++){
+						cdate = w_qstringd.split(",")[i];
+						dateID = cdate.replace("/","").replace("/","");
+						addDate(cdate);		
+					}									
+			}
+			/*$("#accordion").accordion({
+				collapsible: true,
+				active: false,
+				heightStyle: "content"
+			});
+			$("#accordion").accordion("refresh");*/
+			/*$("#datepicker").click(function(){			    
+			    $("#datepickerdiv").toggle();
+			});*/
+			/*$("#datepicker").datepicker({
+			    beforeShow: function() {
+			        $(".ui-datepicker-buttonpane")
+			            .html('')
+			            .append("<button>new button</button>");
+			    }
+			});*/
+			$('#datepick').click(function () {
+				$("#datepicker").toggle();
+				updatepicker();
+				/*if(!($(this).hasClass('open'))) {
+					updatepicker();
+			    }				*/
+			    /*if($(this).hasClass('open')) {
+			    	$("#datepickarea").show();
+			    } else{
+			    	$("#datepickarea").hide();
+			    }*/
+			});
+			$('#dbb').click(function () {
+				$("#datepicker").hide();
+				updatepicker();
+			});
+			$('#repb').click(function () {
+				$("#datepicker").hide();
+				updatepicker();
+			});
+			/*$('#datepick').on('show.bs.dropdown', function () {
+				$("#datepicker").toggle();
+				});
+			$('#datepick').on('hide.bs.dropdown', function () {
+				$("#datepicker").toggle();
+				});*/			
+			
 			$mylist.dialogExtend("collapse");
 			$("#minimize").attr("title", "Minimize");
 			$('a').click(function(e){				
@@ -803,6 +966,9 @@ $mylist
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.1';
 			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex);
+			    }else if (casestring=="CASR"){
+			    	var qstringx = '500';
+			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex);
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '500';
 			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex);
@@ -818,7 +984,11 @@ $mylist
 			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex);	    		
 			    }else if(casestring.substring(0,2)=="DB"){
 			    	if (dbindex!=parseInt(casestring.substring(2)))
-			    		location.replace(document.URL.split("?")[0]+'?&dbindex='+parseInt(casestring.substring(2)));			    		    		
+			    		if ($('#datepicker').multiDatesPicker('getDates').length>0){
+			    			var dates = $('#datepicker').multiDatesPicker('getDates');			    			
+			    			localStorage.setItem(key, dates.join(","));			    			
+			    		}
+			    		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+parseInt(casestring.substring(2)));			    		    		
 			    }				
 			});
     	
@@ -949,3 +1119,17 @@ $mylist
     	}    	
     };
 });
+function updatepicker(){
+	newdates = null;
+	if ($('#datepicker').multiDatesPicker('getDates').length>0){
+		var dates = $('#datepicker').multiDatesPicker('getDates');
+		newdates = dates.join(",");
+		localStorage.setItem(key, newdates);			    			
+	} else {						
+			$("#datepick").css({"border":""});
+			localStorage.removeItem(key);
+		}
+	if (w_qstringd!=newdates){
+		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
+	}
+}

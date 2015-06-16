@@ -30,6 +30,10 @@ public class GeoRList {
     @JsonSerialize
     public String type;
 	
+	@XmlAttribute
+    @JsonSerialize
+    public String metadata;
+	
     @XmlElement(name = "GeoR")
     public Collection<GeoR> GeoR = new ArrayList<GeoR>();
 

@@ -177,19 +177,23 @@ div.ui-dialog.ui-draggable{font-size: 100%}
 #transitTable tbody tr,.dataTables_scrollBody tbody tr{
 	text-align:center;
 	font-size:60%
+}
+#geoTable {
+	table-layout: fixed	
 } 
 #geoTable tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
 	text-align:center;
-	font-size:60%
+	font-size:60%	
 } 
 
 #geoTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
 	text-align:center;
 	font-size:60%
-} 
+}
+ 
 #geoTable tbody tr,.dataTables_scrollBody tbody tr{
 	text-align:center;
-	font-size:60%
+	font-size:60%;	
 } 
 #overlay {
     background-color: rgba(0, 0, 0, 0.1);

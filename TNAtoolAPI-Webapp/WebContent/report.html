@@ -33,7 +33,9 @@ var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported 
 '<th>Phone # <em title="Phone number to contact the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Routes <em title="Total number of routes operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Fare<em title="If available, this field points to the fare information published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>Fare<em title="If available, this field points to the fare information published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Fare Data<em title="If available, this field points to the fare information published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var fURL = new Array();
@@ -109,34 +111,31 @@ $(document).ready(function(){
 	} 
 	timeVar = setInterval(progress, 100);
 	
-	/* document.getElementById("Sradius").value = w_qstringx; */
-	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex,
 		async: true,
 		success: function(d){			
-			$('h2').append('Transit Agency Summary Report <br><hr>');
+			$('h2').append('Transit Agency Summary Report <br><hr>');			
 			$.each(d.agencySR, function(i,item){
 				agencytxt = "null";
-				if (item.AgencyId !== ''){
+				if (item.AgencyId != ''){
 					agencytxt = item.AgencyId;
 				}		
-				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.AgencyId+'">'+agencytxt+'</a></td>'+ '<td><a href="' 
+				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.AgencyId+'">'+agencytxt+'</a></td>'+ '<td><a href="' 
 				+ item.URL + '">'+ item.AgencyName + '</a></td>'+ '<td>' + item.Phone +'</td>'+ '<td><a href="#" type="RC" id="'
 				+ item.AgencyId+'">'+item.RoutesCount+'</a></td>'+ '<td><a href="#" type="SC" id="'+item.AgencyId+'">'+item.StopsCount
-				+'</a></td>';
-				html = html + '<td class="details-control"></td>';
+				+'</a></td><td class="details-control"></td><td>'+item.AverageFare+';'+item.MedianFare+';';
 				fAverage.push(item.AverageFare);
 				fMedian.push(item.MedianFare);
-				if (item.FareURL !== null){
+				if (item.FareURL != null){
 					fURL.push(item.FareURL);
-				}else {
-					//html = html + '<td>-</td>';
+					html+=item.FareURL+'</td><td>'+d.metadata+'</td></tr>';
+				}else {					
 					fURL.push("-");
-				} 
-				html = html + '</tr>';				   			
+					html+='-</td><td>'+d.metadata+'</td></tr>';
+				}				
 			});		
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
@@ -169,10 +168,10 @@ $(document).ready(function(){
 			var table = $('#RT').DataTable( {
 				//"scrollY": "76%",
 				"paging": true,
-				"iDisplayLength": 14,
-				
+				"iDisplayLength": 14,				
 				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [ 5 ] }
+				                 { "bSortable": false, "aTargets": [ 5 ] },
+				                 {"visible": false, "targets": [6,7]}
 				               ],
 			    "order": [[ 1, "asc" ]],
 				
@@ -188,9 +187,12 @@ $(document).ready(function(){
 		                {
 		                    "sExtends":    "collection",
 		                    "sButtonText": "Export Report",
-		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		                    				  "mColumns": [ 0, 1, 2, 3, 4 ]},
+		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		                                      "mColumns": [ 0, 1, 2, 3, 4, 6, 7 ]},
+		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		                                      "mColumns": [ 0, 1, 2, 3, 4, 6, 7 ]} ]
 		                } 
 		            ]
 		        }

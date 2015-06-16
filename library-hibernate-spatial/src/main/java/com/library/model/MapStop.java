@@ -1,12 +1,16 @@
-package com.webapp.api.model;
+package com.library.model;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement(name = "MapR")
-public class MapRoute {
+@XmlRootElement(name = "MapS")
+public class MapStop {
 	@XmlAttribute
 	@JsonSerialize
 	public String Id;
@@ -17,33 +21,20 @@ public class MapRoute {
 	
 	@XmlAttribute
 	@JsonSerialize
-	public boolean hasDirection;
+	public String Lat;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String Shape="";
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String Shape0="";
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String Shape1="";
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String Length;
+	public String Lng;
 	
 	@XmlAttribute
 	@JsonSerialize
 	public String AgencyId;
 	
-	@XmlAttribute
-	@JsonSerialize
-	public String Fare;
+	@XmlElement(name = "MapRI")
+    public Collection<String> RouteIds = new ArrayList<String>();
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int Frequency;
+	public int Frequency=0;
 }

@@ -13,9 +13,11 @@
 
 package com.webapp.api.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -60,10 +62,17 @@ public class ClusterR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String distances;
+    public String scoords;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String connections;
-	       	
+    public String dcoords;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String distances;
+	
+	@XmlElement(name = "connections")
+    public List<ClusterR> connections = new ArrayList<ClusterR>();	
+
 }

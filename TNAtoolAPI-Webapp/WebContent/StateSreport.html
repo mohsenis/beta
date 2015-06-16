@@ -39,7 +39,8 @@ var tmp = '<tr><th id="aid">State <em title="Name of the state"><img src="images
 '<th>ODOT Transit Regions Count <em title="Count of ODOT transit regions within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Census Places Count <em title="Count of census designated places within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Counties Count <em title="Count of Counties within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Tracts Count <em title="Count of census tracts within the state."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>Census Tracts Count <em title="Count of census tracts within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 //var html2 = '<tfoot>'+tmp+'</tfoot>';
 
@@ -122,14 +123,14 @@ $(document).ready(function(){
 		success: function(d){				
 			$('h2').append('Statewide Summary Report <br><hr>');
 			$.each(d.GeoR, function(i,item){
-				html = html + '<tr><td>' + '<a href="#" type="SXR" id="'+item.Name+'">'+item.Name+'</a></td>'+ '<td>' + numberconv(item.landArea) +'</td>'+
+				html +='<tr><td>' + '<a href="#" type="SXR" id="'+item.Name+'">'+item.Name+'</a></td>'+ '<td>' + numberconv(item.landArea) +'</td>'+
 				'<td>' + numberconv(item.population) +'</td>'+ '<td>' + numberconv(item.urbanpop) +'</td>'+ '<td>' + numberconv(item.ruralpop) +'</td>'+
 				'<td><a href="#" type="ASR">' + item.AgenciesCount +'</a></td>'+ '<td>' + numberconv(item.RoutesCount) +'</td>'+ '<td>'+ numberconv(item.StopsCount) +'</td>'+
 				'<td><a href="#" type="USR">' + item.UrbansCount +'</a></td>'+'<td><a href="#" type="CDSR">' + item.CongDistsCount +'</a></td>'+
 				'<td><a href="#" type="OSR">' + item.RegionsCount +'</a></td>'+'<td><a href="#" type="CPSR">' + item.PlacesCount +'</a></td>'+
-				'<td><a href="#" type="CSR">' + item.CountiesCount +'</a></td>'+'<td>' + item.TractsCount +'</td></tr>';				   			
+				'<td><a href="#" type="CSR">' + item.CountiesCount +'</a></td>'+'<td>' + item.TractsCount +'</td><td>'+d.metadata+'</td></tr>';				   			
 			});		
-			html = html + '</tbody></table>';
+			html += '</tbody></table>';
 			$('#displayReport').append($(html));
 			progressbar.remove();			
 			$('a').click(function(e){
@@ -159,6 +160,7 @@ $(document).ready(function(){
 			var table = $('#RT').DataTable( {
 				"paging": false,
 				"bSort": false,
+				"aoColumnDefs": [{"visible": false, "targets": [14]}],
 				"sScrollX": "100%",				
 				"width": "auto",
 				"bScrollCollapse": true,
@@ -175,9 +177,12 @@ $(document).ready(function(){
 		                {
 		                    "sExtends":    "collection",
 		                    "sButtonText": "Export Report",
-		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		                    				  "mColumns": 'visible'},
+		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		                    				  "mColumns": 'all'},
+		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		                    				  "mColumns": 'all'} ]
 		                } 
 		            ]
 		        }

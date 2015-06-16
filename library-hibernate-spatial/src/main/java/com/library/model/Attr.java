@@ -11,33 +11,28 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-package com.webapp.api.model;
+package com.library.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement(name = "data")
-public class RouteListm {
+@XmlRootElement(name = "attr")
+public class Attr {
 	
 	
 	@XmlAttribute
     @JsonSerialize
-	public String data;
-	
-	@XmlElement(name = "attr")	
-	@JsonSerialize
-	public Attr attr;
+	public String id;	
 	
 	@XmlAttribute
     @JsonSerialize
-	public String state;
+	public String type;
 	
-	@XmlElement(name = "children")
-	public Collection<VariantListm> children = new ArrayList<VariantListm>();
+	@XmlAttribute
+    @JsonSerialize
+	public int longest;
+	
 }
