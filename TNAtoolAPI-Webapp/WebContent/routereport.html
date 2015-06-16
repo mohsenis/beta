@@ -43,7 +43,9 @@ var tmp = '<tr><th>Route ID <em title="Unique route identification number report
 '<th>Population (2010) Served by Route <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops on all trips. The Population Served by Route for a route is calculated as route service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops on all trips."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Miles <em title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific date or a set of dates specified using the calendar."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Hours <em title="Total hours a transit agency spends on serving all round trips of a route. Service hours may be calculated for a specific date or a set of dates specified using the calendar."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>More.. <em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>More.. <em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>More.. <em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
@@ -83,7 +85,11 @@ $(document).ready(function(){
 		success: function(d){
 			$('h2').append(d.AgencyName+' Routes Report<br><hr>');
 			$.each(d.RouteR, function(i,item){
-				html = html + '<tr><td><a href="#" class="schedulereport" id="'+ item.RouteId+'">'+item.RouteId+'</a></td><td>' + item.RouteSName + '</td><td>' + item.RouteLName +'</td><td>'+ item.RouteType +'</td><td>'+item.RouteLength +'</td><td><a href="#" class="stopreport" id="'+ item.RouteId+'">'+item.StopsCount+'</a></td><td class="serviceCol">'+ numberconv(item.PopWithinX)+'</td><td class="serviceCol">'+numberconv(item.Stopportunity)+'</td><td class="serviceCol">'+numberconv(item.PopStopportunity)+'</td><td class="serviceCol">'+numberconv(item.ServiceMiles)+'</td><td class="serviceCol">'+numberconv(item.ServiceHours)+'</td><td class="details-control"></td></tr>';
+				html += '<tr><td><a href="#" class="schedulereport" id="'+ item.RouteId+'">'+item.RouteId+'</a></td><td>' + item.RouteSName + '</td><td>' + item.RouteLName 
+				+'</td><td>'+ item.RouteType +'</td><td>'+item.RouteLength +'</td><td><a href="#" class="stopreport" id="'+ item.RouteId+'">'+item.StopsCount
+				+'</a></td><td class="serviceCol">'+ numberconv(item.PopWithinX)+'</td><td class="serviceCol">'+numberconv(item.Stopportunity)+'</td><td class="serviceCol">'
+				+numberconv(item.PopStopportunity)+'</td><td class="serviceCol">'+numberconv(item.ServiceMiles)+'</td><td class="serviceCol">'+numberconv(item.ServiceHours)
+				+'</td><td class="details-control"></td><td>'+item.RouteDesc+'</td><td>'+d.metadata+'</td></tr>';
 				description.push(item.RouteDesc);					    
 			});		
 			html = html + '</tbody>'+html2+'</table>';
@@ -111,7 +117,8 @@ $(document).ready(function(){
 				"iDisplayLength": 14,
 				
 				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [ 11 ] }
+				                 { "bSortable": false, "aTargets": [ 11 ] },
+				                 {"visible": false, "targets": [12,13]}				                 
 				               ],
 				"order": [[ 1, "asc" ]],
 				"dom": 'T<"clear">lfrtip',
@@ -126,9 +133,12 @@ $(document).ready(function(){
 		 		                {
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
-		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		 		                    				  "mColumns": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]},
+		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13 ]},
+		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13 ]}]
 		 		                } 
 		 		         ]
 		        }

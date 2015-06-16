@@ -15,6 +15,10 @@ public class ScheduleList {
 	
 	@XmlAttribute
     @JsonSerialize
+	public String metadata;
+	
+	@XmlAttribute
+    @JsonSerialize
 	public String Fare;
 	
 	@XmlAttribute

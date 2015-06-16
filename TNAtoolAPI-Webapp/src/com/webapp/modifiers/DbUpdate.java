@@ -51,7 +51,7 @@ import org.xml.sax.SAXException;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-	private final static String basePath = "C:/Users/tnatool/Development/Repository/test/";
+	private final static String basePath = "C:/Users/Administrator/repo/tnatool.git/";
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	@GET
     @Path("/updatetrips")

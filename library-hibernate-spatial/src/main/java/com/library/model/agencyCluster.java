@@ -12,8 +12,12 @@ public class agencyCluster {
     public float meanGap;
     public List<String> agencyIds;
     public List<String> agencyNames;
-    public List<Double> minGaps;
-    public List<String> connections;
+    public List<String> minGaps;
+    public List<String> sourceStopNames;
+    public List<String> destStopNames;
+    public List<String> sourceStopCoords;
+    public List<String> destStopCoords;
+    
     
     public agencyCluster(){    	
     }
@@ -82,19 +86,44 @@ public class agencyCluster {
 		this.agencyNames = agencyNames;
 	}
 
-	public List<Double> getMinGaps() {
+	public List<String> getMinGaps() {
 		return minGaps;
 	}
 
-	public void setMinGaps(List<Double> minGaps) {
+	public void setMinGaps(List<String> minGaps) {
 		this.minGaps = minGaps;
 	}
 
-	public List<String> getConnections() {
-		return connections;
+	public List<String> getSourceStopNames() {
+		return sourceStopNames;
 	}
 
-	public void setConnections(List<String> connections) {
-		this.connections = connections;
-	}   
+	public void setSourceStopNames(List<String> sourceStopNames) {
+		this.sourceStopNames = sourceStopNames;
+	}
+
+	public List<String> getDestStopNames() {
+		return destStopNames;
+	}
+
+	public void setDestStopNames(List<String> destStopNames) {
+		this.destStopNames = destStopNames;
+	}
+
+	public List<String> getSourceStopCoords() {
+		return sourceStopCoords;
+	}
+
+	public void setSourceStopCoords(List<String> sourceStopCoords) {
+		this.sourceStopCoords = sourceStopCoords;
+	}
+
+	public List<String> getDestStopCoords() {
+		return destStopCoords;
+	}
+
+	public void setDestStopCoords(List<String> destStopCoords) {
+		this.destStopCoords = destStopCoords;
+	}
+	   
 }

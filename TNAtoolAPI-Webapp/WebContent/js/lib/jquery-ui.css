@@ -434,6 +434,15 @@ button.ui-button::-moz-focus-inner {
 	padding: 1px;
 	height: 18px;
 }
+.ui-dialog .ui-dialog-titlebar-others {
+	position: absolute;
+	right: .3em;
+	top: 50%;
+	width: 20px;
+	margin: -10px 0 0 0;
+	padding: 1px;
+	height: 18px;
+}
 .ui-dialog .ui-dialog-content {
 	position: relative;
 	border: 0;

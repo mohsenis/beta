@@ -28,6 +28,10 @@ public class RouteListR {
 	
 	@XmlAttribute 
 	@JsonSerialize
+	public String metadata;
+	
+	@XmlAttribute 
+	@JsonSerialize
 	public String AgencyName;
     
     @XmlElement(name = "RouteListR")

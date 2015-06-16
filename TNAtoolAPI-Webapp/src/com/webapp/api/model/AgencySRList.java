@@ -16,8 +16,11 @@ package com.webapp.api.model;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 
 @XmlRootElement(name = "AgencySRList")
@@ -25,5 +28,9 @@ public class AgencySRList {
 
     @XmlElement(name = "AgencySR")
     public Collection<AgencySR> agencySR = new ArrayList<AgencySR>();
+    
+    @XmlAttribute 
+	@JsonSerialize
+	public String metadata;
 
 }

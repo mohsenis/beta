@@ -2,7 +2,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Connected Agencies Extended Report</title>
+	<title>Connected Agencies Summary Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -18,26 +18,25 @@
 	
 <script type="text/javascript">
 var qstring = '';
-var qstringx = '0.1';
 var progVal = 0; 
 var qstringd = '';
 var gap = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-var agency = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
-var dbindex = parseInt(document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1));
-//var d = new Date();
+var dbindex = parseInt(document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1));
+var d = new Date();
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Number of Connections<em title="Number of transit stops that have at least one stop within the specified distance of the specified transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Min Connection distance<em title="Smallest distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Max Connection distance<em title="Largest distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Average Connection distance<em title="Average distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connections<em title="List of transit stops within the specified distance of the specified transit agency stops and the distance between them in ft"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connections<em title="List of transit stops within the specified distance of the specified transit agency stops and the distance between them in ft"><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+'<th>Number of Connected Agenies<em title="Number of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency Ids<em title="Agency Ids corresponding with transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency Details<em title="Name of transit agencies that have at least one stop within the specified distance of the transit agency stops and minimum spatial gap in feet between between the transit agencies listed and the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency Names<em title="Name of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency Min Spatial Gaps<em title="Minimum spatial gap in feet between between the transit agencies listed and the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
-var connections = new Array();
+var netNames = new Array();
+var minDistances = new Array();
 
 var key = Math.random();
 
@@ -125,48 +124,34 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/ConNetXR?&agency='+agency+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenSR?&gap='+gap+'&key='+ key+'&dbindex='+dbindex,
 		async: true,
 		success: function(d){			
-			$('h2').append('Connected Transit Agencies Extended Report for '+d.agency+'<br><hr>');
+			$('h2').append('Connected Transit Agencies Summary Report <br><hr>');
 			$.each(d.ClusterR, function(i,item){
 				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +item.name+'</td><td>' +item.size +
-				'</td><td>' +item.minGap +'</td><td>' +item.maxGap +'</td><td>' +item.meanGap +'</td>'+ '<td class="details-control"></td><td>'+item.connections+'</td>';
-				html = html + '</tr>';
-				connections.push(item.connections);				
+				'</td><td>' +item.ids +'</td>'+ '<td class="details-control"></td><td>'+item.names+'</td><td>'+item.distances+'</td><td>'+d.metadata+'</td></tr>';
+				netNames.push(item.names);
+				minDistances.push(item.distances);
 			});		
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			$('a').click(function(e){
-				var d = new Date();
 				if($(this).attr('type')=="XR"){
-		    		qstring = $(this).attr('id');
-		    		qstringx = '0.1';		    		
+		    		qstring = $(this).attr('id');		    				    		
 		    		var keyName = Math.random();
-		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');		    		
-		    		localStorage.setItem(keyName, qstringd);		    		   		
-		    		window.open('/TNAtoolAPI-Webapp/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);
-				}
-				/* var d = new Date();
-			    if($(this).attr('type')=="XR"){
-			    		qstring = $(this).attr('id');
-			    		qstringx = '0.1';
-			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		var keyName = Math.random();
-			    		localStorage.setItem(keyName, qstringd);			    		
-			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
-			    } else if ($(this).attr('type')=="SR"){
-			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&dbindex='+dbindex);
-			    }; */
+		    		localStorage.setItem(keyName, qstringd);			    		
+		    		window.open('/TNAtoolAPI-Webapp/ConAgenXReport.html?&gap='+gap+'&agency='+qstring+'&dbindex='+dbindex);
+				}				
 			});
 			
 			var table = $('#RT').DataTable( {
 				"paging": true,				
 				"iDisplayLength": 14,
 				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [6,7]},
-				                 { "visible": false, "targets": [7]}
+				                 { "bSortable": false, "aTargets": [3,4,5,6 ] },
+				                 { "visible": false, "targets": [5,6,7]}
 				               ],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
@@ -180,9 +165,12 @@ $(document).ready(function(){
 		 		                {
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
-		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		 		                    				  "mColumns": [ 0, 1, 2, 3]},
+		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": [ 0, 1, 2, 3, 5, 6, 7]},
+		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": [ 0, 1, 2, 3, 5, 6, 7]} ]
 		 		                } 
 		 		            ]
 		        }
@@ -206,9 +194,13 @@ $(document).ready(function(){
 		    function format ( p ) {
 		        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
 		            '<tr>'+
-		                '<td>List of Spatially Connected Stops: </td>'+
-		                '<td>'+connections[p]+'</td>'+
-		            '</tr>'+		            		            
+		                '<td>Connected Agency Names: </td>'+
+		                '<td>'+netNames[p]+'</td>'+
+		            '</tr>'+
+		            '<tr>'+
+		                '<td>Connected Agency Min Spatial Gaps (ft.): </td>'+
+		                '<td>'+minDistances[p]+'</td>'+
+		            '</tr>'+		            
 		        '</table>';
 		    }
 		    $('#RT_wrapper').css("width", $('#RT').css("width"));

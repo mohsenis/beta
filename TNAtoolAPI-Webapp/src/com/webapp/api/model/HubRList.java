@@ -30,6 +30,10 @@ public class HubRList {
     @JsonSerialize
     public String type;
 	
+	@XmlAttribute
+    @JsonSerialize
+    public String metadata;
+	
     @XmlElement(name = "HubR")
     public Collection<HubR> HubR = new ArrayList<HubR>();
 
