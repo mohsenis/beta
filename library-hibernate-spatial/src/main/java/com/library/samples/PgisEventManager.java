@@ -642,12 +642,12 @@ public class PgisEventManager {
 		mainquery +="), trips as (select agencyid as aid, id as tripid from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)) select "
 				+ "stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips.aid),0) as service from aids inner join gtfs_stop_times stime on "
 				+ "aids.aid=stime.stop_agencyid left join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id";
-		
+		//System.out.println(mainquery);
 			try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
 				while (rs.next()) {
-					response.put(rs.getString("id"), rs.getInt("svc"));										
+					response.put(rs.getString("stopid"), rs.getInt("service"));										
 			        }
 				rs.close();
 				stmt.close();
@@ -673,10 +673,11 @@ public class PgisEventManager {
 				+ "from gtfs_stop_route_map inner join aids on aids.aid=agencyid_def group by agencyid_def, stopid) select cluster.cid as cid, cluster.sid as sid, cluster.aid "
 				+ "as aid, cluster.name as name, map.agencies as agencies, map.routes as routes from cluster inner join map on map.sid = cluster.sid and map.aid = cluster.aid "
 				+ "order by cluster.cid, cluster.sid";
-		Statement stmt = null;
+		Statement stmt = null;		
 		try{
+			//System.out.println(mainquery);
 			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery(mainquery);
+			ResultSet rs = stmt.executeQuery(mainquery);			
 			//System.out.println("Query: "+stmt);
 			String cid = "";
 			int count = 0;

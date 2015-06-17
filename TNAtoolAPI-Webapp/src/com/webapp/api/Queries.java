@@ -4613,7 +4613,7 @@ Loop:  	for (Trip trip: routeTrips){
     	"Selected Database:" +Databases.dbnames[dbindex]+";Stop Cluster Radius(miles):"+String.valueOf(x);
     	x = x * 1609.34;
     	setprogVal(key, 5);
-    	TreeSet<StopCluster> clusterList = new TreeSet<StopCluster>();    	
+    	TreeSet<StopCluster> clusterList = new TreeSet<StopCluster>();  
     	clusterList = PgisEventManager.stopClusters(fulldates, days, username, x, dbindex);  
     	setprogVal(key, 40);
     	int totalLoad = clusterList.size();
