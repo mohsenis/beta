@@ -266,7 +266,7 @@ var ind;
 var dialog;
 var dbInfo = [[]];
 var defaultInfo = ["","","","","jdbc:postgresql://localhost:5432/gtfsdb","","","mapping.hbm.xml","org/onebusaway/gtfs/model/GtfsMapping.hibernate.xml","org/onebusaway/gtfs/impl/HibernateGtfsRelationalDaoImpl.hibernate.xml"];
-var folder = "C:/Users/Administrator/Documents/Development/TNAtool_v2/git/test/TNAtoolAPI-Webapp/WebContent/admin/Development/";
+var folder = "C:/Users/PB/git/TNAtool/TNAtoolAPI-Webapp/WebContent/admin/Development/";
 var fList;
 var aList;
 var oldName;

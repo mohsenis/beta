@@ -1,2 +1,2 @@
 databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2
-0,Spring 2015,gtfsdb.cfg.xml,classpath:org/onebusaway/gtfs/examples/gtfsdb.cfg.xml,jdbc:postgresql://localhost:5432/gtfsdb,postgres,OSUteam007,mapping.hbm.xml,org/onebusaway/gtfs/model/GtfsMapping.hibernate.xml,org/onebusaway/gtfs/impl/HibernateGtfsRelationalDaoImpl.hibernate.xml
+0,pouyadb,pouyadb.cfg.xml,classpath:org/onebusaway/gtfs/examples/pouyadb.cfg.xml,jdbc:postgresql://localhost:5432/pouyadb,postgres,123123,mapping.hbm.xml,org/onebusaway/gtfs/model/GtfsMapping.hibernate.xml,org/onebusaway/gtfs/impl/HibernateGtfsRelationalDaoImpl.hibernate.xml

@@ -9,13 +9,8 @@
 	<script src="js/lib/leaflet-0.7/leaflet-src.js"></script>	  
     <script type="text/javascript" src="js/lib/tile.stamen.js"></script>
     <script src="js/lib/jquery-ui.js"></script>	
-	<script  src="js/lib/jstree-v.pre1.0/jquery.jstree.js"></script>
-	
-	
-	<!-- <script src="js/lib/date.js"></script> -->	
-	
-	
-	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
+	<script  src="js/lib/jstree-v.pre1.0/jquery.jstree.js"></script>	
+
 	<script src="js/lib/bootstrap-dropdown.js"></script>
 	<link rel="stylesheet" href="js/lib/bootstrap.css" />
 	<script src="js/lib/Polylinencoded.js"></script>
@@ -26,6 +21,7 @@
 	<script src="js/lib/MarkerCluster/leaflet_markercluster-src.js"></script>
 	<!-- <script src="js/lib/MarkerCluster/leaflet.markercluster1.js"></script> -->
 	<script src="js/lib/jquery_dialogextend.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 
 	<script type="text/javascript" src="js/otp/shapes.js"></script>	
 
@@ -89,8 +85,9 @@
       <input  type="text" autofocus style="visibility:hidden">
 	  <div id="tabs">
 		  <ul>
-		    <li><a href="#transit">Transit Agencies Report</a></li>
-		    <li><a href="#geography">Geographical Report</a></li>
+		    <li><a href="#transit">Transit Agencies</a></li>
+		    <li><a href="#geography">Census</a></li>
+		    <li><a href="#parknride">Park and Ride</a></li>
 		  </ul>
 		  <div id="transit">
 		  	<b>Show Transit: </b><input type="radio" name="transitShow" id="stopsCheck" value="stops" style="margin-left:2em" onclick="transitRadio(this)">Stops
@@ -144,6 +141,20 @@
 		  	<!-- <br>
 		  	<br> -->		  	
 		  	<p id="displayGeoReport"></p>
+		  </div>
+		  <div id="parknride">
+		  	<table id="parknrideInfo" style="border:none; font-size:100%">
+		  		<tr>
+		  			<td><b>Number of P&R Lots:</b></td>
+		  			<td class="onMapdata" id="npnr"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Number of Available Spaces:</b></td>
+		  			<td class="onMapdata" id="nspc"></td>
+		  		</tr>
+		  	</table>
+		  	<br>
+		  	<p id="displayPnrCounties"></p>
 		  </div>
 	  </div>
       <img id="dialogPreLoader" src="images/287.GIF" alt="Page Loading" style="margin:9em;margin-top:22em" >	
