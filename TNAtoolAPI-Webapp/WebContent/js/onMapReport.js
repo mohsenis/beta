@@ -258,11 +258,11 @@ function showOnMapReport(lat, lon, date, x){
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
 		        	"sRowSelect": "multi",
 		        	"aButtons": [],
-		        	"columns":[{ "width": "50%"},
-		        	           { "width": "50%"},
-		        	           { "width": "50%"},
-		        	           { "width": "50%"},
-		        	           { "width": "50%"}
+		        	"columns":[{ "width": "50%" },
+		        	           { "width": "50%" },
+		        	           { "width": "50%" },
+		        	           { "width": "50%" },
+		        	           { "width": "50%" }
 		        	           ]
 			}
 			});
@@ -426,7 +426,7 @@ function showOnMapReport(lat, lon, date, x){
 						spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
 					});
 					$.each(jtem.MapPnrSL, function(k,ktem){
-							var marker = L.marker([ktem.Lat,ktem.Lng]/*, {icon: onMapIcon}*/);
+							var marker = L.marker([ktem.Lat,ktem.Lng]);
 //							pophtml2='<br><b>Serving Routes ID(s):</b>';
 //							$.each(ltem.RouteIds, function(m,mtem){
 //								pophtml2+='<br><span style="margin-left:2em">'+mtem+'</span>';
@@ -441,7 +441,7 @@ function showOnMapReport(lat, lon, date, x){
 						points = [d];
 						var polyline = L.multiPolyline(points, {	
 							weight: 5,
-							color: colorset[c],
+							color: colorset[k],
 							//fillColor: colorset[k],
 							//color: "#000",
 							//weight: 1,
