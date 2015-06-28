@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.swing.JOptionPane;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -151,26 +153,21 @@ public class Queries {
         return new TransitError("Sum of Population is: "+ response+" Som of centroids is: "+sum);
     }
 	
-	//static MapDisplay mapResponse;
-	//static Map<String, TmpMapRoute> tripKey;
-	
 	/**
     * Generates The on map report
     *  
     */
-   @GET
-   @Path("/onmapreport")
-   @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-   public Object getOnMapReport(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex) throws JSONException { 
+    @GET
+    @Path("/onmapreport")
+    @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public Object getOnMapReport(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException { 
    	if (Double.isNaN(x) || x <= 0) {
            x = 0;
        }
-   	//x = Math.round(x*100.00)/100.00;
    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
        	dbindex = default_dbindex;
-       } 
-   	//final int sdbindex = dbindex;
-//   	x = x * 1609.34;
+       }
+   	
    	String[] latss = lats.split(",");
    	double[] lat = new double[latss.length];
    	int ind = 0;
@@ -204,7 +201,7 @@ public class Queries {
     @GET
     @Path("/menu")
     @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Object getmenu(@QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex) throws JSONException {  
+    public Object getmenu(@QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {  
     	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
@@ -219,7 +216,7 @@ public class Queries {
     	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);
     	if (menuResponse[dbindex]==null || menuResponse[dbindex].data.size()!=allagencies.size() ){
     		menuResponse[dbindex] = new AgencyRouteList();   	
-    		menuResponse[dbindex] = PgisEventManager.agencyMenu(fulldates, days, dbindex);
+    		menuResponse[dbindex] = PgisEventManager.agencyMenu(fulldates, days, username, dbindex);
     	}    	
     	return menuResponse[dbindex];    	
     }
@@ -805,19 +802,11 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
+		
 		AgencyList allagencies = new AgencyList();
-		allagencies.agencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);      
-		//query change
-				System.out.println(username);
-		    	
-		    	if(!username.equals("null")){
-		    		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
-		    	Collection <Agency> selectedagencies = GtfsHibernateReaderExampleMain.QuerySelectedAgencies(selectedAgencies, dbindex);
-		    	
-		    	
-		    	
-		    	allagencies.agencies = selectedagencies;}
-		//end change
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		allagencies.agencies = GtfsHibernateReaderExampleMain.QuerySelectedAgencies(selectedAgencies, dbindex);
+    	
 	    AgencySRList response = new AgencySRList();    
 	    int index =0;
 		int totalLoad = allagencies.agencies.size();
@@ -829,7 +818,6 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    	each.Phone = instance.getPhone();
 	    	each.URL = instance.getUrl();
 	    	each.FareURL = instance.getFareUrl(); 
-	    	//changed/////////////////////////////////////////////////////////////////////////////////
 	    	List<Route> routes = GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance, dbindex);
 	    	each.RoutesCount = String.valueOf(routes.size());
 	    	float sumFare=0; 
@@ -849,7 +837,6 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    		each.AverageFare = "NA";
 		    	each.MedianFare =  "NA";
 	    	}
-	    	////////////////////////////////////////////////////////////////////////////////////////////
 			//each.RoutesCount = String.valueOf(GtfsHibernateReaderExampleMain.QueryRoutesbyAgency(instance).size()) ;
 	    	List <Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(instance.getId(), dbindex);
 	        each.StopsCount = String.valueOf(stops.size());        
@@ -1298,9 +1285,7 @@ Loop:  	for (Trip trip: routeTrips){
         }
 		List<County> allcounties = new ArrayList<County> ();
 		
-		//query change
 		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
-		//end change
 		
 		try {
 			allcounties = EventManager.getcounties(dbindex);
@@ -1356,17 +1341,8 @@ Loop:  	for (Trip trip: routeTrips){
 	    	}*/
 	    	each.StopsCount = String.valueOf(0);
 	    	try {
-	    		List<GeoStop> tmpGeo = EventManager.getstopsbycounty(instance.getCountyId(), dbindex);
-	    		int tmp=0;
-	    		for(GeoStop gs: tmpGeo){
-	    			if(selectedAgencies.contains(gs.getAgencyId())){
-	    				tmp ++;
-	    			}
-	    		}
-	    		each.StopsCount=tmp+"";
-	    		//each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId(), selectedAgencies, dbindex));
-	    		
 	    		//each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId(), dbindex));
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycounty(instance.getCountyId(), selectedAgencies, dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -1376,8 +1352,8 @@ Loop:  	for (Trip trip: routeTrips){
 			}	
 	    	each.RoutesCount = String.valueOf(0);
 	    	try {
-	    		//change the method here as well
-	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbycounty(instance.getCountyId(), dbindex));
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbycounty(instance.getCountyId(), selectedAgencies, dbindex));
+	    		//each.RoutesCount = String.valueOf(EventManager.getroutescountsbycounty(instance.getCountyId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -1733,11 +1709,12 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoCTSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCTSR(@QueryParam("county") String county, @QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	public Object getGCTSR(@QueryParam("county") String county, @QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
 		List<Tract> alltracts = new ArrayList<Tract> ();
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		try {
 			alltracts = EventManager.gettractsbycounty(county, dbindex);
 		} catch (FactoryException e1) {
@@ -1774,7 +1751,8 @@ Loop:  	for (Trip trip: routeTrips){
 	    	each.MedianFare = "0";	    	
 	    	each.StopsCount = String.valueOf(0);
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbytract(instance.getTractId(), dbindex));
+	    		//each.StopsCount = String.valueOf(EventManager.getstopscountbytract(instance.getTractId(), dbindex));
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbytract(instance.getTractId(), selectedAgencies, dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -1784,7 +1762,8 @@ Loop:  	for (Trip trip: routeTrips){
 			}	
 	    	each.RoutesCount = String.valueOf(0);
 	    	try {
-	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbytract(instance.getTractId(), dbindex));
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbytract(instance.getTractId(), selectedAgencies, dbindex));
+	    		//each.RoutesCount = String.valueOf(EventManager.getroutescountsbytract(instance.getTractId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2138,11 +2117,12 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoCPSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCPSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	public Object getGCPSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
 		List<Place> allplaces = new ArrayList<Place> ();
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		try {
 			allplaces = EventManager.getplaces(dbindex);
 		} catch (FactoryException e1) {
@@ -2186,7 +2166,8 @@ Loop:  	for (Trip trip: routeTrips){
 	    	}*/
 	    	each.StopsCount = String.valueOf(0);
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbyplace(instance.getPlaceId(), dbindex));
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbyplace(instance.getPlaceId(),selectedAgencies, dbindex));
+	    		//each.StopsCount = String.valueOf(EventManager.getstopscountbyplace(instance.getPlaceId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2196,7 +2177,8 @@ Loop:  	for (Trip trip: routeTrips){
 			}	
 	    	each.RoutesCount = String.valueOf(0);
 	    	try {
-	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyplace(instance.getPlaceId(), dbindex));
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyplace(instance.getPlaceId(),selectedAgencies, dbindex));
+	    		//each.RoutesCount = String.valueOf(EventManager.getroutescountsbyplace(instance.getPlaceId(), dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2217,7 +2199,7 @@ Loop:  	for (Trip trip: routeTrips){
 	} 
 	
     /**
-     * Generates The Tracts Extended report
+     * Generates The Census Places Extended report
      */ 
     @GET
     @Path("/PlacesXR")
@@ -2551,7 +2533,7 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoURSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGURSR(@QueryParam("pop") Integer upop, @QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	public Object getGURSR(@QueryParam("pop") Integer upop, @QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
@@ -2559,6 +2541,9 @@ Loop:  	for (Trip trip: routeTrips){
        		upop=50000;
        	}
 		List<Urban> allurbanareas = new ArrayList<Urban> ();
+		System.out.println(username);
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		System.out.println(selectedAgencies.size());
 		try {
 			allurbanareas = EventManager.geturbansbypop(upop,dbindex);
 		} catch (FactoryException e1) {
@@ -2589,7 +2574,8 @@ Loop:  	for (Trip trip: routeTrips){
 	    	population += instance.getPopulation();
 	    	//int routescnt = 0;
 	    	try {
-	    		List<GeoStopRouteMap> routesL = EventManager.getroutesbyurban(instance.getUrbanId(), dbindex);
+	    		//List<GeoStopRouteMap> routesL = EventManager.getroutesbyurban(instance.getUrbanId(), dbindex);
+	    		List<GeoStopRouteMap> routesL = EventManager.getroutesbyurban(instance.getUrbanId(), selectedAgencies, dbindex);
 	    		for(int x=0;x<routesL.size();x++){
 	    			String routeID = routesL.get(x).getrouteId()+routesL.get(x).getagencyId();
 	    			if(!routeL.contains(routeID)){
@@ -2606,7 +2592,8 @@ Loop:  	for (Trip trip: routeTrips){
 	    	//routescount += routescnt;
 	    	int stopscnt = 0;
 	    	try {
-	    		stopscnt = (int)EventManager.getstopscountbyurban(instance.getUrbanId(), dbindex);
+	    		//stopscnt = (int)EventManager.getstopscountbyurban(instance.getUrbanId(), dbindex);
+	    		stopscnt = (int)EventManager.getstopscountbyurban(instance.getUrbanId(), selectedAgencies, dbindex);
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -3007,11 +2994,12 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoUASR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGUASR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	public Object getGUASR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
 		List<Urban> allurbanareas = new ArrayList<Urban> ();
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		try {
 			allurbanareas = EventManager.geturban(dbindex);
 		} catch (FactoryException e1) {
@@ -3035,7 +3023,8 @@ Loop:  	for (Trip trip: routeTrips){
 	    	each.population = String.valueOf(instance.getPopulation());
 	    	each.RoutesCount = String.valueOf(0);	    	
 	    	try {
-	    		each.RoutesCount = String.valueOf(EventManager.getroutescountbyurban(instance.getUrbanId(), dbindex));
+	    		//each.RoutesCount = String.valueOf(EventManager.getroutescountbyurban(instance.getUrbanId(), dbindex));
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountbyurban(instance.getUrbanId(), selectedAgencies, dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -3045,7 +3034,8 @@ Loop:  	for (Trip trip: routeTrips){
 			}
 	    	each.StopsCount = String.valueOf(0);	    	
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbyurban(instance.getUrbanId(), dbindex));
+	    		//each.StopsCount = String.valueOf(EventManager.getstopscountbyurban(instance.getUrbanId(), dbindex));
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbyurban(instance.getUrbanId(), selectedAgencies, dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -3420,11 +3410,12 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoCDSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCDSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	public Object getGCDSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
 		List<CongDist> allcongdists = new ArrayList<CongDist> ();
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		try {
 			allcongdists = EventManager.getcongdist(dbindex);
 		} catch (FactoryException e1) {
@@ -3448,7 +3439,8 @@ Loop:  	for (Trip trip: routeTrips){
 	    	each.population = String.valueOf(instance.getPopulation());
 	    	each.RoutesCount = String.valueOf(0);	    	
 	    	try {
-	    		each.RoutesCount = String.valueOf(EventManager.getroutescountbycongdist(instance.getCongdistId(), dbindex));
+	    		//each.RoutesCount = String.valueOf(EventManager.getroutescountbycongdist(instance.getCongdistId(), dbindex));
+	    		each.RoutesCount = String.valueOf(EventManager.getroutescountbycongdist(instance.getCongdistId(), selectedAgencies, dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -3458,7 +3450,8 @@ Loop:  	for (Trip trip: routeTrips){
 			}
 	    	each.StopsCount = String.valueOf(0);	    	
 	    	try {
-	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycongdist(instance.getCongdistId(), dbindex));
+	    		//each.StopsCount = String.valueOf(EventManager.getstopscountbycongdist(instance.getCongdistId(), dbindex));
+	    		each.StopsCount = String.valueOf(EventManager.getstopscountbycongdist(instance.getCongdistId(), selectedAgencies, dbindex));
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -3835,11 +3828,12 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoORSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGORSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	public Object getGORSR(@QueryParam("key") double key, @QueryParam("type") String type, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
 		List<County> allcounties = new ArrayList<County> ();
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		try {
 			allcounties = EventManager.getcounties(dbindex);
 		} catch (FactoryException e1) {
@@ -3875,7 +3869,8 @@ Loop:  	for (Trip trip: routeTrips){
 			    	each.MedianFare = "0";
 			    	each.StopsCount = String.valueOf(0);
 			    	try {
-			    		each.StopsCount = String.valueOf(EventManager.getstopscountbyregion(regionId, dbindex));
+			    		//each.StopsCount = String.valueOf(EventManager.getstopscountbyregion(regionId, dbindex));
+			    		each.StopsCount = String.valueOf(EventManager.getstopscountbyregion(regionId, selectedAgencies, dbindex));
 					} catch (FactoryException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -3885,7 +3880,8 @@ Loop:  	for (Trip trip: routeTrips){
 					}
 			    	each.RoutesCount = String.valueOf(0);
 			    	try {
-			    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyregion(regionId, dbindex));
+			    		//each.RoutesCount = String.valueOf(EventManager.getroutescountsbyregion(regionId, dbindex));
+			    		each.RoutesCount = String.valueOf(EventManager.getroutescountsbyregion(regionId, selectedAgencies, dbindex));
 					} catch (FactoryException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -4384,10 +4380,12 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/stateSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getStateSR(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	public Object getStateSR(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
        	dbindex = default_dbindex;
        }
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		
 		int totalLoad = 2;
 		int index = 0;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -4418,7 +4416,7 @@ Loop:  	for (Trip trip: routeTrips){
 		index++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		HashMap<String, Integer> transcounts = new HashMap<String, Integer>();
-		transcounts = GtfsHibernateReaderExampleMain.QueryCounts(dbindex);
+		transcounts = GtfsHibernateReaderExampleMain.QueryCounts(dbindex,selectedAgencies);
 		each.StopsCount = String.valueOf(transcounts.get("stop"));
 		each.RoutesCount = String.valueOf(transcounts.get("route"));
 		each.AgenciesCount = String.valueOf(transcounts.get("agency"));
@@ -4442,7 +4440,7 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/stateXR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getStateXR(@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("l") Integer L, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	public Object getStateXR(@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("l") Integer L, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }
@@ -4453,6 +4451,7 @@ Loop:  	for (Trip trip: routeTrips){
 		if (L==null || L<0){
        		L = LEVEL_OF_SERVICE;
        	}
+		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		String[] dates = date.split(",");
     	String[][] days = daysOfWeekString(dates);
     	String[] fulldates = fulldate(dates);
@@ -4462,22 +4461,22 @@ Loop:  	for (Trip trip: routeTrips){
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.AreaName = "Oregon";
 		HashMap<String, Float> FareData = new HashMap<String, Float>();
-		FareData = GtfsHibernateReaderExampleMain.QueryFareData(null, dbindex);
+		FareData = GtfsHibernateReaderExampleMain.QueryFareData(selectedAgencies, dbindex);
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.MinFare = String.valueOf(FareData.get("min"));
 		response.AverageFare = String.valueOf(FareData.get("avg"));
 		response.MaxFare = String.valueOf(FareData.get("max"));
 		int FareCount = FareData.get("count").intValue();
-		float FareMedian = GtfsHibernateReaderExampleMain.QueryFareMedian(null, FareCount, dbindex);
+		float FareMedian = GtfsHibernateReaderExampleMain.QueryFareMedian(selectedAgencies, FareCount, dbindex);
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.MedianFare = String.valueOf(FareMedian);
-		Double RouteMiles = GtfsHibernateReaderExampleMain.QueryRouteMiles(dbindex);
+		Double RouteMiles = GtfsHibernateReaderExampleMain.QueryRouteMiles(selectedAgencies, dbindex);
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.RouteMiles = String.valueOf(RouteMiles);
-		Long StopsCount = GtfsHibernateReaderExampleMain.QueryStopsCount(dbindex);
+		Long StopsCount = GtfsHibernateReaderExampleMain.QueryStopsCount(selectedAgencies, dbindex);
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		HashMap<String, Long> geocounts = new HashMap<String, Long>();

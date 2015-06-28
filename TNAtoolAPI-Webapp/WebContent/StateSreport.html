@@ -8,6 +8,7 @@
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="js/lib/date.js"></script>
 	<script src="js/jQueryContent.js"></script>
+	<script src="js/tooltips.js"></script>
 	<!-- <script src="js/lib/sorttable.js"></script>  -->
 	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
 	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
@@ -117,7 +118,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/stateSR?key='+ key+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/stateSR?key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){				
 			$('h2').append('Statewide Summary Report <br><hr>');

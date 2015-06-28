@@ -24,13 +24,15 @@ function PGlogin(){
         async: false,
         success: function(d) {
         	if(d.DBError!="false"){
+        		username = d.DBError;
         		if(isActive(username)!="true"){
         			alert("Your account has not been activated yet.");
         			return false;
         		}
-    			sessionStorage.setItem("username", username);
+    			//sessionStorage.setItem("username", username);
+        		openSeession(username);
     			window.location.href = "playground.html";
-    			//openSeession(d.DBError);
+    			
         	}else{
         		alert("The Username or Password was incorrect");
         		return false;
@@ -60,24 +62,44 @@ function isActive(username){
 function openSeession(username){
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/FileUpload?&sessionUser="+username,
+        url: "/TNAtoolAPI-Webapp/FileUpload?&setSessionUser="+username,
         dataType: "json",
         async: false,
         success: function(d) {
-        	if(d.DBError!="false"){
-    			/*sessionStorage.setItem("username", cu);
-    			window.location.href = "playground.html";*/
-    			openSeession(d.DBError);
-        	}else{
-        		alert("The Username or Password was incorrect");
-        		return false;
-        	}
+        	
         }
 	});
 }
 
+function getSession(){
+	var username = "admin";
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&getSessionUser=gsu",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	username = d.username;
+        }
+	});
+	return username;
+}
+
+function endSession(){
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&endSessionUser=esu",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+	window.location.href = "playground.html";
+}
+
 function PGregister(){
-	var passkey = $('#key').val();
+	//var passkey = $('#key').val();
 	
 	var username = $('#user').val();
 	var password = $('#pass').val();
@@ -95,8 +117,30 @@ function PGregister(){
     	$( "#UsernameDialog" ).dialog("open");
     	return false;
     }
-	
-	$.ajax({
+    var cu = checkUser(username);
+	var ce = checkUser(email);
+	if(cu=="false" && ce=="false"){
+		var au = addUser(username,password,email,firstname,lastname);
+		sendRequestEmail(username,email,firstname,lastname);
+		if(au=="true"){
+			alert("You are successfully registered. Your account has to get approved and activated before using." +
+					" Once approved, you'll receive an email indicating that you can use your credentials to log into the website.");
+			
+			window.location.href = "index.html";
+		}else{
+			alert(au);
+			return false;
+		}
+	}else if(cu=="true"){
+		alert("The Username \""+username+"\" already exists");
+		return false;
+	}else if(ce=="true"){
+		alert("The Email \""+email+"\" already exists");
+		return false;
+	}else{
+		return false;
+	}
+	/*$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/validatePass?&pass="+passkey,
         dataType: "json",
@@ -107,10 +151,11 @@ function PGregister(){
         		var ce = checkUser(email);
         		if(cu=="false" && ce=="false"){
         			var au = addUser(username,password,email,firstname,lastname);
+        			sendRequestEmail(username,email,firstname,lastname);
         			if(au=="true"){
         				alert("You are successfully registered. Your account has to get approved and activated before using." +
         						" Once approved, you'll receive an email indicating that you can use your credentials to log into the website.");
-        				sendRequestEmail(username,email,firstname,lastname);
+        				
         				window.location.href = "index.html";
         			}else{
         				alert(au);
@@ -130,7 +175,7 @@ function PGregister(){
         		return false;
         	}
         }
-	});
+	});*/
 }
 
 function sendRequestEmail(username,email,firstname,lastname){
@@ -234,11 +279,12 @@ function listOfFeeds(){
 		        		b=true;
 	        			html+="<tr><td>";
 		        		var agencynames = d.names[i].split(",");
-		        		var html1 = "";
+		        		var html1 = "<br><span style='margin-left:3.5em'>Agencies:</span>";
 		        		for(var k=0; k<agencynames.length; k++){
 		        			html1 += "<br><span style='margin-left:6em'>"+agencynames[k]+"</span>";
 		        		}
-		        		html += "<p><input type='checkbox' class='selectFeed' id='"+item+"' style='margin-right:2em'><span>"+item+"</span>"+html1+"</p></td>";
+		        		html += "<p><input type='checkbox' class='selectFeed' id='"+item+"' style='margin-right:2em'><span>"+item+"</span>"
+		        		+"<br><span style='margin-left:3.5em'>Start Date: "+stringToDate(d.startdates[i])+"</span>"+"<br><span style='margin-left:3.5em'>End Date: "+stringToDate(d.enddates[i])+"</span>"+html1+"</p></td>";
 		        		html += "<td style='padding-left:20px'>" +
 		        				"<select onchange='changePublic(this.value,\""+item+"\")'>";
 		        		if(d.isPublic[i]=="f"){
@@ -262,7 +308,6 @@ function listOfFeeds(){
 	}
 	return html;
 }
-
 
 function selectFeed(){
 	
@@ -333,11 +378,12 @@ function listOfPublicFeed(){
 	        			b=true;
 	        			html+="<tr><td>";
 		        		var agencynames = d.names[i].split(",");
-		        		var html1 = "";
+		        		var html1 = "<br><span style='margin-left:3.5em'>Agencies:</span>";
 		        		for(var k=0; k<agencynames.length; k++){
 		        			html1 += "<br><span style='margin-left:6em'>"+agencynames[k]+"</span>";
 		        		}
-		        		html += "<p><input type='checkbox' class='selectPublicFeed' id='"+item+"' style='margin-right:2em'><span>"+item+"</span>"+html1+"</p></td>";
+		        		html += "<p><input type='checkbox' class='selectPublicFeed' id='"+item+"' style='margin-right:2em'><span>"+item+"</span>"
+		        		+"<br><span style='margin-left:3.5em'>Start Date: "+stringToDate(d.startdates[i])+"</span>"+"<br><span style='margin-left:3.5em'>End Date: "+stringToDate(d.enddates[i])+"</span>"+html1+"</p></td>";
 		        		html += "<td  style='padding-left:20px'><P>";
 		        		html += "<span>"+d.ownerFirstname[i]+"</span><br>";
 		        		html += "<span>"+d.ownerLastname[i]+"</span>";
@@ -371,11 +417,12 @@ function listOfOregonFeed(){
 	        	$.each(d.feeds, function(i,item){
 	        		if(d.names[i]!=null){
 		        		var agencynames = d.names[i].split(",");
-		        		var html1 = "";
+		        		var html1 = "<br><span style='margin-left:3.5em'>Agencies:</span>";
 		        		for(var k=0; k<agencynames.length; k++){
 		        			html1 += "<br><span style='margin-left:6em'>"+agencynames[k]+"</span>";
 		        		}
-		        		html += "<p><input type='checkbox' class='selectOregonFeed' id='"+item+"' style='margin-right:2em'><span>"+item+"</span>"+html1+"</p>";
+		        		html += "<p><input type='checkbox' class='selectOregonFeed' id='"+item+"' style='margin-right:2em'><span>"+item+"</span>"
+		        		+"<br><span style='margin-left:3.5em'>Start Date: "+stringToDate(d.startdates[i])+"</span>"+"<br><span style='margin-left:3.5em'>End Date: "+stringToDate(d.enddates[i])+"</span>"+html1+"</p>";
 		        		
 	        		}
 	        	});
@@ -387,6 +434,17 @@ function listOfOregonFeed(){
 	return html;
 }
 
+function stringToDate(str){
+	if(str==null){
+		return "";
+	}
+	var sArr = new Array();
+	sArr.push(str.substring(4, 6));
+	sArr.push(str.substring(6, 8));
+	sArr.push(str.substring(0, 4));
+	return sArr.join("/");
+}
+
 function deleteFeed(){
 	
 	var feeds = new Array();
@@ -396,7 +454,9 @@ function deleteFeed(){
 			feeds.push($(this).attr('id'));
 		}
 	});
-	
+	$("#panel-default").hide();
+	$("#dialogPreLoader").show();
+	$("#overlay").show();
 	for(var i=0; i<feeds.length; i++){
 		$.ajax({
 	        type: "GET",
@@ -410,7 +470,6 @@ function deleteFeed(){
 	}
 	location.reload(true);
 }
-
 
 function getTotalSize(files) {
     var total = 0;
@@ -430,7 +489,8 @@ function go(){
 	
 	$('.col-lg-7').css("width",'100%');
 	$('.col-lg-5').css("width",'100%');
-	username = sessionStorage.getItem("username");
+	//username = sessionStorage.getItem("username");
+	username = getSession();
 	var userInfo = getUserInfo(username);
 	var freeSpace = userInfo[3]-userInfo[4];
 	$('#helloUser').html("Hello "+userInfo[0]+" "+userInfo[1]);
@@ -452,6 +512,9 @@ function go(){
     		alert("The total size of the file(s) selected is more than the available space.");
     		return false;
     	}
+    	$("#panel-default").hide();
+    	$("#dialogPreLoader").show();
+    	$("#overlay").show();
     	/*alert(getTotalSize(data.files));*/
     }).bind('fileuploaddone', function (e, data) {
     	location.reload(true);
@@ -459,6 +522,7 @@ function go(){
     
     // Load existing files:
     $('#fileupload').addClass('fileupload-processing');
+    
     $.ajax({
         url: $('#fileupload').fileupload('option', 'url'),
         dataType: null,

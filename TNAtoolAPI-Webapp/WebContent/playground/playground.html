@@ -30,6 +30,9 @@
   <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />
   <link rel="stylesheet" href="playgournd.css">
   <script>
+  	if(getSession()=="admin"){
+  		window.location.href = "index.html";
+  	}
   	$(document).ready(function(){
   		go();
   	});
@@ -37,17 +40,18 @@
 </head>
 
 <body>
-	
+	<div id="overlay"></div>
 	<br>
 	<div class="info-card" style="margin:20px;width:45%;float:left;margin-left:60px">
 		<div>
-			<h1 id="helloUser"></h1><br>
-			<p id="launchTNA" onclick="launchTNA()">
-				<span class="btn btn-success fileinput-button">Launch TNA Software Tool</span>
-			</p>
+			<h1 id="helloUser"></h1>
+			<span id="launchTNA" onclick="launchTNA()" class="btn btn-success fileinput-button">Launch TNA Software Tool</span>
+			<input type='button' value='Log Out' onclick='endSession()' style='margin-left:20px' class='btn btn-danger delete'>
+			<br><br>
+			
 			<br>
 			<div id="feedAccordion" class="accordion" style="font-size:90%;width:60%">
-	    		<h3>Oregon GTFS feeds. Last updated on 03/15/2015.</h3>
+	    		<h3>Oregon' Transit Agencies GTFS Feed</h3>
 	    		<div id="oregonFeeds"></div>
 	    	</div>
 		</div>
@@ -103,13 +107,14 @@
         <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
     </form>
     <br>
-    <div class="panel panel-default">
+    <img id="dialogPreLoader" src="../images/287.GIF" alt="Page Loading" style="margin-left:35%;display:none" >
+    <div class="panel panel-default" id="panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Upload Notes</h3>
         </div>
         <div class="panel-body">
             <ul>
-	                <li>The maximum file size for uploads in this demo is <strong><span id="freeSpace"></span> MB</strong>.</li>
+	                <li>The maximum file size for uploads is <strong><span id="freeSpace"></span> MB</strong>.</li>
 	                <li>Only Zip files are allowed.</li>
 	                <li>Uploaded files will be deleted automatically after added to the database.</li>
 	                <li>You can <strong>drag &amp; drop</strong> files from your desktop on this webpage.</li>

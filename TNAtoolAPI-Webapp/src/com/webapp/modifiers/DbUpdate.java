@@ -87,28 +87,31 @@ import org.xml.sax.SAXException;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-	private final static String basePath = "C:/Users/tnatool/Development/Repository/test/";
+	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
+	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
+	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
+	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
+	private static final int DBINDEX = Databases.passwords.length-1;
 	
 	public static List<String> getSelectedAgencies(String username){
 		List<String> selectedAgencies = new ArrayList<String>();
 		Connection c = null;
 		Statement statement = null;
 		try {
-			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
-					+ "JOIN selected_feeds "
-					+ "ON gtfs_feed_info.feedname=selected_feeds.feedname "
-					+ "WHERE selected_feeds.username = '"+username+"';");
+			/*ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
+					+ "JOIN gtfs_selected_feeds "
+					+ "ON gtfs_feed_info.feedname=gtfs_selected_feeds.feedname "
+					+ "WHERE gtfs_selected_feeds.username = '"+username+"';");*/
+			ResultSet rs = statement.executeQuery("SELECT agency_id FROM gtfs_selected_feeds "
+					+ "WHERE username = '"+username+"';");
 			while(rs.next()){
-				selectedAgencies.add(rs.getString("defaultid"));
-				/*String[] aIds = rs.getString("agencyids").split(",");
-				for(String aId: aIds){
-					selectedAgencies.add(aId);
-				}*/
+				selectedAgencies.add(rs.getString("agency_id"));
+				
 			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -160,9 +163,9 @@ public class DbUpdate {
 		int count=0;
 		error.DBError = "true";
 		try {
-			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
-			ResultSet rs = statement.executeQuery("select * from users;");
+			ResultSet rs = statement.executeQuery("select * from gtfs_pg_users;");
 			rs.last();
 			count = rs.getRow();
 			if ( count>=USER_COUNT ) {
@@ -187,10 +190,25 @@ public class DbUpdate {
     public Object activateUser(@QueryParam("key") String key, @QueryParam("user") String username) throws IOException, NoSuchAlgorithmException, UnsupportedEncodingException{
 		/*String root = new File(".").getAbsolutePath();
         root = removeLastChar(root);*/
-        File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
-        BufferedReader bf; 
+        /*File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+        BufferedReader bf; */
         String passkey = "";
-        String pass ="";
+        Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT key FROM gtfs_pg_users WHERE username='"+username+"';");
+			if ( rs.next() ) {
+				passkey = rs.getString("key");
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			
+		}
+        /*String pass ="PGpass";
         try{
         	bf = new BufferedReader(new FileReader(passFile));
             passkey = bf.readLine();
@@ -199,23 +217,20 @@ public class DbUpdate {
     		MessageDigest md = MessageDigest.getInstance("MD5");
     		passByte = md.digest(passByte);
     		pass = new String(passByte, "UTF-8");
-    		bf.close();
+//    		bf.close();
         }catch(IOException e){
         	e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
-		}
+		}*/
         
         String email="";
         String lastname="";
 		if(passkey.equals(key)){
-			Connection c = null;
-			Statement statement = null;
 			try {
-				c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
 				statement = c.createStatement();
-				statement.executeUpdate("UPDATE users SET active=true WHERE username='"+username+"';");
-				ResultSet rs = statement.executeQuery("select email,lastname from users where username='"+username+"';");
+				statement.executeUpdate("UPDATE gtfs_pg_users SET active=true WHERE username='"+username+"';");
+				ResultSet rs = statement.executeQuery("select email,lastname from gtfs_pg_users where username='"+username+"';");
 				if(rs.next()){
 					email = rs.getString("email");
 					lastname = rs.getString("lastname");
@@ -275,11 +290,12 @@ public class DbUpdate {
 	      }catch (MessagingException mex) {
 	         mex.printStackTrace();
 	      }
-		
-		return "done";
+		PDBerror er = new PDBerror();
+		er.DBError=username+"'s account was successfully activated.";
+		return er;
 	}
 	
-	@GET
+	/*@GET
     @Path("/validatePass")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object validatePass(@QueryParam("pass") String pass) throws IOException, NoSuchAlgorithmException, UnsupportedEncodingException{
@@ -297,7 +313,7 @@ public class DbUpdate {
 		reader.close();
 		
 		return b;
-	}
+	}*/
 	
 	@GET
     @Path("/getUserInfo")
@@ -307,9 +323,9 @@ public class DbUpdate {
 		Statement statement = null;
 		UserInfo userInfo = new UserInfo();
 		try {
-			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("select * from users where username='"+user+"' or email='"+user+"';");
+			ResultSet rs = statement.executeQuery("select * from gtfs_pg_users where username='"+user+"' or email='"+user+"';");
 			if ( rs.next() ) {
 				userInfo.Firstname = rs.getString("firstname");
 				userInfo.Lastname = rs.getString("lastname");
@@ -337,8 +353,8 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		error.DBError = "false";
 		try {
-			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
-			statement = c.prepareStatement("select * from users where username=? or email=?;");
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.prepareStatement("select * from gtfs_pg_users where username=? or email=?;");
 			statement.setString(1, user);
 			statement.setString(2, user);
 			ResultSet rs = statement.executeQuery();
@@ -368,9 +384,9 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		error.DBError = "";
 		try {
-			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			statement.executeUpdate("UPDATE feeds SET public = '"+p+"' WHERE feedname = '"+feedname+"';");
+			statement.executeUpdate("UPDATE gtfs_uploaded_feeds SET ispublic = '"+p+"' WHERE feedname = '"+feedname+"';");
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -393,9 +409,9 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		error.DBError = "false";
 		try {
-			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT * FROM users WHERE username = '"+username+"';");
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_pg_users WHERE username = '"+username+"';");
 			if(rs.next()){
 				error.DBError = rs.getString("active");
 			}
@@ -411,7 +427,7 @@ public class DbUpdate {
 		return error;
 	}
 	
-	@POST
+	/*@POST
     @Path("/uploadfeed")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.MULTIPART_FORM_DATA })
     public Object uploadFeed(RequestContext request){
@@ -432,7 +448,7 @@ public class DbUpdate {
 		
 		
 		return error;
-	}
+	}*/
 	
 	/**
 	 * Changes the playground passkey. Delete this method from the server!!
@@ -440,7 +456,7 @@ public class DbUpdate {
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 * @throws NoSuchAlgorithmException
-	 */
+	 *//*
 	@GET
     @Path("/makePassKey")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -452,8 +468,8 @@ public class DbUpdate {
 		passByte = md.digest(passByte);
 		String pass = new String(passByte, "UTF-8");
 		
-		/*String root = new File(".").getAbsolutePath();
-        root = removeLastChar(root);*/
+		String root = new File(".").getAbsolutePath();
+        root = removeLastChar(root);
         File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
 		BufferedWriter writer = new BufferedWriter(new FileWriter(passFile));
 		
@@ -461,7 +477,7 @@ public class DbUpdate {
 		
 		writer.close();
 		return "";
-	}
+	}*/
 	
 	@GET
     @Path("/validateUser")
@@ -479,8 +495,8 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		error.DBError = "false";
 		try {
-			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
-			statement = c.prepareStatement("SELECT * FROM users WHERE (username = ? or email = ?) and password = ?;");
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.prepareStatement("SELECT * FROM gtfs_pg_users WHERE (username = ? or email = ?) and password = ?;");
 			statement.setString(1, user);
 			statement.setString(2, user);
 			statement.setString(3, pass);
@@ -514,14 +530,16 @@ public class DbUpdate {
 		passByte = md.digest(passByte);
 		String pass = new String(passByte, "UTF-8");
 		
+		long millis = System.currentTimeMillis() % 1000000;
+		
 		Connection c = null;
 		PreparedStatement statement = null;
 		PDBerror error = new PDBerror();
 		error.DBError = "";
 		try {
-			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
-			statement = c.prepareStatement("INSERT INTO users (username,password,email,firstname,lastname,quota,usedspace,active) "
-					+ "VALUES (?,?,?,?,?,?,?,?);");
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.prepareStatement("INSERT INTO gtfs_pg_users (username,password,email,firstname,lastname,quota,usedspace,active,key) "
+					+ "VALUES (?,?,?,?,?,?,?,?,?);");
 			statement.setString(1, user);
 			statement.setString(2, pass);
 			statement.setString(3, email);
@@ -530,6 +548,7 @@ public class DbUpdate {
 			statement.setInt(6, QUOTA);
 			statement.setInt(7, 0);
 			statement.setBoolean(8, false);
+			statement.setFloat(9, millis);
 			statement.executeUpdate();
 			error.DBError = "true";
 		} catch (SQLException e) {
@@ -791,7 +810,7 @@ public class DbUpdate {
 		try {
 			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/restoreCensus.bat", pass, usrn, name,
 					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/census.backup",
-					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/addCensusErr.txt",
+					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/",
 					psqlPath+"psql.exe",
 					psqlPath+"pg_restore.exe");
 			pb.redirectErrorStream(true);
@@ -875,6 +894,7 @@ public class DbUpdate {
 									{"census_tracts_trip_map","agencyid_def"},
 									{"gtfs_fare_rules","fare_agencyid"},
 									{"gtfs_fare_attributes","agencyid"},
+									{"gtfs_trip_stops","stop_agencyid_origin"},
 									{"gtfs_stop_service_map","agencyid_def"},
 									{"gtfs_route_serviceid_map","agencyid_def"},
 									{"gtfs_stop_route_map","agencyid_def"},
@@ -899,17 +919,23 @@ public class DbUpdate {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			
 			statement = c.createStatement();
+			
+			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname = '"+feedname+"';");
+			statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedname+"';");
+			
+			
 			rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info where feedname = '"+feedname+"';");
 			if ( rs.next() ) {
 				agencyId = rs.getString("defaultid");
 			}
-			
+			statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedname+"';");
+			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = 'admin';");
 			rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname = '"+feedname+"';");
 			if ( rs.next() ) {
 				agencyIds = rs.getString("agencyids");
 			}
 			agencyIdList = agencyIds.split(",");
-			
+//			
 			for(int i=0;i<defAgencyIds.length;i++){
 				System.out.println(defAgencyIds[i][0]);
 				try{
@@ -1017,7 +1043,10 @@ public class DbUpdate {
 			}else{
 				statement.executeUpdate("UPDATE gtfs_feed_info SET feedname = '"+fName+"' WHERE defaultid = '"+defaultId+"';");
 			}
-			
+			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic) "
+					+ "VALUES ('"+fName+"','admin',TRUE);");
+			statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname,agency_id) "
+					+ "VALUES ('admin','"+fName+"','"+defaultId+"');");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			
@@ -1053,6 +1082,32 @@ public class DbUpdate {
 		
 		try {
 			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/dbUpdate.bat", pass, usrn, name,
+					psqlPath+"psql.exe",
+					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
+			pb.redirectErrorStream(true);
+			pr = pb.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return "done";
+	}
+	
+	@GET
+    @Path("/addPsqlFunctions")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object addPsqlFunctions(@QueryParam("db") String db){
+		
+		String[] dbInfo = db.split(",");
+		Process pr;
+		ProcessBuilder pb;
+		String[] dbname = dbInfo[4].split("/");
+		String name = dbname[dbname.length-1];
+		String usrn = dbInfo[5];
+		String pass = dbInfo[6];
+		
+		try {
+			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/addFunctions.bat", pass, usrn, name,
 					psqlPath+"psql.exe",
 					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
 			pb.redirectErrorStream(true);
@@ -1118,15 +1173,18 @@ public class DbUpdate {
 		Statement statement = null;
 		ResultSet rs = null;
 		try {
-			c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/playground", "postgres", "123123");
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			statement.executeUpdate("DELETE FROM selected_feeds WHERE username = '"+username+"';");
+			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = '"+username+"';");
 					
 			for(String f: feeds){
-				statement.executeUpdate("INSERT INTO selected_feeds (username,feedname) "
+				statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname) "
 						+ "VALUES ('"+username+"','"+f+"');");
 			}
-			
+			statement.executeUpdate("update gtfs_selected_feeds "
+					+ "set agency_id = gtfs_feed_info.defaultid "
+					+ "from gtfs_feed_info "
+					+ "where gtfs_selected_feeds.feedname = gtfs_feed_info.feedname;");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			

@@ -110,17 +110,14 @@ $(document).ready(function(){
 	timeVar = setInterval(progress, 100);
 	
 	/* document.getElementById("Sradius").value = w_qstringx; */
-	
-	//session related
-	var username = sessionStorage.getItem("username");
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&username='+username,
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){			
 			$('h2').append('Transit Agency Summary Report <br><hr>');
-			$.each(d.agencySR, function(i,item){
+			$.each(d.AgencySR, function(i,item){
 				agencytxt = "null";
 				if (item.AgencyId !== ''){
 					agencytxt = item.AgencyId;

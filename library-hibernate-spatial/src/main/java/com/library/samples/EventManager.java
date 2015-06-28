@@ -330,7 +330,7 @@ static{
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("STOPS_BY_COUNTY_SEL_AGENCIES");
 		q.setParameter("id", countyId);
-		q.setParameter("sa", selectedAgencies);
+		q.setParameterList("sa", selectedAgencies);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
         Hutil.getSessionFactory()[sessionindex].close();
@@ -550,6 +550,17 @@ static{
         Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
+	
+	public static long getstopscountbyregion(String regionId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_REGION_SEL_AGENCIES");
+		q.setParameter("id", regionId);
+		q.setParameterList("sa", selectedAgencies);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result;
+	    }
 /**
  * returns number of stops for a given census tract
  */
@@ -557,6 +568,17 @@ static{
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("STOPS_BY_TRACT");
 		q.setParameter("id", tractId);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result;
+	    }
+	
+	public static long getstopscountbytract(String tractId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_TRACT_SEL_AGENCIES");
+		q.setParameter("id", tractId);
+		q.setParameterList("sa", selectedAgencies);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
         Hutil.getSessionFactory()[sessionindex].close();
@@ -638,6 +660,17 @@ static{
         return result;
 	    }
 	
+	public static long getstopscountbyplace(String placeId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_PLACE_SEL_AGENCIES");
+		q.setParameter("id", placeId);
+		q.setParameterList("sa", selectedAgencies);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result;
+	    }
+	
 /**
  * returns number of stops for a given urban area
  */
@@ -645,6 +678,17 @@ static{
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("STOPS_BY_URBAN");
 		q.setParameter("id", urbanId);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result;
+	    }
+	
+	public static long getstopscountbyurban(String urbanId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_URBAN_SEL_AGENCIES");
+		q.setParameter("id", urbanId);
+		q.setParameterList("sa", selectedAgencies);
 		//@SuppressWarnings("unchecked")
 		long result = (Long) q.list().get(0);
         Hutil.getSessionFactory()[sessionindex].close();
@@ -663,6 +707,17 @@ static{
         Hutil.getSessionFactory()[sessionindex].close();
         return result;
 	    }
+	
+	public static long getstopscountbycongdist(String congdistId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("STOPS_BY_CONGDIST_SEL_AGENCIES");
+		q.setParameter("id", congdistId);
+		q.setParameterList("sa", selectedAgencies);
+		//@SuppressWarnings("unchecked")
+		long result = (Long) q.list().get(0);
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result;
+	    }
 /**
  * returns list of routes for a given ODOT region
  */
@@ -670,6 +725,17 @@ static{
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_REGION");
 		q.setParameter("id", regionId);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result.size();
+	    }
+	
+	public static int getroutescountsbyregion(String regionId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_REGION_SEL_AGENCIES");
+		q.setParameter("id", regionId);
+		q.setParameterList("sa", selectedAgencies);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
         Hutil.getSessionFactory()[sessionindex].close();
@@ -691,8 +757,8 @@ static{
 	public static int getroutescountsbycounty(String countyId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_COUNTY_SEL_AGENCIES");
-		q.setParameter("id", countyId).setParameter("sa", selectedAgencies);
-		q.setParameter("sa", selectedAgencies);
+		q.setParameter("id", countyId);
+		q.setParameterList("sa", selectedAgencies);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
         Hutil.getSessionFactory()[sessionindex].close();
@@ -711,6 +777,17 @@ static{
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
+	
+	public static int getroutescountsbyplace(String placeId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_PLACE_SEL_AGENCIES");
+		q.setParameter("id", placeId);
+		q.setParameterList("sa", selectedAgencies);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result.size();
+	    }
 /**
  * returns list of routes for a given census tract
  */
@@ -723,6 +800,17 @@ static{
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
+	
+	public static int getroutescountsbytract(String tractId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_TRACT_SEL_AGENCIES");
+		q.setParameter("id", tractId);
+		q.setParameterList("sa", selectedAgencies);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result.size();
+	    }
 /**
  * returns list of routes for a given urban area
  */
@@ -730,6 +818,17 @@ static{
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_URBAN");
 		q.setParameter("id", urbanId);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result.size();
+	    }	
+	
+	public static int getroutescountbyurban(String urbanId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_URBAN_SEL_AGENCIES");
+		q.setParameter("id", urbanId);
+		q.setParameterList("sa", selectedAgencies);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
         Hutil.getSessionFactory()[sessionindex].close();
@@ -749,6 +848,17 @@ static{
 		return result;
 	}
 	
+	public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_AURBAN_SEL_AGENCIES");
+		q.setParameter("id", urbanId);
+		q.setParameterList("sa", selectedAgencies);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+		Hutil.getSessionFactory()[sessionindex].close();
+		return result;
+	}
+	
 /**
  * returns list of routes for a given congressional district
  */
@@ -756,6 +866,17 @@ static{
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_CONGDIST");
 		q.setParameter("id", congdistId);
+		@SuppressWarnings("unchecked")
+		List<GeoStopRouteMap> result = q.list();
+        Hutil.getSessionFactory()[sessionindex].close();
+        return result.size();
+	    }
+	
+	public static int getroutescountbycongdist(String congdistId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_CONGDIST_SEL_AGENCIES");
+		q.setParameter("id", congdistId);
+		q.setParameterList("sa", selectedAgencies);
 		@SuppressWarnings("unchecked")
 		List<GeoStopRouteMap> result = q.list();
         Hutil.getSessionFactory()[sessionindex].close();

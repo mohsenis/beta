@@ -75,13 +75,13 @@
         FROM Stop stop WHERE stop.parentStation = :stationId AND stop.id.agencyId = :agencyId
     </query>
     <query name="allStopsCount" read-only="true">
-        select count(*) FROM Stop 
+        select count(*) FROM Stop WHERE agencyid in (:sa)
     </query>
     <query name="tripsByRoute" read-only="true">
         FROM Trip trip WHERE trip.route = :route order by trip.length+trip.estlength desc
     </query>
     <query name="RouteMilesForState" read-only="true">
-        select sum(length+estlength) from Trip where length+estlength in (select max(length+estlength) from Trip trip group by trip.route.id.agencyId, trip.route.id.id)
+        select sum(length+estlength) from Trip where length+estlength in (select max(length+estlength) from Trip trip WHERE trip.id.agencyId in (:sa) group by trip.route.id.agencyId, trip.route.id.id)
     </query>
     <query name="tripsByShapeId" read-only="true">
         FROM Trip trip WHERE trip.shapeId = :shapeId
@@ -93,13 +93,13 @@
         select avg(fr.fare.price), min(fr.fare.price), max(fr.fare.price), count(fr.fare.price) FROM FareRule fr WHERE fr.route.id.agencyId = :agency
     </query>
     <query name="fareDataForState" read-only="true">
-        select avg(fa.price), min(fa.price), max(fa.price), count(fa.price) FROM FareAttribute fa 
+        select avg(fa.price), min(fa.price), max(fa.price), count(fa.price) FROM FareAttribute fa WHERE fa.id.agencyId in (:sa)
     </query>    
     <query name="fareMedianForAgency" read-only="true">
         select fr.fare.price FROM FareRule fr where fr.route.id.agencyId = :agency order by fr.fare.price desc
     </query>
     <query name="fareMedianForState" read-only="true">
-        select fa.price FROM FareAttribute fa order by fa.price desc 
+        select fa.price FROM FareAttribute fa WHERE fa.id.agencyId in (:sa) order by fa.price desc 
     </query>
     <query name="farePriceForRoutes" read-only="true">
         select fr.fare.price FROM FareRule fr WHERE concat(fr.route.id.agencyId,',',fr.route.id.id) in (:routes) order by fr.fare.price
@@ -156,6 +156,6 @@
         select concat(min(st.arrivalTime),'-',max(st.departureTime)) FROM StopTime st WHERE concat(st.trip.id.agencyId, st.trip.id.id) in (:trips) and st.arrivalTime>0 and st.departureTime>0
     </query>
     <query name="counts" read-only="true">
-        select (select count(id) from Agency)as agency, (select count(id.id) from Stop)as stop, (select count(id.id) from Route)as route from Agency
+        select (select count(id) from Agency WHERE defaultId in (:selectedAgencies))as agency, (select count(id.id) from Stop WHERE agencyid in (:selectedAgencies))as stop, (select count(id.id) from Route WHERE defaultid in (:selectedAgencies))as route from Agency
     </query>
 </hibernate-mapping>

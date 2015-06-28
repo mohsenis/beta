@@ -140,11 +140,13 @@ public class GtfsHibernateReaderExampleMain {
   
   public static HashMap<String, Float> QueryFareData(String agencyId, int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
-	  if (agencyId!=null){
+	  
 	  return dao.getFareDataForAgency(agencyId);
-	  } else {
-		  return dao.getFareDataForState();
-	  }
+  }
+  
+  public static HashMap<String, Float> QueryFareData(List<String> selectedAgencies, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  return dao.getFareDataForState(selectedAgencies);
   }
   
   public static Double QueryRouteMiles(int dbindex){
@@ -152,13 +154,19 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getRouteMiles();
   }
   
+  public static Double QueryRouteMiles(List<String> selectedAgencies,int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  return dao.getRouteMiles(selectedAgencies);
+  }
+  
   public static Float QueryFareMedian(String agencyId,int farecount, int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
-	  if (agencyId!=null){
-		  return dao.getFareMedianForAgency(agencyId, farecount);
-	  } else {
-		  return dao.getFareMedianForState(farecount);
-	  }
+	  return dao.getFareMedianForAgency(agencyId, farecount);
+  }
+  
+  public static Float QueryFareMedian(List<String> selectedAgencies,int farecount, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  return dao.getFareMedianForState(selectedAgencies, farecount);
   }
   
   public static List<Float> QueryFarePriceByRoutes(List <String> routes, int dbindex){
@@ -264,9 +272,9 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getStopsForTripUrbans(trip,urbans);
   }
   
-  public static HashMap<String, Integer> QueryCounts (int dbindex){
+  public static HashMap<String, Integer> QueryCounts (int dbindex, List<String> selectedAgencies){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();  
-	  return dao.getCounts();
+	  return dao.getCounts(selectedAgencies);
   }
   
   public static List<Stop> QueryStopsbyTripCongdist (AgencyAndId trip, String congdist, int dbindex){
@@ -277,6 +285,11 @@ public class GtfsHibernateReaderExampleMain {
   public static Long QueryStopsCount(int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
 	  return dao.getStopsCount();
+  }
+  
+  public static Long QueryStopsCount( List<String> selectedAgencies, int dbindex){
+	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
+	  return dao.getStopsCount(selectedAgencies);
   }
   
   public static String QueryServiceHours (List<String> trips, int dbindex){

@@ -584,8 +584,7 @@ var overlayMaps = {
 map.addControl(new L.Control.Layers(baseMaps,overlayMaps));
 info.addTo(map);
 var $mylist = $("#list");
-//session related
-var username = sessionStorage.getItem("username");
+
 $mylist
 .jstree({
 	"checkbox": {        
@@ -595,7 +594,7 @@ $mylist
      },
 	"json_data" : {
 		"ajax" : {
-            "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?dbindex="+dbindex+"&username="+username,
+            "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?dbindex="+dbindex+'&username='+getSession(),
             "type" : "get",	                
             "success" : function(ops) {  
             	

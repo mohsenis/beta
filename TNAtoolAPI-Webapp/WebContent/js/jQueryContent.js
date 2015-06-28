@@ -1,3 +1,17 @@
+function getSession(){
+	var username = "admin";
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&getSessionUser=gsu",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	username = d.username;
+        }
+	});
+	return username;
+}
+
 function dateRemove(e, d){
 	$(e).remove();
 	$("#datepicker").multiDatesPicker('removeDates', d);

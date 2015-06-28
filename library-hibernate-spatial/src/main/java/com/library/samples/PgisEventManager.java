@@ -861,7 +861,7 @@ public class PgisEventManager {
 	/**
 	 *Queries the transit agency tree menu	  
 	 */
-	public static AgencyRouteList agencyMenu(String[] date, String[] day, int dbindex) {
+	public static AgencyRouteList agencyMenu(String[] date, String[] day, String username, int dbindex) {
 		AgencyRouteList response = new AgencyRouteList();		
 		AgencyRoute instance = new AgencyRoute();
 		RouteListm rinstance = new RouteListm();
@@ -871,11 +871,12 @@ public class PgisEventManager {
 		String mainquery ="";		
 		if (day!=null){
 			//the query with dates
-			mainquery += "with svcids as (";
+			mainquery += "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
 			for (int i=0; i<date.length; i++){
-				mainquery+= "(select  serviceid_agencyid, serviceid_id from gtfs_calendars where startdate::int<="+date[i]+" and enddate::int>="+date[i]+
-						" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date[i]+
-						"' and exceptiontype=2)union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates where date='"+date[i]+"' and exceptiontype=1)";
+				mainquery+= "(select  serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]
+						+" and enddate::int>="+date[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from "
+						+ "gtfs_calendar_dates where date='"+date[i]+"' and exceptiontype=2)union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd inner join "
+						+ "aids on gcd.serviceid_agencyid = aids.aid where date='"+date[i]+"' and exceptiontype=1)";
 				if (i+1<date.length)
 					mainquery+=" union all ";
 			}
@@ -890,8 +891,9 @@ public class PgisEventManager {
 					+ "trip.stop_agencyid_destination, trip.stop_id_destination, trip.stop_name_destination, route.shortname as rsname, route.longname as rlname from tripstops trip "
 					+ "inner join gtfs_routes route on trip.aid = route.agencyid and trip.routeid = route.id) select * from triproute order by aid, routeid, length desc, tripid";
 		}else {	
-			mainquery += "with trips as (select trip.agencyid as aid, trip.tripshortname as sname, round((trip.length+trip.estlength)::numeric,2) as length, trip.tripheadsign as sign,"
-					+ " trip.id as tripid, trip.uid as uid, trip.route_id as routeid from gtfs_trips trip), tripagency as (select trips.aid, agency.name as agency, trips.sname, "
+			mainquery += "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), trips as (select trip.agencyid as aid, trip.tripshortname "
+					+ "as sname, round((trip.length+trip.estlength)::numeric,2) as length, trip.tripheadsign as sign, trip.id as tripid, trip.uid as uid, trip.route_id as routeid "
+					+ "from gtfs_trips trip inner join aids on trip.serviceid_agencyid = aids.aid), tripagency as (select trips.aid, agency.name as agency, trips.sname, "
 					+ "trips.sign, trips.length, trips.tripid, trips.uid, trips.routeid from trips inner join gtfs_agencies agency on trips.aid=agency.id), tripstops as (select "
 					+ "trip.aid, trip.agency, trip.tripid, trip.routeid, trip.sname, trip.sign, trip.length, trip.uid, stop.stop_agencyid_origin, stop.stop_id_origin, "
 					+ "stop.stop_name_origin, stop.stop_agencyid_destination, stop.stop_id_destination, stop.stop_name_destination from tripagency trip inner join "

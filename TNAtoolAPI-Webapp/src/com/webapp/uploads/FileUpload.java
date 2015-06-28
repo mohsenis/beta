@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -59,15 +60,18 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+import org.onebusaway.gtfs.impl.Databases;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.library.samples.UpdateEventManager;
 import com.webapp.api.model.FeedNames;
 import com.webapp.api.model.FileMeta;
 import com.webapp.api.model.PDBerror;
 import com.webapp.api.model.TransitError;
+import com.webapp.api.model.UserSession;
 
 
 
@@ -79,9 +83,10 @@ public class FileUpload extends HttpServlet {
 	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private static final long serialVersionUID = 1L;
-	private static final String dbURL = "jdbc:postgresql://localhost:5432/playground";
-	private static final String dbUSER = "postgres";
-	private static final String dbPASS = "123123";
+	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
+	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
+	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
+	private static final int DBINDEX = Databases.passwords.length-1;
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -105,27 +110,39 @@ public class FileUpload extends HttpServlet {
 	    String username = request.getParameter("username");
 		String feedDel = request.getParameter("feedname");
 		String listName = request.getParameter("list");
-		String sessionUser = request.getParameter("sessionUser");
+		String setSessionUser = request.getParameter("setSessionUser");
+		String getSessionUser = request.getParameter("getSessionUser");
+		String endSessionUser = request.getParameter("endSessionUser");
 		String email = request.getParameter("email");
 		String firstname = request.getParameter("firstname");
 		String lastname = request.getParameter("lastname");
 		
-		/*if(falsesessionUser!=null){
-			HttpSession session = request.getSession();
-            session.setAttribute("username", sessionUser);
-            session.setMaxInactiveInterval(10*60);
-            Cookie userName = new Cookie("username", sessionUser);
-            userName.setMaxAge(30*60);
-            userName.
-            response.addCookie(userName);
-            try {
-	    		obj.put("names", fn.names);
+		if(endSessionUser!=null){//sign out
+			HttpSession session = request.getSession(false);
+			  if (session != null) {
+				  session.invalidate();
+			  }
+		}else if(getSessionUser!=null){//get session id
+			UserSession us = new UserSession();
+			HttpSession session = request.getSession(false);
+			if (session == null){
+				us.User = "admin";
+			}else{
+				us.User = (String) session.getAttribute("username");
+			}
+			
+			try {
+	    		obj.put("username", us.User);
 	    		out.print(obj);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
+		}else if(setSessionUser!=null){//set session id
+			HttpSession session = request.getSession(true);
+            session.setAttribute("username", setSessionUser);
+            session.setMaxInactiveInterval(10*60);
             
-		}else */if(email!=null){
+		}else if(email!=null){// send confirmation email
 		      String to = email;
 		      final String emailUser = "tnatooltech";
 		      final String emailPass = "OSUteam007";
@@ -136,10 +153,8 @@ public class FileUpload extends HttpServlet {
 		      properties.put("mail.smtp.user", emailUser);
 		      properties.put("mail.smtp.password", emailPass);
 		      properties.put("mail.smtp.port", "587"); 
-		      properties.put("mail.smtp.auth", "true");  
-		      //properties.put("mail.debug", "true");              
+		      properties.put("mail.smtp.auth", "true");            
 		      properties.put("mail.smtp.starttls.enable", "true");
-		      //properties.put("mail.smtp.EnableSSL.enable", "true");
 		      
 		      Session session = Session.getInstance(properties,null);
 		      System.out.println("Port: "+session.getProperty("mail.smtp.port"));
@@ -152,12 +167,12 @@ public class FileUpload extends HttpServlet {
 		         InternetAddress addressFrom = new InternetAddress(emailUser+"@gmail.com");  
 		         message.setFrom(addressFrom);
 		         
-		         InternetAddress[] addressesTo = {/*new InternetAddress(to),*/ new InternetAddress(emailUser+"@gmail.com")}; 
+		         InternetAddress[] addressesTo = {new InternetAddress(emailUser+"@gmail.com")}; 
 		         message.setRecipients(Message.RecipientType.TO, addressesTo);
 		         
 		         Multipart multipart = new MimeMultipart("alternative");
 		         BodyPart messageBodyPart = new MimeBodyPart();
-		         String htmlMessage = setMessage(username, email, firstname, lastname);
+		         String htmlMessage = setMessage(username, email, firstname, lastname, request);
 		         messageBodyPart.setContent(htmlMessage, "text/html");
 		         multipart.addBodyPart(messageBodyPart);
 		         message.setContent(multipart);
@@ -165,12 +180,11 @@ public class FileUpload extends HttpServlet {
 		         message.setSubject("New GTFS Playground User Account Confirmation ("+username+")");
 		         trans = session.getTransport("smtp");
 		         trans.connect(host,emailUser,emailPass);
-		         //message.saveChanges();
 		         trans.sendMessage(message, message.getAllRecipients()); 
 		      }catch (MessagingException mex) {
 		         mex.printStackTrace();
 		      }
-		}else if(listName!=null){
+		}else if(listName!=null){//list agency names added by admin
 			FeedNames fn = new FeedNames();
 			
 			Boolean b = true;
@@ -178,13 +192,15 @@ public class FileUpload extends HttpServlet {
 				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 				
 				statement = c.createStatement();
-				rs = statement.executeQuery("SELECT feedname, agencynames FROM gtfs_feed_info "
-						+ "where feedname not in "
-						+ "(select feedname from feeds)");
+				rs = statement.executeQuery("SELECT * FROM gtfs_feed_info "
+						+ "where feedname in "
+						+ "(select feedname from gtfs_uploaded_feeds where username='admin')");
 				
 				while ( rs.next() ) {
 					fn.feeds.add(rs.getString("feedname"));
 					fn.names.add(rs.getString("agencynames"));
+					fn.startdates.add(rs.getString("startdate"));
+					fn.enddates.add(rs.getString("enddate"));
 				}
 				b=true;
 			} catch (SQLException e) {
@@ -200,6 +216,8 @@ public class FileUpload extends HttpServlet {
 	    		if(b){
 	    			obj.put("names", fn.names);
 					obj.put("feeds", fn.feeds);
+					obj.put("startdates", fn.startdates);
+					obj.put("enddates", fn.enddates);
 	    		}else{
 	    			obj.put("DBError", "");
 	    		}
@@ -215,12 +233,12 @@ public class FileUpload extends HttpServlet {
 				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 				
 				statement = c.createStatement();
-				rs = statement.executeQuery("SELECT feeds.username, feeds.feedname, agencynames, firstname, lastname FROM gtfs_feed_info "
-						+ "JOIN feeds "
-						+ "ON gtfs_feed_info.feedname=feeds.feedname "
-						+ "JOIN users "
-						+ "On feeds.username=users.username "
-						+ "where public = 't';");
+				rs = statement.executeQuery("SELECT gtfs_uploaded_feeds.username, gtfs_uploaded_feeds.feedname, agencynames, firstname, lastname, startdate, enddate FROM gtfs_feed_info "
+						+ "JOIN gtfs_uploaded_feeds "
+						+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
+						+ "JOIN gtfs_pg_users "
+						+ "On gtfs_uploaded_feeds.username=gtfs_pg_users.username "
+						+ "where ispublic = 't';");
 				
 				while ( rs.next() ) {
 					fn.ownerUsername.add(rs.getString("username"));
@@ -228,6 +246,8 @@ public class FileUpload extends HttpServlet {
 					fn.names.add(rs.getString("agencynames"));
 					fn.ownerFirstname.add(rs.getString("firstname"));
 					fn.ownerLastname.add(rs.getString("lastname"));
+					fn.startdates.add(rs.getString("startdate"));
+					fn.enddates.add(rs.getString("enddate"));
 				}
 				b=true;
 			} catch (SQLException e) {
@@ -246,6 +266,8 @@ public class FileUpload extends HttpServlet {
 					obj.put("ownerFirstname", fn.ownerFirstname);
 					obj.put("ownerLastname", fn.ownerLastname);
 					obj.put("ownerUsername", fn.ownerUsername);
+					obj.put("startdates", fn.startdates);
+					obj.put("enddates", fn.enddates);
 	    		}else{
 	    			obj.put("DBError", "");
 	    		}
@@ -253,7 +275,7 @@ public class FileUpload extends HttpServlet {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-		}else if(feedDel!=null){
+		}else if(feedDel!=null){//delete feed
 			String agencyId = "";
 			String agencyIds = "";
 			String[] agencyIdList;
@@ -271,6 +293,7 @@ public class FileUpload extends HttpServlet {
 										{"census_tracts_trip_map","agencyid_def"},
 										{"gtfs_fare_rules","fare_agencyid"},
 										{"gtfs_fare_attributes","agencyid"},
+										{"gtfs_trip_stops","stop_agencyid_origin"},
 										{"gtfs_stop_service_map","agencyid_def"},
 										{"gtfs_route_serviceid_map","agencyid_def"},
 										{"gtfs_stop_route_map","agencyid_def"},
@@ -295,7 +318,9 @@ public class FileUpload extends HttpServlet {
 				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 				statement = c.createStatement();
 				
-				statement.executeUpdate("DELETE FROM feeds WHERE feedname = '"+feedDel+"';");
+				statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname = '"+feedDel+"';");
+				statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedDel+"';");
+				
 				updateQuota(username);
 				
 				rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info where feedname = '"+feedDel+"';");
@@ -325,9 +350,9 @@ public class FileUpload extends HttpServlet {
 				}
 				
 				uploadedFile.delete();
-				/*System.out.println("start");
-				statement.executeUpdate("VACUUM FULL ANALYZE");
-				System.out.println("finish");*/
+				System.out.println("vacuum start");
+				statement.executeUpdate("VACUUM");
+				System.out.println("vacuum finish");
 			} catch (SQLException e) {
 				System.out.println(e.getMessage());
 				
@@ -350,15 +375,17 @@ public class FileUpload extends HttpServlet {
 				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 				
 				statement = c.createStatement();
-				rs = statement.executeQuery("SELECT feeds.feedname, agencynames, public "
-						+ "FROM gtfs_feed_info JOIN feeds "
-						+ "ON gtfs_feed_info.feedname=feeds.feedname "
+				rs = statement.executeQuery("SELECT gtfs_uploaded_feeds.feedname, agencynames, ispublic, startdate, enddate "
+						+ "FROM gtfs_feed_info JOIN gtfs_uploaded_feeds "
+						+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
 						+ "where username = '"+username+"';");
 				
 				while ( rs.next() ) {
 					fn.feeds.add(rs.getString("feedname"));
 					fn.names.add(rs.getString("agencynames"));
-					fn.isPublic.add(rs.getString("public"));
+					fn.isPublic.add(rs.getString("ispublic"));
+					fn.startdates.add(rs.getString("startdate"));
+					fn.enddates.add(rs.getString("enddate"));
 				}
 				b=true;
 			} catch (SQLException e) {
@@ -375,6 +402,8 @@ public class FileUpload extends HttpServlet {
 	    			obj.put("names", fn.names);
 					obj.put("feeds", fn.feeds);
 					obj.put("isPublic", fn.isPublic);
+					obj.put("startdates", fn.startdates);
+					obj.put("enddates", fn.enddates);
 	    		}else{
 	    			obj.put("DBError", "");
 	    		}
@@ -388,6 +417,7 @@ public class FileUpload extends HttpServlet {
 	}
 
 	/**
+	 * Uploads, adds, and updates gtfs feeds
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -401,14 +431,11 @@ public class FileUpload extends HttpServlet {
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 	    
         if (isMultipart) {
-	         // Create a factory for disk-based file items
 	        FileItemFactory factory = new DiskFileItemFactory();
 	
-	         // Create a new file upload handler
 	        ServletFileUpload upload = new ServletFileUpload(factory);
 	 
 	        try {
-	             // Parse the request
 		        List<FileItem> items = upload.parseRequest(new ServletRequestContext(request));
 		        
 		        for(FileItem item: items){
@@ -421,9 +448,6 @@ public class FileUpload extends HttpServlet {
 		            if (!item.isFormField()) {
 		                String fileName = item.getName();
 		                fileName=changeFeedName(fileName, username);
-		                /*String root = new File(".").getAbsolutePath();
-		                root = removeLastChar(root)+getServletContext().getContextPath();*/
-		                //root = root.replace('\\', '/');
 		                File path = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/upload/uploaded/"+username);
 		                if (!path.exists()) {
 		                	boolean status = path.mkdirs();
@@ -445,8 +469,6 @@ public class FileUpload extends HttpServlet {
                         
 		                error = addFeed(feed, fileName, item.getSize(),username);
 		                System.out.println(error);
-		                
-		                //uploadedFile.delete();
 		            }
 		        }
 	        } catch (FileUploadException e) {
@@ -466,12 +488,12 @@ public class FileUpload extends HttpServlet {
 			out.flush();
 			out.close();
 			
-	        error = updateFeeds();
-            System.out.println(error);
+	        //error = updateFeeds();
+            //System.out.println(error);
         }
 	}
 	
-	public String setMessage(String username, String email, String firstname, String lastname){
+	public String setMessage(String username, String email, String firstname, String lastname, HttpServletRequest request){
 		String message = "The following user has recently registered in the GTFS Playground website<br><br>"
 				+ "FIRST NAME: "+firstname+"<br>"
 				+ "LAST NAME: "+lastname+"<br>"
@@ -479,11 +501,29 @@ public class FileUpload extends HttpServlet {
 		
 		/*String root = new File(".").getAbsolutePath();
         root = removeLastChar(root);*/
-        File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
-        BufferedReader bf; 
-        String passkey="";
-        String pass ="";
-        try{
+        /*File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+        BufferedReader bf; */
+		String passkey="";
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT key FROM gtfs_pg_users WHERE username='"+username+"';");
+			if ( rs.next() ) {
+				passkey = rs.getString("key");
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+        
+        /*try{
         	bf = new BufferedReader(new FileReader(passFile));
             passkey = bf.readLine();
             
@@ -496,12 +536,15 @@ public class FileUpload extends HttpServlet {
         	e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
-		}
+		}*/
+        String URLpath  = request.getRequestURL().toString();
+        int i = URLpath.indexOf(request.getServletPath());
+        URLpath = URLpath.substring(0, i);
         
-		String activate = "http://localhost:8080/TNAtoolAPI-Webapp/modifiers/dbupdate/activateUser?&key="+passkey+"&user="+username;
+		String activate = URLpath+"/modifiers/dbupdate/activateUser?&key="+passkey+"&user="+username;
 		message += "Click on the following link to activate the account:<br><br>"+activate+"<br><br><br><br>";
-		String deny = "http://localhost:8080/TNAtoolAPI-Webapp/modifiers/dbupdate/denyUser?&key="+pass+"&user="+username;
-		message += "Click on the following link to deny the account's activation:<br><br>"+deny;
+		String deny = URLpath+"/modifiers/dbupdate/denyUser?&key="+passkey+"&user="+username;
+		//message += "Click on the following link to deny the account's activation:<br><br>"+deny;
 		
 		return message;
 	}
@@ -520,9 +563,9 @@ public class FileUpload extends HttpServlet {
 		try {
 			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT feedname FROM gtfs_feed_info INNER JOIN feeds "
-					+ "ON gtfs_feed_info.feedname=feeds.feedname "
-					+ "WHERE feeds.username='"+username+"';");
+			ResultSet rs = statement.executeQuery("SELECT gtfs_feed_info.feedname FROM gtfs_feed_info INNER JOIN gtfs_uploaded_feeds "
+					+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
+					+ "WHERE gtfs_uploaded_feeds.username='"+username+"';");
 			while ( rs.next() ) {
 				names.add(rs.getString("feedname"));
 			}
@@ -624,7 +667,7 @@ public class FileUpload extends HttpServlet {
 			}else{
 				statement.executeUpdate("UPDATE gtfs_feed_info SET feedname = '"+feedName+"' WHERE defaultid = '"+defaultId+"';");
 			}
-			statement.executeUpdate("INSERT INTO feeds (feedname,username,public,feedsize) "
+			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic,feedsize) "
 					+ "VALUES ('"+feedName+"','"+username+"',FALSE,'"+fileSize+"');");
 			
 		} catch (SQLException e) {
@@ -635,8 +678,16 @@ public class FileUpload extends HttpServlet {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
+		/*updateFeeds();
+		try {
+			Thread.sleep(5000L);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		UpdateEventManager.updateTables(DBINDEX, defaultId);
 		
-		return "Feed added";
+		return "Feed added and updated";
 	}
 	
 	public void changeCSV(String feed, String username) throws IOException, ZipException{
@@ -790,9 +841,9 @@ public class FileUpload extends HttpServlet {
 		try {
 			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info INNER JOIN feeds "
-					+ "ON gtfs_feed_info.feedname=feeds.feedname "
-					+ "WHERE feeds.username='"+username+"';");
+			ResultSet rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info INNER JOIN gtfs_uploaded_feeds "
+					+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
+					+ "WHERE gtfs_uploaded_feeds.username='"+username+"';");
 			while ( rs.next() ) {
 				names = Arrays.asList(rs.getString("agencyids").split(","));
 				feedNames.addAll(names);
@@ -826,7 +877,7 @@ public class FileUpload extends HttpServlet {
 		try {
 			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT SUM(feedsize) FROM feeds where username = '"+username+"';");
+			ResultSet rs = statement.executeQuery("SELECT SUM(feedsize) FROM gtfs_uploaded_feeds where username = '"+username+"';");
 			if ( rs.next() ) {
 				usedspace = rs.getString("sum");
 			}
@@ -834,7 +885,7 @@ public class FileUpload extends HttpServlet {
 				usedspace = 0+"";
 			}
 			
-			statement.executeUpdate("UPDATE users SET usedspace='"+usedspace+"' WHERE username='"+username+"';");
+			statement.executeUpdate("UPDATE gtfs_pg_users SET usedspace='"+usedspace+"' WHERE username='"+username+"';");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			//e.printStackTrace();
@@ -846,19 +897,19 @@ public class FileUpload extends HttpServlet {
 	}
 	
 	public String updateFeeds(){
-		String basePath = "C:/Users/Administrator/git/TNAsoftware/";
-		String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
+		
 		Process pr;
 		ProcessBuilder pb;
 		String[] dbname = dbURL.split("/");
 		String name = dbname[dbname.length-1];
-		
+		boolean bz = true;
 		try {
 			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/dbUpdate.bat", dbPASS, dbUSER, name,
 					psqlPath+"psql.exe",
 					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
 			pb.redirectErrorStream(true);
 			pr = pb.start();
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
