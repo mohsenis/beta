@@ -54,7 +54,8 @@ var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated w
 '<th>Average Fare<em title="If available, this field points to the fare average for the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Median Fare<em title="If available, this field points to the fare median for the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Connected Communities <em title="List of geographic areas of the same type that are connected to the area of interest through routes."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'</tr>';
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+
 html += '<thead>'+tmp+'</thead><tbody>';
 var fAverage = new Array();
 var fMedian = new Array();
@@ -94,7 +95,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/UrbanrXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/UrbanrXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&username='+getSession(),
 		async: true,
 		success: function(item){			
 			$('h2').append('Aggregated Urban Area Extended Report <br><hr>');	
@@ -103,7 +104,7 @@ $(document).ready(function(){
 			+ numberconv(item.ServiceMilesPersqMile) +'</td><td  class="serviceCol">'+numberconv(item.MilesofServicePerCapita)+'</td><td class="serviceCol">' + numberconv(item.PopWithinX) 
 			+'</td><td class="serviceCol">' + numberconv(item.PopServed)+'</td><td class="serviceCol">' + numberconv(item.PopServedAtLoService)+'</td><td class="serviceCol">' + numberconv(item.PopUnServed)+'</td><td class="serviceCol">'+
 			numberconv(item.ServiceStops)+'</td><td class="serviceCol">' + numberconv(item.PopServedByService)+'</td><td class="serviceCol">'+ item.ServiceDays+'</td><td class="serviceCol">'
-			+ item.HoursOfService+'</td><td>$'+item.AverageFare+'</td><td>$'+item.MedianFare+'</td><td>'+item.ConnectedCommunities+'</td>';
+			+ item.HoursOfService+'</td><td>$'+item.AverageFare+'</td><td>$'+item.MedianFare+'</td><td>'+item.ConnectedCommunities+'</td><td>'+item.metadata+'</td>';
 			fAverage.push(item.AverageFare);
 			fMedian.push(item.MedianFare);
 			connectedcommunities = item.ConnectedCommunities;
@@ -120,12 +121,7 @@ $(document).ready(function(){
 				"bScrollCollapse": true,
 				"bAutoWidth": false,
 				//"iDisplayWidth": 10,
-				"aoColumnDefs": [
-				                 {
-				                	 "targets": [19,20,21],
-               						 "visible": false
-            					}				               
-				               ],
+				"aoColumnDefs": [{"targets": [19,20,21,22],"visible": false	}],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -137,9 +133,12 @@ $(document).ready(function(){
 		 		                {
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
-		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		 		                    				  "mColumns": [0,1,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]},
+		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": [0,1,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]},
+		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": [0,1,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]} ]
 		 		                } 
 		 		            ]
 		        }

@@ -9,8 +9,7 @@
 	<script src="js/lib/date.js"></script>
 	<script src="js/jQueryContent.js"></script>
 	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
-	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
-	
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>	
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
@@ -41,7 +40,7 @@ var tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based
 '<th>Visit Count <em title="Total number of times all stops in the cluster are served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stop Count <em title="Total number of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops<em title="Detailed list of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'</tr>';
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var stops = [];
@@ -77,7 +76,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/hubsR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/hubsR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&username='+getSession(),
 		async: true,
 		success: function(d){
 			var stopsCount = 0;
@@ -106,7 +105,8 @@ $(document).ready(function(){
 					stopsSet.push(stop);
 				});
 				stops.push(stopsSet);
-				html+= '<td>'+(item.agencies).split(";").length +'</td><td>' + (item.routes).split(";").length +'</td><td>'+item.services+'</td><td>'+stopsCount+'</td><td>'+stopsString+'</td></tr>';
+				html+= '<td>'+(item.agencies).split(";").length +'</td><td>' + (item.routes).split(";").length +'</td><td>'+item.services+'</td><td>'+stopsCount+'</td><td>'+
+				stopsString+'</td><td>'+d.metadata+'</td></tr>';
 			});			
 			//html = html + '</tbody></table>';
 			html = html + '</tbody>'+html2+'</table>';
@@ -120,10 +120,8 @@ $(document).ready(function(){
 				//"width": "100%",
 				"paging": true,				
 				"iDisplayLength": 12,
-				"aoColumnDefs": [{ 	 "targets": [8],
-			   						 "visible": false 
-			   						 }, { "bSortable": false, "aTargets": [ 1,2,3 ] }
-			   						 ],
+				"aoColumnDefs": [{ 	 "targets": [8,9],"visible": false}, 
+				                 { "bSortable": false, "aTargets": [ 1,2,3 ]}],
 				//"bAutoWidth": false,
 				"order": [[ 0, "asc" ]],
 				"dom": 'T<"clear">lfrtip',
@@ -138,9 +136,12 @@ $(document).ready(function(){
 					                {
 					                    "sExtends":    "collection",
 					                    "sButtonText": "Export Report",
-					                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-					                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-					                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+					                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+					                    				  "mColumns": [ 0, 4, 5, 6, 7]},
+					                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+					                                      "mColumns": [ 0, 4, 5, 6, 7, 8, 9]},
+					                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+					                                      "mColumns": [ 0, 4, 5, 6, 7, 8, 9]} ]
 					                } 
 					            ]
 			    }

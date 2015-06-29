@@ -53,7 +53,7 @@ var tmp = '<tr><th id="an">State <em title="Name of the state"><img src="images/
 '<th>Median Fare<em title="Fare median for the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Min Fare<em title="Minimum fare for the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Max Fare<em title="Maximum fare for the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'</tr>';
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var fAverage = new Array();
 var fMedian = new Array();
@@ -100,7 +100,7 @@ $(document).ready(function(){
 			+'</td><td class="serviceCol">' + numberconv(item.PopServed)+'</td><td class="serviceCol">' + numberconv(item.PopServedAtLoService)+'</td><td class="serviceCol">'+ numberconv(item.PopUnServed)+'</td><td class="serviceCol">' +
 			numberconv(item.ServiceStops)+'</td><td class="serviceCol">' + numberconv(item.PopServedByService)+'</td><td class="serviceCol">'+ item.ServiceDays+
 			'</td><td class="serviceCol">'+ item.HoursOfService+'</td><td>$'+item.AverageFare+'</td><td>$'+item.MedianFare+'</td><td>$'+item.MinFare+
-			'</td><td>$'+item.MaxFare+'</td>';
+			'</td><td>$'+item.MaxFare+'</td><td>'+item.metadata+'</td>';
 			fAverage.push(item.AverageFare);
 			fMedian.push(item.MedianFare);
 			fMin.push(item.MinFare);
@@ -118,12 +118,7 @@ $(document).ready(function(){
 				"bScrollCollapse": true,
 				"bAutoWidth": false,
 				//"iDisplayWidth": 10,
-				"aoColumnDefs": [
-				                 {
-				                	 "targets": [17,18,19,20],
-               						 "visible": false
-            					}				               
-				               ],
+				"aoColumnDefs": [{"targets": [17,18,19,20,21],"visible": false}],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -135,39 +130,14 @@ $(document).ready(function(){
 		 		                {
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
-		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		 		                    				  "mColumns": [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]},
+		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]},
+		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 		                                      "mColumns": [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]} ]
 		 		                } 
 		 		            ]
-		        },
-		        "fnDrawCallback": function( oSettings ) {
-		        	$( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
-		        	vCols =0;
-					$.each(oSettings.aoColumns, function(c){
-						if(oSettings.aoColumns[c].bVisible == true){
-						vCols +=1;
-					}});
-		        	var width = $( window ).width();
-		        	//alert(width);
-		        	width /= 12;
-		        	width -= 10;
-		        	//alert(width);
-		        	$('#RT').css('width',vCols*width+'px');
-		        	////////////////////////////////
-		        	//$('#RT'+k+'_wrapper').css("width", $('#RT'+k+'_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table').css("width"));
-		        	$('#RT'+'_wrapper').css("width", $('#RT').css('width'));
-		        	$('#RT'+'_wrapper').css("width", "+=17");
-				    $('#RT'+'_wrapper').css("margin","auto");
-				    $('#RT'+'_wrapper').css("max-width",$( window ).width()-25);
-				    ////////////////////////////////
-				    $( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollHeadInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
-		        	//$( '#RT'+k+'_wrapper .ColVis_Button').click();
-		        	//$( '#RT'+k+'_wrapper .ColVis_Button').click();
 		        },
 			});
 			$('.ColVis').css("float", "left");

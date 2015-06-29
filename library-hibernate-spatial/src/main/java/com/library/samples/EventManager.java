@@ -26,6 +26,7 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 
 import com.library.util.Hutil;
+import com.library.util.Types;
 import com.library.model.*;
 
 
@@ -764,7 +765,6 @@ static{
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
-
 /**
  * returns list of routes for a given census place
  */
@@ -833,7 +833,7 @@ static{
 		List<GeoStopRouteMap> result = q.list();
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
-	    }	
+	    }
 	
 /**
 * returns list of routes for a given urban area for Aggregated urban area report
@@ -1294,7 +1294,98 @@ static{
 		return pop;		
     }
 
-
+	public static GeoArea QueryGeoAreabyId(String id, int type, int sessionindex){
+		Query q;
+		List results;
+		GeoArea response = new GeoArea();
+		response.setType(type);
+		response.setTypeName(Types.getAreaName(type));
+		switch (type) {
+		case 0: //counties
+			q = session[sessionindex].getNamedQuery("COUNTY_BY_ID");
+			q.setParameter("id",id);		
+	        results = q.list();
+			County cn = new County();
+			if (results.size()>0 && results.get(0)!=null){ 
+			cn = (County) results.get(0);
+			response.setId(cn.getCountyId());
+			response.setName(cn.getName());
+			response.setLandarea(cn.getLandarea());
+			response.setWaterarea(cn.getWaterarea());
+			response.setPopulation(cn.getPopulation());
+			}
+			break;						
+		case 1:	//census tract
+			q = session[sessionindex].getNamedQuery("TRACT_BY_ID");		
+			q.setParameter("id",id);		
+	        results = q.list();
+			Tract ct = new Tract();
+			if (results.size()>0 && results.get(0)!=null){ 
+			ct = (Tract) results.get(0);
+			response.setId(ct.getTractId());
+			response.setName(ct.getName());
+			response.setLandarea(ct.getLandarea());
+			response.setWaterarea(ct.getWaterarea());
+			response.setPopulation(ct.getPopulation());
+			}			
+			break;
+		case 2:	//census place
+			q = session[sessionindex].getNamedQuery("PLACE_BY_ID");		
+			q.setParameter("id",id);		
+	        results = q.list();
+			Place pl = new Place();
+			if (results.size()>0 && results.get(0)!=null){ 
+			pl = (Place) results.get(0);
+			response.setId(pl.getPlaceId());
+			response.setName(pl.getName());
+			response.setLandarea(pl.getLandarea());
+			response.setWaterarea(pl.getWaterarea());
+			response.setPopulation(pl.getPopulation());
+			}
+			break;
+		case 3:	//urban area
+			q = session[sessionindex].getNamedQuery("URBAN_BY_ID");		
+			q.setParameter("id",id);		
+	        results = q.list();
+			Urban ur = new Urban();
+			if (results.size()>0 && results.get(0)!=null){ 
+			ur = (Urban) results.get(0);
+			response.setId(ur.getUrbanId());
+			response.setName(ur.getName());
+			response.setLandarea(ur.getLandarea());
+			response.setWaterarea(ur.getWaterarea());
+			response.setPopulation(ur.getPopulation());
+			}
+			break;
+		case 4:	//ODOT region
+			q = session[sessionindex].getNamedQuery("REGION_BY_ID");		
+			q.setParameter("id",id);		
+	        results = q.list();
+			List<County> cns = new ArrayList<County>();
+			if (results.size()>0 && results.get(0)!=null){ 
+			cns = (List<County>) results;
+			//pop = (Integer) results.get(0);
+			}
+			break;
+		case 5:	//Congressional District
+			q = session[sessionindex].getNamedQuery("CONGDIST_BY_ID");		
+			q.setParameter("id",id);		
+	        results = q.list();
+			CongDist cd = new CongDist();
+			if (results.size()>0 && results.get(0)!=null){ 
+			cd = (CongDist) results.get(0);
+			response.setId(cd.getCongdistId());
+			response.setName(cd.getName());
+			response.setLandarea(cd.getLandarea());
+			response.setWaterarea(cd.getWaterarea());
+			response.setPopulation(cd.getPopulation());
+			}
+			break;
+		}		
+		Hutil.getSessionFactory()[sessionindex].close();
+		return response;
+	}
+	
 	public static County QueryCountybyId(String id, int sessionindex){
 		Query q = session[sessionindex].getNamedQuery("COUNTY_BY_ID");		
 		q.setParameter("id",id);		

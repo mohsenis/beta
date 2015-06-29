@@ -30,6 +30,10 @@ public class StopListR {
     @JsonSerialize
 	public String AgencyName;
 	
+	@XmlAttribute
+    @JsonSerialize
+	public String metadata;
+	
 	@XmlElement(name = "StopListR")
     public Collection<StopR> StopR = new ArrayList<StopR>();
 

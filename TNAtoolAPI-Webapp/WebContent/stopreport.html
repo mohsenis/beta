@@ -31,7 +31,8 @@ var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th>Stop ID <em title="Unique stop identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="sn">Stop Name <em title="Name of a stop reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Routes Stop Belongs To <em title="Unique route ID (or IDs) that the stop belongs to."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population (2010)<em title="Unduplicated population count within an X-mile radius (i.e., stop distance) of a stop. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>Population (2010)<em title="Unduplicated population count within an X-mile radius (i.e., stop distance) of a stop. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var boo = false;
@@ -107,13 +108,14 @@ $(document).ready(function(){
 		success: function(d){
 			$('h2').append(d.AgencyName+' Stops Report<br><hr>');
 			$.each(d.StopR, function(i,item){
-			html = html + '<tr class="tablerow"><td>' + item.StopId + '</td>'; 
+			html += '<tr class="tablerow"><td>' + item.StopId + '</td>'; 
 			if (item.URL !== null){
 				html = html + '<td> <a href="' + item.URL + '">'+item.StopName+'</a> </td>';
 				} else {
 					html = html + '<td>'+item.StopName+'</td>';
 					};
-			html = html+ '<td class="routeName"><img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px"></td><td class="pop"><img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px"></td></tr>';					   			
+			html += '<td class="routeName"><img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px"></td><td class="pop"><img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px"></td>'+
+			   		'<td>'+d.metadata+'</td></tr>';					   			
 			});					
 			html = html + '</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));	
@@ -122,7 +124,8 @@ $(document).ready(function(){
 				"paging": true,
 				"iDisplayLength": 14,
 				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [ 2,3 ] }
+				                 { "bSortable": false, "aTargets": [ 2,3 ]},
+				                {"visible": false, "targets": [4]}
 				               ],
 				
 				"dom": 'T<"clear">lfrtip',
@@ -136,9 +139,12 @@ $(document).ready(function(){
 		                {
 		                    "sExtends":    "collection",
 		                    "sButtonText": "Export Report",
-		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
-		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
-		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
+		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		                    				  "mColumns": [ 0, 1 , 2, 3]},
+		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		                                      "mColumns": [ 0, 1, 4 ]},
+		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		                                      "mColumns": [ 0, 1, 4 ]}]
 		                } 
 		            ]
 		        },
@@ -182,10 +188,7 @@ $(document).ready(function(){
 						success: function(d){
 							$.each(d.StopR, function(jj,item){
 								$('#RT').dataTable().fnUpdate(item.Routes,row[jj],2,false,false);
-								$('#RT').dataTable().fnUpdate(item.PopWithinX,row[jj],3,false,false); 
-								//console.log(jj);
-								/* routeName[jj].innerHTML = item.Routes;	
-								pop[jj].innerHTML = item.PopWithinX; */
+								$('#RT').dataTable().fnUpdate(item.PopWithinX,row[jj],3,false,false); 								
 							});
 						}
 					});
@@ -194,25 +197,7 @@ $(document).ready(function(){
 			} );
 			
 			$( ".dataTables_filter" ).before( "<br>" );
-		    /* var routeName = document.getElementsByClassName('routeName');
-		    var pop = document.getElementsByClassName('pop');
-		    var stopIds = new Array();
-		    $( '#RT tbody tr td:first-child' ).each(function() {
-		    	stopIds.push($( this ).html());
-		    });
-		    stopIds = stopIds.join(); 
-		    $.ajax({
-				type: 'GET',
-				datatype: 'json',
-				url: '/TNAtoolAPI-Webapp/queries/transit/StopsRX?&agency='+window.opener.qstring+'&x='+window.opener.qstringx+'&key='+ key+'&stopids='+ stopIds,
-				async: false,
-				success: function(d){
-					$.each(d.StopR, function(jj,item){
-						routeName[jj].innerHTML = item.Routes;	
-						pop[jj].innerHTML = item.PopWithinX;
-					});
-				}
-			});	 */
+		    
     }});
 	
 	
