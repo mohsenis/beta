@@ -90,6 +90,7 @@ function setDialog(){
 	});
     $( "#tabs" ).tabs();
 }
+
 var onMapCluster=new L.FeatureGroup();
 var onMapStopCluster=new L.FeatureGroup();
 var onMapRouteCluster=new L.FeatureGroup();
@@ -392,6 +393,7 @@ function showOnMapReport(lat, lon, date, x){
 			var counter=1;
 			$.each(data.MapPnR.MapPnrCounty, function(i,item){
 				html += '<tr><td>'+(counter++)+'</td>'+
+				
 						'<td>'+item.countyName+'</td>'+
 						'<td>'+item.totalPnRs+'</td>'+
 						'<td>'+numberWithCommas(item.totalSpaces)+'</td></tr>';
@@ -413,10 +415,12 @@ function showOnMapReport(lat, lon, date, x){
 							'<br><b>Total Spaces: </b> '+jtem.spaces;
 					marker.bindPopup(temp);
 					marker.id = jtem.id;
+					marker.MapPnrSL=jtem.MapPnrSL;
+					marker.MapPnrRL=jtem.MapPnrRL;
 					tmpPnrCluster.addLayer(marker);
 					
 					// Begining of new routes and stops markers
-					var tmpPnrRouteCluster = new L.FeatureGroup();
+					/*var tmpPnrRouteCluster = new L.FeatureGroup();
 					var c = i % 6;
 					var tmpPnrStopCluster = new L.MarkerClusterGroup({
 						maxClusterRadius: 120,
@@ -427,11 +431,7 @@ function showOnMapReport(lat, lon, date, x){
 					});
 					$.each(jtem.MapPnrSL, function(k,ktem){
 							var marker = L.marker([ktem.Lat,ktem.Lng]);
-//							pophtml2='<br><b>Serving Routes ID(s):</b>';
-//							$.each(ltem.RouteIds, function(m,mtem){
-//								pophtml2+='<br><span style="margin-left:2em">'+mtem+'</span>';
-//							});
-							marker.bindPopup('<b>Stop ID:</b> '+ktem.Id+'<br><b>Stop Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId+'<br><b>Service Frequency :</b> '+ktem.Frequency/*+pophtml2*/);
+							marker.bindPopup('<b>Stop ID:</b> '+ktem.Id+'<br><b>Stop Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId+'<br><b>Service Frequency :</b> '+ktem.Frequency+pophtml2);
 							tmpPnrStopCluster.addLayer(marker);
 						});	
 					pnrStopCluster[jtem.id] = tmpPnrStopCluster;
@@ -442,22 +442,51 @@ function showOnMapReport(lat, lon, date, x){
 						var polyline = L.multiPolyline(points, {	
 							weight: 5,
 							color: colorset[k],
-							//fillColor: colorset[k],
-							//color: "#000",
-							//weight: 1,
 							opacity: .5,
-							//fillOpacity: 0.6
 							smoothFactor: 1
 							});	
 						polyline.bindPopup('<b>Route ID:</b> '+ktem.Id+'<br><b>Route Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId);
 						tmpPnrRouteCluster.addLayer(polyline);
 					});
-					pnrRouteCluster[jtem.id] = tmpPnrRouteCluster;
+					pnrRouteCluster[jtem.id] = tmpPnrRouteCluster;*/
 				});	
 			pnrCluster.push(tmpPnrCluster);
 			});
 				
 			function onClick(){
+				// Begin
+//				alert(data.MapPnR.get(this.countyId).get(0).id);
+				var tmpPnrRouteCluster = new L.FeatureGroup();
+				var c = i % 6;
+				var tmpPnrStopCluster = new L.MarkerClusterGroup({
+					maxClusterRadius: 120,
+					iconCreateFunction: function (cluster) {
+						return new L.DivIcon({ html: cluster.getChildCount(), className: colorArray[c], iconSize: new L.Point(30, 30) });
+					},
+					spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+				});
+				$.each(this.MapPnrSL, function(k,ktem){
+						var marker = L.marker([ktem.Lat,ktem.Lng]);
+						marker.bindPopup('<b>Stop ID:</b> '+ktem.Id+'<br><b>Stop Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId+'<br><b>Service Frequency :</b> '+ktem.Frequency);
+						tmpPnrStopCluster.addLayer(marker);
+					});	
+				pnrStopCluster[this.id] = tmpPnrStopCluster;
+				
+				$.each(this.MapPnrRL, function(k,ktem){
+					d = L.PolylineUtil.decode(ktem.Shape);
+					points = [d];
+					var polyline = L.multiPolyline(points, {	
+						weight: 5,
+						color: colorset[k],
+						opacity: .5,
+						smoothFactor: 1
+						});	
+					polyline.bindPopup('<b>Route ID:</b> '+ktem.Id+'<br><b>Route Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId);
+					tmpPnrRouteCluster.addLayer(polyline);
+				});
+				pnrRouteCluster[this.id] = tmpPnrRouteCluster;
+				// End
+				
 				onMapPnrStopCluster.eachLayer(function (layer) {
 					onMapPnrStopCluster.removeLayer(layer);
 				});

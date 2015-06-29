@@ -158,6 +158,40 @@ public class PgisEventManager {
       return response;
     }
 	
+	/** Queries all P&Rs nationwide grouped by county*/
+	public static ParknRideCountiesList getCountiesPnrs(int dbindex){
+		ParknRideCountiesList results = new ParknRideCountiesList();
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		String querytext =	"SELECT pr.countyid, pr.county, count(pr.countyid) counts, sum(pr.spaces) spaces, sum(pr.accessiblespaces) accessiblespaces FROM parknride pr GROUP BY pr.countyid, pr.county;";
+		System.out.println(querytext+"\n");
+		try {
+	        stmt = connection.createStatement();
+	        ResultSet rs = stmt.executeQuery(querytext); 
+	        List<ParknRideCounties> list=new ArrayList<ParknRideCounties>();
+	        while ( rs.next() ) {
+	        	ParknRideCounties instance = new ParknRideCounties();
+	        	instance.countyId = rs.getString("countyid");
+	        	instance.cname = rs.getString("county");
+	        	instance.count = rs.getString("counts");
+	        	instance.spaces = rs.getString("spaces");
+	        	instance.accessibleSpaces = rs.getString("accessiblespaces");
+	        	list.add(instance);
+	        }
+//	        results.PnrCountiesList.add(instance);
+	        rs.close();
+	        stmt.close(); 
+	        results.PnrCountiesList=list;
+	      } catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        e.getStackTrace();
+	        //System.exit(0);
+	      }
+	      dropConnection(connection);
+	      
+	      return results;
+	}
+	
 	/**
 	 *Queries Stops count, unduplicated urban pop and rural pop within x meters of all stops within the given geographic area
 	 */
@@ -539,7 +573,7 @@ public class PgisEventManager {
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery( "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pairs as (select stp1.agencyid as "
+			String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pairs as (select stp1.agencyid as "
 					+ "aid1, stp1.id as sid1, stp2.agencyid as aid2, stp2.id as sid2, st_distance(stp1.location,stp2.location) as dist from gtfs_stops stp1 inner join gtfs_stops "
 					+ "stp2 on st_dwithin(stp1.location,stp2.location,"+String.valueOf(dist)+") inner join aids on stp1.agencyid=aids.aid), agencies as (select agency.id as aid, "
 					+ "map.agencyid_def as aid_def, agency.name as aname, map.stopid as sid from gtfs_agencies agency inner join gtfs_stop_service_map map on agency.id=map.agencyid"
@@ -547,7 +581,8 @@ public class PgisEventManager {
 					+ "pairs on ag1.aid_def=pairs.aid1 and ag1.sid= pairs.sid1 inner join agencies ag2 on ag2.aid_def=pairs.aid2 and ag2.sid= pairs.sid2 where ag1.aid !=ag2.aid "
 					+ "group by ag1.aid, ag2.aid, ag2.aname order by aid1, aname),results as (select aid1, count(aid2) as size, array_agg(aid2) as aids, array_agg(aname) as names,"
 					+ " array_agg(min_gap::text) as min_gaps from  clusters group by aid1) select agency.id as aid, agency.name, size, aids, names, min_gaps from gtfs_agencies "
-					+ "agency left join results on agency.id=results.aid1" );
+					+ "agency left join results on agency.id=results.aid1";
+			ResultSet rs = stmt.executeQuery(query);
 			while ( rs.next() ) {
 				agencyCluster instance = new agencyCluster();
 				instance.agencyId = rs.getString("aid");

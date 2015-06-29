@@ -80,7 +80,7 @@ static{
     }
 	
 /**
- * returns ParknRideswithin a rectangle
+ * returns ParknRides within a rectangle
  */	
 	public static List<ParknRide> getPnRs(double[] lat, double[] lon, int sessionindex) throws FactoryException, TransformException {			
 /*		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");

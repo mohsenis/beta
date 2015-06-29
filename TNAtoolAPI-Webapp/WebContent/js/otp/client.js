@@ -850,7 +850,7 @@ $mylist
 	        .css( "right", 1 + "px" )
 	        .css( "top", 55 + "%" )
 	        .appendTo(div);		    
-		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="SSR" href="#">Statewide Report</a></li><li role="presentation"><a id="THR" href="#">Transit Hubs Report</a></li><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CNSR" href="#">Connected Networks Report</a></li><li role="presentation"><a id="CASR" href="#">Connected Agencies Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
+		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="SSR" href="#">Statewide Report</a></li><li role="presentation"><a id="THR" href="#">Transit Hubs Report</a></li><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CNSR" href="#">Connected Networks Report</a></li><li role="presentation"><a id="CASR" href="#">Connected Agencies Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li><li role="presentation"><a id="PNRR" href="#">Park & Ride Report</a></li></ul>');
 			div.appendTo(titlebar);
 			$('.ui-dialog-titlebar-other').dropdown();			
 			$("#datepicker").multiDatesPicker({
@@ -982,6 +982,8 @@ $mylist
 			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex);	    		
 			    }else if(casestring=="ORSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex);	    		
+			    }else if(casestring=="PNRR"){
+			    	window.open('/TNAtoolAPI-Webapp/ParkRideReport.html'+'?&dbindex='+dbindex);
 			    }else if(casestring.substring(0,2)=="DB"){
 			    	if (dbindex!=parseInt(casestring.substring(2)))
 			    		if ($('#datepicker').multiDatesPicker('getDates').length>0){

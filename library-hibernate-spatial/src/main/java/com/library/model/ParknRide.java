@@ -19,8 +19,8 @@ public class ParknRide {
 	private String transitservice;
 	private String countyid;
 	private Point geom;
-	private List<GeoStop> stops;
-	private List<GeoStopRouteMap> routes;
+//	private List<GeoStop> stops;
+//	private List<GeoStopRouteMap> routes;
 	
 	public ParknRide(){
 		
