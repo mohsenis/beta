@@ -51,6 +51,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
+import com.library.samples.UpdateEventManager;
 import com.webapp.api.model.*;
 import com.webapp.api.utils.PolylineEncoder;
 import com.webapp.api.utils.SphericalDistance;
@@ -951,9 +952,9 @@ public class DbUpdate {
 					System.out.println(e.getMessage());
 				}
 			}
-			/*System.out.println("start");
-			statement.executeUpdate("VACUUM FULL ANALYZE");
-			System.out.println("finish");*/
+			System.out.println("vacuum start");
+			statement.executeUpdate("VACUUM");
+			System.out.println("vacuum finish");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			
@@ -1048,6 +1049,7 @@ public class DbUpdate {
 					+ "VALUES ('"+fName+"','admin',TRUE);");
 			statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname,agency_id) "
 					+ "VALUES ('admin','"+fName+"','"+defaultId+"');");
+			UpdateEventManager.updateTables(DBINDEX, defaultId);
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			

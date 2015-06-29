@@ -834,9 +834,9 @@ $mylist
 		    div3.append('<div id="datepicker"><br></div>');
 		    div3.appendTo(titlebar);
 		    
-		    /*var div4 = $("<div/>");
+		    var div4 = $("<div/>");
 		    div4.attr("id", "datepickerdiv");
-		    div4.appendTo(titlebar);*/
+		    div4.appendTo(titlebar);
 		    
 		    document.getElementById('DB'+dbindex).innerHTML = '&#9989 '+document.getElementById('DB'+dbindex).innerHTML;
 		    var div = $("<div/>");
