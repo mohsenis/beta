@@ -70,7 +70,7 @@ $(document).ready(function(){
 		    select.selectedIndex = dbindex;		    				    
 		}			
 	});
-	alert("dbindex= " + countyId); 
+	
 	$(document).tooltip({
 		position: {
 	        my: "left bottom",
@@ -116,7 +116,7 @@ $(document).ready(function(){
 		success: function(d){			
 			$('h2').append('Park & Ride Extended Report <br><hr>');
 			$.each(d.PnrCountiesList, function(i,item){
-				html += '<tr><td><a href="#" type"XR">'+ item.pnrId + '</a></td>'+
+				html += '<tr><td>'+ item.pnrId + '</td>'+
 							'<td>' + item.lotName + '</td>'+
 							'<td>' + item.city + '</td>'+
 							'<td>' + item.location + '</td>'+
@@ -124,7 +124,7 @@ $(document).ready(function(){
 							'<td>' + item.accessibleSpaces + '</td>'+
 							'<td>' + item.transitServices + '</td>'+
 							'<td>' + item.lat + '</td>'+
-							'<td>' + item.lng + '</td>'+
+							'<td>' + item.lon + '</td>'+
 							'<td>' + d.metadata + '</td></tr>';							   			
 			});
 			html +='</tbody>'+html2+'</table>';
