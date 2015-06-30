@@ -164,7 +164,6 @@ public class PgisEventManager {
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
 		String querytext =	"SELECT pr.countyid, pr.county, count(pr.countyid) counts, sum(pr.spaces) spaces, sum(pr.accessiblespaces) accessiblespaces FROM parknride pr GROUP BY pr.countyid, pr.county;";
-		System.out.println(querytext+"\n");
 		try {
 	        stmt = connection.createStatement();
 	        ResultSet rs = stmt.executeQuery(querytext); 

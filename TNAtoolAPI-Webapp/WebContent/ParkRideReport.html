@@ -10,7 +10,7 @@
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="js/lib/date.js"></script>
 	<script src="js/jQueryContent.js"></script>
-	<!-- <script src="js/lib/sorttable.js"></script>  -->
+	<script src="js/lib/sorttable.js"></script>
 	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
 	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>	
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
@@ -26,11 +26,11 @@ var qstringd = '';
 var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
 var d = new Date();
 var html = '<table id="RT" class="display" align="center">';
-var tmp = '<tr><th id="an">ID <em title="County ID conforming to census data."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>County <em title="County name."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total of P&R lots<em title="Total number of park and ride lots in the county."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total parking spaces <em title="Total number of parking spaces in the county."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total accessible pariking spaces <em title="Total number of accessible parking spaces in the county."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+var tmp = 	'<tr><th id="an">ID <em title="County ID conforming to census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+			'<th>County <em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+			'<th>Total of P&R lots<em title="Total number of park and ride lots in the county"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+			'<th>Total parking spaces <em title="Total number of parking spaces in the county"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+			'<th>Total accessible pariking spaces <em title="Total number of accessible parking spaces in the county"><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var fAverage = new Array();
@@ -114,38 +114,25 @@ $(document).ready(function(){
 		async: true,
 		success: function(d){			
 			$('h2').append('Park&Ride Summary Report <br><hr>');
-			$.each(d.Par, function(i,item){
-				html += '<tr><td>' + item.countyId + '</td>'+
+			$.each(d.PnrCountiesList, function(i,item){
+				html += '<tr><td><a href="#" type"XR">'+ item.countyId + '</a></td>'+
 							'<td>' + item.cname + '</td>'+
 							'<td>' + item.count + '</td>'+
 							'<td>' + item.spaces + '</td>'+
 							'<td>' + item.accessibleSpaces + '</td></tr>';							   			
 			});
-			html +='</tbody>'+html2+'</table>'
+			html +='</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));
 			progressbar.remove();
-			/* $('a').click(function(e){
-				var d = new Date();
-			    if($(this).attr('type')=="XR"){
-			    		qstring = $(this).attr('id');
-			    		qstringx = '0.1';
-			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		var keyName = Math.random();
-			    		localStorage.setItem(keyName, qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/GeoCountiesXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
-			    }else if($(this).attr('type')=="TC"){
-			    	qstring = $(this).attr('id');
-			    	qstringd =$(this).attr('name');
-			    	window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html?&county='+qstring+'&dbindex='+dbindex);
-			    } ;
-			}); */
+
 			
-			var table = $('#RT').DataTable( {
+			var table = $('#RT').DataTable({
 				//"scrollY": "76%",
+				"bSort" : true,
 				"paging": true,				
 				"iDisplayLength": 14,
-				"aoColumnDefs": [{"visible": false, "targets": [10]}],
-				"order": [[ 1, "asc" ]],
+				/* "aoColumnDefs": [{"visible": false, "targets": [3]}], */
+				"order": [[ 2, "des" ]],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -215,13 +202,14 @@ $(document).ready(function(){
     }});
 });
 
+
 $(".export").on('click', function (event) {    
 	exportbutton.apply(this, ['export.csv']);
 });
 
 function exportbutton(){
-	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
-	window.open(uri, 'AgencySummaryReport.csv');
+	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20ParknRide%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
+	window.open(uri, 'ParknRideSummaryReport.csv');
 }
 function dbchange(){
 	if (document.getElementById("dbselect").selectedIndex !=dbindex){
@@ -241,8 +229,6 @@ function dbchange(){
 			</div>
 			
 			<div class="headerR">
-				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
-				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
 				<select id='dbselect' onchange='dbchange()'></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
