@@ -163,7 +163,9 @@ public class PgisEventManager {
 		ParknRideCountiesList results = new ParknRideCountiesList();
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
-		String querytext =	"SELECT pr.countyid, pr.county, count(pr.countyid) counts, sum(pr.spaces) spaces, sum(pr.accessiblespaces) accessiblespaces FROM parknride pr GROUP BY pr.countyid, pr.county;";
+		String querytext =	"SELECT pr.countyid, pr.county, count(pr.countyid) counts, sum(pr.spaces) spaces, sum(pr.accessiblespaces) accessiblespaces " +
+				"FROM parknride pr " + 
+				"GROUP BY pr.countyid, pr.county;";
 		try {
 	        stmt = connection.createStatement();
 	        ResultSet rs = stmt.executeQuery(querytext); 
@@ -189,6 +191,55 @@ public class PgisEventManager {
 	      dropConnection(connection);
 	      
 	      return results;
+	}
+	
+	/** Queries all detailed information on all the PnRs within a given county.
+	 * 
+	 */
+	public static PnrInCountyList  getPnrsInCounty(int countyId, int dbindex){
+		PnrInCountyList results = new PnrInCountyList();
+		String id = countyId+"";
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		String querytext =	"SELECT	pnrid, " +
+								"lotname, " +
+								"location, " +
+								"city, " +
+								"spaces, " +
+								"accessiblespaces, " +
+								"transitservice, " +
+								"lat, " +
+								"lon " +
+							"FROM parknride " +
+							"WHERE countyid='"+ id + "';";
+		try {
+	        stmt = connection.createStatement();
+	        ResultSet rs = stmt.executeQuery(querytext); 
+	        List<PnrInCounty> list=new ArrayList<PnrInCounty>();
+	        while ( rs.next() ) {
+	        	PnrInCounty instance = new PnrInCounty();
+	        	instance.pnrId = rs.getString("pnrid");
+	        	instance.lotName = rs.getString("lotname");
+	        	instance.city = rs.getString("city");
+	        	instance.location = rs.getString("location");	  
+	        	instance.spaces = rs.getString("spaces");	
+	        	instance.accessibleSpaces = rs.getString("accessiblespaces");	
+	        	instance.transitServices = rs.getString("transitservice");	
+	        	instance.lat = rs.getString("lat");
+	        	instance.lon = rs.getString("lon");
+	        	list.add(instance);
+	        }
+	        rs.close();
+	        stmt.close(); 
+	        results.PnrCountiesList=list;
+	      } catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        e.getStackTrace();
+	        //System.exit(0);
+	      }
+	      dropConnection(connection);
+		
+		return results;
 	}
 	
 	/**

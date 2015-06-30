@@ -81,7 +81,7 @@ public class Queries {
         return response;
     }
 
-	/** Generate Counties P&R Report*/
+	/** Generates Counties P&R Report*/
 	@GET
 	@Path("/CountiesPnR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -91,6 +91,32 @@ public class Queries {
         }
 		ParknRideCountiesList response = new ParknRideCountiesList();
 		response = PgisEventManager.getCountiesPnrs(dbindex);
+		
+		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex];
+			    
+	    setprogVal(key, 0);
+	    
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    progVal.remove(key);
+	    return response;
+	}
+	
+	/** Generates P&R Report for a given county*/
+	@GET
+	@Path("/pnrsInCounty")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object pnrsInCounty(@QueryParam("key") double key, @QueryParam("countyId") String countyId, @QueryParam("dbindex") Integer dbindex ) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+		PnrInCountyList response = new PnrInCountyList();
+		
+		response = PgisEventManager.getPnrsInCounty(Integer.parseInt(countyId), dbindex);
 		
 		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex];
