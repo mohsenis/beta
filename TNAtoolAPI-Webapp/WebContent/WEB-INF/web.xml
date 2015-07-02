@@ -43,6 +43,16 @@
 		<welcome-file>default.htm</welcome-file>
 		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
+	<servlet>
+        <description></description>
+     	<display-name>FileUpload</display-name>
+	    <servlet-name>FileUpload</servlet-name>
+	    <servlet-class>com.webapp.uploads.FileUpload</servlet-class>
+    </servlet>
+    <servlet-mapping>
+	    <servlet-name>FileUpload</servlet-name>
+	    <url-pattern>/FileUpload</url-pattern>
+    </servlet-mapping>
 	<security-constraint>
         <web-resource-collection>
             <web-resource-name>HTTPSOnly</web-resource-name>

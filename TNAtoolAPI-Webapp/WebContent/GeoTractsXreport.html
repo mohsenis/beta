@@ -45,7 +45,7 @@ var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated w
 '<th>Population Served (Unduplicated) <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Percent of Population Served <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total population of the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Percent of Population Served at Level of Service <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total population of the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population Unserved <em title="100 minus percent of population served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Percent of Population Unserved <em title="100 minus percent of population served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Stops <em title="Total stops within the given geographic area multiplied by the number of times each stop is being served for the given date(s). Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Population Served By Service <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. Population served by service is calculated as service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Days <em title="Set of days (from the selected days) in which at least one trip within the given geographic area is served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -88,7 +88,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=1'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=1'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&username='+getSession(),
 		async: true,
 		success: function(item){			
 			$('h2').append(item.AreaLongName+' Extended Report <br><hr>');	
@@ -132,35 +132,7 @@ $(document).ready(function(){
 		 		                                      "mColumns": [ 0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]} ]
 		 		                } 
 		 		            ]
-		        },
-		        "fnDrawCallback": function( oSettings ) {
-		        	$( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
-		        	vCols =0;
-					$.each(oSettings.aoColumns, function(c){
-						if(oSettings.aoColumns[c].bVisible == true){
-						vCols +=1;
-					}});
-		        	var width = $( window ).width();
-		        	//alert(width);
-		        	width /= 12;
-		        	width -= 10;
-		        	//alert(width);
-		        	$('#RT').css('width',vCols*width+'px');
-		        	////////////////////////////////
-		        	//$('#RT'+k+'_wrapper').css("width", $('#RT'+k+'_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table').css("width"));
-		        	$('#RT'+'_wrapper').css("width", $('#RT').css('width'));
-		        	$('#RT'+'_wrapper').css("width", "+=17");
-				    $('#RT'+'_wrapper').css("margin","auto");
-				    $('#RT'+'_wrapper').css("max-width",$( window ).width()-25);
-				    ////////////////////////////////
-				    $( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollHeadInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
-		        	//$( '#RT'+k+'_wrapper .ColVis_Button').click();
-		        	//$( '#RT'+k+'_wrapper .ColVis_Button').click();
-		        },
+		        }
 			});
 			$('.ColVis').css("float", "left");
 			$('#RT tbody').on('click', 'td.details-control', function () {

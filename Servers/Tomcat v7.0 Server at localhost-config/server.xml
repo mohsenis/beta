@@ -104,7 +104,7 @@
     <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">         
     --> 
     <Engine defaultHost="localhost" name="Catalina">
-
+	  <Realm className="org.apache.catalina.realm.MemoryRealm" />
       <!--For clustering, please take a look at documentation at:
           /docs/cluster-howto.html  (simple how to)
           /docs/config/cluster.html (reference documentation) -->

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+  <title>GTFS Playground Register</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+  <script src="playground.js"></script>
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />
+  
+  <link rel="stylesheet" href="upload/jquery.fileupload.css">
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="playgournd.css">
+	
+  <script >
+	  $(document).ready(function(){
+		  $( "#UsernameDialog" ).dialog({
+			  autoOpen: false,
+			  width: 'auto',
+			  modal: true
+		  });
+	  });
+  </script>
+</head>
+
+<body onload="userCount()">
+
+	<div class="login-card" style="width:350px">
+	    <h1>Register</h1><br>
+	  <form onsubmit="event.preventDefault(); return PGregister()">
+	    <input type="text" id="firstname" placeholder="First name" required>
+	    <input type="text" id="lastname" placeholder="Last name" required>
+	    <input type="text" id="user" placeholder="Username" required>
+	    <input type="password" id="pass" placeholder="Password" required>
+	    <input type="password" id="passR" placeholder="Re-Enter Password" required>
+	    <input type="email" id="email" placeholder="Email" required>
+	    <!-- <input type="password" id="key" placeholder="Passkey" required> -->
+	    <input type="submit" name="register" class="login login-submit" value="Register">
+	  </form>
+	
+	</div>
+	<div class="panel panel-default" style="width:350px;margin:auto">
+        <div class="panel-heading">
+            <h3 class="panel-title">Your Username:</h3>
+        </div>
+        <div class="panel-body">
+            <ul>
+                <li>Can only contain lower-case letters, digits, and underscore.</li>
+                <li>Must start with a letter.</li>
+                <li>Cannot be more than 8 characters.</li>
+                <li>Will be available to other users.</li>
+                
+            </ul>
+        </div>
+    </div>
+    <div id="UsernameDialog" title="Your Username:">
+		<div class="panel-body">
+            <ul>
+                <li>Can only contain lower-case letters, digits, and underscore.</li>
+                <li>Must start with a letter.</li>
+                <li>Cannot be more than 8 characters.</li>
+                <li>Will be available to other users.</li>
+                
+            </ul>
+        </div>
+	</div>
+</body>
+
+</html>
