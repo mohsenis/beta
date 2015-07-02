@@ -4540,7 +4540,11 @@ Loop:  	for (Trip trip: routeTrips){
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.StopsPersqMile = String.valueOf(Math.round(stopspop[0]*25899752356.00/instance.getLandarea())/10000.00);
 		response.PopWithinX = String.valueOf(stopspop[1]+stopspop[2]);
-		response.PopServed = String.valueOf(Math.round((10000.00*(stopspop[1]+stopspop[2])/instance.getPopulation()))/100.00);	
+		response.UPopWithinX = String.valueOf(stopspop[1]);
+		response.RPopWithinX = String.valueOf(stopspop[2]);
+		response.PopServed = String.valueOf(Math.round((10000.00*(stopspop[1]+stopspop[2])/instance.getPopulation()))/100.00);
+		response.UPopServed = String.valueOf(Math.round((10000.00*(stopspop[1])/instance.getPopulation()))/100.00);	
+		response.RPopServed = String.valueOf(Math.round((10000.00*(stopspop[2])/instance.getPopulation()))/100.00);	
 		response.PopUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[1]+stopspop[2])/instance.getPopulation())))/100.0);
 		HashMap<String, String> servicemetrics = PgisEventManager.ServiceMetrics(type,sdates,days,fulldates,areaId,username,L,x,dbindex);
 		index ++;
@@ -4552,6 +4556,8 @@ Loop:  	for (Trip trip: routeTrips){
 		response.ServiceHours = servicemetrics.get("svchours");
 		response.ServiceStops = servicemetrics.get("svcstops");
 		response.PopServedAtLoService = String.valueOf(Math.round(10000.0*PopatLOS/instance.getPopulation())/100.0);
+		response.UPopServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("upopatlos")));
+		response.RPopServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("rpopatlos")));
 		
 		String serviceDays = servicemetrics.get("svcdays");
 		if (serviceDays.length()>2){
@@ -4572,10 +4578,12 @@ Loop:  	for (Trip trip: routeTrips){
 			connections = connections.replace("\"", "");
 			connections= connections.substring(1,connections.length()-1);
 			String[] conns = connections.split(",");
-			connections = StringUtils.join(Arrays.asList(conns), ";");
+			connections = StringUtils.join(Arrays.asList(conns), " ;");
         }
 		response.ConnectedCommunities = connections;
-		response.PopServedByService = String.valueOf(svcPop);			
+		response.PopServedByService = String.valueOf(svcPop);
+		response.UPopServedByService = String.valueOf(Float.parseFloat(servicemetrics.get("uspop")));	
+		response.RPopServedByService = String.valueOf(Float.parseFloat(servicemetrics.get("rspop")));	
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {

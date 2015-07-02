@@ -188,6 +188,7 @@ public class PgisEventManager {
       		+ " stopcount as (select count(stops.id) as stopscount from stops) select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop, COALESCE(rpop,0) as "
       		+ "ruralpop from stopcount inner join urbanpop on true inner join ruralpop on true";
       long[] results = new long[3];
+      //System.out.println(querytext);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(querytext);        
@@ -243,7 +244,7 @@ public class PgisEventManager {
     		+ "stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where "
     		+criteria+"='"+areaId+"' and stime.arrivaltime>0 and stime.departuretime>0 group by stime.stop_agencyid, stime.stop_id, stop.location), svchrs as (select "
     		+ "COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), concom as (select distinct map."+Types.getIdColumnName(type)+" from "
-    		+Types.getTripMapTableName(type)+" map inner join trips on trips.aid=map.agencyid and trips.tripid=map.tripid),concomnames as (select array_agg("
+    		+Types.getTripMapTableName(type)+" map inner join trips on trips.aid=map.agencyid and trips.tripid=map.tripid),concomnames as (select array_agg(distinct "
     		+Types.getNameColumn(type)+" order by "+Types.getNameColumn(type)+")::text as connections from concom inner join "+Types.getTableName(type)+" using("
     		+Types.getIdColumnName(type)+")), upopatlos as (select COALESCE(sum(population),0) as upoplos from census_blocks block inner join stopsatlos on "
     		+ "st_dwithin(block.location,stopsatlos.location,"+String.valueOf(x)+") where poptype='U'), rpopatlos as (select COALESCE(sum(population),0) as rpoplos from "
@@ -253,7 +254,7 @@ public class PgisEventManager {
     		+ "stops.location,"+ String.valueOf(x)+") where poptype='R'), svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) select svcmiles,"
     		+ "svchours,svcstops,upoplos,rpoplos,uspop,rspop,svdays,fromtime,totime,connections from service inner join upopatlos on true inner join rpopatlos on true inner join "
     		+ "upopserved on true inner join rpopserved on true inner join svcdays on true inner join svchrs on true inner join concomnames on true";
-    //System.out.println(query);
+    System.out.println(query);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        

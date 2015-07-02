@@ -46,7 +46,23 @@ public class GeoXR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String UPopWithinX;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RPopWithinX;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String PopServed;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UPopServed;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RPopServed;
 	
 	@XmlAttribute
     @JsonSerialize
@@ -114,5 +130,21 @@ public class GeoXR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String UPopServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RPopServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String PopServedAtLoService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UPopServedAtLoService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RPopServedAtLoService;
 }

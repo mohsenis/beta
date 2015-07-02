@@ -1221,6 +1221,19 @@ static{
 			List<County> cns = new ArrayList<County>();
 			if (results.size()>0 && results.get(0)!=null){ 
 			cns = (List<County>) results;
+			response.setId(cns.get(0).getRegionId());
+			response.setName(cns.get(0).getRegionName());
+			long landarea = 0;
+			long waterarea = 0;
+			long population = 0;
+			for (County inst: cns){
+				landarea += inst.getLandarea();
+				waterarea += inst.getWaterarea();
+				population += inst.getPopulation();
+			}
+			response.setLandarea(landarea);
+			response.setWaterarea(waterarea);
+			response.setPopulation(population);
 			//pop = (Integer) results.get(0);
 			}
 			break;
