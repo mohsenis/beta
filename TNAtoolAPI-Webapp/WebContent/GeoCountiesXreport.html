@@ -58,7 +58,6 @@ html += '<thead>'+tmp+'</thead><tbody>';
 var fAverage = new Array();
 var fMedian = new Array();
 var key = Math.random();
-
 $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
@@ -81,7 +80,7 @@ $(document).ready(function(){
 		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
 		    }
 		    select.options.size = menusize;
-		    select.selectedIndex = dbindex;		    				    
+		    select.selectedIndex = dbindex;		    
 		}			
 	});
 	go(key);	

@@ -26,6 +26,7 @@ var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].in
 var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 var keyName = document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1);
 var dbindex = parseInt(document.URL.split("&")[5].substr(document.URL.split("&")[5].indexOf("=")+1));
+
 var dateID;
 var boo;
 var gg = 1.0/1.1;
@@ -62,13 +63,14 @@ $(document).ready(function(){
 		    }
 		    select.options.size = menusize;
 		    select.selectedIndex = dbindex;		    				    
-		}			
+		}	
+	alert('dblist done!');
 	});
 	go(key);	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=4'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=4'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&username='+getSession(),
 		async: true,
 		success: function(item){			
 			$('h2').append(item.AreaName+' Extended Report <br><hr>');	

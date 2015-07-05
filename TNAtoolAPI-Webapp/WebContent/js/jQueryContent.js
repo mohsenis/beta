@@ -154,7 +154,7 @@ function daydiff(first, second) {
 
 function pad(s) { return (s < 10) ? '0' + s : s; }
 
-function go(key){
+function go(key){	
 	$(document).tooltip({
 		position: {
 	        my: "left bottom",
@@ -195,7 +195,7 @@ function go(key){
 	
 	//check if the selected dates are within the agency's start and end date.
 	var startDateUnion="";
-	var endDateUnion="";
+	var endDateUnion="";	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -204,6 +204,7 @@ function go(key){
 		success: function(d){
 			startDateUnion = d.Startdateunion;
 			endDateUnion = d.Enddateunion;
+			
 		}			
 	});
 	var tmpdates= new Array();
@@ -398,4 +399,5 @@ function gos(key){
 		    }, 4000);
 		  }
 		});
+	
 }
