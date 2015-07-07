@@ -1293,7 +1293,7 @@ static{
 		Hutil.getSessionFactory()[sessionindex].close();
 		return pop;		
     }
-
+	
 	public static GeoArea QueryGeoAreabyId(String id, int type, int sessionindex){
 		Query q;
 		List results;
