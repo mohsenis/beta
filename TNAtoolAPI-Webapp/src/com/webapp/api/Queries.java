@@ -370,7 +370,7 @@ public class Queries {
    
    /**
     * Identifies the stops and routes within 
-    * 100m distance of a given park&ride.
+    * 300m distance of a given park&ride.
     * 
     * @return MapPnrRecord
     */
@@ -388,7 +388,7 @@ public class Queries {
 	   List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
 	   List<GeoStopRouteMap> sRoutes = new ArrayList<GeoStopRouteMap>();
 		try { 
-			pnrGeoStops = EventManager.getstopswithincircle(100, lat, lng, dbindex);
+			pnrGeoStops = EventManager.getstopswithincircle(300, lat, lng, dbindex);
 			for (GeoStop s:pnrGeoStops){
 				mapPnrStop=new MapStop();
 				mapPnrStop.AgencyId=s.getAgencyId();
