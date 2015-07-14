@@ -120,8 +120,24 @@ public class FileUpload extends HttpServlet {
 		if(endSessionUser!=null){//sign out
 			HttpSession session = request.getSession(false);
 			  if (session != null) {
+				  String esu = (String) session.getAttribute("username");
+				  try {
+						c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+						
+						statement = c.createStatement();
+						
+						statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = '"+esu+"';");
+				  } catch (SQLException e) {
+						System.out.println(e.getMessage());
+						
+					} finally {
+						if (rs != null) try { rs.close(); } catch (SQLException e) {}
+						if (statement != null) try { statement.close(); } catch (SQLException e) {}
+						if (c != null) try { c.close(); } catch (SQLException e) {}
+					}
 				  session.invalidate();
 			  }
+			  
 		}else if(getSessionUser!=null){//get session id
 			UserSession us = new UserSession();
 			HttpSession session = request.getSession(false);
@@ -225,7 +241,7 @@ public class FileUpload extends HttpServlet {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-		}else if(username==null){
+		}else if(username==null){//feeds added by other users and made public
 			FeedNames fn = new FeedNames();
 			
 			Boolean b = true;
@@ -238,7 +254,7 @@ public class FileUpload extends HttpServlet {
 						+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
 						+ "JOIN gtfs_pg_users "
 						+ "On gtfs_uploaded_feeds.username=gtfs_pg_users.username "
-						+ "where ispublic = 't';");
+						+ "where ispublic = 't' and active = 't';");
 				
 				while ( rs.next() ) {
 					fn.ownerUsername.add(rs.getString("username"));

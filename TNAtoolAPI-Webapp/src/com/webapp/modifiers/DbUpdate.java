@@ -113,7 +113,6 @@ public class DbUpdate {
 					+ "WHERE username = '"+username+"';");
 			while(rs.next()){
 				selectedAgencies.add(rs.getString("agency_id"));
-				
 			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -121,7 +120,9 @@ public class DbUpdate {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
-		
+		if(selectedAgencies.isEmpty()){
+			selectedAgencies.add("null");
+		}
 		return selectedAgencies;
 	}
 	
