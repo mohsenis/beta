@@ -532,9 +532,8 @@ function dispronmap(k,d,name,node){
 	var polyline = L.Polyline.fromEncoded(d.points, {	
 		weight: 5,
 		color: colorset[k],
-		smoothFactor: 10,
 		opacity: .5,
-		smoothFactor: 1
+		smoothFactor: 9
 		});	
 		polyline.bindPopup('<b>Agency Name:</b> '+d.agencyName+ '<br><b>Agency ID:</b> '+d.agency+'<br><b>Trip Name:</b> '+d.headSign);
 		polyline._leaflet_id = name;	
@@ -638,7 +637,7 @@ $mylist
      },
 	"json_data" : {
 		"ajax" : {
-            "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?day="+w_qstringd+"&dbindex="+dbindex,
+            "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?day="+w_qstringd+"&dbindex="+dbindex+'&username='+getSession(),
             "type" : "get",	                
             "success" : function(ops) {  
             	
@@ -835,9 +834,9 @@ $mylist
 		    div3.append('<div id="datepicker"><br></div>');
 		    div3.appendTo(titlebar);
 		    
-		    /*var div4 = $("<div/>");
+		    var div4 = $("<div/>");
 		    div4.attr("id", "datepickerdiv");
-		    div4.appendTo(titlebar);*/
+		    div4.appendTo(titlebar);
 		    
 		    document.getElementById('DB'+dbindex).innerHTML = '&#9989 '+document.getElementById('DB'+dbindex).innerHTML;
 		    var div = $("<div/>");
@@ -960,28 +959,28 @@ $mylist
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="SSR"){			    	
-			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '500';
-			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '500';
-			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if(casestring=="CSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring=="CPSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring=="CDSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring=="UASR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring=="ORSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring.substring(0,2)=="DB"){
 			    	if (dbindex!=parseInt(casestring.substring(2)))
 			    		if ($('#datepicker').multiDatesPicker('getDates').length>0){

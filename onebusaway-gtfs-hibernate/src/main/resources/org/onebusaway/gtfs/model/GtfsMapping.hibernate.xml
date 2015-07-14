@@ -334,6 +334,6 @@
         <property name="stopscount"/>
         <property name="uid"/>
     </class>
-
+	
 
 </hibernate-mapping>

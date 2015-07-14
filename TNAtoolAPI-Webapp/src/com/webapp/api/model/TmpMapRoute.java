@@ -3,6 +3,8 @@ package com.webapp.api.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.library.model.MapStop;
+
 public class TmpMapRoute {
 	private int frequency;
 	private String shape;

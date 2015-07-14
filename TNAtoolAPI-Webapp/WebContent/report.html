@@ -114,11 +114,12 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){			
+
 			$('h2').append('Transit Agency Summary Report <br><hr>');			
-			$.each(d.agencySR, function(i,item){
+			$.each(d.AgencySR, function(i,item){
 				agencytxt = "null";
 				if (item.AgencyId != ''){
 					agencytxt = item.AgencyId;

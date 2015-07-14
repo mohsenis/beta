@@ -125,7 +125,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&pop='+upop+'&key='+ key+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&pop='+upop+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){			
 			$('h2').append('Aggregated Urban Areas Summary Report <br><hr>');
@@ -147,7 +147,7 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);			    		
-			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());    		
 			    } else if ($(this).attr('type')=="SR"){
 			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&dbindex='+dbindex);
 			    };

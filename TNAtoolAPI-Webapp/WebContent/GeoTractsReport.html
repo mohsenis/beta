@@ -112,7 +112,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCTSR?&county='+w_qstring+'&key='+ key+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCTSR?&county='+w_qstring+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){			
 			$('h2').append('Census Tracts Summary Report: '+window.opener.qstringd+'<br><hr>');
@@ -134,7 +134,7 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/GeoTractsXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoTractsXreport1.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
 			    };
 			});
 			
