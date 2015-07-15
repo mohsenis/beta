@@ -113,11 +113,24 @@ public class FileUpload extends HttpServlet {
 		String setSessionUser = request.getParameter("setSessionUser");
 		String getSessionUser = request.getParameter("getSessionUser");
 		String endSessionUser = request.getParameter("endSessionUser");
+		String getURLpath = request.getParameter("getURLpath");
 		String email = request.getParameter("email");
 		String firstname = request.getParameter("firstname");
 		String lastname = request.getParameter("lastname");
 		
-		if(endSessionUser!=null){//sign out
+		if(getURLpath!=null){
+			String URLpath  = request.getRequestURL().toString();
+	        int i = URLpath.indexOf(request.getServletPath());
+	        URLpath = URLpath.substring(0, i);
+			URLpath += ","+DBINDEX;
+			
+			try {
+    			obj.put("URLpath", URLpath);
+	    		out.print(obj);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}else if(endSessionUser!=null){//sign out
 			HttpSession session = request.getSession(false);
 			  if (session != null) {
 				  String esu = (String) session.getAttribute("username");

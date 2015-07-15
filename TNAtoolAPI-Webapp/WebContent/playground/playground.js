@@ -193,22 +193,38 @@ function sendRequestEmail(username,email,firstname,lastname){
 }
 
 function launchTNAguest(){
+	var URLpath = getURLpath();
 	window.open(
-	  'http://localhost:8080/TNAtoolAPI-Webapp/?&dbindex=2',
+			URLpath.split(',')[0]+'/?&dbindex='+URLpath.split(',')[1],
 	  '_blank'
 	);
 }
 
 function launchTNA(){
+	var URLpath = getURLpath();
 	var isEmpty = selectFeed();
 	if (isEmpty){
-		alert('You must at least select one feed.')
+		alert('You must at least select one feed.');
 		return;
 	}
 	window.open(
-	  'http://localhost:8080/TNAtoolAPI-Webapp/?&dbindex=2',
+			URLpath.split(',')[0]+'/?&dbindex='+URLpath.split(',')[1],
 	  '_blank'
 	);
+}
+
+function getURLpath(){
+	var URLpath="";
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&getURLpath=gup",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	URLpath = d.URLpath;
+        }
+	});
+	return URLpath;
 }
 
 function guestUser(){
