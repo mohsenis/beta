@@ -105,7 +105,6 @@ var blockCluster;
 var tractCluster;
 var pnrCluster;
 var pnrStopCluster;
-//var pnrRouteCluster;
 
 function transitRadio(r){
 	//alert(r.value);

@@ -213,6 +213,17 @@ div.ui-dialog.ui-draggable{font-size: 100%}
 	text-align:center;
 	font-size:60%;	
 } 
+
+#displayConAgenciesTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+	text-align:center;
+	font-size:60%
+}
+
+#displayConAgenciesTable tbody tr,.dataTables_scrollBody tbody tr{
+	text-align:center;
+	font-size:60%;	
+}
+
 #overlay {
     background-color: rgba(0, 0, 0, 0.1);
     z-index: 1999;

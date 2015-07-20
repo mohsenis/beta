@@ -53,6 +53,163 @@ var aerialLayer = new L.TileLayer(aerialURL,
 
 map.addLayer(osmLayer);
 
+///******Variables declared for the on-Map connected agencies report ********///
+var connections = new L.FeatureGroup();
+var gap=500;
+var selectedAgency;
+var stopsCluster;
+var text='';
+map.addLayer(connections);
+
+
+///*********Beginning of on-Map connected agencies report*******///
+var dialog2=$("#connectedAgencies-form").dialog({
+    autoOpen: false,
+    height: 700,
+    width: 350,
+    modal: false,
+    draggable: true,
+    resizable: false,
+    closeOnEscape: false,
+    position: {my: "right top", at: "right-55 top+5", of: window },    
+    buttons: {
+        },
+    close: function() {
+    	miniMap._restore();
+    	connections.eachLayer(function (layer) {
+		    connections.removeLayer(layer);
+		});
+    	$('#gap').val(500);
+    	gap=500;
+      },
+    open: function(  ) { 	
+    	miniMap._minimize(); 
+    	dialog.dialog( "close" );
+    	$('.jstree-checked').each(function() {
+    		$( this ).children('a').children('.jstree-checkbox').click();
+    	});
+    	$('#ui-id-1').css('font-size','80%');
+    },
+  }).dialogExtend({
+	  "closable" : true,
+      "minimizable" : true,
+      "minimizeLocation": "right",
+      "minimize" : function() {
+    	  miniMap._restore();
+      },
+      "restore" : function() {
+    	  miniMap._minimize();
+      }
+  });
+
+function loadDialog2(node){
+	$mylist.dialogExtend("collapse");
+    dialog2.dialog( "open" );
+    $('#dialogPreLoader2').show();
+	$('#displayConAgenciesTable').empty();
+	var html='';
+	var connectionsClusters=new Array();
+	$.ajax({
+		type: 'GET',
+		datatype: 'jason',
+		url: '/TNAtoolAPI-Webapp/queries/transit/stops?agency='+ node.attr("id")+'&dbindex='+dbindex,
+		async: true,
+		success: function(data){
+			var stopsCluster = new L.MarkerClusterGroup({
+				maxClusterRadius: 120,
+				iconCreateFunction: function (cluster) {
+					return new L.DivIcon({ html: cluster.getChildCount(), className: 'ycluster', iconSize: new L.Point(25, 25) });						
+				},
+				spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+			});
+			
+			$.each(data.stops,function(i, item){
+				var marker = new L.marker([item.stopLat,item.stopLon] /*,{icon: onMapIcon}).on('click',onClick*/);
+				marker.bindPopup('<b>Stop Name:</b> '+item.stopName);
+				stopsCluster.addLayer(marker);
+			}); 
+			connections.addLayer(stopsCluster);
+		}
+	});
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+node.attr("id")+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex,
+		async: true,
+		success: function(data){
+			var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
+			text = data.agency;
+			$('#dialogSelectedAgency').html(data.agency);
+    		$('#dialogNoOfConnectedAgencies').html(data.ClusterR.length);
+			html = '<table id="connectedAgenciesTable" class="display" align="center">';
+			var tmp = 	'<th>Agency ID </th>'+
+            			'<th>Agency Name</th>'+
+            			'<th>Number of Connections</th></tr>';	
+			html += '<thead>'+tmp+'</thead><tbody>';
+			var html2 = '<tfoot>'+tmp+'</tfoot>';
+			
+			
+			
+			for (i = 0; i < data.ClusterR.length; i++) {
+				html += '<td>'+ data.ClusterR[i].id +'</td>'+
+				'<td>'+ data.ClusterR[i].name +'</td>'+
+				'<td>'+ data.ClusterR[i].size +'</td></tr>';
+			}
+			
+			html += '</tbody></table>';
+			$('#displayConAgenciesTable').append(html);
+			var connectedAgenciesTable = $('#connectedAgenciesTable').DataTable( {
+				"paging": false,
+				"bSort": false,
+				//"scrollY": "40%",
+				"dom": 'T<"clear">lfrtip',
+		        "tableTools": {
+		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+		        	"sRowSelect": "multi",
+		        	"aButtons": []}
+			});
+			$("#connectedAgenciesTable_length").remove();
+		    $("#connectedAgenciesTable_filter").remove();
+		    $("#connectedAgenciesTable_info").remove();
+		    connectedAgenciesTable.$('tr').click( function () {
+		    	if($(this).hasClass('selected')){
+		    		connections.removeLayer(connectionsClusters[$(this).index()]);
+		    	}else{
+		    		var c = ($(this).index()+1)%6;
+		    		var tmpConnectionsClusters = new L.MarkerClusterGroup({
+    					maxClusterRadius: 120,
+    					iconCreateFunction: function (cluster) {
+    						return new L.DivIcon({ html: cluster.getChildCount(), className: colorArray[c], iconSize: new L.Point(25, 25) });						
+    					},
+    					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+    				});
+    				var agencyName=data.ClusterR[$(this).index()].name;
+    				$.each(data.ClusterR[$(this).index()].connections, function (i, item){
+    					var str = item.scoords.replace("{","");
+            			str=str.split(",");
+    					var lat = str[0];
+    					var lng = str[1];
+    					
+    					var marker = new L.marker([lat,lng] /*,{icon: onMapIcon}).on('click',onClick*/);
+    					marker.bindPopup('<b>Agency: </b>'+ agencyName +'<br>'+
+    									'<b>Stop Name: </b>'+item.name);
+    					tmpConnectionsClusters.addLayer(marker);
+    				});
+    				connectionsClusters[$(this).index()] = (tmpConnectionsClusters);
+		    		connections.addLayer(connectionsClusters[$(this).index()]);
+//		    		var id= $(this).find("td:nth-child(1)").text();
+		    	}                   		    	
+		    });
+		    $('#dialogPreLoader2').hide();
+		}
+	});
+}
+function reloadDialog2(input){
+	gap=input;
+	loadDialog2(selectedAgency);
+}
+
 ///*****************Leaflet Draw******************///
 var dialogAgencies = new Array();
 var dialogAgenciesId = new Array();
@@ -72,7 +229,8 @@ var dialog = $( "#dialog-form" ).dialog({
     	map.removeLayer(onMapCluster);
       },
     open: function( event, ui ) {
-    	miniMap._minimize();    	
+    	miniMap._minimize();
+    	dialog2.dialog('close');
     },
   }).dialogExtend({
 	  "closable" : true,
@@ -258,9 +416,7 @@ map.on('draw:edited', function (e) {
     	$('#POPlon').html(drawCentroid[1]);
     	$('#POParea').html(area);
     	
-    });
-	
-	
+    });	
 	dialog.dialog( "close" );	
 }); 
 ////////*************************************/////////////////////
@@ -683,15 +839,13 @@ $mylist
     },
     "contextmenu" : {
         "items" : function (node) {        	
-        	if ((node.attr("type"))!=="variant" && $.jstree._reference($mylist)._get_type($(node))!="disabled") {        	       	 
+        	if ((node.attr("type"))!=="variant" && $.jstree._reference($mylist)._get_type($(node))!="disabled" && node.attr("type")=="agency") {        	       	 
         	return { 
         		"show" : {
                     "label" : "Show Route Shapes",
                     "action" : function (node) { 
                     	//alert(node.attr("type"));
-                    	switch (node.attr("type")){
-                    	case "agency":                    		
-                    		if ($.jstree._reference($mylist)._is_loaded(node)){
+                    	if ($.jstree._reference($mylist)._is_loaded(node)){
                     			$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
                     				if ($.jstree._reference($mylist)._is_loaded(child)){
                     					$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){                    						
@@ -729,49 +883,61 @@ $mylist
             								});},function(){alert("Node Load Error");});
                 					}                        			
                                 		});},function(){alert("Node Load Error");});
-                			}                    		                    		
-	                    	break; 
-                    	case "route":
-                    		if ($.jstree._reference($mylist)._is_loaded(node)){
-	                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
-	                    		$.jstree._reference($mylist).change_state(child, true);
-	                    		if ($(child).attr("longest")==1){
-        							$.jstree._reference($mylist).change_state(child, false);
-        						}
-	                    		}); 
-                    		}else {
-                    			$.jstree._reference($mylist).load_node_json(node, function(){$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
-                            		$.jstree._reference($mylist).change_state(child, true);
-                            		if ($(child).attr("longest")==1){
-            							$.jstree._reference($mylist).change_state(child, false);
-            						}
-                            		});},function(){alert("Node Load Error");});
-                    		}
-                    		break;
-                    	}
+                			}
                     }
                 },
                 "hide" : {
                     "label" : "Hide Route Shapes",
                     "action" : function (node) { 
-                    	switch (node.attr("type")){
-                    	case "agency":                    		
-                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
-                    			$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){
-                            		$.jstree._reference($mylist).uncheck_node(gchild);
-                            		});
-                        		});
-	                    	break; 
-                    	case "route":
-                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
-                    		$.jstree._reference($mylist).uncheck_node(child);
+                    	$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
+                    		$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){
+                    			$.jstree._reference($mylist).uncheck_node(gchild);
+                    			});
                     		});
-                    		break;
                     	}
-                    }
                 },
+                "connectedAgencies" : {
+                	"label" : "Connected Agencies",
+                	"action" : function(node){
+                		selectedAgency=node;
+                		loadDialog2(selectedAgency);
+           			}
+                }
         	};        	     
-                }            
+                }else if ((node.attr("type"))!=="variant" && $.jstree._reference($mylist)._get_type($(node))!="disabled" && node.attr("type")=="route"){
+                	return { 
+                		"show" : {
+                            "label" : "Show Route Shapes",
+                            "action" : function (node) { 
+                            	//alert(node.attr("type"));
+                            	
+                            		if ($.jstree._reference($mylist)._is_loaded(node)){
+        	                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
+        	                    		$.jstree._reference($mylist).change_state(child, true);
+        	                    		if ($(child).attr("longest")==1){
+                							$.jstree._reference($mylist).change_state(child, false);
+                						}
+        	                    		}); 
+                            		}else {
+                            			$.jstree._reference($mylist).load_node_json(node, function(){$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
+                                    		$.jstree._reference($mylist).change_state(child, true);
+                                    		if ($(child).attr("longest")==1){
+                    							$.jstree._reference($mylist).change_state(child, false);
+                    						}
+                                    		});},function(){alert("Node Load Error");});
+                            		}
+                            }
+                        },
+                        "hide" : {
+                            "label" : "Hide Route Shapes",
+                            "action" : function (node) { 
+                            		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
+                            		$.jstree._reference($mylist).uncheck_node(child);
+                            		});
+                            }
+                        }
+                	};
+                }
         }
     },
 	"plugins" : [ "themes","types","json_data", "checkbox", "sort", "ui" ,"contextmenu"]			
@@ -805,9 +971,9 @@ $mylist
 	      "close": "ui-icon-document",	     
 	    },
 	    "load" : function(evt, dlg) {  	
-	    	$(".ui-dialog-titlebar-minimize:eq( 1 )").attr("title", "Minimize");
-	    	$(".ui-dialog-titlebar-buttonpane:eq( 1 )").css("right", 68 + "px");    	
-		    var titlebar = $(".ui-dialog-titlebar:eq( 1 )");		
+	    	$(".ui-dialog-titlebar-minimize:eq( 2 )").attr("title", "Minimize");
+	    	$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 68 + "px");    	
+		    var titlebar = $(".ui-dialog-titlebar:eq( 2 )");		
 			var div2 = $("<div/>");			
 		    div2.addClass("ui-dialog-titlebar-other");	    
 		    var button2 = $( "<button/>" ).text( "Databases" );	
@@ -1007,6 +1173,7 @@ $mylist
 	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.polygon.handler.disable();
 	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.circle.handler.disable();
 	    	drawControl._toolbars[L.EditToolbar.TYPE]._modes.edit.handler.disable();
+	    	dialog2.dialog('close');
 	    },
 	    "collapse" : function(evt,dlg){	    	
 	    	$(".dropdown-menu").css("top", 100+"%" );

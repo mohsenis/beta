@@ -70,9 +70,19 @@
 </head>
 
 <body>
+
 	<div id="overlay"></div>
 	<div id='list' class='list'>
 	</div>
+	
+	<div id="connectedAgencies-form" title="On-Map Connected Agencies Report" style="text-size=50%">
+	<p style="font-size:80%"> Maximum Spatial Gap (ft.) <input type="number" name="gap" id="gap" class="utbox" required value='500'/>
+			    	<input id="submit" type="button" onclick="reloadDialog2(document.getElementById('gap').value)" title="Click submit to refresh the report"  value="Submit" class="button" /></p>		    			    	    	
+	<p><br><span>Agencies connected to: <b><br>- <span style="font-size:80%; align:center;" id="dialogSelectedAgency"></span></b></span><br>
+	<p id="displayConAgenciesTable"></p>
+	<img id="dialogPreLoader2" src="images/287.GIF" alt="Page Loading" style="margin:70px" >
+	</div>
+	
 	<div id="dialog-form" title="On-Map Report">
 	  <p><b>Centroid</b>:<br>
     	<span style="padding-left:3em">Latitude: <span style="padding-left:1.5em" id="dialogLat"></span></span><br>
@@ -142,6 +152,7 @@
 		  	<br> -->		  	
 		  	<p id="displayGeoReport"></p>
 		  </div>
+		  
 		  <div id="parknride">
 		  	<table id="parknrideInfo" style="border:none; font-size:100%">
 		  		<tr>
@@ -172,11 +183,13 @@
 	      	Population (Census Blocks)
 	      	<input id="popRadio" type="radio" name="onMapRep" value="popupation" style="display:inline; margin-left:4.3em" checked="checked"><br>
 	      </p>
-      </div> -->     
-    </div>
+      </div> --> 
+      </div>    
+
     <div id="dialogResults" title="Report Results">
 	</div>
     <div id="map"> </div>
+    	
 	<script type="text/javascript" src="js/otp/client.js"></script>
 	
 </body>
