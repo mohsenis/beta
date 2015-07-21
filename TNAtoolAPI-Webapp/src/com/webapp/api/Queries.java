@@ -4382,7 +4382,6 @@ Loop:  	for (Trip trip: routeTrips){
     /**
 	 * Generates The connected agencies summary report
 	 */
-	    
 	@GET
 	@Path("/ConAgenSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })

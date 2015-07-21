@@ -109,28 +109,7 @@ function loadDialog2(node){
 	$('#displayConAgenciesTable').empty();
 	var html='';
 	var connectionsClusters=new Array();
-	$.ajax({
-		type: 'GET',
-		datatype: 'jason',
-		url: '/TNAtoolAPI-Webapp/queries/transit/stops?agency='+ node.attr("id")+'&dbindex='+dbindex,
-		async: true,
-		success: function(data){
-			var stopsCluster = new L.MarkerClusterGroup({
-				maxClusterRadius: 120,
-				iconCreateFunction: function (cluster) {
-					return new L.DivIcon({ html: cluster.getChildCount(), className: 'ycluster', iconSize: new L.Point(25, 25) });						
-				},
-				spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
-			});
-			
-			$.each(data.stops,function(i, item){
-				var marker = new L.marker([item.stopLat,item.stopLon] /*,{icon: onMapIcon}).on('click',onClick*/);
-				marker.bindPopup('<b>Stop Name:</b> '+item.stopName);
-				stopsCluster.addLayer(marker);
-			}); 
-			connections.addLayer(stopsCluster);
-		}
-	});
+
 	
 	$.ajax({
 		type: 'GET',
@@ -178,7 +157,7 @@ function loadDialog2(node){
 		    	}else{
 		    		var c = ($(this).index()+1)%6;
 		    		var tmpConnectionsClusters = new L.MarkerClusterGroup({
-    					maxClusterRadius: 120,
+//    					maxClusterRadius: 120,
     					iconCreateFunction: function (cluster) {
     						return new L.DivIcon({ html: cluster.getChildCount(), className: colorArray[c], iconSize: new L.Point(25, 25) });						
     					},
@@ -186,7 +165,7 @@ function loadDialog2(node){
     				});
     				var agencyName=data.ClusterR[$(this).index()].name;
     				$.each(data.ClusterR[$(this).index()].connections, function (i, item){
-    					var str = item.scoords.replace("{","");
+    					var str = item.dcoords.replace("{","");
             			str=str.split(",");
     					var lat = str[0];
     					var lng = str[1];
@@ -202,12 +181,47 @@ function loadDialog2(node){
 		    	}                   		    	
 		    });
 		    $('#dialogPreLoader2').hide();
+		    
+			$.ajax({
+				type: 'GET',
+				datatype: 'jason',
+				url: '/TNAtoolAPI-Webapp/queries/transit/stops?agency='+ node.attr("id")+'&dbindex='+dbindex,
+				async: true,
+				success: function(data){
+					var stopsCluster = new L.MarkerClusterGroup({
+//						maxClusterRadius: 120,
+						iconCreateFunction: function (cluster) {
+							return new L.DivIcon({ html: cluster.getChildCount(), className: 'ycluster', iconSize: new L.Point(25, 25) });						
+						},
+						spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+					});
+					
+					$.each(data.stops,function(i, item){
+						var marker = new L.marker([item.stopLat,item.stopLon] /*,{icon: onMapIcon}).on('click',onClick*/);
+						marker.bindPopup('<b>Stop Name:</b> '+item.stopName);
+						stopsCluster.addLayer(marker);
+					}); 
+					connections.addLayer(stopsCluster);
+				}
+			});
 		}
 	});
 }
 function reloadDialog2(input){
+	if (!isNormalInteger(input)){
+		alert('Please enter a positive integer.');
+		return;
+	}
 	gap=input;
+	connections.eachLayer(function (layer) {
+	    connections.removeLayer(layer);
+	});
 	loadDialog2(selectedAgency);
+}
+
+function isNormalInteger(str) {
+    var n = ~~Number(str);
+    return String(n) === str && n >= 0;
 }
 
 ///*****************Leaflet Draw******************///
@@ -283,6 +297,7 @@ map.on('draw:drawstart', function (e) {
 	$mylist.dialogExtend("collapse");
 	drawnItems.clearLayers();
 	dialog.dialog( "close" );
+	dialog2.dialog( "close" );
 });
 
 $('.leaflet-draw-edit-remove').click(function(event){
