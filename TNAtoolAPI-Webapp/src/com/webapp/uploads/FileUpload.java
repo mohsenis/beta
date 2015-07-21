@@ -382,6 +382,7 @@ public class FileUpload extends HttpServlet {
 				System.out.println("vacuum start");
 				statement.executeUpdate("VACUUM");
 				System.out.println("vacuum finish");
+				System.out.println(System.currentTimeMillis());
 			} catch (SQLException e) {
 				System.out.println(e.getMessage());
 				
@@ -458,7 +459,7 @@ public class FileUpload extends HttpServlet {
 		String error = "";
 		String username = "";
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-	    
+		System.out.println(System.currentTimeMillis());
         if (isMultipart) {
 	        FileItemFactory factory = new DiskFileItemFactory();
 	
