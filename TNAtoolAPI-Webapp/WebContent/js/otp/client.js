@@ -641,10 +641,17 @@ $mylist
             "type" : "get",	                
             "success" : function(ops) {  
             	
-            	$.each(ops.data, function(i,item){
-            		dialogAgencies.push(item.data);
-            		dialogAgenciesId.push(item.attr.id);
-            	});
+            	try {
+            		console.log(ops.data[0].attr.id);
+            		$.each(ops.data, function(i,item){
+                		dialogAgencies.push(item.data);
+                		dialogAgenciesId.push(item.attr.id);
+                	});
+            	}
+            	catch(err) {
+            		console.log("error");
+            	}
+            	
             	return ops.data;            	
             }    	               
         },

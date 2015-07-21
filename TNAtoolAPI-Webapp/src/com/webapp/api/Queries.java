@@ -218,7 +218,11 @@ public class Queries {
            	days = datedays[1];
            	AgencyRouteList response = PgisEventManager.agencyMenu(fulldates, days, username, dbindex);
            	return response;
-    	} else {    	
+    	} else {
+    		if(!username.equals("admin")){
+    			AgencyRouteList response = PgisEventManager.agencyMenu(null, null, username, dbindex);
+    			return response;
+    		}
 	    	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);
 	    	if (menuResponse[dbindex]==null || menuResponse[dbindex].data.size()!=allagencies.size() ){
 	    		menuResponse[dbindex] = new AgencyRouteList();   	

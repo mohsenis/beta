@@ -457,7 +457,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   
   @Override
   public Long getStopsCount(List<String> selectedAgencies) {
-     List<Long> results = _ops.findByNamedQueryAndNamedParam("allStopsCount", "selectedAgencies", selectedAgencies);
+     List<Long> results = _ops.findByNamedQueryAndNamedParam("allStopsCount", "sa", selectedAgencies);
      return results.get(0);
   }
   
@@ -470,7 +470,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   
   @Override
   public Double getRouteMiles(List<String> selectedAgencies) {
-    Double response = (Double)_ops.findByNamedQueryAndNamedParam("RouteMilesForState", "selectedAgencies", selectedAgencies).get(0);
+    Double response = (Double)_ops.findByNamedQueryAndNamedParam("RouteMilesForState", "sa", selectedAgencies).get(0);
     response = Math.round(response*100.00)/100.00;
     return response;
   }
@@ -479,7 +479,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   @Override
   public HashMap<String, Integer> getCounts(List<String> selectedAgencies) {
 	  HashMap<String, Integer> response = new HashMap<String, Integer>();
-	  List results = _ops.findByNamedQueryAndNamedParam("counts", "selectedAgencies", selectedAgencies);
+	  List results = _ops.findByNamedQueryAndNamedParam("counts", "sa", selectedAgencies);
 	  Object[] counts = (Object[]) results.get(0);
 	  response.put("agency", ((Long)counts[0]).intValue());
 	  response.put("stop", ((Long)counts[1]).intValue());
@@ -561,7 +561,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   
   @Override
 	public Collection<Agency> getSelectedAgencies(List<String> selectedAgencies) {
-		return _ops.findByNamedQueryAndNamedParam("selectedAgenies", "selectedAgencies", selectedAgencies);
+		return _ops.findByNamedQueryAndNamedParam("selectedAgenies", "sa", selectedAgencies);
 	}
   
   @Override
