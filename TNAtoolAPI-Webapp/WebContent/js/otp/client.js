@@ -42,7 +42,7 @@ var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
 var minimalLayer = new L.StamenTileLayer("toner");
 $("body").css("display","");
-var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov">US Census Bureau</a> 2010';
+var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> V.3.15.07';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
 /*var osmLayer = new L.TileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', 
