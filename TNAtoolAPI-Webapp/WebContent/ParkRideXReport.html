@@ -4,7 +4,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>P&R Extended Report</title>
+	<title>Park and Ride Extended Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -25,15 +25,33 @@ var countyId = parseInt(document.URL.split("&")[1].substr(document.URL.split("&"
 var dbindex = parseInt(document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1));
 var key = Math.random();
 var html = '<table id="RT" class="display" align="center">';
-var tmp = 	'<tr><th>P&R ID </th>'+
-			'<th>Lot Name </th>'+
-			'<th>City </th>'+
-			'<th>Location</th>'+			
-			'<th>Spaces </th>'+
-			'<th>Accessible Spaces <em title="Number of handicap parking"><img src="images/tooltip.png" alt="tooltip"></em> </th>'+
-			'<th>Transit Services <em title="Transit routes accessible from the lot"><img src="images/tooltip.png" alt="tooltip"></em> </th>'+
-			'<th>Latitude </th>'+
-			'<th>Longitude </th>'+
+var tmp = 	'<tr><th>P&R ID</th>'+
+			'<th>Lot Name</th>'+
+			'<th>City</th>'+
+			'<th>Location</th>'+
+			'<th>Zipcode</th>'+
+			'<th>Spaces</th>'+
+			'<th>Accessible Spaces<em title="Number of handicap parking"><img src="images/tooltip.png" alt="tooltip"></em> </th>'+
+			'<th>Transit Services<em title="Transit routes accessible from the lot"><img src="images/tooltip.png" alt="tooltip"></em> </th>'+
+			'<th>Latitude</th>'+
+			'<th>Longitude</th>'+
+			'<th>Bike Rack Spaces</th>'+
+			'<th>Bike Locker Spaces </th>'+
+			'<th>Electric Vehicle Spaces</th>'+
+			'<th>Car Sharing</th>'+
+			'<th>Time Limit</th>'+
+			'<th>Restroom</th>'+
+			'<th>Benches</th>'+
+			'<th>Shelter</th>'+
+			'<th>Indoor Waiting Area</th>'+
+			'<th>Trash Can</th>'+
+			'<th>Lighting</th>'+
+			'<th>Security Cameras</th>'+
+			'<th>Sidewalks</th>'+
+			'<th>Park&Ride Signage</th>'+
+			'<th>Lot Surface</th>'+
+			'<th>Property Owner</th>'+
+			'<th>Local Expert</th>' +
 			'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
@@ -115,16 +133,36 @@ $(document).ready(function(){
 		async: true,
 		success: function(d){			
 			$('h2').append('Park & Ride Extended Report <br><hr>');
+			//alert(d.PnrCountiesList.length);
+			$('#PnrXReportCounty').append(d.PnrCountiesList[0].county +" County - ");
 			$.each(d.PnrCountiesList, function(i,item){
-				html += '<tr><td>'+ item.pnrId + '</td>'+
-							'<td>' + item.lotName + '</td>'+
+				html += '<tr><td>'+ item.pnrid + '</td>'+
+							'<td>' + item.lotname + '</td>'+
 							'<td>' + item.city + '</td>'+
 							'<td>' + item.location + '</td>'+
+							'<td>' + item.zipcode + '</td>'+
 							'<td>' + item.spaces + '</td>'+
-							'<td>' + item.accessibleSpaces + '</td>'+
-							'<td>' + item.transitServices + '</td>'+
+							'<td>' + item.accessiblespaces + '</td>'+
+							'<td>' + item.transitservices + '</td>'+
 							'<td>' + item.lat + '</td>'+
 							'<td>' + item.lon + '</td>'+
+							'<td>' + item.bikerackspaces + '</td>'+
+							'<td>' + item.bikelockerspaces + '</td>'+
+							'<td>' + item.electricvehiclespaces + '</td>'+
+							'<td>' + item.carsharing + '</td>'+
+							'<td>' + item.timelimit + '</td>'+
+							'<td>' + item.restroom + '</td>'+
+							'<td>' + item.benches + '</td>'+
+							'<td>' + item.shelter + '</td>'+
+							'<td>' + item.indoorwaitingarea + '</td>'+
+							'<td>' + item.trashcan + '</td>'+
+							'<td>' + item.lighting + '</td>'+
+							'<td>' + item.securitycameras + '</td>'+
+							'<td>' + item.sidewalks + '</td>'+
+							'<td>' + item.pnrsignage + '</td>'+
+							'<td>' + item.lotsurface + '</td>'+
+							'<td>' + item.propertyowner + '</td>'+
+							'<td>' + item.localexpert + '</td>'+
 							'<td>' + d.metadata + '</td></tr>';							   			
 			});
 			html +='</tbody>'+html2+'</table>';
@@ -138,14 +176,21 @@ $(document).ready(function(){
 			    };
 			}); */
 			
-			var table = $('#RT').DataTable({
-				//"scrollY": "76%",
+			var table = $('#RT').dataTable({
+				"width": "100%", 
+				"scrollY": "50%",
+				"sScrollX": true,
+				"bScrollCollapse": true, 
+				"autoWidth": true, 
 				"bSort" : true,
 				"paging": true,				
-				"iDisplayLength": 14,
-				"aoColumnDefs": [{"visible": false, "targets": [9]}],
+				//"iDisplayLength": 7,
+				"aoColumnDefs": [{"visible": false, "targets": [27]}],
 				"order": [[ 2, "des" ]],
 				"dom": 'T<"clear">lfrtip',
+				
+				
+				
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
 		        	"sRowSelect": "os",
@@ -169,6 +214,7 @@ $(document).ready(function(){
 				
 			} );
 			
+		
 		    $('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
 		        var row = table.row( tr );
@@ -205,7 +251,7 @@ $(document).ready(function(){
 		            '</tr>'+
 		        '</table>';
 		    }
-		    $('#RT_wrapper').css("width", $('#RT').css("width"));
+		    //$('#RT_wrapper').css("width", $('#RT').css("width"));
 		    $('#RT_wrapper').css("margin", "auto");
 			$("#RT_length").remove();
 		    $("#RT_filter").insertBefore("#RT_info");
@@ -249,7 +295,7 @@ function dbchange(){
 			<tr>
 			  <td id="td1">
 			  	<div class="headerBL"  >
-				<h2 style="margin:0px;"></h2>
+				<h2 style="margin:0px;"><span id="PnrXReportCounty"></span></h2>
 				</div>
 			  </td>
 			  
@@ -264,7 +310,7 @@ function dbchange(){
 		</table>		
 		
 		
-		<p id="displayReport"><br></p>
+		<p id="displayReport" ><br></p>
 		<br>
 		<br>
 		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	

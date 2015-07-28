@@ -65,7 +65,6 @@ static{
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();			
 		Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
 		Geometry targetGeometry = JTS.transform( point, transform);
-		point = geometryFactory.createPoint(targetGeometry.getCoordinate());
 		point = targetGeometry.getCentroid();
 		point.setSRID(2993);	
 		session[sessionindex].beginTransaction();
@@ -106,12 +105,12 @@ static{
 		Type geomType = GeometryUserType.TYPE;
 		q.setParameter("polygon", targetGeometry, geomType);
 		//q.setParameter("radius", d);
-//		@SuppressWarnings("unchecked")
-//		List<ParknRide> results = (List<ParknRide>) q.list();
+		@SuppressWarnings("unchecked")
+		List<ParknRide> results = (List<ParknRide>) q.list();
         Hutil.getSessionFactory()[sessionindex].close();
-        List<ParknRide> results=new ArrayList<ParknRide>();
+//        List<ParknRide> results=new ArrayList<ParknRide>();
         
-        return results=null;
+        return results;
     }	
 
 

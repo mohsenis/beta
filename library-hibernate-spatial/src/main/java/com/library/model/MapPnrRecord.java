@@ -41,6 +41,10 @@ public class MapPnrRecord {
 	
 	@XmlAttribute
 	@JsonSerialize
+	public String availability;
+	
+	@XmlAttribute
+	@JsonSerialize
 	public String transitSerives;
 	
 	@XmlElement(name = "MapPnrTr")

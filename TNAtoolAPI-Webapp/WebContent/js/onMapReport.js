@@ -90,7 +90,7 @@ function setDialog(){
 	});
     $( "#tabs" ).tabs();
 }
-
+var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
 var onMapCluster=new L.FeatureGroup();
 var onMapStopCluster=new L.FeatureGroup();
 var onMapRouteCluster=new L.FeatureGroup();
@@ -105,6 +105,7 @@ var blockCluster;
 var tractCluster;
 var pnrCluster;
 var pnrStopCluster;
+var pnrRadius=500;
 
 function transitRadio(r){
 	//alert(r.value);
@@ -169,7 +170,7 @@ function showOnMapReport(lat, lon, date, x){
 //	pnrStopCluster = new Array();
 //	pnrRouteCluster = new Array();
 	
-	var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
+	
 	var GcolorArray=['blockscluster', 'tractscluster'];
 	$('#displayTransitReport').empty();
 	$('#displayGeoReport').empty();
@@ -216,7 +217,10 @@ function showOnMapReport(lat, lon, date, x){
 					$.each(jtem.RouteIds, function(h,htem){
 						pophtml+='<br><span style="margin-left:2em">'+htem+'</span>';
 					});
-					marker.bindPopup('<b>Stop ID:</b> '+jtem.Id+'<br><b>Stop Name:</b> '+jtem.Name+'<br><b>Agency:</b> '+jtem.AgencyId+'<br><b>Service Frequency :</b> '+jtem.Frequency+pophtml,popupOptions);
+					marker.bindPopup('<b>Stop ID:</b> '+jtem.Id+
+							'<br><b>Stop Name:</b> '+jtem.Name+
+							'<br><b>Agency:</b> '+jtem.AgencyId+
+							'<br><b>Service Frequency :</b> '+jtem.Frequency+pophtml,popupOptions);
 					tmpStopCluster.addLayer(marker);
 				});
 				stopCluster.push(tmpStopCluster);
@@ -374,11 +378,18 @@ function showOnMapReport(lat, lon, date, x){
 				});
 				var cntr=1;
 				$.each(item.MapPnrRecords, function(j,jtem){
-					var marker = L.marker([jtem.lat,jtem.lon], {icon: onMapIcon}).on('click',onClick);
+					var marker = L.marker([jtem.lat,jtem.lon], {icon: onMapIcon})/*.on('click',onClick)*/;
+					marker.markerId = jtem.id;
+					marker.markerCountyId = jtem.countyId;
+					marker.markerLat = jtem.lat;
+					marker.markerLon = jtem.lon;
 					var temp='<b>County Name:</b> '+jtem.countyName+
 							'<br><b>Lot Name:</b> '+jtem.lotName+
 							'<br><b>Transit Services:</b> '+jtem.transitSerives+
-							'<br><b>Total Spaces: </b> '+jtem.spaces;
+							'<br><b>Total Spaces: </b> '+jtem.spaces+
+							'<br><b>Availability: </b> '+jtem.availability+
+							'<br><b>Display stops within:</b><input type="text" style="width:3em" id="'+jtem.lat+'pnrRadius" name="radius" class="utbox" size="5" value='+ pnrRadius +' required class="utbox">ft.'+
+							'<br><input type="submit" style="margin:1px auto;width:100px; text-align:center;" value="submit" onclick="nearbyStops(\''+marker.markerId+'\',\''+marker.markerCountyId+'\', \''+marker.markerLat+'\', \''+marker.markerLon+'\', \''+marker.markerLat+'pnrRadius\')" title="Click submit to reload the near stop(s)" class="button">';
 					marker.bindPopup(temp);
 					marker.markerId = jtem.id;
 					marker.markerCountyId = jtem.countyId;
@@ -388,58 +399,12 @@ function showOnMapReport(lat, lon, date, x){
 				});	
 			pnrCluster.push(tmpPnrCluster);
 			});
-				
-			function onClick(){
-				$.ajax({
-					type: 'GET',
-					datatype: 'json',
-					url: 	'/TNAtoolAPI-Webapp/queries/transit/pnrstopsroutes?&pnrId=' + this.markerId +
-							'&pnrCountyId=' + this.markerCountyId + '&lat=' + this.markerLat +
-							'&lng=' + this.markerLon + '&dbindex=' + dbindex,
-					async: true,
-					success: function(data){
-						var tmpPnrRouteCluster = new L.FeatureGroup();
-						var c = i % 6;
-						var tmpPnrStopCluster = new L.MarkerClusterGroup({
-							maxClusterRadius: 120,
-							iconCreateFunction: function (cluster) {
-								return new L.DivIcon({ html: cluster.getChildCount(), className: colorArray[c], iconSize: new L.Point(30, 30) });
-							},
-							spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
-						});
-						$.each(data.MapPnrSL, function(k,ktem){
-								var marker = L.marker([ktem.Lat,ktem.Lng]);
-								marker.bindPopup('<b>Stop ID:</b> '+ktem.Id+'<br><b>Stop Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId);
-								tmpPnrStopCluster.addLayer(marker);
-							});	
-						pnrStopCluster = tmpPnrStopCluster;
-						
-						$.each(data.MapPnrRL, function(k,ktem){
-							d = L.PolylineUtil.decode(ktem.Shape);
-							points = [d];
-							var polyline = L.multiPolyline(points, {	
-								weight: 5,
-								color: colorset[k],
-								opacity: .5,
-								smoothFactor: 1
-								});	
-							polyline.bindPopup('<b>Route ID:</b> '+ktem.Id+'<br><b>Route Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId);
-							tmpPnrRouteCluster.addLayer(polyline);
-							});
-						pnrRouteCluster = tmpPnrRouteCluster;
-						// End
-						
-						onMapPnrStopCluster.eachLayer(function (layer) {
-							onMapPnrStopCluster.removeLayer(layer);
-							});
-						onMapPnrStopCluster.addLayer(pnrStopCluster); // No need for the index
-						onMapPnrRouteCluster.eachLayer(function (layer) {
-							onMapPnrRouteCluster.removeLayer(layer);
-							});
-						onMapPnrRouteCluster.addLayer(pnrRouteCluster); // No need for the index
-					}
-				});				
-			}
+			
+			/*function onClick(){
+				nearbyStops(PnrRadius);
+			}*/
+			
+
 			
 			html = html + '</tbody></table>';
 			$('#displayPnrCounties').append($(html));
@@ -478,6 +443,67 @@ function showOnMapReport(lat, lon, date, x){
 		}
 	});
 	
+}
+
+function nearbyStops(markerId, countyId, lat ,lon, radius){
+	PnrRadius = document.getElementById(radius).value;
+	if (!isNormalInteger(PnrRadius)){
+		
+		alert('Please enter a positive integer.');
+		return;
+	}
+	
+	PnrRadius = PnrRadius/3.280;
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: 	'/TNAtoolAPI-Webapp/queries/transit/pnrstopsroutes?&pnrId=' + markerId +
+				'&pnrCountyId=' + countyId + '&lat=' + lat +
+				'&lng=' + lon + '&radius=' + PnrRadius + '&dbindex=' + dbindex,
+		async: true,
+		success: function(data){
+			var tmpPnrRouteCluster = new L.FeatureGroup();
+			var c = i % 6;
+			var tmpPnrStopCluster = new L.MarkerClusterGroup({
+				maxClusterRadius: 120,
+				iconCreateFunction: function (cluster) {
+					return new L.DivIcon({ html: cluster.getChildCount(), className: colorArray[c], iconSize: new L.Point(30, 30) });
+				},
+				spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+			});
+			$.each(data.MapPnrSL, function(k,ktem){
+					var marker = L.marker([ktem.Lat,ktem.Lng]);
+					marker.bindPopup('<b>Stop ID:</b> '+ktem.Id+'<br><b>Stop Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId);
+					tmpPnrStopCluster.addLayer(marker);
+				});	
+			pnrStopCluster = tmpPnrStopCluster;
+			
+			$.each(data.MapPnrRL, function(k,ktem){
+				d = L.PolylineUtil.decode(ktem.Shape);
+				points = [d];
+				var polyline = L.multiPolyline(points, {	
+					weight: 5,
+					color: colorset[k],
+					opacity: .5,
+					smoothFactor: 1
+					});	
+				polyline.bindPopup('<b>Route ID:</b> '+ktem.Id+'<br><b>Route Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId);
+				tmpPnrRouteCluster.addLayer(polyline);
+				});
+			pnrRouteCluster = tmpPnrRouteCluster;
+			// End
+			
+			onMapPnrStopCluster.eachLayer(function (layer) {
+				onMapPnrStopCluster.removeLayer(layer);
+				});
+			onMapPnrStopCluster.addLayer(pnrStopCluster); // No need for the index
+			onMapPnrRouteCluster.eachLayer(function (layer) {
+				onMapPnrRouteCluster.removeLayer(layer);
+				});
+			onMapPnrRouteCluster.addLayer(pnrRouteCluster); // No need for the index
+		}
+	});				
 }
 
 function numberWithCommas(x) {

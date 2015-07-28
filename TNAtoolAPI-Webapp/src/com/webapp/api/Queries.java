@@ -264,12 +264,10 @@ public class Queries {
 	List<MapPnrCounty> mapPnrCounties=new ArrayList<MapPnrCounty>();
 	MapPnrRecord mapPnrRecord;
 	MapPnrCounty mapPnrCounty;
-	MapStop mapPnrStop;
-	MapRoute mapPnrRoute;
-	List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
+//	MapStop mapPnrStop;
+//	MapRoute mapPnrRoute;
+//	List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
 	for (ParknRide p:PnRs){
-//		double[] latitude={p.getLat()};
-//		double[] longitude={p.getLon()};
 		mapPnrRecord=new MapPnrRecord();
 		mapPnrRecord.countyId=p.getCountyid();
 		mapPnrRecord.countyName=p.getCounty();
@@ -279,55 +277,7 @@ public class Queries {
 		mapPnrRecord.lotName=p.getLotname();
 		mapPnrRecord.spaces=p.getSpaces()+"";
 		mapPnrRecord.transitSerives=p.getTransitservice();
-		/*List<GeoStopRouteMap> sRoutes = new ArrayList<GeoStopRouteMap>();
-		try { 
-			pnrGeoStops = EventManager.getstopswithincircle(200, p.getLat(), p.getLon(), dbindex);
-			for (GeoStop s:pnrGeoStops){
-				mapPnrStop=new MapStop();
-				mapPnrStop.AgencyId=s.getAgencyId();
-				mapPnrStop.Id=s.getStopId();
-				mapPnrStop.Lat=s.getLat()+"";
-				mapPnrStop.Lng=s.getLon()+"";
-				mapPnrStop.Name=s.getName();
-				
-				mapPnrRecord.MapPnrSL.add(mapPnrStop);
-				
-				List<GeoStopRouteMap> stmpRoutes = EventManager.getroutebystop(s.getStopId(), s.getAgencyId(), dbindex);
-				for(GeoStopRouteMap r: stmpRoutes){
-					if(!sRoutes.contains(r)){
-						sRoutes.add(r);
-					}
-				}
-			}
-			for(GeoStopRouteMap r: sRoutes){
-				mapPnrRoute = new MapRoute();
-				Route _r = GtfsHibernateReaderExampleMain.QueryRoutebyid(new AgencyAndId(r.getagencyId(), r.getrouteId()), dbindex);
-				mapPnrRoute.AgencyId = _r.getId().getAgencyId();
-				mapPnrRoute.Id=_r.getId().getId();
-				mapPnrRoute.Name=_r.getLongName();
-				List<Trip> ts = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(_r, dbindex);
-				mapPnrRoute.Shape=ts.get(0).getEpshape();
-				mapPnrRecord.MapPnrRL.add(mapPnrRoute);
-			}
-		} catch (FactoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		
-		//mapPnrRecord.MapPnrSL = EventManager.getstopswithincircle(10, p.getLat(), p.getLon(), dbindex);
-		/*MapTransit temp=new MapTransit();
-		temp=PgisEventManager.onMapStops(fulldates, days, 50000, latitude, longitude, dbindex);
-		mapPnrRecord.routes=temp;*/
-		
-		/*for (GeoStopRouteMap r:p.getRoutes()){
-			mapPnrRoute=new MapRoute();
-			mapPnrRoute.AgencyId=r.getagencyId();
-			mapPnrRoute.Id=r.getrouteId();
-			mapPnrRecord.MapPnrRL.add(mapPnrRoute);
-		}*/
+		mapPnrRecord.availability=p.getAvailability();
 		
 		
 		if (!mapPnr.containsKey(p.getCountyid())){
@@ -378,8 +328,8 @@ public class Queries {
    @Path("/pnrstopsroutes")
    @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
    public Object getPnrStopsRoutes(@QueryParam("pnrId") String pnrId, @QueryParam("pnrCountyId") String pnrCountyId,
-		   @QueryParam("lat") Double lat, @QueryParam("lng") Double lng, @QueryParam("dbindex") Integer dbindex) 
-				   throws JSONException {
+		   @QueryParam("lat") Double lat, @QueryParam("lng") Double lng, @QueryParam ("radius") Double radius,
+		   @QueryParam("dbindex") Integer dbindex) throws JSONException {
 	   
 	   MapPnrRecord response = new MapPnrRecord();
 	   response.id = pnrId;
@@ -388,7 +338,7 @@ public class Queries {
 	   List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
 	   List<GeoStopRouteMap> sRoutes = new ArrayList<GeoStopRouteMap>();
 		try { 
-			pnrGeoStops = EventManager.getstopswithincircle(300, lat, lng, dbindex);
+			pnrGeoStops = EventManager.getstopswithincircle(radius, lat, lng, dbindex);
 			for (GeoStop s:pnrGeoStops){
 				mapPnrStop=new MapStop();
 				mapPnrStop.AgencyId=s.getAgencyId();
@@ -423,7 +373,6 @@ public class Queries {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	   
 	   return response;
    }
 	

@@ -205,11 +205,33 @@ public class PgisEventManager {
 								"lotname, " +
 								"location, " +
 								"city, " +
+								"zipcode, "+
 								"spaces, " +
 								"accessiblespaces, " +
 								"transitservice, " +
 								"lat, " +
-								"lon " +
+								"lon, " +
+								"bikerackspaces, " +
+								"bikelockerspaces, " +
+								"electricvehiclespaces, " +
+								"carsharing, " +
+								"transitservice, " +
+								"availability, " +
+								"timelimit, " +
+								"restroom, " +
+								"benches, " +
+								"shelter, " +
+								"indoorwaitingarea, " +
+								"trashcan, " +
+								"lighting, " +
+								"securitycameras, " +
+								"sidewalks, " +
+								"pnrsignage, " +
+								"lotsurface, " +
+								"propertyowner, " +
+								"localexpert, " +
+								"county "+
+								
 							"FROM parknride " +
 							"WHERE countyid='"+ id + "';";
 		try {
@@ -218,15 +240,51 @@ public class PgisEventManager {
 	        List<PnrInCounty> list=new ArrayList<PnrInCounty>();
 	        while ( rs.next() ) {
 	        	PnrInCounty instance = new PnrInCounty();
-	        	instance.pnrId = rs.getString("pnrid");
-	        	instance.lotName = rs.getString("lotname");
+	        	instance.pnrid = rs.getString("pnrid");
+	        	instance.lotname = rs.getString("lotname");
 	        	instance.city = rs.getString("city");
+	        	instance.zipcode=rs.getString("zipcode");
 	        	instance.location = rs.getString("location");	  
-	        	instance.spaces = rs.getString("spaces");	
-	        	instance.accessibleSpaces = rs.getString("accessiblespaces");	
-	        	instance.transitServices = rs.getString("transitservice");	
-	        	instance.lat = rs.getString("lat");
-	        	instance.lon = rs.getString("lon");
+	        	if (rs.getString("spaces").equals("0"))
+	        		instance.spaces = "N/A";
+	        	else
+	        		instance.spaces =instance.spaces = rs.getString("spaces");	
+	        	if (rs.getString("accessiblespaces").equals("0"))
+	        		instance.accessiblespaces = "N/A";
+	        	else 
+	        		instance.accessiblespaces = rs.getString("accessiblespaces");	
+	        	instance.transitservices = rs.getString("transitservice");
+	        	instance.lat = rs.getString("lat").substring(0,7);
+	        	instance.lon = rs.getString("lon").substring(0,9);
+	        	if (rs.getString("bikerackspaces").equals("0"))
+	        		instance.bikerackspaces = "N/A";
+	        	else
+	        		instance.bikerackspaces = rs.getString("bikerackspaces");
+	        	if (rs.getString("bikelockerspaces").equals("0"))
+	        		instance.bikelockerspaces = "N/A";
+	        	else
+	        		instance.bikelockerspaces = rs.getString("bikelockerspaces");
+	        	if (rs.getString("electricvehiclespaces").equals("0"))
+	        		instance.electricvehiclespaces = "N/A";
+	        	else
+	        		instance.electricvehiclespaces = rs.getString("electricvehiclespaces");
+	        	instance.carsharing = rs.getString("carsharing");
+	        	instance.availability = rs.getString("availability");
+	        	instance.timelimit = rs.getString("timelimit");
+	        	instance.restroom = rs.getString("restroom");
+	        	instance.benches = rs.getString("benches");
+	        	instance.shelter = rs.getString("shelter");
+	        	instance.indoorwaitingarea = rs.getString("indoorwaitingarea");
+	        	instance.trashcan = rs.getString("trashcan");
+	        	instance.lighting = rs.getString("lighting");
+	        	instance.securitycameras = rs.getString("securitycameras");
+	        	instance.sidewalks = rs.getString("sidewalks");
+	        	instance.pnrsignage = rs.getString("pnrsignage");
+	        	instance.lotsurface = rs.getString("lotsurface");
+	        	instance.propertyowner = rs.getString("propertyowner");
+	        	instance.localexpert = rs.getString("localexpert");
+	        	instance.county = rs.getString("county");
+	        	
 	        	list.add(instance);
 	        }
 	        rs.close();
