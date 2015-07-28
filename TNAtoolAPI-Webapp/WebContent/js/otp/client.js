@@ -856,8 +856,26 @@ $mylist
 	        .css( "right", 1 + "px" )
 	        .css( "top", 55 + "%" )
 	        .appendTo(div);		    
-		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="SSR" href="#">Statewide Report</a></li><li role="presentation"><a id="THR" href="#">Transit Hubs Report</a></li><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CNSR" href="#">Connected Networks Report</a></li><li role="presentation"><a id="CASR" href="#">Connected Agencies Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
+		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4">'+
+		    		'<li role="presentation"><a id="SSR" href="#">Statewide Report</a>'+
+		    		'<ul>'+
+		    		'<li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li>'+
+		    		'<li role="presentation"><a id="" href="#">Geographical Reports</a>'+
+		    		'<ul>'+
+		    		'<li role="presentation"><a id="CSR" href="#">Counties Reports</a></li>'+
+		    		'<li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li>'+
+		    		'<li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li>'+
+		    		'<li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li>'+
+		    		'<li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li>'+
+		    		'</li></ul>'+
+		    		'</li></ul>'+
+		    		'<li role="presentation"><a id="THR" href="#">Transit Hubs Report</a></li>'+
+		    		'<li role="presentation"><a id="CNSR" href="#">Connected Networks Report</a></li>'+
+		    		'<li role="presentation"><a id="CASR" href="#">Connected Agencies Reports</a></li>'+
+		    		'</ul>');
+		    
 			div.appendTo(titlebar);
+			$( "#rmenu" ).menu();
 			$('.ui-dialog-titlebar-other').dropdown();			
 			$("#datepicker").multiDatesPicker({
 				changeMonth: false,
