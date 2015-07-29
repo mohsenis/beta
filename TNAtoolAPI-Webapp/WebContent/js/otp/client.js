@@ -41,8 +41,8 @@ var map = new L.Map('map', {
 var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
 var minimalLayer = new L.StamenTileLayer("toner");
-
-var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov">US Census Bureau</a> 2010';
+$("body").css("display","");
+var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> V.3.15.07';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
 /*var osmLayer = new L.TileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', 
@@ -703,9 +703,8 @@ function dispronmap(k,d,name,node){
 	var polyline = L.Polyline.fromEncoded(d.points, {	
 		weight: 5,
 		color: colorset[k],
-		smoothFactor: 10,
 		opacity: .5,
-		smoothFactor: 1
+		smoothFactor: 9
 		});	
 		polyline.bindPopup('<b>Agency Name:</b> '+d.agencyName+ '<br><b>Agency ID:</b> '+d.agency+'<br><b>Trip Name:</b> '+d.headSign);
 		polyline._leaflet_id = name;	
@@ -809,14 +808,21 @@ $mylist
      },
 	"json_data" : {
 		"ajax" : {
-            "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?day="+w_qstringd+"&dbindex="+dbindex,
+            "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?day="+w_qstringd+"&dbindex="+dbindex+'&username='+getSession(),
             "type" : "get",	                
             "success" : function(ops) {  
             	
-            	$.each(ops.data, function(i,item){
-            		dialogAgencies.push(item.data);
-            		dialogAgenciesId.push(item.attr.id);
-            	});
+            	try {
+            		console.log(ops.data[0].attr.id);
+            		$.each(ops.data, function(i,item){
+                		dialogAgencies.push(item.data);
+                		dialogAgenciesId.push(item.attr.id);
+                	});
+            	}
+            	catch(err) {
+            		console.log("error");
+            	}
+            	
             	return ops.data;            	
             }    	               
         },
@@ -1016,9 +1022,9 @@ $mylist
 		    div3.append('<div id="datepicker"><br></div>');
 		    div3.appendTo(titlebar);
 		    
-		    /*var div4 = $("<div/>");
+		    var div4 = $("<div/>");
 		    div4.attr("id", "datepickerdiv");
-		    div4.appendTo(titlebar);*/
+		    div4.appendTo(titlebar);
 		    
 		    document.getElementById('DB'+dbindex).innerHTML = '&#9989 '+document.getElementById('DB'+dbindex).innerHTML;
 		    var div = $("<div/>");
@@ -1031,8 +1037,33 @@ $mylist
 	        .css( "right", 1 + "px" )
 	        .css( "top", 55 + "%" )
 	        .appendTo(div);		    
-		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="SSR" href="#">Statewide Report</a></li><li role="presentation"><a id="THR" href="#">Transit Hubs Report</a></li><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CNSR" href="#">Connected Networks Report</a></li><li role="presentation"><a id="CASR" href="#">Connected Agencies Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li><li role="presentation"><a id="PNRR" href="#">Park & Ride Report</a></li></ul>');
+
+		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4">'+
+		    		'<li role="presentation"><a id="SSR" href="#"><b>Statewide Report</b></a>'+
+		    		'<ul>'+
+		    		'<li role="presentation"><a id="ASR" href="#"><b>Transit Agency Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Geographical Reports</a>'+
+		    		'<ul>'+
+		    		'<li role="presentation"><a id="CSR" href="#"><b>Counties Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="CPSR" href="#"><b>Census Places Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="CDSR" href="#"><b>Congressional Districts Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="UASR" href="#"><b>Urban Areas Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="ORSR" href="#"><b>ODOT Transit Regions Reports</b></a></li>'+
+		    		'</ul></li>'+
+		    		'</ul></li>'+
+		    		'<li role="presentation" onclick="return;"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
+		    		'<ul>'+
+		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Report</b></a></li>'+
+		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Networks Report</b></a></li>'+
+		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Agencies Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Report</b></a></li>'+
+		    		'</ul></li>'+
+		    		'</ul>');
+		 
 			div.appendTo(titlebar);
+			$( "#rmenu" ).menu();
+			$( ".ui-menu" ).css('width','18em');
+			$( ".ui-menu-item" ).css('width','18em');
 			$('.ui-dialog-titlebar-other').dropdown();			
 			$("#datepicker").multiDatesPicker({
 				changeMonth: false,
@@ -1141,28 +1172,28 @@ $mylist
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="SSR"){			    	
-			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '500';
-			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '500';
-			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if(casestring=="CSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring=="CPSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring=="CDSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring=="UASR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring=="ORSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring=="PNRR"){
 			    	window.open('/TNAtoolAPI-Webapp/ParkRideReport.html'+'?&dbindex='+dbindex);
 			    }else if(casestring.substring(0,2)=="DB"){

@@ -21,6 +21,7 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FareAttribute;
 import org.onebusaway.gtfs.model.FareRule;
+import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.Frequency;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
@@ -60,6 +61,7 @@ public interface GtfsRelationalDao extends GtfsDao {
    ****/
   public List<String> getRouteIdsForStop(Stop stop);
   public Double getRouteMiles();
+  public Double getRouteMiles(List<String> selectedAgencies);
   
   public List<Route> getRoutesForAgency(Agency agency);
 
@@ -89,9 +91,11 @@ public interface GtfsRelationalDao extends GtfsDao {
   
   public List<Stop> getStopsForStation(Stop station);
   
-  public HashMap<String, Integer> getCounts();
+  public HashMap<String, Integer> getCounts(List<String> selectedAgencies);
   
   public Long getStopsCount();
+  
+  public Long getStopsCount(List<String> selectedAgencies);
   /****
    * Stop Methods
    * Alireza: 
@@ -101,9 +105,12 @@ public interface GtfsRelationalDao extends GtfsDao {
   public List<FareRule> getFareRuleForRoute(Route route);
   public List<Float> getFarePriceForRoutes(List<String> routes);
   public HashMap<String, Float> getFareDataForAgency(String agencyId);
-  public HashMap<String, Float> getFareDataForState();
+  public HashMap<String, Float> getFareDataForState(List<String> selectedAgencies);
+  public Collection<Agency> getSelectedAgencies(List<String> selectedAgencies);
   public Float getFareMedianForAgency(String agencyId, int farecount);
-  public Float getFareMedianForState(int farecount);
+  public Float getFareMedianForState(List<String> selectedAgencies,int farecount);
+  public List<FeedInfo> getFeedInfoByDefAgencyId(String defaultAgency);
+
   /****
    * {@link Trip} Methods
    ****/

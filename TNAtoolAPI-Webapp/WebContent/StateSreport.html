@@ -118,7 +118,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/stateSR?key='+ key+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/stateSR?key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){				
 			$('h2').append('Statewide Summary Report <br><hr>');
@@ -140,20 +140,20 @@ $(document).ready(function(){
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    	var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex);			    	   
+			    	window.open('/TNAtoolAPI-Webapp/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());			    	   
 			    }else if($(this).attr('type')=="ASR"){
 		    		qstringx = '0.1';
-		    		window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex);	    		
+		    		window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if($(this).attr('type')=="USR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if($(this).attr('type')=="CDSR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if($(this).attr('type')=="OSR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if($(this).attr('type')=="CPSR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if($(this).attr('type')=="CSR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
 			    };
 			});
 			

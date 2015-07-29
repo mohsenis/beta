@@ -3,13 +3,20 @@ package com.webapp.modifiers;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -17,9 +24,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -29,10 +48,28 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
+
+import com.library.samples.UpdateEventManager;
 import com.webapp.api.model.*;
 import com.webapp.api.utils.PolylineEncoder;
 import com.webapp.api.utils.SphericalDistance;
 
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.io.ZipOutputStream;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
+
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.apache.tomcat.util.http.fileupload.RequestContext;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.onebusaway.gtfs.impl.Databases;
@@ -53,65 +90,53 @@ import org.xml.sax.SAXException;
 public class DbUpdate {
 	private final static String basePath = "C:/Users/PB/git/TNAtool/";
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/";
-	@GET
-    @Path("/updatetrips")
-   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object dbshapesforagency(@QueryParam("agency") String agency, @QueryParam("dbindex") int dbindex){
-    	ShapeList response = new ShapeList();
-		List<Trip> triplist = GtfsHibernateReaderExampleMain.QueryTripsforAgency(agency, dbindex);
-		String shapeId = "";		    	
-    	String pe = "";
-    	double length = 0;
-    	double estlength = 0;
-    	String Desc = "";
-
-		for (Trip trip: triplist){
-
-			AgencyAndId agencyandtrip = trip.getId();	
-
-	    	Trip tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip, dbindex);
-	    	List<ShapePoint> shapes = GtfsHibernateReaderExampleMain.Queryshapebytrip(agencyandtrip, dbindex);
-	    	
-	    	//computing the shape length
-	    	if (shapes.size()>1) {
-		    	if (!(trip.getShapeId().getId().equals(shapeId))){		    		
-		    		pe = PolylineEncoder.createEncodings(shapes, 1);
-			    	length = SphericalDistance.sLength(shapes);
-			    	shapeId = trip.getShapeId().getId();
-			    	//stopCount = GtfsHibernateReaderExampleMain.queryst
-		    	}	    		
-		    	Desc = "Trip" + tp.getId().getId() + "has shape data";
-	    	} else {
-	    		//estimating the trip length and shape (straight line distance) in case there is no shape data
-	    		List<StopTime> st = GtfsHibernateReaderExampleMain.Querystoptimebytrip(agencyandtrip, dbindex);		    		
-	        	List<ShapePoint> stops = new ArrayList<ShapePoint>();
-	        	for (StopTime instance: st){
-	        		Stop stop =instance.getStop();
-	        		ShapePoint sp = new ShapePoint();
-	        		sp.setLat(stop.getLat());
-	        		sp.setLon(stop.getLon());
-	        		stops.add(sp);
-	        	}
-	        	pe = PolylineEncoder.createEncodings(stops, 1);
-	        	estlength = SphericalDistance.sLength(stops);	        		        	
-	    		Desc = "Trip" + tp.getId().getId() + "does not have shape data";
-	    	}		
-    	Rshape shape = new Rshape();
-    	shape.points = pe;
-    	shape.length = SphericalDistance.sLength(shapes);    		 
-    	shape.estlength = estlength;
-    	shape.description = Desc;
-    	response.shapelist.add(shape);
-    	
-    	// now setting the new values for the trip and updating the DB
-    	tp.setEpshape(pe);
-    	tp.setLength(length);
-    	tp.setEstlength(estlength);
-    	GtfsHibernateReaderExampleMain.updateTrip(tp, dbindex);
+	private final static int USER_COUNT = 10;
+	private final static int QUOTA = 10000000;
+	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
+	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
+	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
+	private static final int DBINDEX = Databases.passwords.length-1;
+	
+	public static List<String> getSelectedAgencies(String username){
+		List<String> selectedAgencies = new ArrayList<String>();
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			/*ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
+					+ "JOIN gtfs_selected_feeds "
+					+ "ON gtfs_feed_info.feedname=gtfs_selected_feeds.feedname "
+					+ "WHERE gtfs_selected_feeds.username = '"+username+"';");*/
+			ResultSet rs = statement.executeQuery("SELECT agency_id FROM gtfs_selected_feeds "
+					+ "WHERE username = '"+username+"';");
+			while(rs.next()){
+				selectedAgencies.add(rs.getString("agency_id"));
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
-		return response;
-    }
-
+		if(selectedAgencies.isEmpty()){
+			selectedAgencies.add("null");
+		}
+		return selectedAgencies;
+	}
+	
+	@POST
+    @Path("/correctAjax")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object tests(@QueryParam("x") String x){
+		
+		PDBerror b = new PDBerror();
+		b.DBError = x;
+		System.out.println(x);
+		
+		return b;
+	}
+	
 	@GET
     @Path("/getIndex")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -128,6 +153,416 @@ public class DbUpdate {
 		reader.close();
 		
 		return j+"";
+	}
+	
+	@GET
+    @Path("/userCount")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object userCount(){
+		Connection c = null;
+		Statement statement = null;
+		PDBerror error = new PDBerror();
+		int count=0;
+		error.DBError = "true";
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = statement.executeQuery("select * from gtfs_pg_users;");
+			rs.last();
+			count = rs.getRow();
+			if ( count>=USER_COUNT ) {
+				error.DBError = "false";
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = "error";
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
+	}
+	
+	@GET
+    @Path("/activateUser")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object activateUser(@QueryParam("key") String key, @QueryParam("user") String username) throws IOException, NoSuchAlgorithmException, UnsupportedEncodingException{
+		/*String root = new File(".").getAbsolutePath();
+        root = removeLastChar(root);*/
+        /*File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+        BufferedReader bf; */
+        String passkey = "";
+        Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT key FROM gtfs_pg_users WHERE username='"+username+"';");
+			if ( rs.next() ) {
+				passkey = rs.getString("key");
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			
+		}
+        /*String pass ="PGpass";
+        try{
+        	bf = new BufferedReader(new FileReader(passFile));
+            passkey = bf.readLine();
+            
+            byte[] passByte = passkey.getBytes("UTF-8");
+    		MessageDigest md = MessageDigest.getInstance("MD5");
+    		passByte = md.digest(passByte);
+    		pass = new String(passByte, "UTF-8");
+//    		bf.close();
+        }catch(IOException e){
+        	e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}*/
+        
+        String email="";
+        String lastname="";
+		if(passkey.equals(key)){
+			try {
+				statement = c.createStatement();
+				statement.executeUpdate("UPDATE gtfs_pg_users SET active=true WHERE username='"+username+"';");
+				ResultSet rs = statement.executeQuery("select email,lastname from gtfs_pg_users where username='"+username+"';");
+				if(rs.next()){
+					email = rs.getString("email");
+					lastname = rs.getString("lastname");
+				}
+				
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+			} finally {
+				if (statement != null) try { statement.close(); } catch (SQLException e) {}
+				if (c != null) try { c.close(); } catch (SQLException e) {}
+			}
+		}else{
+			return "exit";
+		}
+		
+		  String to = email;
+	      final String emailUser = "tnatooltech";
+	      final String emailPass = "OSUteam007";
+	      String host = "smtp.gmail.com";
+	
+	      Properties properties = System.getProperties();
+	      properties.put("mail.smtp.host", host); 
+	      properties.put("mail.smtp.user", emailUser);
+	      properties.put("mail.smtp.password", emailPass);
+	      properties.put("mail.smtp.port", "587"); 
+	      properties.put("mail.smtp.auth", "true");  
+	      //properties.put("mail.debug", "true");              
+	      properties.put("mail.smtp.starttls.enable", "true");
+	      //properties.put("mail.smtp.EnableSSL.enable", "true");
+	      
+	      Session session = Session.getInstance(properties,null);
+	      System.out.println("Port: "+session.getProperty("mail.smtp.port"));
+	
+	      Transport trans=null;
+	
+	      try{
+	         MimeMessage message = new MimeMessage(session);
+	         InternetAddress addressFrom = new InternetAddress(emailUser+"@gmail.com");  
+	         message.setFrom(addressFrom);
+	         
+	         InternetAddress[] addressesTo = {new InternetAddress(to)}; 
+	         message.setRecipients(Message.RecipientType.TO, addressesTo);
+	         
+	         Multipart multipart = new MimeMultipart("alternative");
+	         BodyPart messageBodyPart = new MimeBodyPart();
+	         String htmlMessage = lastname+",<br><br>"+"Your GTFS Playground account has been successfully activated!<br>"
+	         		+ "You can now log into the website using your credentials.";
+	         messageBodyPart.setContent(htmlMessage, "text/html");
+	         multipart.addBodyPart(messageBodyPart);
+	         message.setContent(multipart);
+	         
+	         message.setSubject("GTFS Playground Account Activated");
+	         trans = session.getTransport("smtp");
+	         trans.connect(host,emailUser,emailPass);
+	         //message.saveChanges();
+	         trans.sendMessage(message, message.getAllRecipients()); 
+	      }catch (MessagingException mex) {
+	         mex.printStackTrace();
+	      }
+		PDBerror er = new PDBerror();
+		er.DBError=username+"'s account was successfully activated.";
+		return er;
+	}
+	
+	/*@GET
+    @Path("/validatePass")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object validatePass(@QueryParam("pass") String pass) throws IOException, NoSuchAlgorithmException, UnsupportedEncodingException{
+		String tmpPath = basePath+"TNAtoolAPI-Webapp/WebContent/playground/";
+		File inputFile = new File(tmpPath + "pass.txt");
+	
+		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+		PDBerror b = new PDBerror();
+		String passkey = reader.readLine();
+		if(passkey.equals(pass)){
+			b.DBError = "true";
+		}else{
+			b.DBError = "false";
+		}
+		reader.close();
+		
+		return b;
+	}*/
+	
+	@GET
+    @Path("/getUserInfo")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getUserInfo(@QueryParam("user") String user){
+		Connection c = null;
+		Statement statement = null;
+		UserInfo userInfo = new UserInfo();
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("select * from gtfs_pg_users where username='"+user+"' or email='"+user+"';");
+			if ( rs.next() ) {
+				userInfo.Firstname = rs.getString("firstname");
+				userInfo.Lastname = rs.getString("lastname");
+				userInfo.Username = rs.getString("username");
+				userInfo.Quota = rs.getString("quota");
+				userInfo.Usedspace = rs.getString("usedspace");
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return userInfo;
+	}
+	
+	@GET
+    @Path("/checkUser")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkUser(@QueryParam("user") String user){
+		Connection c = null;
+		PreparedStatement statement = null;
+		PDBerror error = new PDBerror();
+		error.DBError = "false";
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.prepareStatement("select * from gtfs_pg_users where username=? or email=?;");
+			statement.setString(1, user);
+			statement.setString(2, user);
+			ResultSet rs = statement.executeQuery();
+			if ( rs.next() ) {
+				error.DBError = "true";
+			}else{
+				error.DBError = "false";
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = "error";
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
+	}
+	
+	@GET
+    @Path("/changePublic")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object changePublic(@QueryParam("isPublic") String p, @QueryParam("feedname") String feedname){
+		Connection c = null;
+		Statement statement = null;
+		PDBerror error = new PDBerror();
+		error.DBError = "";
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			statement.executeUpdate("UPDATE gtfs_uploaded_feeds SET ispublic = '"+p+"' WHERE feedname = '"+feedname+"';");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = "error";
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
+	}
+	
+	@GET
+    @Path("/isActive")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object isActive(@QueryParam("user") String username){
+		Connection c = null;
+		Statement statement = null;
+		PDBerror error = new PDBerror();
+		error.DBError = "false";
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_pg_users WHERE username = '"+username+"';");
+			if(rs.next()){
+				error.DBError = rs.getString("active");
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = "error";
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
+	}
+	
+	/*@POST
+    @Path("/uploadfeed")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.MULTIPART_FORM_DATA })
+    public Object uploadFeed(RequestContext request){
+		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+		FileItemFactory factory = new DiskFileItemFactory();
+		ServletFileUpload upload = new ServletFileUpload(factory);
+		try {
+			List<FileItem> items = upload.parseRequest(request);
+			System.out.println(items.size());
+		}catch (FileUploadException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println(request);
+
+		PDBerror error = new PDBerror();
+		
+		
+		return error;
+	}*/
+	
+	/**
+	 * Changes the playground passkey. Delete this method from the server!!
+	 * @param password
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 *//*
+	@GET
+    @Path("/makePassKey")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object makePassKey(@QueryParam("pass") String password) 
+    				throws UnsupportedEncodingException, NoSuchAlgorithmException, IOException{
+		
+		byte[] passByte = password.getBytes("UTF-8");
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		passByte = md.digest(passByte);
+		String pass = new String(passByte, "UTF-8");
+		
+		String root = new File(".").getAbsolutePath();
+        root = removeLastChar(root);
+        File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+		BufferedWriter writer = new BufferedWriter(new FileWriter(passFile));
+		
+		writer.write(pass);
+		
+		writer.close();
+		return "";
+	}*/
+	
+	@GET
+    @Path("/validateUser")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object validateUser(@QueryParam("user") String user, @QueryParam("pass") String password) 
+    				throws UnsupportedEncodingException, NoSuchAlgorithmException{
+		
+		byte[] passByte = password.getBytes("UTF-8");
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		passByte = md.digest(passByte);
+		String pass = new String(passByte, "UTF-8");
+		
+		Connection c = null;
+		PreparedStatement statement = null;
+		PDBerror error = new PDBerror();
+		error.DBError = "false";
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.prepareStatement("SELECT * FROM gtfs_pg_users WHERE (username = ? or email = ?) and password = ?;");
+			statement.setString(1, user);
+			statement.setString(2, user);
+			statement.setString(3, pass);
+			ResultSet rs = statement.executeQuery();
+			
+			if(rs.next()){
+				error.DBError = rs.getString("username");
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = e.getMessage();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
+	}
+	
+	@GET
+    @Path("/addUser")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object addUser(@QueryParam("user") String user, @QueryParam("pass") String password, @QueryParam("email") String email,
+    		@QueryParam("firstname") String firstname, @QueryParam("lastname") String lastname) 
+    				throws UnsupportedEncodingException, NoSuchAlgorithmException{
+		
+		byte[] passByte = password.getBytes("UTF-8");
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		passByte = md.digest(passByte);
+		String pass = new String(passByte, "UTF-8");
+		
+		long millis = System.currentTimeMillis() % 1000000;
+		
+		Connection c = null;
+		PreparedStatement statement = null;
+		PDBerror error = new PDBerror();
+		error.DBError = "";
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.prepareStatement("INSERT INTO gtfs_pg_users (username,password,email,firstname,lastname,quota,usedspace,active,key) "
+					+ "VALUES (?,?,?,?,?,?,?,?,?);");
+			statement.setString(1, user);
+			statement.setString(2, pass);
+			statement.setString(3, email);
+			statement.setString(4, firstname);
+			statement.setString(5, lastname);
+			statement.setInt(6, QUOTA);
+			statement.setInt(7, 0);
+			statement.setBoolean(8, false);
+			statement.setFloat(9, millis);
+			statement.executeUpdate();
+			error.DBError = "true";
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			error.DBError = e.getMessage();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return error;
 	}
 	
 	@GET
@@ -377,7 +812,7 @@ public class DbUpdate {
 		try {
 			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/restoreCensus.bat", pass, usrn, name,
 					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/census.backup",
-					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/addCensusErr.txt",
+					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/",
 					psqlPath+"psql.exe",
 					psqlPath+"pg_restore.exe");
 			pb.redirectErrorStream(true);
@@ -461,42 +896,50 @@ public class DbUpdate {
 									{"census_tracts_trip_map","agencyid_def"},
 									{"gtfs_fare_rules","fare_agencyid"},
 									{"gtfs_fare_attributes","agencyid"},
+									{"gtfs_trip_stops","stop_agencyid_origin"},
 									{"gtfs_stop_service_map","agencyid_def"},
 									{"gtfs_route_serviceid_map","agencyid_def"},
 									{"gtfs_stop_route_map","agencyid_def"},
-									{"gtfs_calendar_dates","serviceid_agencyid"},
-									{"gtfs_calendars","serviceid_agencyid"},
 									{"gtfs_frequencies","defaultid"},
 									{"gtfs_pathways","agencyid"},
 									{"gtfs_shape_points","shapeid_agencyid"},
 									{"gtfs_stop_times","stop_agencyid"},
 									{"gtfs_transfers","defaultid"},
-									{"gtfs_trips","serviceid_agencyid"},
-									{"gtfs_stops","agencyid"},
-									{"gtfs_routes","defaultid"},
-									{"gtfs_agencies","defaultid"},
 									{"tempstopcodes","agencyid"},
 									{"tempetriptimes","agencyid"},
 									{"tempestshapes","agencyid"},
 									{"tempshapes","agencyid"},
+									{"gtfs_trips","serviceid_agencyid"},
+									{"gtfs_calendar_dates","serviceid_agencyid"},
+									{"gtfs_calendars","serviceid_agencyid"},
+									{"gtfs_stops","agencyid"},
+									{"gtfs_routes","defaultid"},
+									{"gtfs_agencies","defaultid"},
 									{"gtfs_feed_info","defaultid"}};
 		
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			
 			statement = c.createStatement();
+			
+			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname = '"+feedname+"';");
+			statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedname+"';");
+			
+			
 			rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info where feedname = '"+feedname+"';");
 			if ( rs.next() ) {
 				agencyId = rs.getString("defaultid");
 			}
-			
+			statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedname+"';");
+			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = 'admin';");
 			rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname = '"+feedname+"';");
 			if ( rs.next() ) {
 				agencyIds = rs.getString("agencyids");
 			}
 			agencyIdList = agencyIds.split(",");
-			
+//			
 			for(int i=0;i<defAgencyIds.length;i++){
+				System.out.println(defAgencyIds[i][0]);
 				try{
 					if(defAgencyIds[i][0].startsWith("temp")){
 						statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+sqlString(agencyIdList,defAgencyIds[i][1])+"';");
@@ -509,8 +952,9 @@ public class DbUpdate {
 					System.out.println(e.getMessage());
 				}
 			}
-			statement.executeUpdate("VACUUM FULL ANALYZE");
-			
+			System.out.println("vacuum start");
+			statement.executeUpdate("VACUUM");
+			System.out.println("vacuum finish");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			
@@ -601,7 +1045,11 @@ public class DbUpdate {
 			}else{
 				statement.executeUpdate("UPDATE gtfs_feed_info SET feedname = '"+fName+"' WHERE defaultid = '"+defaultId+"';");
 			}
-			
+			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic) "
+					+ "VALUES ('"+fName+"','admin',TRUE);");
+			statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname,agency_id) "
+					+ "VALUES ('admin','"+fName+"','"+defaultId+"');");
+			UpdateEventManager.updateTables(DBINDEX, defaultId);
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			
@@ -649,6 +1097,32 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/addPsqlFunctions")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object addPsqlFunctions(@QueryParam("db") String db){
+		
+		String[] dbInfo = db.split(",");
+		Process pr;
+		ProcessBuilder pb;
+		String[] dbname = dbInfo[4].split("/");
+		String name = dbname[dbname.length-1];
+		String usrn = dbInfo[5];
+		String pass = dbInfo[6];
+		
+		try {
+			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/addFunctions.bat", pass, usrn, name,
+					psqlPath+"psql.exe",
+					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
+			pb.redirectErrorStream(true);
+			pr = pb.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return "done";
+	}
+	
+	@GET
     @Path("/agencyList")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object agencyList(@QueryParam("db") String db){
@@ -663,11 +1137,13 @@ public class DbUpdate {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			
 			statement = c.createStatement();
-			rs = statement.executeQuery("SELECT feedname, agencynames FROM gtfs_feed_info;");
+			rs = statement.executeQuery("SELECT * FROM gtfs_feed_info;");
 			
 			while ( rs.next() ) {
 				fn.feeds.add(rs.getString("feedname"));
 				fn.names.add(rs.getString("agencynames"));
+				fn.startdates.add(rs.getString("startdate"));
+				fn.enddates.add(rs.getString("enddate"));
 			}
 			
 		} catch (SQLException e) {
@@ -688,6 +1164,40 @@ public class DbUpdate {
 	    	return error;
 	    }
 	   
+	}    
+	
+	@GET
+    @Path("/selectedFeeds")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object selectedFeeds(@QueryParam("feeds") String feed, @QueryParam("username") String username){
+		
+		String[] feeds = feed.split(",");
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = '"+username+"';");
+					
+			for(String f: feeds){
+				statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname) "
+						+ "VALUES ('"+username+"','"+f+"');");
+			}
+			statement.executeUpdate("update gtfs_selected_feeds "
+					+ "set agency_id = gtfs_feed_info.defaultid "
+					+ "from gtfs_feed_info "
+					+ "where gtfs_selected_feeds.feedname = gtfs_feed_info.feedname;");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+	    
+	   return "done";
 	}    
 	
 	@GET

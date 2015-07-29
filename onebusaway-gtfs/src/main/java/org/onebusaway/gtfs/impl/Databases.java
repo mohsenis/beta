@@ -52,8 +52,10 @@ public class Databases {
 	public static String[] ConfigPaths = infoMap.get("ConfigPaths");
 	public static String[] dbnames = infoMap.get("dbnames");
 	public static String[] connectionURLs = infoMap.get("connectionURL");
+
 	public static String[] usernames = infoMap.get("username");
 	public static String[] passwords = infoMap.get("password");
+
 	static{
 		//list of configuration file names used in library-hibernate-spatial used in Hutil.java
 		//spatialConfigPaths[0]= "hibernate.cfg.xml";

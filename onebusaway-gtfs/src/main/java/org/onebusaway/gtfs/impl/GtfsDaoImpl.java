@@ -80,7 +80,7 @@ public class GtfsDaoImpl extends GenericDaoImpl implements GtfsMutableDao {
   public Collection<Agency> getAllAgencies() {
     return getAllEntitiesForType(Agency.class);
   }
-
+  
   public Collection<ServiceCalendarDate> getAllCalendarDates() {
     return getAllEntitiesForType(ServiceCalendarDate.class);
   }

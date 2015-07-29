@@ -1,3 +1,17 @@
+function getSession(){
+	var username = "admin";
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&getSessionUser=gsu",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	username = d.username;
+        }
+	});
+	return username;
+}
+
 function dateRemove(e, d){
 	$(e).remove();
 	$("#datepicker").multiDatesPicker('removeDates', d);
@@ -116,9 +130,31 @@ function exportbutton(){
 	window.open(uri);
 }
 
+function dateToString(date){
+	var dArr = date.split("/");
+	return dArr[2]+dArr[0]+dArr[1];
+}
+
+function stringToDate(str){
+	var sArr = new Array();
+	sArr.push(str.substring(4, 6));
+	sArr.push(str.substring(6, 8));
+	sArr.push(str.substring(0, 4));
+	return sArr.join("/");
+}
+
+function parseDate(str) {
+    var mdy = str.split('/');
+    return new Date(mdy[2], mdy[0]-1, mdy[1]);
+}
+
+function daydiff(first, second) {
+    return (second-first)/(1000*60*60*24);
+}
+
 function pad(s) { return (s < 10) ? '0' + s : s; }
 
-function go(key){
+function go(key){	
 	$(document).tooltip({
 		position: {
 	        my: "left bottom",
@@ -157,9 +193,42 @@ function go(key){
 	
 	timeVar = setInterval(progress, 100);
 	
+	//check if the selected dates are within the agency's start and end date.
+	var startDateUnion="";
+	var endDateUnion="";	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?&dbindex='+dbindex,
+		async: false,
+		success: function(d){
+			startDateUnion = d.Startdateunion;
+			endDateUnion = d.Enddateunion;
+			
+		}			
+	});
+	var tmpdates= new Array();
+	for(var i=0;i<w_qstringd.split(",").length;i++){
+		if(startDateUnion<=dateToString(w_qstringd.split(",")[i]) && dateToString(w_qstringd.split(",")[i])<=endDateUnion){
+			tmpdates.push(w_qstringd.split(",")[i]);
+		}
+	}
+	
+	if(tmpdates.length==0){
+		w_qstringd=stringToDate(endDateUnion);
+	}else{
+		w_qstringd = tmpdates.join(",");
+	}
+	
+	var maxDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(endDateUnion))));
+	var minDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(startDateUnion))));
+	//*****************//
+	
 	$( "#datepicker" ).multiDatesPicker({
 		changeMonth: true,
       	changeYear: true,
+      	minDate: minDate,
+      	maxDate: maxDate,
 		addDates: w_qstringd.split(","),
 		onSelect: function (date) {
 			dateID = date.replace("/","").replace("/","");
@@ -249,9 +318,45 @@ function gos(key){
 	
 	timeVar = setInterval(progress, 100);
 	
+	//check if the selected dates are within the agency's start and end date.
+	var activeHTML="";
+	try{
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/agencyCalendarRange?&dbindex='+dbindex+'&agency='+w_qstring,
+			async: false,
+			success: function(d){
+				startDate = d.Startdate;
+				endDate = d.Enddate;
+			}			
+		});
+		var tmpdates= new Array();
+		for(var i=0;i<w_qstringd.split(",").length;i++){
+			if(startDate<=dateToString(w_qstringd.split(",")[i]) && dateToString(w_qstringd.split(",")[i])<=endDate){
+				tmpdates.push(w_qstringd.split(",")[i]);
+			}
+		}
+		
+		if(tmpdates.length==0){
+			w_qstringd=stringToDate(endDate);
+		}else{
+			w_qstringd = tmpdates.join(",");
+		}
+		
+		var maxDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(endDate))));
+		var minDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(startDate))));
+		
+		activeHTML = "<span style='margin-left:3em;font-size:85%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>";
+	}catch(err){
+	}
+	//*****************//
+	
 	$( "#datepicker" ).multiDatesPicker({
 		changeMonth: true,
       	changeYear: true,
+      	minDate: minDate,
+      	maxDate: maxDate,
 		addDates: w_qstringd.split(","),
 		onSelect: function (date) {
 			dateID = date.replace("/","").replace("/","");
@@ -262,7 +367,7 @@ function gos(key){
 				$("#"+dateID).remove();
 				$("#submit").trigger('mouseenter');
 			}
-			$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected");
+			$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected"+activeHTML);
 	    }
 	});
 	
@@ -279,7 +384,7 @@ function gos(key){
 		heightStyle: "content"
 	});
 	$("#accordion").accordion("refresh");
-	$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected");
+	$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected"+activeHTML);
 	
 	
 	document.getElementById("Sradius").value = w_qstringx;
@@ -300,4 +405,5 @@ function gos(key){
 		    }, 4000);
 		  }
 		});
+	
 }

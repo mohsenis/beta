@@ -72,37 +72,6 @@ RETURN e;
 End
 $$ LANGUAGE plpgsql;
 
-/**************************************************************
- * Second of two methods. Accepts a signed integer (LON or LAT
- * by 1e5) and returns an ASCII-encoded coordinate expression.
- *************************************************************/
-CREATE OR REPLACE FUNCTION GoogleEncodeSignedInteger(c INT)
-RETURNS VARCHAR(255) AS $$
-DECLARE
-  e VARCHAR(255);
-  s BIT(32);
-  b BIT(6);
-  n INT;
-BEGIN
- e = '';
- s = (c::BIT(32))<<1;
-
- IF s::INT < 0 THEN
-   s = ~s;
-   END IF;
-
- WHILE s::INT >= B'100000'::INT LOOP
-   b = B'100000' | (('0'||substring(s, 28, 5))::BIT(6));
-   n = b::INT + 63;
-   e = e || chr(n);
-   s = s >> 5;
- END LOOP;
- e = e || chr(s::INT+63);
-
-RETURN e;
-End
-$$ LANGUAGE plpgsql;
-
 /*create table tempshapes and fill it with route shapes*/
 drop table if exists tempshapes;
 create table tempshapes(

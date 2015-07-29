@@ -90,7 +90,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/stateXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/stateXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&username='+getSession(),
 		async: true,
 		success: function(item){			
 			$('h2').append(item.AreaName+' Extended Report <br><hr>');	
@@ -138,34 +138,6 @@ $(document).ready(function(){
 		 		                                      "mColumns": [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]} ]
 		 		                } 
 		 		            ]
-		        },
-		        "fnDrawCallback": function( oSettings ) {
-		        	$( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
-		        	vCols =0;
-					$.each(oSettings.aoColumns, function(c){
-						if(oSettings.aoColumns[c].bVisible == true){
-						vCols +=1;
-					}});
-		        	var width = $( window ).width();
-		        	//alert(width);
-		        	width /= 12;
-		        	width -= 10;
-		        	//alert(width);
-		        	$('#RT').css('width',vCols*width+'px');
-		        	////////////////////////////////
-		        	//$('#RT'+k+'_wrapper').css("width", $('#RT'+k+'_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table').css("width"));
-		        	$('#RT'+'_wrapper').css("width", $('#RT').css('width'));
-		        	$('#RT'+'_wrapper').css("width", "+=17");
-				    $('#RT'+'_wrapper').css("margin","auto");
-				    $('#RT'+'_wrapper').css("max-width",$( window ).width()-25);
-				    ////////////////////////////////
-				    $( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollHeadInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
-		        	//$( '#RT'+k+'_wrapper .ColVis_Button').click();
-		        	//$( '#RT'+k+'_wrapper .ColVis_Button').click();
 		        },
 			});
 			$('.ColVis').css("float", "left");

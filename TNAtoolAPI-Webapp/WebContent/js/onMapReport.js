@@ -179,7 +179,7 @@ function showOnMapReport(lat, lon, date, x){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(data){
 			$('#ts').html(numberWithCommas(data.MapTr.TotalStops));

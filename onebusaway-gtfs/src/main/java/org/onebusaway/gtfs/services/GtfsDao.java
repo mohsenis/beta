@@ -46,7 +46,7 @@ public interface GtfsDao extends GenericDao {
    * Agency Methods
    ****/
 
-  public Collection<Agency> getAllAgencies();  
+  public Collection<Agency> getAllAgencies(); 
  
   public Agency getAgencyForId(String id);
 

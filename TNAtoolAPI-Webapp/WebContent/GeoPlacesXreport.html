@@ -32,28 +32,8 @@ var gg = 1.0/1.1;
 var progVal = 0; 
 var w_qstringd = localStorage.getItem(keyName);
 var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
-var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th id="an">Name <em title="Name of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Fare<em title="If available, this field points to the fare information published by the transit agencies in their GTFS data."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Route Miles <em title="Summation of the lengths of the longest trips within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Stops Per Square Mile <em title="Stop count in the given geographic area divided by the area of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Stops Per Service Mile <em title="Stop count in the given geographic area divided by service miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Service Hours <em title="Total hours a transit agency spends on serving all round trips of routes within the given geographic area. Service hours may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Service Miles <em title="Total miles driven over all round trips of routes within the given geographic area. Service miles may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Service Miles Per Square Mile <em title="Service miles divided by the area of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Miles of Service Per Capita <em title="Service miles divided by the population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population Served (Unduplicated) <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Percent of Population Served <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total population of the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Percent of Population Served at Level of Service <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total population of the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population Unserved <em title="100 minus percent of population served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Service Stops <em title="Total stops within the given geographic area multiplied by the number of times each stop is being served for the given date(s). Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population Served By Service <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. Population served by service is calculated as service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Service Days <em title="Set of days (from the selected days) in which at least one trip within the given geographic area is served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Communities <em title="List of geographic areas of the same type that are connected to the area of interest through routes."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Hours of Service<em title="Earliest and latest arrival and departure times of all transit stops within the given geographic area"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Average Fare<em title="If available, this field points to the fare average for the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Median Fare<em title="If available, this field points to the fare median for the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+var tmp = '<tr><th>Metric</th><th>Value</th></tr>';
+
 html += '<thead>'+tmp+'</thead><tbody>';
 var fAverage = new Array();
 var fMedian = new Array();
@@ -88,33 +68,52 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=2'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=2'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&username='+getSession(),
 		async: true,
 		success: function(item){			
 			$('h2').append(item.AreaName+' Census Place Extended Report <br><hr>');	
-			html +='<tr><td>' + item.AreaId +'</td><td>' + item.AreaName +'</td><td class="details-control"></td><td>' + numberconv(item.RouteMiles) +'</td><td>'+ numberconv(item.StopsPersqMile) 
-			+'</td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) +'</td><td class="serviceCol">'+ numberconv(item.ServiceHours)+'</td><td class="serviceCol">'+ numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'
-			+ numberconv(item.ServiceMilesPersqMile) +'</td><td  class="serviceCol">'+numberconv(item.MilesofServicePerCapita)+'</td><td class="serviceCol">' + numberconv(item.PopWithinX) 
-			+'</td><td class="serviceCol">' + numberconv(item.PopServed)+'</td><td class="serviceCol">' + numberconv(item.PopServedAtLoService)+'</td><td class="serviceCol">' + numberconv(item.PopUnServed)+'</td><td class="serviceCol">' +
-			numberconv(item.ServiceStops)+'</td><td class="serviceCol">' + numberconv(item.PopServedByService)+'</td><td class="serviceCol">'+ item.ServiceDays+'</td><td>'+
-			item.ConnectedCommunities+'</td><td class="serviceCol">'+ item.HoursOfService+'</td><td>$'+item.AverageFare+'</td><td>$'+item.MedianFare+'</td><td>'+item.metadata+'</td>';
+			html += '<tr><td>Geo ID<em title="Identification number associated with the geographic area."><img src="images/tooltip.png"></em><td>'+ item.AreaId 
+			+'</td></tr><tr><td>Name<em title="Name of the geographic area."><img src="images/tooltip.png"></em></td><td>' + item.AreaName 
+			+'</td></tr><tr><td>Route Miles <em title="Summation of the lengths of the longest trips within the given geographic area."><img src="images/tooltip.png"></em></td><td>'+ numberconv(item.RouteMiles) 
+			+'</td></tr><tr><td>Stops Per Square Mile <em title="Stop count in the given geographic area divided by the area of the geographic area."><img src="images/tooltip.png"></em></td><td>'+ numberconv(item.StopsPersqMile) 
+			+'</td></tr><tr><td>Stops Per Service Mile <em title="Stop count in the given geographic area divided by service miles."><img src="images/tooltip.png"></em></td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) 
+			+'</td></tr><tr><td>Service Hours <em title="Total hours a transit agency spends on serving all round trips of routes within the given geographic area. Service hours may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates."><img src="images/tooltip.png"></em></td><td class="serviceCol">'+ numberconv(item.ServiceHours)
+			+'</td></tr><tr><td>Service Miles <em title="Total miles driven over all round trips of routes within the given geographic area. Service miles may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates."><img src="images/tooltip.png"></em></td><td class="serviceCol">'+ numberconv(item.ServiceMiles)
+			+'</td></tr><tr><td>Service Miles Per Square Mile <em title="Service miles divided by the area of the geographic area."><img src="images/tooltip.png"></em></td><td  class="serviceCol">'	+ numberconv(item.ServiceMilesPersqMile) 
+			+'</td></tr><tr><td>Miles of Service Per Capita <em title="Service miles divided by the population of the geographic area."><img src="images/tooltip.png"></em></td><td  class="serviceCol">'+numberconv(item.MilesofServicePerCapita)
+			+'</td></tr><tr><td>Urban Population Served (Unduplicated) <em title="Summation of unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."><img src="images/tooltip.png"></em></td><td class="serviceCol">' + numberconv(item.UPopWithinX)
+			+'</td></tr><tr><td>Rural Population Served (Unduplicated) <em title="Summation of unduplicated rural population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."><img src="images/tooltip.png"></em></td><td class="serviceCol">' + numberconv(item.RPopWithinX) 
+			+'</td></tr><tr><td>Percent of Population Served <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total population of the given geographic area."><img src="images/tooltip.png"></em></td><td class="serviceCol">' + numberconv(item.PopServed)
+			+'</td></tr><tr><td>Percent of Population Served at Level of Service <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total population of the given geographic area."><img src="images/tooltip.png"></em></td><td class="serviceCol">' + numberconv(item.PopServedAtLoService)
+			+'</td></tr><tr><td>Urban Population Served at Level of Service <em title="Summation of unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service."><img src="images/tooltip.png"></em></td><td class="serviceCol">' + numberconv(item.UPopServedAtLoService)
+			+'</td></tr><tr><td>Rural Population Served at Level of Service <em title="Summation of unduplicated rural population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service."><img src="images/tooltip.png"></em></td><td class="serviceCol">' + numberconv(item.RPopServedAtLoService)
+			+'</td></tr><tr><td>Population Unserved <em title="100 minus percent of population served."><img src="images/tooltip.png"></em></td><td class="serviceCol">'+ numberconv(item.PopUnServed)
+			+'</td></tr><tr><td>Service Stops <em title="Total stops within the given geographic area multiplied by the number of times each stop is being served for the given date(s). Reported number is cumulative over the selected dates."><img src="images/tooltip.png"></em></td><td class="serviceCol">' +numberconv(item.ServiceStops)
+			+'</td></tr><tr><td>Urban Population Served By Service <em title="Total unduplicated urban population impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. Urban population served by service is calculated as service stops multiplied by the unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates."><img src="images/tooltip.png"></em></td><td class="serviceCol">' + numberconv(item.UPopServedByService)
+			+'</td></tr><tr><td>Rural Population Served By Service <em title="Total unduplicated rural population impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. Rural population served by service is calculated as service stops multiplied by the unduplicated rural population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates."><img src="images/tooltip.png"></em></td><td class="serviceCol">' + numberconv(item.RPopServedByService)
+			+'</td></tr><tr><td>Service Days <em title="Set of days (from the selected days) in which at least one trip within the given geographic area is served."><img src="images/tooltip.png"></em></td><td class="serviceCol">'+ item.ServiceDays
+			+'</td></tr><tr><td>Connected Communities <em title="List of geographic areas of the same type that are connected to the area of interest through routes."><img src="images/tooltip.png"></em></td><td>'+item.ConnectedCommunities   
+			+'</td></tr><tr><td>Hours of Service <em title="Earliest and latest arrival and departure times of all transit stops within the given geographic area"><img src="images/tooltip.png"></em></td><td class="serviceCol">'+ item.HoursOfService
+			+'</td></tr><tr><td>Minimum Fare <em title="If available, this field points to the fare minimum for the given geographic area."><img src="images/tooltip.png"></em></td><td>$'+item.MinFare
+			+'</td></tr><tr><td>Average Fare <em title="If available, this field points to the fare average for the given geographic area."><img src="images/tooltip.png"></em></td><td>$'+item.AverageFare
+			+'</td></tr><tr><td>Median Fare <em title="If available, this field points to the fare median for the given geographic area."><img src="images/tooltip.png"></em></td><td>$'+item.MedianFare
+			+'</td></tr><tr><td>Maximum Fare <em title="If available, this field points to the fare maximum for the given geographic area."><img src="images/tooltip.png"></em></td><td>$'+item.MaxFare
+			+'</td></tr><tr><td>MetaData <em title="Report Metadata."><img src="images/tooltip.png"></em></th></td><td>'+item.metadata+'</td>';
 			fAverage.push(item.AverageFare);
 			fMedian.push(item.MedianFare);							    
-			html += '</tr></tbody></table>';
+			html +='</tr></tbody></table>';
 			$('#displayReport').append($(html));	
-			progressbar.remove();			
+			progressbar.remove();
+			
 			
 			var table = $('#RT').DataTable({
 				"bSort" : false,
 				"paging": false,
-				"sScrollX": "100%",				
-				"width": "auto",
-				"bScrollCollapse": true,
-				"bAutoWidth": false,				
-				"aoColumnDefs": [{"targets": [19,20,21],"visible": false}],
+				"bAutoWidth": false,
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+		        	"sRowSelect": "os",
 		        	"aButtons": [
 		 						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
 		 							"sMessage": ""
@@ -124,35 +123,22 @@ $(document).ready(function(){
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
 		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
-		 		                    				  "mColumns": [ 0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]},
-		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                                      "mColumns": [ 0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]},
-		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                                      "mColumns": [ 0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]} ]
+		 		                    				  "mColumns": 'visible'},
+		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {order: "current"},
+		 		                    				  "mColumns": 'all'},
+		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {order: "current"},
+		 		                                      "mColumns": 'all'} ]
 		 		                } 
 		 		            ]
 		        },
 		        "fnDrawCallback": function( oSettings ) {
-		        	$( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
-		        	vCols =0;
-					$.each(oSettings.aoColumns, function(c){
-						if(oSettings.aoColumns[c].bVisible == true){
-						vCols +=1;
-					}});
-		        	var width = $( window ).width();
-		        	width /= 12;
-		        	width -= 10;
-		        	$('#RT').css('width',vCols*width+'px');		        	
-		        	$('#RT'+'_wrapper').css("width", $('#RT').css('width'));
-		        	$('#RT'+'_wrapper').css("width", "+=17");
-				    $('#RT'+'_wrapper').css("margin","auto");
-				    $('#RT'+'_wrapper').css("max-width",$( window ).width()-25);
-				    $( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner' ).css( "width", "" );
-		        	$( '#RT'+'_wrapper .dataTables_scrollHeadInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
-		        	$( '#RT'+'_wrapper .dataTables_scrollFootInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );		        	
-		        },
+		        	$.fn.dataTable.ext.search.push(
+		        		    function( settings, data, dataIndex ) {
+		        		        var metric = data[0]; // use data for the age column
+		        		        return (metric.indexOf("MetaData")<=-1)		        		        
+		        		    }
+		        		);		        	
+		        }
 			});
 			$('.ColVis').css("float", "left");
 			$('#RT tbody').on('click', 'td.details-control', function () {
@@ -169,7 +155,6 @@ $(document).ready(function(){
 		        }
 		    } );	
 			function format ( p ) {
-		        //var html;
 		        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
 		            '<tr>'+
 		                '<td>Average Fare: </td>'+
@@ -181,16 +166,13 @@ $(document).ready(function(){
 		            '</tr>'+            
 		        '</table>';
 		    }
-			//$('#RT_wrapper').css("width", "");
 			$('#RT_wrapper').css("width", $('#RT').css("width"));
 		    $('#RT_wrapper').css("margin", "auto");
-		    //$('#dtcontainer').css("overflow-x", "scroll");		    
-			$("#RT_length").remove();
+		    $("#RT_length").remove();
 			$("#RT_filter").remove();
-			$("#RT_info").remove();
-			//$( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-			//$( '#RT'+'_wrapper .dataTables_scrollHeadInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
-    }});	   	
+			$("#RT_info").remove();			
+        	table.draw();
+    }});	    	
 });
 function dbchange(){
 	if (document.getElementById("dbselect").selectedIndex !=dbindex){
@@ -240,7 +222,7 @@ function dbchange(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
+			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reloadG()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
 			    	Minimum Level of Service (times) <input type="text" name="LoS" id="LoS" class="tbox" onkeypress="return isWholeNumber(event)"/>		    	    	
 		    	</div>

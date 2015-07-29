@@ -77,8 +77,13 @@ $(document).ready(function(){
 	        at: "right bottom",
 	    }
 	});
+	
+	var progressLabel = $( ".progress-label" );
 	$( "#progressbar" ).progressbar({
 	    value: false,
+	    change: function() {
+	        progressLabel.html( '<table><tr><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
+	    }
 	}); 
 	var prog = false;
 	function progress() {
@@ -111,7 +116,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCPSR?&key='+ key+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCPSR?&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){			
 			$('h2').append('Census Places Summary Report <br><hr>');
