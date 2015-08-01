@@ -1,6 +1,7 @@
 package com.webapp.api;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -83,6 +84,32 @@ public class Queries {
         return response;
     }
 	
+	  /**
+     * Lists stops within a certain distance of a 
+     * given stop while filtering the agencies.
+     * Used in Connected agencies on-map report.
+     * 
+     */
+    @GET
+    @Path("/castops")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getCAS(@QueryParam("lat") double lat, @QueryParam("lon") double lon, @QueryParam ("agencies") String agencies,
+ 		   @QueryParam("radius") Integer gap, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	double temp = gap / 3.28084;
+    	gap = (int) temp;
+    	CAStopsList results = PgisEventManager.getConnectedStops(lat, lon, gap, agencies, dbindex);
+    	try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+ 	   return results;	   
+    }
+    
+    
 	/** Generates Counties P&R Report*/
 	@GET
 	@Path("/CountiesPnR")
@@ -265,9 +292,6 @@ public class Queries {
 	List<MapPnrCounty> mapPnrCounties=new ArrayList<MapPnrCounty>();
 	MapPnrRecord mapPnrRecord;
 	MapPnrCounty mapPnrCounty;
-//	MapStop mapPnrStop;
-//	MapRoute mapPnrRoute;
-//	List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
 	for (ParknRide p:PnRs){
 		mapPnrRecord=new MapPnrRecord();
 		mapPnrRecord.countyId=p.getCountyid();
@@ -318,9 +342,11 @@ public class Queries {
    	return response;
     }
    
+
+
    /**
     * Identifies the stops and routes within 
-    * 300m distance of a given park&ride.
+    * a given radius of a park&ride lot.
     * 
     * @return MapPnrRecord
     */
@@ -389,7 +415,7 @@ public class Queries {
         }
     	String[] fulldates = null;
        	String[] days = null; 
-       	//String username = "admin";
+//       	username = "admin";
     	if (date!=null && !date.equals("") && !date.equals("null")){
     		String[] dates = date.split(",");
            	String[][] datedays = daysOfWeekString(dates);
@@ -428,6 +454,8 @@ public class Queries {
 		  } 		
 		return response;
     }
+    
+  
     
  	/**
      * Return shape for a given trip and agency
@@ -1403,7 +1431,7 @@ Loop:  	for (Trip trip: routeTrips){
     		return ""+value;
     	}
     }
-
+    
     /**
 	 * Generates The counties Summary report
 	 */
@@ -1719,6 +1747,24 @@ Loop:  	for (Trip trip: routeTrips){
     	response.GeoR.add(each);
 	    return response;
 	}
+    
+    /**
+     * Generates list of stops for a given agency.
+     * Used to generated Connected Agencies On-map Report.
+     * 
+     */
+    @GET
+	@Path("/agenStops")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getAgenStops(@QueryParam("agency") String agencyId, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+		CAStopsList response = new CAStopsList();
+		response = PgisEventManager.getAgenStops(agencyId, dbindex);
+		return response;		
+    }
+    
     
 	/**
 	 * Generates The urban areas Summary report
@@ -2065,6 +2111,7 @@ Loop:  	for (Trip trip: routeTrips){
 			instance.meanGap = String.valueOf(acl.getMeanGap());
 			for (int i=0;i<acl.getClusterSize();i++){
 				ClusterR inst = new ClusterR();
+				inst.id = acl.destStopIds.get(i);
 				inst.name = acl.sourceStopNames.get(i);
 				inst.names = acl.destStopNames.get(i);
 				inst.scoords = acl.sourceStopCoords.get(i);

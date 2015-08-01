@@ -54,12 +54,17 @@ var aerialLayer = new L.TileLayer(aerialURL,
 map.addLayer(osmLayer);
 
 ///******Variables declared for the on-Map connected agencies report ********///
-var connections = new L.FeatureGroup();
+var connectionMarkers = new L.FeatureGroup();
+var connectionPolylines = new L.FeatureGroup();
 var gap=500;
 var selectedAgency;
+var selectedAgencies=Array();
+var polylines = Array();
 var stopsCluster;
 var text='';
-map.addLayer(connections);
+
+map.addLayer(connectionMarkers);
+map.addLayer(connectionPolylines);
 
 
 ///*********Beginning of on-Map connected agencies report*******///
@@ -76,11 +81,17 @@ var dialog2=$("#connectedAgencies-form").dialog({
         },
     close: function() {
     	miniMap._restore();
-    	connections.eachLayer(function (layer) {
-		    connections.removeLayer(layer);
+    	connectionMarkers.eachLayer(function (layer) {
+		    connectionMarkers.removeLayer(layer);
+		});
+    	connectionPolylines.eachLayer(function (layer) {
+    		connectionPolylines.removeLayer(layer);
 		});
     	$('#gap').val(500);
     	gap=500;
+    	selectedAgency = [];
+    	selectedAgencies = [];
+    	polylines = [];
       },
     open: function(  ) { 	
     	miniMap._minimize(); 
@@ -114,10 +125,16 @@ function loadDialog2(node){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+node.attr("id")+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+node.attr("id")+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(data){
 			var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
+			var colors = ['rgba(110, 204, 57, 0.8)',
+			              'rgba(255, 51, 255, 0.8)',
+			              'rgba(5, 250, 252, 0.7)',
+			              'rgba(254, 10, 10, 0.6)',
+			              'rgba(122, 0, 245, 0.6)',
+			              'rgba(204, 102, 0, 0.8)'];
 			text = data.agency;
 			$('#dialogSelectedAgency').html(data.agency);
     		$('#dialogNoOfConnectedAgencies').html(data.ClusterR.length);
@@ -153,8 +170,13 @@ function loadDialog2(node){
 		    $("#connectedAgenciesTable_info").remove();
 		    connectedAgenciesTable.$('tr').click( function () {
 		    	if($(this).hasClass('selected')){
-		    		connections.removeLayer(connectionsClusters[$(this).index()]);
+		    		connectionMarkers.removeLayer(connectionsClusters[$(this).index()]);
+		    		connectionPolylines.removeLayer(polylines[$(this).index()]);
+		    		selectedAgencies.remove($(this).children().eq(0).html());
 		    	}else{
+		    		var index = $(this).index();
+		    		selectedAgencies.push($(this).children().eq(0).html());
+		    		var agencyId = $(this).children().eq(0).html();
 		    		var c = ($(this).index()+1)%6;
 		    		var tmpConnectionsClusters = new L.MarkerClusterGroup({
 //    					maxClusterRadius: 120,
@@ -166,18 +188,23 @@ function loadDialog2(node){
     				var agencyName=data.ClusterR[$(this).index()].name;
     				$.each(data.ClusterR[$(this).index()].connections, function (i, item){
     					var str = item.dcoords.replace("{","");
+    					str = str.replace("}","");
             			str=str.split(",");
     					var lat = str[0];
-    					var lng = str[1];
+    					var lon = str[1];
     					
-    					var marker = new L.marker([lat,lng] /*,{icon: onMapIcon}).on('click',onClick*/);
+    					var marker = new L.marker([lat,lon] /*,{icon: onMapIcon}*/).on('click',onClick);
+    					marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
+    					marker.agencyId = agencyId;
+    					marker.lat = lat;
+    					marker.lon = lon;
+    					marker.color = colors[c];
     					marker.bindPopup('<b>Agency: </b>'+ agencyName +'<br>'+
     									'<b>Stop Name: </b>'+item.name);
     					tmpConnectionsClusters.addLayer(marker);
     				});
     				connectionsClusters[$(this).index()] = (tmpConnectionsClusters);
-		    		connections.addLayer(connectionsClusters[$(this).index()]);
-//		    		var id= $(this).find("td:nth-child(1)").text();
+		    		connectionMarkers.addLayer(connectionsClusters[$(this).index()]);
 		    	}                   		    	
 		    });
 		    $('#dialogPreLoader2').hide();
@@ -185,7 +212,7 @@ function loadDialog2(node){
 			$.ajax({
 				type: 'GET',
 				datatype: 'jason',
-				url: '/TNAtoolAPI-Webapp/queries/transit/stops?agency='+ node.attr("id")+'&dbindex='+dbindex,
+				url: '/TNAtoolAPI-Webapp/queries/transit/agenStops?agency='+ node.attr("id")+'&dbindex='+dbindex,
 				async: true,
 				success: function(data){
 					var stopsCluster = new L.MarkerClusterGroup({
@@ -196,16 +223,73 @@ function loadDialog2(node){
 						spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
 					});
 					
-					$.each(data.stops,function(i, item){
-						var marker = new L.marker([item.stopLat,item.stopLon] /*,{icon: onMapIcon}).on('click',onClick*/);
-						marker.bindPopup('<b>Stop Name:</b> '+item.stopName);
+					$.each(data.stopsList,function(i, item){
+						var marker = new L.marker([item.lat,item.lon] /*,{icon: onMapIcon})*/).on('click',onClick);
+						marker.bindPopup('<b>Agency:</b> '+item.agencyName+
+										'<br><b>Stop Name: </b> '+item.name);
+						marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
+						marker.lat = item.lat;
+						marker.lon = item.lon;
+						marker.agencyId = node.attr("id");
+						marker.color = 'rgba(255, 255, 0, 0.8)';
 						stopsCluster.addLayer(marker);
 					}); 
-					connections.addLayer(stopsCluster);
+					connectionMarkers.addLayer(stopsCluster);
+					map.fitBounds(stopsCluster);
 				}
 			});
 		}
 	});
+}
+
+function onClick(){
+	var id = this.id;
+	
+	if (polylines[id]==null){
+		
+		var selectedStopLat= this.lat;
+		var selectedStopLon=this.lon;
+		var color = this.color;
+				
+		selectedAgencies.remove(this.agencyId);
+		this.closePopup();
+		
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: 	'/TNAtoolAPI-Webapp/queries/transit/castops?&lat=' + selectedStopLat +
+					'&lon=' + selectedStopLon +'&agencies='+ selectedAgencies +'&radius=' + gap + '&dbindex=' + dbindex,
+			async: true,
+			success: function(data){
+				var sourceMarker = new L.marker([selectedStopLat,selectedStopLon]);
+				var bounds = Array();
+				bounds.push(sourceMarker.getLatLng());
+				var tmpConnectionsPolylines = new L.FeatureGroup();
+				$.each(data.stopsList, function(i,item){
+					if (item.Lat!=selectedStopLat){
+						var latlngs= Array();
+						var destMarker = new L.marker([item.lat,item.lon] /*,{className: 'ycluster', iconSize: new L.Point(10, 10)}).on('click',onClick*/);
+						bounds.push(destMarker.getLatLng());
+						latlngs.push(sourceMarker.getLatLng());
+						latlngs.push(destMarker.getLatLng());
+						var polyline = L.polyline(latlngs, {color: color});
+						tmpConnectionsPolylines.addLayer(polyline);	
+					}				
+				});
+				polylines[id] = tmpConnectionsPolylines;
+				connectionPolylines.addLayer(polylines[id]);
+				dialog2.dialogExtend("minimize");
+				map.fitBounds(bounds);
+				
+			}
+		});
+		selectedAgencies.push(this.agencyId);
+	}else{
+		this.closePopup();
+		connectionPolylines.removeLayer(polylines[id]);
+//		polylines.splice(id,5);		
+		delete polylines[id];
+	}
 }
 function reloadDialog2(input){
 	if (!isNormalInteger(input)){
@@ -213,8 +297,11 @@ function reloadDialog2(input){
 		return;
 	}
 	gap=input;
-	connections.eachLayer(function (layer) {
-	    connections.removeLayer(layer);
+	connectionMarkers.eachLayer(function (layer) {
+	    connectionMarkers.removeLayer(layer);
+	});
+	connectionPolylines.eachLayer(function (layer) {
+	    connectionPolylines.removeLayer(layer);
 	});
 	loadDialog2(selectedAgency);
 }
@@ -921,6 +1008,7 @@ $mylist
                 	"label" : "Connected Agencies",
                 	"action" : function(node){
                 		selectedAgency=node;
+                		selectedAgencies.push(node.attr("id"));
                 		loadDialog2(selectedAgency);
            			}
                 }
@@ -1022,9 +1110,9 @@ $mylist
 		    div3.append('<div id="datepicker"><br></div>');
 		    div3.appendTo(titlebar);
 		    
-		    var div4 = $("<div/>");
+		    /*var div4 = $("<div/>");
 		    div4.attr("id", "datepickerdiv");
-		    div4.appendTo(titlebar);
+		    div4.appendTo(titlebar);*/
 		    
 		    document.getElementById('DB'+dbindex).innerHTML = '&#9989 '+document.getElementById('DB'+dbindex).innerHTML;
 		    var div = $("<div/>");
