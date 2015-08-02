@@ -869,7 +869,7 @@ $mylist
 		    		'<li role="presentation"><a id="ORSR" href="#"><b>ODOT Transit Regions Reports</b></a></li>'+
 		    		'</ul></li>'+
 		    		'</ul></li>'+
-		    		'<li role="presentation" onclick="return;"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
+		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
 		    		'<ul>'+
 		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Report</b></a></li>'+
 		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Networks Report</b></a></li>'+
