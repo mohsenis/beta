@@ -59,7 +59,7 @@ import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-//import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
 import org.onebusaway.gtfs.impl.Databases;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -635,7 +635,7 @@ public class FileUpload extends HttpServlet {
 		
 		boolean b = true;
 		try{
-			//GtfsDatabaseLoaderMain.main(args);
+			GtfsDatabaseLoaderMain.main(args);
 			b = false;
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
