@@ -162,9 +162,13 @@ function go(key){
 	    }
 	});
 	
+	var progressLabel = $( ".progress-label" );
 	$( "#progressbar" ).progressbar({
 	    value: false,
-	}); 
+	    change: function() {
+	        progressLabel.html( '<table><tr><td>Report in progress... </td><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
+	    }
+	});  
 	var prog=false;
 	function progress() {
 		$.ajax({
@@ -287,8 +291,12 @@ function gos(key){
 	    }
 	});
 	
+	var progressLabel = $( ".progress-label" );
 	$( "#progressbar" ).progressbar({
 	    value: false,
+	    change: function() {
+	        progressLabel.html( '<table><tr><td>Report in progress... </td><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
+	    }
 	}); 
 	var prog=false;
 	function progress() {
