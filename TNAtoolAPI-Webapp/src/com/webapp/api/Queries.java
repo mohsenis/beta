@@ -1,6 +1,7 @@
 package com.webapp.api;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -82,6 +83,83 @@ public class Queries {
         
         return response;
     }
+	
+	  /**
+     * Lists stops within a certain distance of a 
+     * given stop while filtering the agencies.
+     * Used in Connected agencies on-map report.
+     * 
+     */
+    @GET
+    @Path("/castops")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getCAS(@QueryParam("lat") double lat, @QueryParam("lon") double lon, @QueryParam ("agencies") String agencies,
+ 		   @QueryParam("radius") Integer gap, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	double temp = gap / 3.28084;
+    	gap = (int) temp;
+    	CAStopsList results = PgisEventManager.getConnectedStops(lat, lon, gap, agencies, dbindex);
+    	try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+ 	   return results;	   
+    }
+    
+    
+	/** Generates Counties P&R Report*/
+	@GET
+	@Path("/CountiesPnR")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object countiesPnR(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex ) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+		ParknRideCountiesList response = new ParknRideCountiesList();
+		response = PgisEventManager.getCountiesPnrs(dbindex);
+		
+		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex];
+			    
+	    setprogVal(key, 0);
+	    
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    progVal.remove(key);
+	    return response;
+	}
+	
+	/** Generates P&R Report for a given county*/
+	@GET
+	@Path("/pnrsInCounty")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object pnrsInCounty(@QueryParam("key") double key, @QueryParam("countyId") String countyId, @QueryParam("dbindex") Integer dbindex ) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+		PnrInCountyList response = new PnrInCountyList();
+		
+		response = PgisEventManager.getPnrsInCounty(Integer.parseInt(countyId), dbindex);
+		
+		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex];
+			    
+	    setprogVal(key, 0);
+	    
+	    try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    progVal.remove(key);
+	    return response;
+	}
 	
 	@GET
     @Path("/NearBlocks")
@@ -194,8 +272,135 @@ public class Queries {
    	MapGeo blocks = PgisEventManager.onMapBlocks(x, lat, lon, dbindex);
    	response.MapTr = stops;
    	response.MapG = blocks;
+   	MapPnR pnr=new MapPnR();
+   	List<ParknRide> PnRs=new ArrayList<ParknRide>();
+	try {
+		if (lat.length==1){
+			PnRs=EventManager.getPnRs(x, lat[0], lon[0], dbindex);
+		}else{
+			PnRs=EventManager.getPnRs(lat, lon, dbindex);
+	   	}		
+	} catch (FactoryException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (TransformException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
+	Map<String,List<MapPnrRecord>> mapPnr= new HashMap<String, List<MapPnrRecord>>(); 
+	List<MapPnrCounty> mapPnrCounties=new ArrayList<MapPnrCounty>();
+	MapPnrRecord mapPnrRecord;
+	MapPnrCounty mapPnrCounty;
+	for (ParknRide p:PnRs){
+		mapPnrRecord=new MapPnrRecord();
+		mapPnrRecord.countyId=p.getCountyid();
+		mapPnrRecord.countyName=p.getCounty();
+		mapPnrRecord.id=p.getPnrid()+"";
+		mapPnrRecord.lat=p.getLat()+"";
+		mapPnrRecord.lon=p.getLon()+"";
+		mapPnrRecord.lotName=p.getLotname();
+		mapPnrRecord.spaces=p.getSpaces()+"";
+		mapPnrRecord.transitSerives=p.getTransitservice();
+		mapPnrRecord.availability=p.getAvailability();
+		
+		
+		if (!mapPnr.containsKey(p.getCountyid())){
+			mapPnr.put(p.getCountyid(), new ArrayList<MapPnrRecord>());
+			mapPnr.get(p.getCountyid()).add(mapPnrRecord);
+			mapPnrCounty=new MapPnrCounty();
+			mapPnrCounty.countyId=p.getCountyid();
+			mapPnrCounty.countyName=p.getCounty();
+			mapPnrCounties.add(mapPnrCounty);
+		}else{
+			mapPnr.get(p.getCountyid()).add(mapPnrRecord);
+		}
+	}
+	
+	int Spaces;
+	int totalSpaces=0;
+	int totalPnrs=0;
+	List<MapPnrRecord> mapPnrRecords;
+	for (MapPnrCounty mp:mapPnrCounties){
+		Spaces=0;
+		mapPnrRecords = mapPnr.get(mp.countyId);
+		mp.MapPnrRecords=mapPnrRecords;
+		mp.totalPnRs=mapPnrRecords.size()+"";
+		totalPnrs+=mapPnrRecords.size();
+		for (MapPnrRecord t:mapPnrRecords){
+			Spaces+=Integer.parseInt(t.spaces);
+		}
+		totalSpaces+=Spaces;
+		mp.totalSpaces=Spaces+"";
+	}   	
+		
+   	pnr.totalPnR=totalPnrs;
+   	pnr.totalSpaces=totalSpaces;
+   	pnr.MapPnrCounty=mapPnrCounties;
+   	
+   	response.MapPnR=pnr;
    	return response;
     }
+   
+
+
+   /**
+    * Identifies the stops and routes within 
+    * a given radius of a park&ride lot.
+    * 
+    * @return MapPnrRecord
+    */
+   @GET
+   @Path("/pnrstopsroutes")
+   @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+   public Object getPnrStopsRoutes(@QueryParam("pnrId") String pnrId, @QueryParam("pnrCountyId") String pnrCountyId,
+		   @QueryParam("lat") Double lat, @QueryParam("lng") Double lng, @QueryParam ("radius") Double radius,
+		   @QueryParam("dbindex") Integer dbindex) throws JSONException {
+	   
+	   MapPnrRecord response = new MapPnrRecord();
+	   response.id = pnrId;
+	   MapStop mapPnrStop;
+	   MapRoute mapPnrRoute;
+	   List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
+	   List<GeoStopRouteMap> sRoutes = new ArrayList<GeoStopRouteMap>();
+		try { 
+			pnrGeoStops = EventManager.getstopswithincircle(radius, lat, lng, dbindex);
+			for (GeoStop s:pnrGeoStops){
+				mapPnrStop=new MapStop();
+				mapPnrStop.AgencyId=s.getAgencyId();
+				mapPnrStop.Id=s.getStopId();
+				mapPnrStop.Lat=s.getLat()+"";
+				mapPnrStop.Lng=s.getLon()+"";
+				mapPnrStop.Name=s.getName();
+				
+				response.MapPnrSL.add(mapPnrStop);
+				
+				List<GeoStopRouteMap> stmpRoutes = EventManager.getroutebystop(s.getStopId(), s.getAgencyId(), dbindex);
+				for(GeoStopRouteMap r: stmpRoutes){
+					if(!sRoutes.contains(r)){
+						sRoutes.add(r);
+					}
+				}
+			}
+			for(GeoStopRouteMap r: sRoutes){
+				mapPnrRoute = new MapRoute();
+				Route _r = GtfsHibernateReaderExampleMain.QueryRoutebyid(new AgencyAndId(r.getagencyId(), r.getrouteId()), dbindex);
+				mapPnrRoute.AgencyId = _r.getId().getAgencyId();
+				mapPnrRoute.Id=_r.getId().getId();
+				mapPnrRoute.Name=_r.getLongName();
+				List<Trip> ts = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(_r, dbindex);
+				mapPnrRoute.Shape=ts.get(0).getEpshape();
+				response.MapPnrRL.add(mapPnrRoute);
+			}
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	   return response;
+   }
 	
 	/**
      * Generates a sorted by agency id list of routes for the LHS menu
@@ -210,7 +415,7 @@ public class Queries {
         }
     	String[] fulldates = null;
        	String[] days = null; 
-       	//String username = "admin";
+//       	username = "admin";
     	if (date!=null && !date.equals("") && !date.equals("null")){
     		String[] dates = date.split(",");
            	String[][] datedays = daysOfWeekString(dates);
@@ -249,6 +454,8 @@ public class Queries {
 		  } 		
 		return response;
     }
+    
+  
     
  	/**
      * Return shape for a given trip and agency
@@ -1224,7 +1431,7 @@ Loop:  	for (Trip trip: routeTrips){
     		return ""+value;
     	}
     }
-
+    
     /**
 	 * Generates The counties Summary report
 	 */
@@ -1540,6 +1747,24 @@ Loop:  	for (Trip trip: routeTrips){
     	response.GeoR.add(each);
 	    return response;
 	}
+    
+    /**
+     * Generates list of stops for a given agency.
+     * Used to generated Connected Agencies On-map Report.
+     * 
+     */
+    @GET
+	@Path("/agenStops")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getAgenStops(@QueryParam("agency") String agencyId, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+		CAStopsList response = new CAStopsList();
+		response = PgisEventManager.getAgenStops(agencyId, dbindex);
+		return response;		
+    }
+    
     
 	/**
 	 * Generates The urban areas Summary report
@@ -1886,6 +2111,7 @@ Loop:  	for (Trip trip: routeTrips){
 			instance.meanGap = String.valueOf(acl.getMeanGap());
 			for (int i=0;i<acl.getClusterSize();i++){
 				ClusterR inst = new ClusterR();
+				inst.id = acl.destStopIds.get(i);
 				inst.name = acl.sourceStopNames.get(i);
 				inst.names = acl.destStopNames.get(i);
 				inst.scoords = acl.sourceStopCoords.get(i);

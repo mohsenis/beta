@@ -17,6 +17,7 @@ public class agencyCluster {
     public List<String> destStopNames;
     public List<String> sourceStopCoords;
     public List<String> destStopCoords;
+    public List<String> destStopIds;
     
     
     public agencyCluster(){    	
@@ -126,4 +127,11 @@ public class agencyCluster {
 		this.destStopCoords = destStopCoords;
 	}
 	   
+	public List<String> getDestStopIds() {
+		return destStopIds;
+	}
+
+	public void setDestStopIds(List<String> destStopIds) {
+		this.destStopCoords = destStopIds;
+	}
 }

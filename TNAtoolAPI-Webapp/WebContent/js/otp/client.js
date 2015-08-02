@@ -42,7 +42,7 @@ var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
 var minimalLayer = new L.StamenTileLayer("toner");
 $("body").css("display","");
-var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov">US Census Bureau</a> 2010';
+var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> V.3.15.07';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
 /*var osmLayer = new L.TileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', 
@@ -52,6 +52,264 @@ var aerialLayer = new L.TileLayer(aerialURL,
 		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 19, attribution: osmAttrib});
 
 map.addLayer(osmLayer);
+
+///******Variables declared for the on-Map connected agencies report ********///
+var connectionMarkers = new L.FeatureGroup();
+var connectionPolylines = new L.FeatureGroup();
+var gap=500;
+var selectedAgency;
+var selectedAgencies=Array();
+var polylines = Array();
+var stopsCluster;
+var text='';
+
+map.addLayer(connectionMarkers);
+map.addLayer(connectionPolylines);
+
+
+///*********Beginning of on-Map connected agencies report*******///
+var dialog2=$("#connectedAgencies-form").dialog({
+    autoOpen: false,
+    height: 700,
+    width: 350,
+    modal: false,
+    draggable: true,
+    resizable: false,
+    closeOnEscape: false,
+    position: {my: "right top", at: "right-55 top+5", of: window },    
+    buttons: {
+        },
+    close: function() {
+    	miniMap._restore();
+    	connectionMarkers.eachLayer(function (layer) {
+		    connectionMarkers.removeLayer(layer);
+		});
+    	connectionPolylines.eachLayer(function (layer) {
+    		connectionPolylines.removeLayer(layer);
+		});
+    	$('#gap').val(500);
+    	gap=500;
+    	selectedAgency = [];
+    	selectedAgencies = [];
+    	polylines = [];
+      },
+    open: function(  ) { 	
+    	miniMap._minimize(); 
+    	dialog.dialog( "close" );
+    	$('.jstree-checked').each(function() {
+    		$( this ).children('a').children('.jstree-checkbox').click();
+    	});
+    	$('#ui-id-1').css('font-size','80%');
+    },
+  }).dialogExtend({
+	  "closable" : true,
+      "minimizable" : true,
+      "minimizeLocation": "right",
+      "minimize" : function() {
+    	  miniMap._restore();
+      },
+      "restore" : function() {
+    	  miniMap._minimize();
+      }
+  });
+
+function loadDialog2(node){
+	$mylist.dialogExtend("collapse");
+    dialog2.dialog( "open" );
+    $('#dialogPreLoader2').show();
+	$('#displayConAgenciesTable').empty();
+	var html='';
+	var connectionsClusters=new Array();
+
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+node.attr("id")+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		async: true,
+		success: function(data){
+			var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
+			var colors = ['rgba(110, 204, 57, 0.8)',
+			              'rgba(255, 51, 255, 0.8)',
+			              'rgba(5, 250, 252, 0.7)',
+			              'rgba(254, 10, 10, 0.6)',
+			              'rgba(122, 0, 245, 0.6)',
+			              'rgba(204, 102, 0, 0.8)'];
+			text = data.agency;
+			$('#dialogSelectedAgency').html(data.agency);
+    		$('#dialogNoOfConnectedAgencies').html(data.ClusterR.length);
+			html = '<table id="connectedAgenciesTable" class="display" align="center">';
+			var tmp = 	'<th>Agency ID </th>'+
+            			'<th>Agency Name</th>'+
+            			'<th>Number of Connections</th></tr>';	
+			html += '<thead>'+tmp+'</thead><tbody>';
+			var html2 = '<tfoot>'+tmp+'</tfoot>';
+			
+			
+			
+			for (i = 0; i < data.ClusterR.length; i++) {
+				html += '<td>'+ data.ClusterR[i].id +'</td>'+
+				'<td>'+ data.ClusterR[i].name +'</td>'+
+				'<td>'+ data.ClusterR[i].size +'</td></tr>';
+			}
+			
+			html += '</tbody></table>';
+			$('#displayConAgenciesTable').append(html);
+			var connectedAgenciesTable = $('#connectedAgenciesTable').DataTable( {
+				"paging": false,
+				"bSort": false,
+				//"scrollY": "40%",
+				"dom": 'T<"clear">lfrtip',
+		        "tableTools": {
+		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+		        	"sRowSelect": "multi",
+		        	"aButtons": []}
+			});
+			$("#connectedAgenciesTable_length").remove();
+		    $("#connectedAgenciesTable_filter").remove();
+		    $("#connectedAgenciesTable_info").remove();
+		    connectedAgenciesTable.$('tr').click( function () {
+		    	if($(this).hasClass('selected')){
+		    		connectionMarkers.removeLayer(connectionsClusters[$(this).index()]);
+		    		connectionPolylines.removeLayer(polylines[$(this).index()]);
+		    		selectedAgencies.remove($(this).children().eq(0).html());
+		    	}else{
+		    		var index = $(this).index();
+		    		selectedAgencies.push($(this).children().eq(0).html());
+		    		var agencyId = $(this).children().eq(0).html();
+		    		var c = ($(this).index()+1)%6;
+		    		var tmpConnectionsClusters = new L.MarkerClusterGroup({
+//    					maxClusterRadius: 120,
+    					iconCreateFunction: function (cluster) {
+    						return new L.DivIcon({ html: cluster.getChildCount(), className: colorArray[c], iconSize: new L.Point(25, 25) });						
+    					},
+    					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+    				});
+    				var agencyName=data.ClusterR[$(this).index()].name;
+    				$.each(data.ClusterR[$(this).index()].connections, function (i, item){
+    					var str = item.dcoords.replace("{","");
+    					str = str.replace("}","");
+            			str=str.split(",");
+    					var lat = str[0];
+    					var lon = str[1];
+    					
+    					var marker = new L.marker([lat,lon] /*,{icon: onMapIcon}*/).on('click',onClick);
+    					marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
+    					marker.agencyId = agencyId;
+    					marker.lat = lat;
+    					marker.lon = lon;
+    					marker.color = colors[c];
+    					marker.bindPopup('<b>Agency: </b>'+ agencyName +'<br>'+
+    									'<b>Stop Name: </b>'+item.name);
+    					tmpConnectionsClusters.addLayer(marker);
+    				});
+    				connectionsClusters[$(this).index()] = (tmpConnectionsClusters);
+		    		connectionMarkers.addLayer(connectionsClusters[$(this).index()]);
+		    	}                   		    	
+		    });
+		    $('#dialogPreLoader2').hide();
+		    
+			$.ajax({
+				type: 'GET',
+				datatype: 'jason',
+				url: '/TNAtoolAPI-Webapp/queries/transit/agenStops?agency='+ node.attr("id")+'&dbindex='+dbindex,
+				async: true,
+				success: function(data){
+					var stopsCluster = new L.MarkerClusterGroup({
+//						maxClusterRadius: 120,
+						iconCreateFunction: function (cluster) {
+							return new L.DivIcon({ html: cluster.getChildCount(), className: 'ycluster', iconSize: new L.Point(25, 25) });						
+						},
+						spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+					});
+					
+					$.each(data.stopsList,function(i, item){
+						var marker = new L.marker([item.lat,item.lon] /*,{icon: onMapIcon})*/).on('click',onClick);
+						marker.bindPopup('<b>Agency:</b> '+item.agencyName+
+										'<br><b>Stop Name: </b> '+item.name);
+						marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
+						marker.lat = item.lat;
+						marker.lon = item.lon;
+						marker.agencyId = node.attr("id");
+						marker.color = 'rgba(255, 255, 0, 0.8)';
+						stopsCluster.addLayer(marker);
+					}); 
+					connectionMarkers.addLayer(stopsCluster);
+					map.fitBounds(stopsCluster);
+				}
+			});
+		}
+	});
+}
+
+function onClick(){
+	var id = this.id;
+	
+	if (polylines[id]==null){
+		
+		var selectedStopLat= this.lat;
+		var selectedStopLon=this.lon;
+		var color = this.color;
+				
+		selectedAgencies.remove(this.agencyId);
+		this.closePopup();
+		
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: 	'/TNAtoolAPI-Webapp/queries/transit/castops?&lat=' + selectedStopLat +
+					'&lon=' + selectedStopLon +'&agencies='+ selectedAgencies +'&radius=' + gap + '&dbindex=' + dbindex,
+			async: true,
+			success: function(data){
+				var sourceMarker = new L.marker([selectedStopLat,selectedStopLon]);
+				var bounds = Array();
+				bounds.push(sourceMarker.getLatLng());
+				var tmpConnectionsPolylines = new L.FeatureGroup();
+				$.each(data.stopsList, function(i,item){
+					if (item.Lat!=selectedStopLat){
+						var latlngs= Array();
+						var destMarker = new L.marker([item.lat,item.lon] /*,{className: 'ycluster', iconSize: new L.Point(10, 10)}).on('click',onClick*/);
+						bounds.push(destMarker.getLatLng());
+						latlngs.push(sourceMarker.getLatLng());
+						latlngs.push(destMarker.getLatLng());
+						var polyline = L.polyline(latlngs, {color: color});
+						tmpConnectionsPolylines.addLayer(polyline);	
+					}				
+				});
+				polylines[id] = tmpConnectionsPolylines;
+				connectionPolylines.addLayer(polylines[id]);
+				dialog2.dialogExtend("minimize");
+				map.fitBounds(bounds);
+				
+			}
+		});
+		selectedAgencies.push(this.agencyId);
+	}else{
+		this.closePopup();
+		connectionPolylines.removeLayer(polylines[id]);
+//		polylines.splice(id,5);		
+		delete polylines[id];
+	}
+}
+function reloadDialog2(input){
+	if (!isNormalInteger(input)){
+		alert('Please enter a positive integer.');
+		return;
+	}
+	gap=input;
+	connectionMarkers.eachLayer(function (layer) {
+	    connectionMarkers.removeLayer(layer);
+	});
+	connectionPolylines.eachLayer(function (layer) {
+	    connectionPolylines.removeLayer(layer);
+	});
+	loadDialog2(selectedAgency);
+}
+
+function isNormalInteger(str) {
+    var n = ~~Number(str);
+    return String(n) === str && n >= 0;
+}
 
 ///*****************Leaflet Draw******************///
 var dialogAgencies = new Array();
@@ -72,7 +330,8 @@ var dialog = $( "#dialog-form" ).dialog({
     	map.removeLayer(onMapCluster);
       },
     open: function( event, ui ) {
-    	miniMap._minimize();    	
+    	miniMap._minimize();
+    	dialog2.dialog('close');
     },
   }).dialogExtend({
 	  "closable" : true,
@@ -125,6 +384,7 @@ map.on('draw:drawstart', function (e) {
 	$mylist.dialogExtend("collapse");
 	drawnItems.clearLayers();
 	dialog.dialog( "close" );
+	dialog2.dialog( "close" );
 });
 
 $('.leaflet-draw-edit-remove').click(function(event){
@@ -258,9 +518,7 @@ map.on('draw:edited', function (e) {
     	$('#POPlon').html(drawCentroid[1]);
     	$('#POParea').html(area);
     	
-    });
-	
-	
+    });	
 	dialog.dialog( "close" );	
 }); 
 ////////*************************************/////////////////////
@@ -689,15 +947,13 @@ $mylist
     },
     "contextmenu" : {
         "items" : function (node) {        	
-        	if ((node.attr("type"))!=="variant" && $.jstree._reference($mylist)._get_type($(node))!="disabled") {        	       	 
+        	if ((node.attr("type"))!=="variant" && $.jstree._reference($mylist)._get_type($(node))!="disabled" && node.attr("type")=="agency") {        	       	 
         	return { 
         		"show" : {
                     "label" : "Show Route Shapes",
                     "action" : function (node) { 
                     	//alert(node.attr("type"));
-                    	switch (node.attr("type")){
-                    	case "agency":                    		
-                    		if ($.jstree._reference($mylist)._is_loaded(node)){
+                    	if ($.jstree._reference($mylist)._is_loaded(node)){
                     			$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
                     				if ($.jstree._reference($mylist)._is_loaded(child)){
                     					$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){                    						
@@ -735,49 +991,62 @@ $mylist
             								});},function(){alert("Node Load Error");});
                 					}                        			
                                 		});},function(){alert("Node Load Error");});
-                			}                    		                    		
-	                    	break; 
-                    	case "route":
-                    		if ($.jstree._reference($mylist)._is_loaded(node)){
-	                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
-	                    		$.jstree._reference($mylist).change_state(child, true);
-	                    		if ($(child).attr("longest")==1){
-        							$.jstree._reference($mylist).change_state(child, false);
-        						}
-	                    		}); 
-                    		}else {
-                    			$.jstree._reference($mylist).load_node_json(node, function(){$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
-                            		$.jstree._reference($mylist).change_state(child, true);
-                            		if ($(child).attr("longest")==1){
-            							$.jstree._reference($mylist).change_state(child, false);
-            						}
-                            		});},function(){alert("Node Load Error");});
-                    		}
-                    		break;
-                    	}
+                			}
                     }
                 },
                 "hide" : {
                     "label" : "Hide Route Shapes",
                     "action" : function (node) { 
-                    	switch (node.attr("type")){
-                    	case "agency":                    		
-                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
-                    			$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){
-                            		$.jstree._reference($mylist).uncheck_node(gchild);
-                            		});
-                        		});
-	                    	break; 
-                    	case "route":
-                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
-                    		$.jstree._reference($mylist).uncheck_node(child);
+                    	$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
+                    		$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){
+                    			$.jstree._reference($mylist).uncheck_node(gchild);
+                    			});
                     		});
-                    		break;
                     	}
-                    }
                 },
+                "connectedAgencies" : {
+                	"label" : "Connected Agencies",
+                	"action" : function(node){
+                		selectedAgency=node;
+                		selectedAgencies.push(node.attr("id"));
+                		loadDialog2(selectedAgency);
+           			}
+                }
         	};        	     
-                }            
+                }else if ((node.attr("type"))!=="variant" && $.jstree._reference($mylist)._get_type($(node))!="disabled" && node.attr("type")=="route"){
+                	return { 
+                		"show" : {
+                            "label" : "Show Route Shapes",
+                            "action" : function (node) { 
+                            	//alert(node.attr("type"));
+                            	
+                            		if ($.jstree._reference($mylist)._is_loaded(node)){
+        	                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
+        	                    		$.jstree._reference($mylist).change_state(child, true);
+        	                    		if ($(child).attr("longest")==1){
+                							$.jstree._reference($mylist).change_state(child, false);
+                						}
+        	                    		}); 
+                            		}else {
+                            			$.jstree._reference($mylist).load_node_json(node, function(){$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
+                                    		$.jstree._reference($mylist).change_state(child, true);
+                                    		if ($(child).attr("longest")==1){
+                    							$.jstree._reference($mylist).change_state(child, false);
+                    						}
+                                    		});},function(){alert("Node Load Error");});
+                            		}
+                            }
+                        },
+                        "hide" : {
+                            "label" : "Hide Route Shapes",
+                            "action" : function (node) { 
+                            		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
+                            		$.jstree._reference($mylist).uncheck_node(child);
+                            		});
+                            }
+                        }
+                	};
+                }
         }
     },
 	"plugins" : [ "themes","types","json_data", "checkbox", "sort", "ui" ,"contextmenu"]			
@@ -811,9 +1080,9 @@ $mylist
 	      "close": "ui-icon-document",	     
 	    },
 	    "load" : function(evt, dlg) {  	
-	    	$(".ui-dialog-titlebar-minimize:eq( 1 )").attr("title", "Minimize");
-	    	$(".ui-dialog-titlebar-buttonpane:eq( 1 )").css("right", 68 + "px");    	
-		    var titlebar = $(".ui-dialog-titlebar:eq( 1 )");		
+	    	$(".ui-dialog-titlebar-minimize:eq( 2 )").attr("title", "Minimize");
+	    	$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 68 + "px");    	
+		    var titlebar = $(".ui-dialog-titlebar:eq( 2 )");		
 			var div2 = $("<div/>");			
 		    div2.addClass("ui-dialog-titlebar-other");	    
 		    var button2 = $( "<button/>" ).text( "Databases" );	
@@ -841,9 +1110,9 @@ $mylist
 		    div3.append('<div id="datepicker"><br></div>');
 		    div3.appendTo(titlebar);
 		    
-		    var div4 = $("<div/>");
+		    /*var div4 = $("<div/>");
 		    div4.attr("id", "datepickerdiv");
-		    div4.appendTo(titlebar);
+		    div4.appendTo(titlebar);*/
 		    
 		    document.getElementById('DB'+dbindex).innerHTML = '&#9989 '+document.getElementById('DB'+dbindex).innerHTML;
 		    var div = $("<div/>");
@@ -856,8 +1125,33 @@ $mylist
 	        .css( "right", 1 + "px" )
 	        .css( "top", 55 + "%" )
 	        .appendTo(div);		    
-		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4"><li role="presentation"><a id="SSR" href="#">Statewide Report</a></li><li role="presentation"><a id="THR" href="#">Transit Hubs Report</a></li><li role="presentation"><a id="ASR" href="#">Transit Agency Reports</a></li><li role="presentation"><a id="CNSR" href="#">Connected Networks Report</a></li><li role="presentation"><a id="CASR" href="#">Connected Agencies Reports</a></li><li role="presentation"><a id="CSR" href="#">Counties Reports</a></li><li role="presentation"><a id="CPSR" href="#">Census Places Reports</a></li><li role="presentation"><a id="CDSR" href="#">Congressional Districts Reports</a></li><li role="presentation"><a id="UASR" href="#">Urban Areas Reports</a></li><li role="presentation"><a id="ORSR" href="#">ODOT Transit Regions Reports</a></li></ul>');
+
+		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4">'+
+		    		'<li role="presentation"><a id="SSR" href="#"><b>Statewide Report</b></a>'+
+		    		'<ul>'+
+		    		'<li role="presentation"><a id="ASR" href="#"><b>Transit Agency Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Geographical Reports</a>'+
+		    		'<ul>'+
+		    		'<li role="presentation"><a id="CSR" href="#"><b>Counties Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="CPSR" href="#"><b>Census Places Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="CDSR" href="#"><b>Congressional Districts Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="UASR" href="#"><b>Urban Areas Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="ORSR" href="#"><b>ODOT Transit Regions Reports</b></a></li>'+
+		    		'</ul></li>'+
+		    		'</ul></li>'+
+		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
+		    		'<ul>'+
+		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Report</b></a></li>'+
+		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Networks Report</b></a></li>'+
+		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Agencies Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Report</b></a></li>'+
+		    		'</ul></li>'+
+		    		'</ul>');
+		 
 			div.appendTo(titlebar);
+			$( "#rmenu" ).menu();
+			$( ".ui-menu" ).css('width','18em');
+			$( ".ui-menu-item" ).css('width','18em');
 			$('.ui-dialog-titlebar-other').dropdown();			
 			$("#datepicker").multiDatesPicker({
 				changeMonth: false,
@@ -988,6 +1282,8 @@ $mylist
 			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&username='+getSession());	    		
 			    }else if(casestring=="ORSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
+			    }else if(casestring=="PNRR"){
+			    	window.open('/TNAtoolAPI-Webapp/ParkRideReport.html'+'?&dbindex='+dbindex);
 			    }else if(casestring.substring(0,2)=="DB"){
 			    	if (dbindex!=parseInt(casestring.substring(2)))
 			    		if ($('#datepicker').multiDatesPicker('getDates').length>0){
@@ -1011,6 +1307,7 @@ $mylist
 	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.polygon.handler.disable();
 	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.circle.handler.disable();
 	    	drawControl._toolbars[L.EditToolbar.TYPE]._modes.edit.handler.disable();
+	    	dialog2.dialog('close');
 	    },
 	    "collapse" : function(evt,dlg){	    	
 	    	$(".dropdown-menu").css("top", 100+"%" );
