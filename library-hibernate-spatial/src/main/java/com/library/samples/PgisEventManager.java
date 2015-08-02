@@ -69,6 +69,44 @@ public class PgisEventManager {
 		}
 	}
 	
+	///// CONNECTED AGENCIES ON-MAP REPORT QUERIES
+	/**
+	 * Queries stops within a certain distance of a given stop while filtering the agencies.
+	 */
+	public static CAStopsList getConnectedStops(double lat, double lon, int gap, String agencies, int dbindex){
+		CAStopsList results=new CAStopsList();	// This object is declared to hold the stops
+		
+		Connection connection = makeConnection(dbindex);
+	    Statement stmt = null;
+	    String query = "WITH main AS (SELECT agencyid, id, name, description, lat, lon "
+  						+ "FROM gtfs_stops WHERE agencyid = ANY('{"+agencies+"}'::text[]) "
+  						+ "AND ST_Dwithin(ST_transform(ST_setsrid(ST_MakePoint("+lon+", "+lat+"),4326), 2993), location, "+gap+")) "
+  						+ "SELECT main.id, main.name stopname, main.description, main.agencyid, gtfs_agencies.name agencyname, main.lat, main.lon "
+  						+ "FROM main INNER JOIN gtfs_agencies ON main.agencyid=gtfs_agencies.id";
+	    System.out.println(query);
+
+	    try {
+			stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			
+			while(rs.next()){
+				CAStop instance  = new CAStop();
+				
+				instance.id = rs.getString("id");
+				instance.name = rs.getString("stopname");
+				instance.agencyName = rs.getString("agencyname");
+				instance.agencyId = rs.getString("agencyid");
+				instance.lat = rs.getString("lat");
+				instance.lon = rs.getString("lon");
+				results.stopsList.add(instance);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	      
+		return results;
+	}
+	
 	/////GEO AREA EXTENDED REORTS QUERIES
 	
 	/**
@@ -157,6 +195,148 @@ public class PgisEventManager {
       }
       return response;
     }
+	
+	/** Queries all P&Rs nationwide grouped by county*/
+	public static ParknRideCountiesList getCountiesPnrs(int dbindex){
+		ParknRideCountiesList results = new ParknRideCountiesList();
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		String querytext =	"SELECT pr.countyid, pr.county, count(pr.countyid) counts, sum(pr.spaces) spaces, sum(pr.accessiblespaces) accessiblespaces " +
+				"FROM parknride pr " + 
+				"GROUP BY pr.countyid, pr.county;";
+		try {
+	        stmt = connection.createStatement();
+	        ResultSet rs = stmt.executeQuery(querytext); 
+	        List<ParknRideCounties> list=new ArrayList<ParknRideCounties>();
+	        while ( rs.next() ) {
+	        	ParknRideCounties instance = new ParknRideCounties();
+	        	instance.countyId = rs.getString("countyid");
+	        	instance.cname = rs.getString("county");
+	        	instance.count = rs.getString("counts");
+	        	instance.spaces = rs.getString("spaces");
+	        	instance.accessibleSpaces = rs.getString("accessiblespaces");
+	        	list.add(instance);
+	        }
+//	        results.PnrCountiesList.add(instance);
+	        rs.close();
+	        stmt.close(); 
+	        results.PnrCountiesList=list;
+	      } catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        e.getStackTrace();
+	        //System.exit(0);
+	      }
+	      dropConnection(connection);
+	      
+	      return results;
+	}
+	
+	/** Queries all detailed information on all the PnRs within a given county.
+	 * 
+	 */
+	public static PnrInCountyList  getPnrsInCounty(int countyId, int dbindex){
+		PnrInCountyList results = new PnrInCountyList();
+		String id = countyId+"";
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		String querytext =	"SELECT	pnrid, " +
+								"lotname, " +
+								"location, " +
+								"city, " +
+								"zipcode, "+
+								"spaces, " +
+								"accessiblespaces, " +
+								"transitservice, " +
+								"lat, " +
+								"lon, " +
+								"bikerackspaces, " +
+								"bikelockerspaces, " +
+								"electricvehiclespaces, " +
+								"carsharing, " +
+								"transitservice, " +
+								"availability, " +
+								"timelimit, " +
+								"restroom, " +
+								"benches, " +
+								"shelter, " +
+								"indoorwaitingarea, " +
+								"trashcan, " +
+								"lighting, " +
+								"securitycameras, " +
+								"sidewalks, " +
+								"pnrsignage, " +
+								"lotsurface, " +
+								"propertyowner, " +
+								"localexpert, " +
+								"county "+
+								
+							"FROM parknride " +
+							"WHERE countyid='"+ id + "';";
+		try {
+	        stmt = connection.createStatement();
+	        ResultSet rs = stmt.executeQuery(querytext); 
+	        List<PnrInCounty> list=new ArrayList<PnrInCounty>();
+	        while ( rs.next() ) {
+	        	PnrInCounty instance = new PnrInCounty();
+	        	instance.pnrid = rs.getString("pnrid");
+	        	instance.lotname = rs.getString("lotname");
+	        	instance.city = rs.getString("city");
+	        	instance.zipcode=rs.getString("zipcode");
+	        	instance.location = rs.getString("location");	  
+	        	if (rs.getString("spaces").equals("0"))
+	        		instance.spaces = "N/A";
+	        	else
+	        		instance.spaces =instance.spaces = rs.getString("spaces");	
+	        	if (rs.getString("accessiblespaces").equals("0"))
+	        		instance.accessiblespaces = "N/A";
+	        	else 
+	        		instance.accessiblespaces = rs.getString("accessiblespaces");	
+	        	instance.transitservices = rs.getString("transitservice");
+	        	instance.lat = rs.getString("lat").substring(0,7);
+	        	instance.lon = rs.getString("lon").substring(0,9);
+	        	if (rs.getString("bikerackspaces").equals("0"))
+	        		instance.bikerackspaces = "N/A";
+	        	else
+	        		instance.bikerackspaces = rs.getString("bikerackspaces");
+	        	if (rs.getString("bikelockerspaces").equals("0"))
+	        		instance.bikelockerspaces = "N/A";
+	        	else
+	        		instance.bikelockerspaces = rs.getString("bikelockerspaces");
+	        	if (rs.getString("electricvehiclespaces").equals("0"))
+	        		instance.electricvehiclespaces = "N/A";
+	        	else
+	        		instance.electricvehiclespaces = rs.getString("electricvehiclespaces");
+	        	instance.carsharing = rs.getString("carsharing");
+	        	instance.availability = rs.getString("availability");
+	        	instance.timelimit = rs.getString("timelimit");
+	        	instance.restroom = rs.getString("restroom");
+	        	instance.benches = rs.getString("benches");
+	        	instance.shelter = rs.getString("shelter");
+	        	instance.indoorwaitingarea = rs.getString("indoorwaitingarea");
+	        	instance.trashcan = rs.getString("trashcan");
+	        	instance.lighting = rs.getString("lighting");
+	        	instance.securitycameras = rs.getString("securitycameras");
+	        	instance.sidewalks = rs.getString("sidewalks");
+	        	instance.pnrsignage = rs.getString("pnrsignage");
+	        	instance.lotsurface = rs.getString("lotsurface");
+	        	instance.propertyowner = rs.getString("propertyowner");
+	        	instance.localexpert = rs.getString("localexpert");
+	        	instance.county = rs.getString("county");
+	        	
+	        	list.add(instance);
+	        }
+	        rs.close();
+	        stmt.close(); 
+	        results.PnrCountiesList=list;
+	      } catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        e.getStackTrace();
+	        //System.exit(0);
+	      }
+	      dropConnection(connection);
+		
+		return results;
+	}
 	
 	/**
 	 *Queries Stops count, unduplicated urban pop and rural pop within x meters of all stops within the given geographic area
@@ -588,7 +768,7 @@ public class PgisEventManager {
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pairs as (select stp1.agencyid as aid1,"
+			String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pairs as (select stp1.agencyid as aid1,"
 					+ " stp1.id as sid1, array[stp1.lat, stp1.lon]::text as stp1loc, stp1.name as name1, stp2.agencyid as aid2, stp2.id as sid2, array[stp2.lat, stp2.lon]::text "
 					+ "as stp2loc, stp2.name as name2, st_distance(stp1.location,stp2.location) as dist from gtfs_stops stp1 inner join gtfs_stops stp2 on "
 					+ "st_dwithin(stp1.location, stp2.location,"+String.valueOf(dist)+") inner join aids on stp1.agencyid=aids.aid inner join aids aids2 on stp2.agencyid=aids2.aid)"
@@ -596,9 +776,11 @@ public class PgisEventManager {
 					+ "agencies as (select agency.id as aid, map.agencyid_def as aid_def, agency.name as aname, map.stopid as sid from gtfs_agencies agency inner join "
 					+ "gtfs_stop_service_map map on agency.id=map.agencyid where agency.id!='"+agencyId+"') select ag1.aid as aid1, ag2.aid as aid2, ag2.aname, count(pairs.sid2) "
 					+ "as size, round((3.28084*min(pairs.dist))::numeric, 2) as min_gap, round((3.28084*max(pairs.dist))::numeric, 2) as max_gap, "
-					+ "round((3.28084*avg(pairs.dist))::numeric, 2) as avg_gap, array_agg(name1) as names1, array_agg(stp1loc) as locs1,array_agg(name2) as names2, "
+					+ "round((3.28084*avg(pairs.dist))::numeric, 2) as avg_gap, array_agg(name1) as names1, array_agg(stp1loc) as locs1, array_agg(sid2) as sids2, array_agg(name2) as names2, "
 					+ "array_agg(stp2loc) as locs2, array_agg(round((3.28084*dist)::numeric, 2)::text) as dists from agency ag1 inner join pairs on ag1.aid_def=pairs.aid1 and "
-					+ "ag1.sid= pairs.sid1 inner join agencies ag2 on ag2.aid_def=pairs.aid2 and ag2.sid= pairs.sid2 where ag1.aid!=ag2.aid group by ag1.aid, ag2.aid, ag2.aname");					
+					+ "ag1.sid= pairs.sid1 inner join agencies ag2 on ag2.aid_def=pairs.aid2 and ag2.sid= pairs.sid2 where ag1.aid!=ag2.aid group by ag1.aid, ag2.aid, ag2.aname";					
+			System.out.println(query);
+			ResultSet rs = stmt.executeQuery(query);
 			while ( rs.next() ) {
 				agencyCluster instance = new agencyCluster();
 				instance.agencyId = rs.getString("aid2");
@@ -616,7 +798,9 @@ public class PgisEventManager {
 				buffer = (String[]) rs.getArray("locs1").getArray();
 				instance.sourceStopCoords = Arrays.asList(buffer);
 				buffer = (String[]) rs.getArray("locs2").getArray();
-				instance.destStopCoords = Arrays.asList(buffer);				
+				instance.destStopCoords = Arrays.asList(buffer);
+				buffer = (String[]) rs.getArray("sids2").getArray();
+				instance.destStopIds = Arrays.asList(buffer);
 		        response.add(instance);
 		        }
 		} catch ( Exception e ) {
@@ -625,6 +809,40 @@ public class PgisEventManager {
 	      }
 		dropConnection(connection);
 		return response;
+	}
+	
+	/**
+	 * Queries stops of a given agency.
+	 * Used to generate Connecteg Agencies On-map report,
+	 */
+	public static CAStopsList getAgenStops(String agencyId, int dbindex){
+		CAStopsList result = new CAStopsList();
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		
+		try {
+			stmt = connection.createStatement();
+			String query = "WITH main AS (SELECT id stopid, name stopname, agencyid, lat, lon, location "
+					+ "FROM gtfs_stops WHERE agencyid='" + agencyId + "') "
+							+ "SELECT main.stopid, main.stopname, main.agencyid, gtfs_agencies.name agencyname, main.lat, main.lon, gtfs_agencies.url "
+							+ "FROM main INNER JOIN gtfs_agencies ON main.agencyid = gtfs_agencies.id";
+			
+			ResultSet rs = stmt.executeQuery(query);
+			while (rs.next()){
+				CAStop instance = new CAStop();
+				instance.id = rs.getString("stopid");
+				instance.name = rs.getString("stopname");
+				instance.agencyId = rs.getString("agencyid");
+				instance.agencyName = rs.getString("agencyname");
+				instance.lat = rs.getString("lat");
+				instance.lon = rs.getString("lon");
+				result.stopsList.add(instance);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
 	}
 	
 	/**

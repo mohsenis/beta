@@ -45,6 +45,40 @@
         <property name="regionName" column="odotregionname" type="string" length="9" />        
     </class>
     
+    <class name="ParknRide" table="parknride">
+        <id name="pnrid" column="pnrid" type="integer"/>
+        <property name="lat" column="lat" type="double"/>
+        <property name="lon" column="lon" type="double"/>
+        <property name="lotname" column="lotname" type="string"/>
+        <property name="location" column="location" type="string"/>
+        <property name="city" column="city" type="string" />
+        <property name="zipcode" column="zipcode" type="integer"/>
+        <property name="countyid" column="countyid" type="string"/>
+        <property name="county" column="county" type="string" />
+        <property name="spaces" column="spaces" type="integer"/>
+        <property name="accessiblespaces" column="accessiblespaces" type="integer"/>
+        <property name="bikerackspaces" column="bikerackspaces" type="integer"/>
+        <property name="bikelockerspaces" column="bikelockerspaces" type="integer"/>
+        <property name="electricvehiclespaces" column="electricvehiclespaces" type="integer"/>
+        <property name="carsharing" column="carsharing" type="string"/>
+        <property name="transitservice" column="transitservice" type="string"/>
+        <property name="availability" column="availability" type="string"/>
+        <property name="timelimit" column="timelimit" type="string"/>
+        <property name="restroom" column="restroom" type="string"/>
+        <property name="benches" column="benches" type="string"/>
+        <property name="shelter" column="shelter" type="string"/>
+        <property name="indoorwaitingarea" column="indoorwaitingarea" type="string"/>
+        <property name="trashcan" column="trashcan" type="string"/>
+        <property name="lighting" column="lighting" type="string"/>
+        <property name="securitycameras" column="securitycameras" type="string"/>
+        <property name="sidewalks" column="sidewalks" type="string"/>
+        <property name="pnrsignage" column="pnrsignage" type="string"/>
+        <property name="lotsurface" column="lotsurface" type="string"/>
+        <property name="propertyowner" column="propertyowner" type="string"/>
+        <property name="localexpert" column="localexpert" type="string"/>         
+        <property name="geom" column="geom" type="org.hibernatespatial.GeometryUserType" />
+    </class>
+    
     <class name="Place" table="census_places">
         <id name="placeId" column="placeid" type="string" length="7" />
         <property name="name" column="pname" type="string"/> 
@@ -488,6 +522,12 @@
 	</query>
 	<query name = "CONNECTED_REGIONS">
     <![CDATA[select map.regionId from CountyTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from CountyTripMap where regionId =:id ) group by map.regionId order by map.regionId ]]>
+	</query>
+	<query name = "PARKNRIDE_WITHIN_CIRCLE">
+    <![CDATA[from ParknRide where dwithin(geom, :point, :radius) = true]]>
+	</query>
+	 <query name = "PARKNRIDE_WITHIN_RECTANGLE">
+    <![CDATA[from ParknRide where within(geom, :polygon) = true]]>
 	</query>
 	<query name = "GEO_COUNTS">
     <![CDATA[select (select count(countyId) from County) as county, (select count(tractId) from Tract) as tract, (select count(placeId) from Place) as place, (select count(urbanId) from Urban) as urban, (select count(congdistId) from CongDist) as congdist, (select count(distinct regionId) from County) as region, sum(population), sum(landarea), (select sum(population) from Census where poptype='U'), (select sum(population) from Census where poptype='R') from County]]>	</query>		

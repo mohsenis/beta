@@ -80,7 +80,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.examples.GtfsHibernateReaderExampleMain;
-import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+//import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -88,9 +88,8 @@ import org.xml.sax.SAXException;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-
-	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
-	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
+	private final static String basePath = "C:/Users/PB/git/TNAtool/";
+	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/";
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
 	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
@@ -978,7 +977,7 @@ public class DbUpdate {
 		return sql;
 	}
 	
-	@GET
+	/*@GET
     @Path("/addfeed")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object addfeed(@QueryParam("feedname") String feedname, @QueryParam("db") String db) throws IOException{
@@ -1062,7 +1061,7 @@ public class DbUpdate {
 		
 		System.out.println("done");
 		return new TransitError(feedname +"Has been added to the database");
-	}
+	}*/
 	
 	public String removeLastChar(String str) {
     	if (str.length() > 0) {
