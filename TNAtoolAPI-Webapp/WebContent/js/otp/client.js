@@ -42,6 +42,7 @@ var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
 var minimalLayer = new L.StamenTileLayer("toner");
 $("body").css("display","");
+$("#overlay").show();
 var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> V.3.15.08';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
@@ -172,7 +173,8 @@ function loadDialog2(node){
 		    	if($(this).hasClass('selected')){
 		    		connectionMarkers.removeLayer(connectionsClusters[$(this).index()]);
 		    		connectionPolylines.removeLayer(polylines[$(this).index()]);
-		    		selectedAgencies.remove($(this).children().eq(0).html());
+		    		// remove the selected agency from the list of agencies.
+		    		selectedAgencies = selectedAgencies.splice(selectedAgencies.indexOf($(this).children().eq(0).html()), 1);
 		    	}else{
 		    		var index = $(this).index();
 		    		selectedAgencies.push($(this).children().eq(0).html());
@@ -251,7 +253,7 @@ function onMarkerClick(){
 		var selectedStopLon=this.lon;
 		var color = this.color;
 				
-		selectedAgencies.remove(this.agencyId);
+		selectedAgencies = selectedAgencies.splice(selectedAgencies.indexOf(this.agencyId), 1);
 		this.closePopup();
 		
 		$.ajax({
@@ -909,7 +911,7 @@ $mylist
             	catch(err) {
             		console.log("error");
             	}
-            	
+            	$("#overlay").hide();
             	return ops.data;            	
             }    	               
         },
