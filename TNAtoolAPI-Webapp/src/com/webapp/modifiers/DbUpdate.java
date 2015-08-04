@@ -931,8 +931,7 @@ public class DbUpdate {
 			if ( rs.next() ) {
 				agencyId = rs.getString("defaultid");
 			}
-			statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedname+"';");
-			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = 'admin';");
+			
 			rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname = '"+feedname+"';");
 			if ( rs.next() ) {
 				agencyIds = rs.getString("agencyids");
