@@ -174,7 +174,7 @@ function loadDialog2(node){
 		    		connectionMarkers.removeLayer(connectionsClusters[$(this).index()]);
 		    		connectionPolylines.removeLayer(polylines[$(this).index()]);
 		    		// remove the selected agency from the list of agencies.
-		    		selectedAgencies = selectedAgencies.splice(selectedAgencies.indexOf($(this).children().eq(0).html()), 1);
+		    		selectedAgencies.splice(selectedAgencies.indexOf($(this).children().eq(0).html()),1);
 		    	}else{
 		    		var index = $(this).index();
 		    		selectedAgencies.push($(this).children().eq(0).html());
@@ -252,8 +252,7 @@ function onMarkerClick(){
 		var selectedStopLat= this.lat;
 		var selectedStopLon=this.lon;
 		var color = this.color;
-				
-		selectedAgencies = selectedAgencies.splice(selectedAgencies.indexOf(this.agencyId), 1);
+		selectedAgencies.splice(selectedAgencies.indexOf(this.agencyId),1);
 		this.closePopup();
 		
 		$.ajax({
