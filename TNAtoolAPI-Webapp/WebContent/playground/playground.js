@@ -550,5 +550,5 @@ function go(){
             .call(this, $.Event('done'), {result: result});
     });
     
-    $('body').css('display','');
+    
 }

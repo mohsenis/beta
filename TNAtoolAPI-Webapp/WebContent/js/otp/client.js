@@ -42,7 +42,7 @@ var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
 var minimalLayer = new L.StamenTileLayer("toner");
 $("body").css("display","");
-var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> V.3.15.07';
+var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> V.3.15.08';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
 /*var osmLayer = new L.TileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', 
@@ -193,7 +193,7 @@ function loadDialog2(node){
     					var lat = str[0];
     					var lon = str[1];
     					
-    					var marker = new L.marker([lat,lon] /*,{icon: onMapIcon}*/).on('click',onClick);
+    					var marker = new L.marker([lat,lon] /*,{icon: onMapIcon}*/).on('click',onMarkerClick);
     					marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
     					marker.agencyId = agencyId;
     					marker.lat = lat;
@@ -224,7 +224,7 @@ function loadDialog2(node){
 					});
 					
 					$.each(data.stopsList,function(i, item){
-						var marker = new L.marker([item.lat,item.lon] /*,{icon: onMapIcon})*/).on('click',onClick);
+						var marker = new L.marker([item.lat,item.lon] /*,{icon: onMapIcon})*/).on('click',onMarkerClick);
 						marker.bindPopup('<b>Agency:</b> '+item.agencyName+
 										'<br><b>Stop Name: </b> '+item.name);
 						marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
@@ -242,7 +242,7 @@ function loadDialog2(node){
 	});
 }
 
-function onClick(){
+function onMarkerClick(){
 	var id = this.id;
 	
 	if (polylines[id]==null){
@@ -1165,11 +1165,11 @@ $mylist
 							//alert("del triggered");
 							$("#"+dateID).remove();							
 						}
-						if ($('#datepicker').multiDatesPicker('getDates').length>0){
+						if($('#datepicker').multiDatesPicker('getDates').length>0){
 								$("#datepick").css({"border":"2px solid #900"});
-							} else {
+						} else {
 								$("#datepick").css({"border":""});
-							}
+						}
 			      }
 			});			
 			$("#datepicker").append("<div id='datesdiv'><ul id='datesarea'></ul></div>");
@@ -1197,6 +1197,7 @@ $mylist
 									}
 					      }
 					});	
+					//alert(w_qstringd);
 					var cdate;
 					for(var i=0; i<w_qstringd.split(",").length; i++){
 						cdate = w_qstringd.split(",")[i];
@@ -1329,8 +1330,9 @@ $mylist
 		                    }
 		                 }
 		            ]
-	});        
-	    })
+	});   
+    //addRangeTooltip(dialogAgenciesId);
+})
 .bind("change_state.jstree", function (e, d) {
     var tagName = d.args[0].tagName;
     var refreshing = d.inst.data.core.refreshing;
@@ -1435,4 +1437,30 @@ function updatepicker(){
 	if (w_qstringd!=newdates){
 		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
 	}
+}
+
+function addRangeTooltip(agenciesIds){
+	var aList = $( "li[type='agency']" );
+	var today = currentDateFormatted();
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/agenciesCalendarRange?agencies='+agenciesIds.join(',')+'&dbindex='+dbindex,
+		async: false,
+		success: function(d){	
+			$.each(d.SEDList, function(i,item){
+				if(today>item.Enddate){
+					$(aList[i]).children('a').css('color','red');
+				}
+		    	$(aList[i]).children('a').attr( "title", "Active Service Dates: "+stringToDate(item.Startdate)+" to "+stringToDate(item.Enddate));
+		    });	
+		}
+	});
+	
+	/*$(document).tooltip({
+		position: {
+	        my: "left top",
+	        at: "left bottom",
+	    }
+	});*/
 }

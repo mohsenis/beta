@@ -80,7 +80,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.examples.GtfsHibernateReaderExampleMain;
-//import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -930,8 +930,7 @@ public class DbUpdate {
 			if ( rs.next() ) {
 				agencyId = rs.getString("defaultid");
 			}
-			statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedname+"';");
-			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = 'admin';");
+			
 			rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname = '"+feedname+"';");
 			if ( rs.next() ) {
 				agencyIds = rs.getString("agencyids");
@@ -977,7 +976,7 @@ public class DbUpdate {
 		return sql;
 	}
 	
-	/*@GET
+	@GET
     @Path("/addfeed")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object addfeed(@QueryParam("feedname") String feedname, @QueryParam("db") String db) throws IOException{
@@ -1061,7 +1060,7 @@ public class DbUpdate {
 		
 		System.out.println("done");
 		return new TransitError(feedname +"Has been added to the database");
-	}*/
+	}
 	
 	public String removeLastChar(String str) {
     	if (str.length() > 0) {
