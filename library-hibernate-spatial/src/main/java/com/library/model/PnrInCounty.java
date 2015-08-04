@@ -1,6 +1,9 @@
 package com.library.model;
 
+import java.sql.Array;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -127,4 +130,16 @@ public class PnrInCounty {
 	@XmlAttribute
 	@JsonSerialize
 	public String metadata;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String agencies;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String stops;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String routes;
 }

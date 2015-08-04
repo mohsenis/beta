@@ -287,7 +287,6 @@ function onClick(){
 	}else{
 		this.closePopup();
 		connectionPolylines.removeLayer(polylines[id]);
-//		polylines.splice(id,5);		
 		delete polylines[id];
 	}
 }

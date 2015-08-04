@@ -139,13 +139,14 @@ public class Queries {
 	@GET
 	@Path("/pnrsInCounty")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object pnrsInCounty(@QueryParam("key") double key, @QueryParam("countyId") String countyId, @QueryParam("dbindex") Integer dbindex ) throws JSONException {
+	public Object pnrsInCounty(@QueryParam("key") double key, @QueryParam("countyId") String countyId, @QueryParam("radius") String radius, @QueryParam("dbindex") Integer dbindex ) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
 		PnrInCountyList response = new PnrInCountyList();
 		
-		response = PgisEventManager.getPnrsInCounty(Integer.parseInt(countyId), dbindex);
+		int tmpRadius = (int) (Integer.parseInt(radius) / 3.2804);
+		response = PgisEventManager.getPnrsInCounty(Integer.parseInt(countyId), tmpRadius, dbindex);
 		
 		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex];

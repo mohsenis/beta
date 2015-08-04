@@ -1,5 +1,4 @@
 <html>
-
 <head>
 	<meta charset="utf-8" />
 	<title>Connected Agencies Summary Report</title>
@@ -176,7 +175,6 @@ $(document).ready(function(){
 		        }
 				
 			} );
-			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
 		        var row = table.row( tr );
@@ -186,7 +184,7 @@ $(document).ready(function(){
 		            tr.removeClass('shown');
 		        }
 		        else {
-		            row.child(format(pos)).show();
+		        	row.child(format(pos)).show();
 		            tr.addClass('shown');
 		        }
 		    } );

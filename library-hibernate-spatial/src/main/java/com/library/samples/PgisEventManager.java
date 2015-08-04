@@ -201,7 +201,7 @@ public class PgisEventManager {
 		ParknRideCountiesList results = new ParknRideCountiesList();
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
-		String querytext =	"SELECT pr.countyid, pr.county, count(pr.countyid) counts, sum(pr.spaces) spaces, sum(pr.accessiblespaces) accessiblespaces " +
+		String querytext =	"SELECT pr.countyid, pr.county, count(pr.countyid) count, sum(pr.spaces) spaces, sum(pr.accessiblespaces) accessiblespaces " +
 				"FROM parknride pr " + 
 				"GROUP BY pr.countyid, pr.county;";
 		try {
@@ -212,7 +212,7 @@ public class PgisEventManager {
 	        	ParknRideCounties instance = new ParknRideCounties();
 	        	instance.countyId = rs.getString("countyid");
 	        	instance.cname = rs.getString("county");
-	        	instance.count = rs.getString("counts");
+	        	instance.count = rs.getString("count");
 	        	instance.spaces = rs.getString("spaces");
 	        	instance.accessibleSpaces = rs.getString("accessiblespaces");
 	        	list.add(instance);
@@ -234,47 +234,105 @@ public class PgisEventManager {
 	/** Queries all detailed information on all the PnRs within a given county.
 	 * 
 	 */
-	public static PnrInCountyList  getPnrsInCounty(int countyId, int dbindex){
+	public static PnrInCountyList  getPnrsInCounty(int countyId, int radius, int dbindex){
 		PnrInCountyList results = new PnrInCountyList();
 		String id = countyId+"";
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
-		String querytext =	"SELECT	pnrid, " +
-								"lotname, " +
-								"location, " +
-								"city, " +
-								"zipcode, "+
-								"spaces, " +
-								"accessiblespaces, " +
-								"transitservice, " +
-								"lat, " +
-								"lon, " +
-								"bikerackspaces, " +
-								"bikelockerspaces, " +
-								"electricvehiclespaces, " +
-								"carsharing, " +
-								"transitservice, " +
-								"availability, " +
-								"timelimit, " +
-								"restroom, " +
-								"benches, " +
-								"shelter, " +
-								"indoorwaitingarea, " +
-								"trashcan, " +
-								"lighting, " +
-								"securitycameras, " +
-								"sidewalks, " +
-								"pnrsignage, " +
-								"lotsurface, " +
-								"propertyowner, " +
-								"localexpert, " +
-								"county "+
-								
-							"FROM parknride " +
-							"WHERE countyid='"+ id + "';";
+		String query =	"WITH temp1 AS ("+
+							"SELECT parknride.*,"+
+							"	gtfs_stops.name stopname, "+
+							"	gtfs_stops.id stopid "+
+							"FROM parknride CROSS JOIN gtfs_stops "+
+							"WHERE ST_dwithin(parknride.geom, gtfs_stops.location, "+radius+") "+
+							"ORDER BY pnrid), "+
+			
+							"temp2 AS (SELECT temp1.*, gtfs_stop_route_map.agencyid , gtfs_stop_route_map.routeid "+
+							"FROM temp1 CROSS JOIN gtfs_stop_route_map "+
+							"WHERE temp1.stopid=gtfs_stop_route_map.stopid), "+
+			
+							"temp3 AS (SELECT temp2.*, gtfs_agencies.name agencyname "+
+							"FROM temp2 CROSS JOIN gtfs_agencies "+
+							"WHERE temp2.agencyid=gtfs_agencies.id), "+
+			
+							"temp4 AS (SELECT temp3.*, gtfs_routes.longname routename "+
+							"FROM temp3 CROSS JOIN gtfs_routes "+
+							"WHERE temp3.routeid = gtfs_routes.id), "+
+			
+							"temp5 AS (SELECT pnrid,  "+
+							"	lotname, "+
+							"	location, "+
+							"	city, "+
+							"	zipcode, "+
+							"	spaces,  "+
+							"	accessiblespaces, "+
+							"	lat, "+
+							"	lon, "+
+							"	bikerackspaces, "+
+							"	bikelockerspaces,  "+
+							"	electricvehiclespaces, "+ 
+							"	carsharing, "+
+							"	transitservice, "+
+							"	availability, "+
+							"	timelimit, "+
+							"	restroom, "+
+							"	benches, "+
+							"	shelter, "+
+							"	indoorwaitingarea, "+ 
+							"	trashcan, "+
+							"	lighting, "+
+							"	securitycameras, "+
+							"	sidewalks, "+
+							"	pnrsignage, "+
+							"	lotsurface, "+
+							"	propertyowner, "+
+							"	localexpert, "+
+							"	county, "+
+							"   countyid, "+
+							"	array_agg(stopname) stops, "+
+							"	array_agg(agencyname) agencies, "+
+							"	array_agg(routename) routes, "+
+							"	count(stopname) count "+
+							"FROM temp4 "+
+							"GROUP BY pnrid, "+
+							"lotname, "+
+							"	location, "+
+							"	city, "+
+							"	zipcode, "+
+							"	spaces, "+
+							"	accessiblespaces, "+
+							"	lat, "+
+							"	lon, "+
+							"	bikerackspaces, "+
+							"	bikelockerspaces, "+
+							"	electricvehiclespaces, "+
+							"	carsharing, "+
+							"	transitservice, "+
+							"	availability, "+
+							"	timelimit, "+
+							"	restroom, "+
+							"	benches, "+
+							"	shelter, "+
+							"	indoorwaitingarea,"+
+							"	trashcan, "+
+							"	lighting, "+
+							"	securitycameras, "+
+							"	sidewalks, "+
+							"	pnrsignage, "+
+							"	lotsurface,"+
+							"	propertyowner, "+
+							"	localexpert, "+
+							"	county, "+
+							"   countyid),"
+							+ " temp6 AS (SELECT parknride.*, temp5.agencies, temp5.stops, temp5.routes FROM parknride LEFT OUTER JOIN temp5"
+							+ "	ON temp5.pnrid = parknride.pnrid)"
+							+ " SELECT * FROM temp6"
+							+ " WHERE countyid='"+id+"'"
+							+ "	ORDER BY pnrid;";
+		
 		try {
 	        stmt = connection.createStatement();
-	        ResultSet rs = stmt.executeQuery(querytext); 
+	        ResultSet rs = stmt.executeQuery(query); 
 	        List<PnrInCounty> list=new ArrayList<PnrInCounty>();
 	        while ( rs.next() ) {
 	        	PnrInCounty instance = new PnrInCounty();
@@ -292,8 +350,14 @@ public class PgisEventManager {
 	        	else 
 	        		instance.accessiblespaces = rs.getString("accessiblespaces");	
 	        	instance.transitservices = rs.getString("transitservice");
-	        	instance.lat = rs.getString("lat").substring(0,7);
-	        	instance.lon = rs.getString("lon").substring(0,9);
+	        	if (rs.getString("lat").length()>8)
+	        		instance.lat = rs.getString("lat").substring(0,7);
+	        	else
+	        		instance.lat = rs.getString("lat");
+	        	if (rs.getString("lon").length()>10)
+	        		instance.lon = rs.getString("lon").substring(0,9);
+	        	else
+	        		instance.lon = rs.getString("lon");
 	        	if (rs.getString("bikerackspaces").equals("0"))
 	        		instance.bikerackspaces = "N/A";
 	        	else
@@ -322,7 +386,15 @@ public class PgisEventManager {
 	        	instance.propertyowner = rs.getString("propertyowner");
 	        	instance.localexpert = rs.getString("localexpert");
 	        	instance.county = rs.getString("county");
-	        	
+	        	if (rs.getString("routes")==null){
+	        		instance.agencies = "N/A";
+	        		instance.stops = "N/A";
+	        		instance.routes = "N/A";
+	        	}else{
+	        		instance.agencies = rs.getString("agencies");
+		        	instance.routes = rs.getString("routes");
+		        	instance.stops = rs.getString("stops");	 
+	        	}
 	        	list.add(instance);
 	        }
 	        rs.close();

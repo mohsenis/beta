@@ -35,7 +35,7 @@ var tmp = 	'<tr><th>P&R ID</th>'+
 			'<th>Spaces</th>'+
 			'<th>Accessible Spaces<em title="Number of handicap parking"><img src="images/tooltip.png" alt="tooltip"></em> </th>'+
 			'<th>Transit Services<em title="Transit routes accessible from the lot"><img src="images/tooltip.png" alt="tooltip"></em> </th>'+
-			'<th>Amenities</th>'+
+			/* '<th>Amenities</th>'+ */
 			'<th>Connected Agencies</th>'+
 			'<th>Connected Stops</th>'+
 			'<th>Connected Routes</th>'+
@@ -149,7 +149,6 @@ $(document).ready(function(){
 							'<td>' + item.spaces + '</td>'+
 							'<td>' + item.accessiblespaces + '</td>'+
 							'<td class = "details-control"></td>'+
-							'<td class = "details-control"></td>'+
 							'<td>' + item.agencies + '</td>'+
 							'<td>' + item.stops + '</td>'+
 							'<td>' + item.routes + '</td>'+
@@ -187,7 +186,18 @@ $(document).ready(function(){
 				"bSort" : true,
 				"paging": true,				
 				"iDisplayLength": 5,
-                 "columnDefs": [ { "visible": false,  "targets": [ 9,10,11,19,20,21,22,23,24,25,26,27,31 ] }
+                 "columnDefs": [ { "visible": false,  "targets": [ 8,9,10,30 ] },
+                                 {
+			                	    "targets": [16,17,18,19,20,21,22,23,24,25,26],
+			                	    "render": function ( data, type, full, meta ) {
+			                	    	if ( data.indexOf("Yes")>-1 || data.indexOf("yes")>-1 || data.indexOf("YES")>-1)	// if s contains "yes"
+			        	    				return '<img src="http://www.veryicon.com/icon/ico/System/Pretty%20Office%208/Accept.ico" height="40" width="40" alt="Yes">';
+			        	    			else if ( data.indexOf("No") > -1 || data.indexOf("no") > -1 || data.indexOf("NO") > -1)  // if s contains "no"
+			        	    				return '<img src="http://www.daha.net/blog/wp-content/uploads/2010/11/error.png" height="40" width="40" alt="No">';
+			        	    			else 
+			        	    				return data;;
+				                	    }
+			                	  }
                          		],
 				"order": [[ 2, "des" ]],
 				"dom": 'T<"clear">lfrtip',				
