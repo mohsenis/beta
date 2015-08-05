@@ -1262,28 +1262,28 @@ $mylist
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="SSR"){			    	
-			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '500';
-			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '500';
-			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if(casestring=="CSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CPSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CDSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="UASR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&username='+getSession());	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="ORSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="PNRR"){
 			    	window.open('/TNAtoolAPI-Webapp/ParkRideReport.html'+'?&dbindex='+dbindex);
 			    }else if(casestring.substring(0,2)=="DB"){
