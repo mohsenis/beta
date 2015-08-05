@@ -99,8 +99,9 @@ $(document).ready(function(){
 			progressbar.remove();			
 			$('.stopreport').click(function(e){
 				if ($(this).attr('id')!==undefined){
-				    qstring = '&agency='+w_qstring+'&x='+qstringx+ '&route=' + $(this).attr('id');	    
-				    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring+'&dbindex='+dbindex);
+					var key1 = Math.random();
+				    qstring = '&agency='+w_qstring+'&x='+qstringx;	    
+				    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring+'&dbindex='+dbindex+ '&route=' + $(this).attr('id'));
 			}});
 			$('.schedulereport').click(function(e){
 				if ($(this).attr('id')!==undefined){
