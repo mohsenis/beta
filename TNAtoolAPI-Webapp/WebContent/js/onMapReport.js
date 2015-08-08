@@ -348,7 +348,7 @@ function showOnMapReport(lat, lon, date, x){
 		    		onMapTractCluster.addLayer(tractCluster[$(this).index()]);
 		    	}
 		    });		    
-		    
+		    geoRadio(document.getElementById('blocksCheck'));
 		    //Beginning point of the Park n Ride table
 		    $('#npnr').html(numberWithCommas(data.MapPnR.totalPnR));
 			$('#nspc').html(numberWithCommas(data.MapPnR.totalSpaces));
