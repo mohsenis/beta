@@ -228,11 +228,11 @@ $(document).ready(function(){
 		    	return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
 		            '<tr>'+
 		                '<td>Average Fare: </td>'+
-		                '<td>$'+fAverage[p]+'</td>'+
+		                '<td>'+showDollarSign(fAverage[p])+fAverage[p]+'</td>'+
 		            '</tr>'+
 		            '<tr>'+
 		                '<td>Median Fare: </td>'+
-		                '<td>$'+fMedian[p]+'</td>'+
+		                '<td>'+showDollarSign(fMedian[p])+fMedian[p]+'</td>'+
 		            '</tr>'+
 		            '<tr>'+
 		                '<td>Fare URL: </td>'+
@@ -274,11 +274,17 @@ function exportbutton(){
 	window.open(uri, 'AgencySummaryReport.csv');
 }
 
-function pageLoad(){
-	
-	
+function showDollarSign(v){
+	if(!isNaN(v)){
+		return '$';
+	}else{
+		return '';
+	}
 }
 
+function pageLoad(){
+	
+}
 
 </script>
 
