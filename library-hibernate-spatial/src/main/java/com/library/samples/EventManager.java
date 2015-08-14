@@ -187,11 +187,37 @@ static{
 		Type geomType = GeometryUserType.TYPE;
 		q.setParameter("point", point, geomType);
 		q.setParameter("radius", d);
+		
 		@SuppressWarnings("unchecked")
 		List<GeoStop> results = (List<GeoStop>) q.list();
         Hutil.getSessionFactory()[sessionindex].close();
         return results;
-    }	
+    }
+	
+	/**
+	 * returns stops within a circle for selected list of agencies
+	 */
+		public static List<GeoStop> getstopswithincircle2(double d, double lat, double lon, int sessionindex, List<String> agencyList) throws FactoryException, TransformException {			
+			CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
+			CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
+			MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
+			GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();			
+			Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
+			Geometry targetGeometry = JTS.transform( point, transform);
+			//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
+			point = targetGeometry.getCentroid();
+			point.setSRID(2993);	
+			session[sessionindex].beginTransaction();
+			Query q = session[sessionindex].getNamedQuery("STOP_BY_COORDINATES_SEL_AGENCIES");
+			Type geomType = GeometryUserType.TYPE;
+			q.setParameter("point", point, geomType);
+			q.setParameter("radius", d);
+			q.setParameterList("sa", agencyList);
+			@SuppressWarnings("unchecked")
+			List<GeoStop> results = (List<GeoStop>) q.list();
+	        Hutil.getSessionFactory()[sessionindex].close();
+	        return results;
+	    }
 	
 	/**
 	 * returns stops within a rectangle

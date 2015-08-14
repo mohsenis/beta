@@ -191,9 +191,9 @@ $(document).ready(function(){
 			                	    "targets": [16,17,18,19,20,21,22,23,24,25,26],
 			                	    "render": function ( data, type, full, meta ) {
 			                	    	if ( data.indexOf("Yes")>-1 || data.indexOf("yes")>-1 || data.indexOf("YES")>-1)	// if s contains "yes"
-			        	    				return '<img src="http://www.veryicon.com/icon/ico/System/Pretty%20Office%208/Accept.ico" height="40" width="40" alt="Yes">';
+			                	    		return '<img src="images/tick.ico" height="40" width="40" alt="Yes">';
 			        	    			else if ( data.indexOf("No") > -1 || data.indexOf("no") > -1 || data.indexOf("NO") > -1)  // if s contains "no"
-			        	    				return '<img src="http://www.daha.net/blog/wp-content/uploads/2010/11/error.png" height="40" width="40" alt="No">';
+			        	    				return '<img src="images/error.png" height="40" width="40" alt="No">';
 			        	    			else 
 			        	    				return data;;
 				                	    }
@@ -366,7 +366,7 @@ function dbchange(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" >
-			  	Transit Service Search Radius (miles) <input id="radiusInput" type="text" value="500" style="width:5em" name="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
+			  	Transit Service Search Radius (ft.) <input id="radiusInput" type="text" value="500" style="width:5em" name="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
 			    	<input type="button" onclick="reloadC()" title="Refresh Report"  value="Submit" class="button" /> 		    	    	
 		    	</div>
 			  </td>

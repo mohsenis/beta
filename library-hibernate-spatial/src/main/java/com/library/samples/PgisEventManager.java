@@ -234,13 +234,18 @@ public class PgisEventManager {
 	/** Queries all detailed information on all the PnRs within a given county.
 	 * 
 	 */
-	public static PnrInCountyList  getPnrsInCounty(int countyId, int radius, int dbindex){
+	public static PnrInCountyList  getPnrsInCounty(int countyId, int radius, int dbindex, String username){
 		PnrInCountyList results = new PnrInCountyList();
 		String id = countyId+"";
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
-		String query =	"WITH temp1 AS ("+
-							"SELECT parknride.*,"+
+		String query =	"WITH aids AS ("
+						+ "SELECT agency_id AS aid "
+						+ "FROM gtfs_selected_feeds "
+						+ "WHERE username='"+username+"'), "
+						
+						+ "temp1 AS ("
+						+ "SELECT parknride.*,"+
 							"	gtfs_stops.name stopname, "+
 							"	gtfs_stops.id stopid "+
 							"FROM parknride CROSS JOIN gtfs_stops "+
@@ -251,15 +256,20 @@ public class PgisEventManager {
 							"FROM temp1 CROSS JOIN gtfs_stop_route_map "+
 							"WHERE temp1.stopid=gtfs_stop_route_map.stopid), "+
 			
-							"temp3 AS (SELECT temp2.*, gtfs_agencies.name agencyname "+
-							"FROM temp2 CROSS JOIN gtfs_agencies "+
-							"WHERE temp2.agencyid=gtfs_agencies.id), "+
+							"temp3 AS (SELECT temp2.*, gtfs_routes.longname routename, gtfs_routes.agencyid agenid "+
+							"FROM temp2 CROSS JOIN gtfs_routes "+
+							"WHERE temp2.routeid = gtfs_routes.id), "
+							+ "temp4 AS ("
+							+ "	SELECT temp3.* "
+							+ "	FROM temp3 INNER JOIN aids "
+							+ "	ON temp3.agenid = aids.aid "
+							+ "	)," +
+							
+							"temp5 AS (SELECT temp4.*, gtfs_agencies.name agencyname "+
+							"FROM temp4 CROSS JOIN gtfs_agencies "+
+							"WHERE temp4.agenid=gtfs_agencies.id), "+
 			
-							"temp4 AS (SELECT temp3.*, gtfs_routes.longname routename "+
-							"FROM temp3 CROSS JOIN gtfs_routes "+
-							"WHERE temp3.routeid = gtfs_routes.id), "+
-			
-							"temp5 AS (SELECT pnrid,  "+
+							"temp6 AS (SELECT pnrid,  "+
 							"	lotname, "+
 							"	location, "+
 							"	city, "+
@@ -289,11 +299,14 @@ public class PgisEventManager {
 							"	localexpert, "+
 							"	county, "+
 							"   countyid, "+
-							"	array_agg(stopname) stops, "+
-							"	array_agg(agencyname) agencies, "+
-							"	array_agg(routename) routes, "+
-							"	count(stopname) count "+
-							"FROM temp4 "+
+							"	array_agg(agencyname) agencies,"
+							+ "	array_agg(stopid) stopids,"
+							+ "	array_agg(stopname) stopnames,"
+							+ "	array_agg(routeid) routeids,"
+							+ "	array_agg(routename) routenames,"
+							+ "array_agg(stopname) stops, "+
+							" count(stopname) count "+
+							"FROM temp5 "+
 							"GROUP BY pnrid, "+
 							"lotname, "+
 							"	location, "+
@@ -324,11 +337,13 @@ public class PgisEventManager {
 							"	localexpert, "+
 							"	county, "+
 							"   countyid),"
-							+ " temp6 AS (SELECT parknride.*, temp5.agencies, temp5.stops, temp5.routes FROM parknride LEFT OUTER JOIN temp5"
-							+ "	ON temp5.pnrid = parknride.pnrid)"
-							+ " SELECT * FROM temp6"
+							+ " temp7 AS (SELECT parknride.*, temp6.agencies, temp6.stopids, temp6.stopnames, temp6.routeids, temp6.routenames FROM parknride LEFT OUTER JOIN temp6"
+							+ "	ON temp6.pnrid = parknride.pnrid)"
+							
+							+ " SELECT * FROM temp7"
 							+ " WHERE countyid='"+id+"'"
 							+ "	ORDER BY pnrid;";
+		System.out.println(query);
 		
 		try {
 	        stmt = connection.createStatement();
@@ -386,14 +401,19 @@ public class PgisEventManager {
 	        	instance.propertyowner = rs.getString("propertyowner");
 	        	instance.localexpert = rs.getString("localexpert");
 	        	instance.county = rs.getString("county");
-	        	if (rs.getString("routes")==null){
+	        	if (rs.getString("routenames")==null){
 	        		instance.agencies = "N/A";
-	        		instance.stops = "N/A";
-	        		instance.routes = "N/A";
+	        		instance.stopids = "N/A";
+	        		instance.stopnames = "N/A";
+	        		instance.routeids = "N/A";
+	        		instance.routenames = "N/A";
 	        	}else{
 	        		instance.agencies = rs.getString("agencies");
-		        	instance.routes = rs.getString("routes");
-		        	instance.stops = rs.getString("stops");	 
+		        	instance.stopids = rs.getString("stopids");
+		        	instance.stopnames = rs.getString("stopnames");
+		        	instance.routeids = rs.getString("routeids");
+		        	instance.routenames = rs.getString("routenames");
+		        		 
 	        	}
 	        	list.add(instance);
 	        }

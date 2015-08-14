@@ -291,6 +291,9 @@
     <query name = "STOP_BY_COORDINATES">
     <![CDATA[from GeoStop where dwithin(location, :point, :radius) = true]]>
 	</query>
+	<query name = "STOP_BY_COORDINATES_SEL_AGENCIES">
+    <![CDATA[from GeoStop where id.agencyId in (:sa) AND dwithin(location, :point, :radius) = true ]]>
+	</query>
 	<query name = "CENSUS_WITHIN_RECTANGLE">
     <![CDATA[from Census where within(location, :polygon) = true]]>
 	</query>

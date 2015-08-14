@@ -460,7 +460,7 @@ function nearbyStops(markerId, countyId, lat ,lon, radius){
 		datatype: 'json',
 		url: 	'/TNAtoolAPI-Webapp/queries/transit/pnrstopsroutes?&pnrId=' + markerId +
 				'&pnrCountyId=' + countyId + '&lat=' + lat +
-				'&lng=' + lon + '&radius=' + PnrRadius + '&dbindex=' + dbindex,
+				'&lng=' + lon + '&radius=' + PnrRadius + '&dbindex=' + dbindex + '&username=' + getSession(),
 		async: true,
 		success: function(data){
 			var tmpPnrRouteCluster = new L.FeatureGroup();

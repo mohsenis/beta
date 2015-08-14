@@ -137,9 +137,17 @@ public class PnrInCounty {
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String stops;
+	public String stopids;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String routes;
+	public String stopnames;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String routeids;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String routenames;
 }

@@ -37,7 +37,9 @@ var tmp = 	'<tr><th>P&R ID</th>'+
 			'<th>Transit Services<em title="Transit routes accessible from the lot"><img src="images/tooltip.png" alt="tooltip"></em> </th>'+
 			'<th>Amenities</th>'+
 			'<th>Connected Agencies</th>'+
+			'<th>Connected Stops IDs</th>'+
 			'<th>Connected Stops</th>'+
+			'<th>Connected Routes IDs</th>'+
 			'<th>Connected Routes</th>'+
 			'<th>Latitude</th>'+
 			'<th>Longitude</th>'+
@@ -71,7 +73,7 @@ function EscFunc(){
 
 $(document).ready(function(){
 	document.getElementById("radiusInput").value = radius;
-	$.ajax({
+/* 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
@@ -94,7 +96,7 @@ $(document).ready(function(){
 		    select.options.size = menusize;
 		    select.selectedIndex = dbindex;		    				    
 		}			
-	});
+	}); */
 	
 	$(document).tooltip({
 		position: {
@@ -134,7 +136,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/pnrsInCounty?&key=' + key + '&countyId=' + countyId + '&radius=' + radius + '&dbindex=' + dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/pnrsInCounty?&key=' + key + '&countyId=' + countyId + '&radius=' + radius + '&dbindex=' + dbindex + '&username=' + getSession(),
 		async: true,
 		success: function(d){			
 			$('h2').append('Park & Ride Extended Report <br><hr>');
@@ -151,8 +153,10 @@ $(document).ready(function(){
 							'<td class = "details-control"></td>'+
 							'<td class = "details-control"></td>'+
 							'<td>' + item.agencies + '</td>'+
-							'<td>' + item.stops + '</td>'+
-							'<td>' + item.routes + '</td>'+
+							'<td>' + item.stopids + '</td>'+
+							'<td>' + item.stopnames + '</td>'+
+							'<td>' + item.routeids + '</td>'+
+							'<td>' + item.routenames + '</td>'+
 							'<td>' + item.lat + '</td>'+
 							'<td>' + item.lon + '</td>'+
 							'<td>' + item.bikerackspaces + '</td>'+
@@ -187,7 +191,7 @@ $(document).ready(function(){
 				"bSort" : true,
 				"paging": true,				
 				"iDisplayLength": 5,
-                 "columnDefs": [ { "visible": false,  "targets": [ 9,10,11,19,20,21,22,23,24,25,26,27,31 ] }
+                 "columnDefs": [ { "visible": false,  "targets": [ 9,10,11,12,13,21,22,23,24,25,26,27,28,29,33 ] }
                          		],
 				"order": [[ 2, "des" ]],
 				"dom": 'T<"clear">lfrtip',				
@@ -247,21 +251,22 @@ $(document).ready(function(){
 				'<th>Security Cameras</th>'+
 				'<th>Sidewalks</th>'+
 				'<th>Park&Ride Signage</th></tr>'+
-				'<tr><td>'+fun(rowData[19])+'</td>'+
-				'<td>'+fun(rowData[20])+'</td>'+
-				'<td>'+fun(rowData[21])+'</td>'+
+				'<tr><td>'+fun(rowData[21])+'</td>'+
 				'<td>'+fun(rowData[22])+'</td>'+
 				'<td>'+fun(rowData[23])+'</td>'+
 				'<td>'+fun(rowData[24])+'</td>'+
-	    		'<td>'+fun(rowData[25])+'</td>'+
-	    		'<td>'+fun(rowData[26])+'</td>'+
-	    		'<td>'+fun(rowData[27])+'</td></br></table>'; 
+				'<td>'+fun(rowData[25])+'</td>'+
+				'<td>'+fun(rowData[26])+'</td>'+
+	    		'<td>'+fun(rowData[27])+'</td>'+
+	    		'<td>'+fun(rowData[28])+'</td>'+
+	    		'<td>'+fun(rowData[29])+'</td></br></table>'; 
 	    		
 	    		function fun(s){
 	    			if ( s.indexOf("Yes")>-1 || s.indexOf("yes")>-1 || s.indexOf("YES")>-1)	// if s contains "yes"
-	    				return '<img src="http://www.veryicon.com/icon/ico/System/Pretty%20Office%208/Accept.ico" height="40" width="40" alt="Yes">';
+	    				/* return '<img src="http://www.veryicon.com/icon/ico/System/Pretty%20Office%208/Accept.ico" height="40" width="40" alt="Yes">'; */
+	    				return '<img src="images/tick.ico" height="40" width="40" alt="Yes">';
 	    			else if ( s.indexOf("No") > -1 || s.indexOf("no") > -1 || s.indexOf("NO") > -1)  // if s contains "no"
-	    				return '<img src="http://www.daha.net/blog/wp-content/uploads/2010/11/error.png" height="40" width="40" alt="No">';
+	    				return '<img src="images/error.png" height="40" width="40" alt="No">';
 	    			else return s;
 	    		}
 	    		return html;
@@ -270,32 +275,48 @@ $(document).ready(function(){
 		    function format7 ( arg ) {
 		    	var rowData = Array.prototype.slice.call(arg);
 		    	var agencies = rowData[9];
-		    	var stops = rowData[10];
-		    	var routes = rowData[11];
+		    	var stopids = rowData[10];
+		    	var stopnames = rowData[11];
+		    	var routeids = rowData[12];		    	
+		    	var routenames = rowData[13];
 		    	
 		    	agencies = agencies.replace("{","");
 		    	agencies = agencies.replace("}","");
 		    	agencies = agencies.replace(/"/g,"");
 		    	var agenciesArr = agencies.split(",");
 		    	
-		    	stops = stops.replace("{","");
-		    	stops = stops.replace("}","");
-		    	stops = stops.replace(/"/g,"");
-		    	var stopsArr = stops.split(",");
+		    	stopids = stopids.replace("{","");
+		    	stopids = stopids.replace("}","");
+		    	stopids = stopids.replace(/"/g,"");
+		    	var stopidsArr = stopids.split(",");
 		    	
-		    	routes = routes.replace("{","");
-		    	routes = routes.replace("}","");
-		    	routes = routes.replace(/"/g,"");
-		    	var routesArr = routes.split(",");
+		    	stopnames = stopnames.replace("{","");
+		    	stopnames = stopnames.replace("}","");
+		    	stopnames = stopnames.replace(/"/g,"");
+		    	var stopnamesArr = stopnames.split(",");
+		    	
+		    	routeids = routeids.replace("{","");
+		    	routeids = routeids.replace("}","");
+		    	routeids = routeids.replace(/"/g,"");
+		    	var routeidsArr = routeids.split(",");
 
+		    	routenames = routenames.replace("{","");
+		    	routenames = routenames.replace("}","");
+		    	routenames = routenames.replace(/"/g,"");
+		    	var routenamesArr = routenames.split(",");
+		    	
 		    	var html = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:320px;">'+
 		    		'<tr><th>Agency</th>'+
+		    		'<th>Stop ID</th>'+
 		    		'<th>Stop Name</th>'+
+		    		'<th>Route ID</th>'+
 		    		'<th>Route Name</th></tr>';
-		    	for (var i = 0 ; i<agenciesArr.length ; i++){
+		    	for (var i = 0 ; i<routenamesArr.length ; i++){
 		    		html += '<tr><td>'+agenciesArr[i]+'</td>'+
-		    		'<<td>'+stopsArr[i]+'</td>'+
-		    		'<td>'+routesArr[i]+'</td></tr>'
+		    		'<<td>'+stopidsArr[i]+'</td>'+
+		    		'<<td>'+stopnamesArr[i]+'</td>'+
+		    		'<<td>'+routeidsArr[i]+'</td>'+
+		    		'<td>'+routenamesArr[i]+'</td></tr>'
 		    	}	
 		            html+='</table>';
 		        return html;
@@ -356,7 +377,7 @@ function dbchange(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" >
-			  	Transit Service Search Radius (miles) <input id="radiusInput" type="text" value="500" style="width:5em" name="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
+			  	Transit Service Search Radius (ft.) <input id="radiusInput" type="text" value="500" style="width:5em" name="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
 			    	<input type="button" onclick="reloadC()" title="Refresh Report"  value="Submit" class="button" /> 		    	    	
 		    	</div>
 			  </td>
