@@ -1438,9 +1438,54 @@ Loop:  	for (Trip trip: routeTrips){
     }
     
     /**
+     * Counties Employment Reports
+     */
+    @GET
+	@Path("/emp")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getEmp(@QueryParam("report") String reportType, @QueryParam("gap") double gap, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+    	EmpDataList results = new EmpDataList();
+    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	System.out.println(results.metadata);
+    	results = PgisEventManager.getEmpData(reportType, gap, dbindex, username);
+    	return results;
+    }
+    
+    /**
+     * Counties Employment Reports
+     */
+    @GET
+	@Path("/getEmp")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getEmp2(@QueryParam("criteria") String criteria, @QueryParam("areaID") String areaID, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+    	EmpDataList results = new EmpDataList();
+    	results.metadata = "Report Type: "+criteria+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	System.out.println(results.metadata);
+    	results = PgisEventManager.getEmpData(criteria, areaID, dbindex, username);
+    	return results;
+    }
+    
+    /**
+     * Urban Areas Employment Reports
+     */
+    @GET
+	@Path("/urbanareasemp")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getUAEmp(@QueryParam("report") String reportType, @QueryParam("gap") double gap, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+    	EmpDataList results = new EmpDataList();
+    	results.metadata = "Report Type:Employment Counties Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	System.out.println(results.metadata);
+    	results = PgisEventManager.getEmpData(reportType, gap, dbindex, username);
+    	return results;
+    }
+    
+    
+    /**
 	 * Generates The counties Summary report
-	 */
-	    
+	 */	    
 	@GET
 	@Path("/GeoCSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })

@@ -343,7 +343,6 @@ public class PgisEventManager {
 							+ " SELECT * FROM temp7"
 							+ " WHERE countyid='"+id+"'"
 							+ "	ORDER BY pnrid;";
-		System.out.println(query);
 		
 		try {
 	        stmt = connection.createStatement();
@@ -431,6 +430,326 @@ public class PgisEventManager {
 	}
 	
 	/**
+	 * Queries employment data on counties
+	 */
+	public static EmpDataList getEmpData(String reportType, double gap, int dbindex, String username){
+		EmpDataList results = new EmpDataList();
+		Connection connection = makeConnection(dbindex);
+	    Statement stmt = null;
+	    String query = "";
+	    if (reportType.equals("counties")){
+	    query = "WITH countypopserved AS (SELECT countyid AS id, cname AS name, population, (with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), "
+	    		+ "stops AS (SELECT id, agencyid, left(blockid,5) countyid, location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid where left(blockid,5)=census_counties.countyid), "
+	    		+ "census AS (SELECT population, poptype from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+gap+") where left(block.blockid,5)=census_counties.countyid group by block.blockid), "
+	    		+ "urbanpop AS (SELECT COALESCE(sum(population),0) upop from census where poptype = 'U'), "
+	    		+ "ruralpop AS (SELECT COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
+	    		+ "stopcount AS (SELECT count(stops.id) as stopscount from stops), "
+	    		+ "servedpop AS (SELECT (COALESCE(upop,0)+COALESCE(rpop,0))/census_counties.population::float as popserved from stopcount inner join urbanpop on true inner join ruralpop on true) "
+	    		+ "SELECT servedpop.* FROM servedpop) FROM census_counties)"
+	    		+ "SELECT countypopserved.*, "
+	    		+ "  COALESCE(all_naics_sectors ,0) all_naics_sectors, "
+	    		+ "  ROUND(COALESCE(all_naics_sectors ,0)*popserved) all_naics_sectors_served, "
+	    		+ "  COALESCE(agriculture_forestry_fishing_hunting ,0) agriculture_forestry_fishing_hunting,"
+	    		+ "  ROUND(COALESCE(agriculture_forestry_fishing_hunting ,0)*popserved) agriculture_forestry_fishing_hunting_served,"
+	    		+ "  COALESCE(mining_quarrying_oil_gas_extraction ,0) mining_quarrying_oil_gas_extraction,"
+	    		+ "  ROUND(COALESCE(mining_quarrying_oil_gas_extraction ,0)*popserved) mining_quarrying_oil_gas_extraction_served,"
+	    		+ "  COALESCE(utilities ,0) utilities,"
+	    		+ "  ROUND(COALESCE(utilities ,0)*popserved) utilities_served,"
+	    		+ "  COALESCE(construction ,0) construction,"
+	    		+ "  ROUND(COALESCE(construction ,0)*popserved) construction_served,"
+	    		+ "  COALESCE(wholesale_trade ,0) wholesale_trade,"
+	    		+ "  ROUND(COALESCE(wholesale_trade ,0)*popserved) wholesale_trade_served,"
+	    		+ "  COALESCE(information ,0) information,"
+	    		+ "  ROUND(COALESCE(information ,0)*popserved) information_served,"
+	    		+ "  COALESCE(finance_insurance ,0) finance_insurance,"
+	    		+ "  ROUND(COALESCE(finance_insurance ,0)*popserved) finance_insurance_served,"
+	    		+ "  COALESCE(real_estate_rental_leasing ,0) real_estate_rental_leasing,"
+	    		+ "  ROUND(COALESCE(real_estate_rental_leasing ,0)*popserved) real_estate_rental_leasing_served,"
+	    		+ "  COALESCE(professional_scientific_technical_services ,0) professional_scientific_technical_services,"
+	    		+ "  ROUND(COALESCE(professional_scientific_technical_services ,0)*popserved) professional_scientific_technical_services_served,"
+	    		+ "  COALESCE(management_of_companies_enterprises ,0) management_of_companies_enterprises,"
+	    		+ "  ROUND(COALESCE(management_of_companies_enterprises ,0)*popserved) management_of_companies_enterprises_served,"
+	    		+ "  COALESCE(administrative_support_waste_management_remediation_services ,0) administrative_support_waste_management_services,"
+	    		+ "  ROUND(COALESCE(administrative_support_waste_management_remediation_services ,0)*popserved) administrative_support_waste_management_services_served,"
+	    		+ "  COALESCE(educational_services ,0) educational_services ,"
+	    		+ "  ROUND(COALESCE(educational_services ,0)*popserved) educational_services_served ,"
+	    		+ "  COALESCE(health_care_social_assistance ,0) health_care_social_assistance,"
+	    		+ "  ROUND(COALESCE(health_care_social_assistance ,0)*popserved) health_care_social_assistance_served,"
+	    		+ "  COALESCE(arts_entertainment_recreation ,0) arts_entertainment_recreation,"
+	    		+ "  ROUND(COALESCE(arts_entertainment_recreation ,0)*popserved) arts_entertainment_recreation_served,"
+	    		+ "  COALESCE(accommodation_food_services ,0) accommodation_food_services,"
+	    		+ "  ROUND(COALESCE(accommodation_food_services ,0)*popserved) accommodation_food_services_served,"
+	    		+ "  COALESCE(other_services_except_public_administration ,0) other_services_except_public_administration,"
+	    		+ "  ROUND(COALESCE(other_services_except_public_administration ,0)*popserved) other_services_except_public_administration_served,"
+	    		+ "  COALESCE(public_administration ,0) public_administration,"
+	    		+ "  ROUND(COALESCE(public_administration ,0)*popserved) public_administration_served,"
+	    		+ "  COALESCE(manufacturing ,0) manufacturing,"
+	    		+ "  ROUND(COALESCE(manufacturing ,0)*popserved) manufacturing_served,"
+	    		+ "  COALESCE(retail_trade ,0) retail_trade,"
+	    		+ "  ROUND(COALESCE(retail_trade ,0)*popserved) retail_trade_served,"
+	    		+ "  COALESCE(transportation_warehousing,0) transportation_warehousing,"
+	    		+ "  ROUND(COALESCE(transportation_warehousing,0)*popserved) transportation_warehousing_served"
+
+	    		+ " FROM countypopserved JOIN oregon_emp ON id=county_id";
+	    }else if (reportType.equals("urbanarea")){
+	    	query = "WITH temp1 AS (SELECT census_urbans.urbanid AS id, census_urbans.uname AS name, LEFT(census_blocks.blockid,5) countyid, census_blocks.lat, census_blocks.lon, census_blocks.population "
+	    			+ "	FROM census_urbans LEFT OUTER JOIN census_blocks "
+	    			+ "	ON ST_CONTAINS(census_urbans.shape , ST_setsrid(ST_MakePoint(census_blocks.lon, census_blocks.lat),4326))), "
+	    			+ "	temp2 AS (SELECT temp1.*, temp1.population/census_counties.population::FLOAT coeff "
+	    			+ "	FROM temp1 LEFT OUTER JOIN census_counties "
+	    			+ " ON temp1.countyid=census_counties.countyid), "
+	    			+ " temp4 AS (SELECT temp2.id, temp2.name,"
+	    			+ " COALESCE(SUM(all_naics_sectors*coeff)::int,0) all_naics_sectors,"
+	    			+ " COALESCE(SUM(agriculture_forestry_fishing_hunting*coeff)::int,0) agriculture_forestry_fishing_hunting,"
+	    			+ " COALESCE(SUM(mining_quarrying_oil_gas_extraction*coeff)::int,0) mining_quarrying_oil_gas_extraction,"
+	    			+ " COALESCE(SUM(utilities*coeff)::int,0) utilities,"
+	    			+ " COALESCE(SUM(construction*coeff)::int,0) construction,"
+	    			+ " COALESCE(SUM(wholesale_trade*coeff)::int,0) wholesale_trade,"
+	    			+ " COALESCE(SUM(information*coeff)::int,0) information,"
+	    			+ " COALESCE(SUM(finance_insurance*coeff)::int,0) finance_insurance,"
+	    			+ " COALESCE(SUM(real_estate_rental_leasing*coeff)::int,0) real_estate_rental_leasing,"
+	    			+ " COALESCE(SUM(professional_scientific_technical_services*coeff)::int,0) professional_scientific_technical_services,"
+	    			+ " COALESCE(SUM(management_of_companies_enterprises*coeff)::int,0) management_of_companies_enterprises,"
+	    			+ " COALESCE(SUM(administrative_support_waste_management_remediation_services*coeff)::int,0) administrative_support_waste_management_services,"
+	    			+ " COALESCE(SUM(educational_services*coeff)::int,0) educational_services,"
+	    			+ " COALESCE(SUM(health_care_social_assistance*coeff)::int,0) health_care_social_assistance,"
+	    			+ " COALESCE(SUM(arts_entertainment_recreation*coeff)::int,0) arts_entertainment_recreation,"
+	    			+ " COALESCE(SUM(accommodation_food_services*coeff)::int,0) accommodation_food_services,"
+	    			+ " COALESCE(SUM(other_services_except_public_administration*coeff)::int,0) other_services_except_public_administration,"
+	    			+ " COALESCE(SUM(public_administration*coeff)::int,0) public_administration,"
+	    			+ " COALESCE(SUM(manufacturing*coeff)::int,0) manufacturing,"
+	    			+ " COALESCE(SUM(retail_trade*coeff)::int,0) retail_trade,"
+	    			+ " COALESCE(SUM(transportation_warehousing*coeff)::int,0) transportation_warehousing"
+	    			+ " FROM temp2 LEFT OUTER JOIN oregon_emp"
+	    			+ "	ON temp2.countyid = oregon_emp.county_id"
+	    			+ " GROUP BY temp2.id, temp2.name),"
+	    			+ " temp5 AS (SELECT urbanid AS id, uname AS name, population,"
+	    			+ " (WITH aids AS (select agency_id as aid from gtfs_selected_feeds where username='admin'),"
+	    			+ " stops AS (select id, agencyid, lat, lon, location"
+	    			+ " FROM gtfs_stops stop inner join aids ON stop.agencyid = aids.aid"
+	    			+ " WHERE ST_CONTAINS(census_urbans.shape , ST_setsrid(ST_MakePoint(stop.lon, stop.lat),4326))),"
+	    			+ " blockscoeff2 AS (select LEFT(blockid,5) countyid, SUM(population) pop"
+	    			+ " FROM census_blocks block INNER JOIN stops"
+	    			+ " ON st_dwithin(block.location, stops.location, 160.934)"
+	    			+ " GROUP BY countyid),"
+	    			+ " blockspoppercent AS (SELECT blockscoeff2.countyid, blockscoeff2.pop/census_counties.population::FLOAT AS blockpoppercent"
+	    			+ " FROM census_counties JOIN blockscoeff2"
+	    			+ " ON blockscoeff2.countyid = census_counties.countyid"
+	    			+ " GROUP BY blockscoeff2.countyid, blockscoeff2.pop, census_counties.population),"
+	    			+ " blockempserved AS (SELECT blockspoppercent.countyid, blockpoppercent*oregon_emp.all_naics_sectors blockempserved"
+	    			+ " FROM blockspoppercent JOIN oregon_emp"
+	    			+ " ON blockspoppercent.countyid=oregon_emp.county_id)"
+	    			+ " SELECT SUM(blockempserved.blockempserved) AS totalservedemp FROM blockempserved),"
+	    			+ " (WITH aids AS (select agency_id as aid from gtfs_selected_feeds where username='admin'),"
+	    			+ " blocks AS (SELECT LEFT(blockid,5) AS countyid, SUM(population) AS pop"
+	    			+ " FROM census_blocks"
+	    			+ " WHERE ST_CONTAINS(census_urbans.shape, ST_setsrid(ST_MakePoint(census_blocks.lon, census_blocks.lat),4326))"
+	    			+ " GROUP BY countyid),"
+	    			+ " blockspoppercent AS (SELECT blocks.countyid, blocks.pop/census_counties.population::FLOAT AS blockpoppercent"
+	    			+ " FROM census_counties JOIN blocks"
+	    			+ " ON blocks.countyid = census_counties.countyid),"
+	    			+ " areaemp AS (SELECT blockspoppercent.countyid, blockpoppercent*oregon_emp.all_naics_sectors areaemp, blockpoppercent*oregon_emp.all_naics_sectors"
+	    			+ " FROM blockspoppercent JOIN oregon_emp"
+	    			+ " ON blockspoppercent.countyid=oregon_emp.county_id"
+	    			+ " GROUP BY blockspoppercent.countyid, blockspoppercent.blockpoppercent, oregon_emp.all_naics_sectors)"
+	    			+ " SELECT SUM(areaemp) AS totalareaemp FROM areaemp"
+	    			+ " )"
+	    			+ " FROM census_urbans"
+	    			+ " ORDER BY urbanid),"
+	    			+ " temp6 AS (SELECT temp5.*, COALESCE(totalservedemp/totalareaemp,0) AS coeff2,temp4.*"
+	    			+ " FROM temp4 LEFT OUTER JOIN temp5"
+	    			+ " ON temp4.id = temp5.id)"
+	    			+ " SELECT temp6.*,"
+	    			+ " ROUND(COALESCE(all_naics_sectors ,0)*coeff2) all_naics_sectors_served,"
+	    			+ " ROUND(COALESCE(agriculture_forestry_fishing_hunting ,0)*coeff2) agriculture_forestry_fishing_hunting_served,"
+	    			+ " ROUND(COALESCE(mining_quarrying_oil_gas_extraction ,0)*coeff2) mining_quarrying_oil_gas_extraction_served,"
+	    			+ " ROUND(COALESCE(utilities ,0)*coeff2) utilities_served,"
+	    			+ " ROUND(COALESCE(construction ,0)*coeff2) construction_served,"
+	    			+ " ROUND(COALESCE(wholesale_trade ,0)*coeff2) wholesale_trade_served,"
+	    			+ " ROUND(COALESCE(information ,0)*coeff2) information_served,"
+	    			+ " ROUND(COALESCE(finance_insurance ,0)*coeff2) finance_insurance_served,"
+	    			+ " ROUND(COALESCE(real_estate_rental_leasing ,0)*coeff2) real_estate_rental_leasing_served,"
+	    			+ " ROUND(COALESCE(professional_scientific_technical_services ,0)*coeff2) professional_scientific_technical_services_served,"
+	    			+ " ROUND(COALESCE(management_of_companies_enterprises ,0)*coeff2) management_of_companies_enterprises_served,"
+	    			+ " ROUND(COALESCE(administrative_support_waste_management_services ,0)*coeff2) administrative_support_waste_management_services_served,"
+	    			+ " ROUND(COALESCE(educational_services ,0)*coeff2) educational_services_served ,"
+	    			+ " ROUND(COALESCE(health_care_social_assistance ,0)*coeff2) health_care_social_assistance_served,"
+	    			+ " ROUND(COALESCE(arts_entertainment_recreation ,0)*coeff2) arts_entertainment_recreation_served,"
+	    			+ " ROUND(COALESCE(accommodation_food_services ,0)*coeff2) accommodation_food_services_served,"
+	    			+ " ROUND(COALESCE(other_services_except_public_administration ,0)*coeff2) other_services_except_public_administration_served,"
+	    			+ " ROUND(COALESCE(public_administration ,0)*coeff2) public_administration_served,"
+	    			+ " ROUND(COALESCE(manufacturing ,0)*coeff2) manufacturing_served,"
+	    			+ " ROUND(COALESCE(retail_trade ,0)*coeff2) retail_trade_served,"
+	    			+ " ROUND(COALESCE(transportation_warehousing,0)*coeff2) transportation_warehousing_served"
+	    			+ " FROM temp6";
+	    }
+
+	    try {
+	    	stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query); 
+			
+			while (rs.next()){
+				EmpData i = new EmpData();
+				i.id = rs.getInt("id");
+				i.name = rs.getString("name");
+				i.population = rs.getInt("population");
+				i.popserved = rs.getDouble("popserved");
+				i.all_naics_sectors = rs.getInt("all_naics_sectors");
+				i.all_naics_sectors_served = rs.getInt("all_naics_sectors_served");
+				i.agriculture_forestry_fishing_hunting = rs.getInt("agriculture_forestry_fishing_hunting");
+				i.agriculture_forestry_fishing_hunting_served = rs.getInt("agriculture_forestry_fishing_hunting_served");
+				i.mining_quarrying_oil_gas_extraction = rs.getInt("mining_quarrying_oil_gas_extraction");
+				i.mining_quarrying_oil_gas_extraction_served = rs.getInt("mining_quarrying_oil_gas_extraction_served");
+				i.utilities = rs.getInt("utilities");
+				i.utilities_served = rs.getInt("utilities_served");
+				i.construction = rs.getInt("construction");
+				i.construction_served = rs.getInt("construction_served");
+				i.wholesale_trade = rs.getInt("wholesale_trade");
+				i.wholesale_trade_served = rs.getInt("wholesale_trade_served");
+				i.information = rs.getInt("information");
+				i.information_served = rs.getInt("information_served");
+				i.finance_insurance = rs.getInt("finance_insurance");
+				i.finance_insurance_served = rs.getInt("finance_insurance_served");
+				i.real_estate_rental_leasing = rs.getInt("real_estate_rental_leasing");
+				i.real_estate_rental_leasing_served = rs.getInt("real_estate_rental_leasing_served");
+				i.professional_scientific_technical_services = rs.getInt("professional_scientific_technical_services");
+				i.professional_scientific_technical_services_served = rs.getInt("professional_scientific_technical_services_served");
+				i.management_of_companies_enterprises = rs.getInt("management_of_companies_enterprises");
+				i.management_of_companies_enterprises_served = rs.getInt("management_of_companies_enterprises_served");
+				i.administrative_support_waste_management_remediation_services = rs.getInt("administrative_support_waste_management_services");
+				i.administrative_support_waste_management_remediation_services_served = rs.getInt("administrative_support_waste_management_services_served");
+				i.educational_services = rs.getInt("educational_services");
+				i.educational_services_served = rs.getInt("educational_services_served");
+				i.health_care_social_assistance = rs.getInt("health_care_social_assistance");
+				i.health_care_social_assistance_served = rs.getInt("health_care_social_assistance_served");
+				i.arts_entertainment_recreation = rs.getInt("arts_entertainment_recreation");
+				i.arts_entertainment_recreation_served = rs.getInt("arts_entertainment_recreation_served");
+				i.accommodation_food_services = rs.getInt("accommodation_food_services");
+				i.accommodation_food_services_served = rs.getInt("accommodation_food_services_served");
+				i.other_services_except_public_administration = rs.getInt("other_services_except_public_administration");
+				i.other_services_except_public_administration_served = rs.getInt("other_services_except_public_administration_served");
+				i.public_administration = rs.getInt("public_administration");
+				i.public_administration_served = rs.getInt("public_administration_served");
+				i.manufacturing = rs.getInt("manufacturing");
+				i.manufacturing_served = rs.getInt("manufacturing_served");
+				i.retail_trade = rs.getInt("retail_trade");
+				i.retail_trade_served = rs.getInt("retail_trade_served");
+				i.transportation_warehousing = rs.getInt("transportation_warehousing");
+				i.transportation_warehousing_served = rs.getInt("transportation_warehousing_served");
+				results.EmpDataList.add(i);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    dropConnection(connection);
+		return results;
+	}
+	
+	/**
+	 * Queries employment data on counties
+	 */
+	public static EmpDataList getEmpData(String criteria, String areaID, int dbindex, String username){
+		EmpDataList results = new EmpDataList();
+		areaID = "'"+areaID+"'";
+		Connection connection = makeConnection(dbindex);
+	    Statement stmt = null;
+	    String query = "WITH temp1 AS (SELECT countyid, sum(census_blocks.population/census_counties.population::FLOAT) AS poppercent "
+	    		+ "		FROM census_blocks INNER JOIN census_counties "
+	    		+ "		ON LEFT(blockid,5) = census_counties.countyid "
+	    		+ "		WHERE LEFT(blockid,5) IN (" + areaID + ") "
+	    		+ "		GROUP BY countyid)"
+	    		+ ""
+	    		+ "SELECT "
+	    		+ "   COALESCE(SUM(all_naics_sectors*poppercent),0)::int all_naics_sectors, "
+	    		+ "   COALESCE(SUM(agriculture_forestry_fishing_hunting*poppercent),0)::int agriculture_forestry_fishing_hunting,"
+	    		+ "   COALESCE(SUM(mining_quarrying_oil_gas_extraction*poppercent),0)::int mining_quarrying_oil_gas_extraction, "
+	    		+ "   COALESCE(SUM(utilities*poppercent),0)::int utilities,"
+	    		+ "   COALESCE(SUM(construction*poppercent),0)::int construction,"
+	    		+ "   COALESCE(SUM(wholesale_trade*poppercent),0)::int wholesale_trade,"
+	    		+ "   COALESCE(SUM(information*poppercent),0)::int information,"
+	    		+ "   COALESCE(SUM(finance_insurance*poppercent),0)::int finance_insurance,"
+	    		+ "   COALESCE(SUM(real_estate_rental_leasing*poppercent),0)::int real_estate_rental_leasing,"
+	    		+ "   COALESCE(SUM(professional_scientific_technical_services*poppercent),0)::int professional_scientific_technical_services,"
+	    		+ "   COALESCE(SUM(management_of_companies_enterprises*poppercent),0)::int management_of_companies_enterprises,"
+	    		+ "   COALESCE(SUM(administrative_support_waste_management_remediation_services*poppercent),0)::int administrative_support_waste_management_remediation_services,"
+	    		+ "   COALESCE(SUM(educational_services*poppercent),0)::int educational_services,"
+	    		+ "   COALESCE(SUM(health_care_social_assistance*poppercent),0)::int health_care_social_assistance,"
+	    		+ "   COALESCE(SUM(arts_entertainment_recreation*poppercent),0)::int arts_entertainment_recreation,"
+	    		+ "   COALESCE(SUM(accommodation_food_services*poppercent),0)::int accommodation_food_services,"
+	    		+ "   COALESCE(SUM(other_services_except_public_administration*poppercent),0)::int other_services_except_public_administration,"
+	    		+ "   COALESCE(SUM(public_administration*poppercent),0)::int public_administration,"
+	    		+ "   COALESCE(SUM(manufacturing*poppercent),0)::int manufacturing,"
+	    		+ "   COALESCE(SUM(retail_trade*poppercent),0)::int retail_trade,"
+	    		+ "   COALESCE(SUM(transportation_warehousing*poppercent),0)::int transportation_warehousing"
+	    		+ ""
+	    		+ " FROM temp1 INNER JOIN oregon_emp"
+	    		+ " ON temp1.countyid = oregon_emp.county_id";
+	    System.out.println(query);
+	    
+	    try {
+	    	stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query); 
+						
+			while (rs.next()){
+				EmpData i = new EmpData();
+//				i.id = rs.getInt("id");
+//				i.name = rs.getString("name");
+//				i.population = rs.getInt("population");
+//				i.popserved = rs.getDouble("popserved");
+				i.all_naics_sectors = rs.getInt("all_naics_sectors");
+//				i.all_naics_sectors_served = rs.getInt("all_naics_sectors_served");
+				i.agriculture_forestry_fishing_hunting = rs.getInt("agriculture_forestry_fishing_hunting");
+//				i.agriculture_forestry_fishing_hunting_served = rs.getInt("agriculture_forestry_fishing_hunting_served");
+				i.mining_quarrying_oil_gas_extraction = rs.getInt("mining_quarrying_oil_gas_extraction");
+//				i.mining_quarrying_oil_gas_extraction_served = rs.getInt("mining_quarrying_oil_gas_extraction_served");
+				i.utilities = rs.getInt("utilities");
+//				i.utilities_served = rs.getInt("utilities_served");
+				i.construction = rs.getInt("construction");
+//				i.construction_served = rs.getInt("construction_served");
+				i.wholesale_trade = rs.getInt("wholesale_trade");
+//				i.wholesale_trade_served = rs.getInt("wholesale_trade_served");
+				i.information = rs.getInt("information");
+//				i.information_served = rs.getInt("information_served");
+				i.finance_insurance = rs.getInt("finance_insurance");
+//				i.finance_insurance_served = rs.getInt("finance_insurance_served");
+				i.real_estate_rental_leasing = rs.getInt("real_estate_rental_leasing");
+//				i.real_estate_rental_leasing_served = rs.getInt("real_estate_rental_leasing_served");
+				i.professional_scientific_technical_services = rs.getInt("professional_scientific_technical_services");
+//				i.professional_scientific_technical_services_served = rs.getInt("professional_scientific_technical_services_served");
+				i.management_of_companies_enterprises = rs.getInt("management_of_companies_enterprises");
+//				i.management_of_companies_enterprises_served = rs.getInt("management_of_companies_enterprises_served");
+				i.administrative_support_waste_management_remediation_services = rs.getInt("administrative_support_waste_management_remediation_services");
+//				i.administrative_support_waste_management_remediation_services_served = rs.getInt("administrative_support_waste_management_services_served");
+				i.educational_services = rs.getInt("educational_services");
+//				i.educational_services_served = rs.getInt("educational_services_served");
+				i.health_care_social_assistance = rs.getInt("health_care_social_assistance");
+//				i.health_care_social_assistance_served = rs.getInt("health_care_social_assistance_served");
+				i.arts_entertainment_recreation = rs.getInt("arts_entertainment_recreation");
+//				i.arts_entertainment_recreation_served = rs.getInt("arts_entertainment_recreation_served");
+				i.accommodation_food_services = rs.getInt("accommodation_food_services");
+//				i.accommodation_food_services_served = rs.getInt("accommodation_food_services_served");
+				i.other_services_except_public_administration = rs.getInt("other_services_except_public_administration");
+//				i.other_services_except_public_administration_served = rs.getInt("other_services_except_public_administration_served");
+				i.public_administration = rs.getInt("public_administration");
+//				i.public_administration_served = rs.getInt("public_administration_served");
+				i.manufacturing = rs.getInt("manufacturing");
+//				i.manufacturing_served = rs.getInt("manufacturing_served");
+				i.retail_trade = rs.getInt("retail_trade");
+//				i.retail_trade_served = rs.getInt("retail_trade_served");
+				i.transportation_warehousing = rs.getInt("transportation_warehousing");
+//				i.transportation_warehousing_served = rs.getInt("transportation_warehousing_served");
+				results.EmpDataList.add(i);
+			}
+	    }catch (SQLException e) {			
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+	}
+    dropConnection(connection);
+	return results;
+}
+	    
+	/**
 	 *Queries Stops count, unduplicated urban pop and rural pop within x meters of all stops within the given geographic area
 	 */
 	public static long[] stopsPop(int type, String areaId, String username, double x, int dbindex) 
@@ -459,6 +778,7 @@ public class PgisEventManager {
       		+ "(select COALESCE(sum(population),0) upop from census where poptype = 'U'), ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'),"
       		+ " stopcount as (select count(stops.id) as stopscount from stops) select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop, COALESCE(rpop,0) as "
       		+ "ruralpop from stopcount inner join urbanpop on true inner join ruralpop on true";
+      System.out.println(querytext);
       long[] results = new long[3];
       //System.out.println(querytext);
       try {
@@ -526,7 +846,7 @@ public class PgisEventManager {
     		+ "stops.location,"+ String.valueOf(x)+") where poptype='R'), svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) select svcmiles,"
     		+ "svchours,svcstops,upoplos,rpoplos,uspop,rspop,svdays,fromtime,totime,connections from service inner join upopatlos on true inner join rpopatlos on true inner join "
     		+ "upopserved on true inner join rpopserved on true inner join svcdays on true inner join svchrs on true inner join concomnames on true";
-    //System.out.println(query);
+  
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
@@ -591,6 +911,7 @@ public class PgisEventManager {
     		+ "(select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) select svcmiles, svchours, svcstops, upoplos, rpoplos, uspop, rspop, svdays, fromtime, "
     		+ "totime from service inner join upopatlos on true inner join rpopatlos on true inner join upopserved on true inner join rpopserved on true inner join svcdays "
     		+ "on true inner join svchrs on true";
+    System.out.println(query);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
