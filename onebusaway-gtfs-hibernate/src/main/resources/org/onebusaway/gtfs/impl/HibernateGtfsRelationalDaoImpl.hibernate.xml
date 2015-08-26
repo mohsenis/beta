@@ -22,7 +22,9 @@
     <query name="agencyIdsReferencingServiceId" read-only="true">
         SELECT trip.id.agencyId FROM Trip trip WHERE trip.serviceId = :serviceId GROUP BY trip.id.agencyId
     </query>
-     
+     <query name="allAgencies" read-only="true">
+        FROM Agency agency WHERE agency.defaultId in (:sa)
+    </query>
      <query name="updatedTripShpaeLength" read-only="false">
         update Trip set length = :length, estlength = :estlength, shape = :shape WHERE id = :tripid    
     </query>
