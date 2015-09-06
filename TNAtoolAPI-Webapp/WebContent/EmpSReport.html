@@ -4,7 +4,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Counties Employment Report</title>
+	<title>Employment Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -21,56 +21,35 @@
 <script type="text/javascript">
 var id = "";
 var progVal = 0; 
-var gap = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
+var reportType = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 var dbindex = parseInt(document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1));
 var username = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
 //var d = new Date();
-var html = '<table id="CEmp" class="display" align="center">';
-var tmp = 	'<tr><th id="an"">County ID <em title="County ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>County Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>All Sectors</th>'+
-			'<th>All Sectors served</th>'+
-			'<th>Population Served</th>'+
+var html = '<table id="Emp" class="display" align="center">';
+var tmp = 	'<tr><th id="an">Area ID <em title="ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+			'<th>Area Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+			'<th>Population</em></th>'+
+			'<th>Employment</em></th>'+
 			'<th>Agriculture<em title="agriculture_forestry_fishing_hunting"><img src="images/tooltip.png" alt="tooltip"></th>'+
-			'<th>Agriculture Served<em title="agriculture_forestry_fishing_hunting served"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Mining<em title="mining_quarrying_oil_gas_extraction"><img src="images/tooltip.png" alt="tooltip"></th>'+
-			'<th>Mining Served<em title="mining_quarrying_oil_gas_extraction served"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Utilities</th>'+
-			'<th>Utilities Served</th>'+
 			'<th>Construction</th>'+
-			'<th>Construction Served</th>'+
 			'<th>Wholesale Trade</th>'+
-			'<th>Wholesale Trade served</th>'+
 			'<th>Information</th>'+
-			'<th>Information Served</th>'+
 			'<th>Finance Insurance</th>'+
-			'<th>Finance Insurance Served</th>'+
 			'<th>Rentals<em title="real_estate_rental_leasing"><img src="images/tooltip.png" alt="tooltip"></th>'+
-			'<th>Rentals Served<em title="real_estate_rental_leasing served"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Scientific & Technical Services<em title="professional_scientific_technical_services"><img src="images/tooltip.png" alt="tooltip"></th>'+
-			'<th>Scientific & Technical Services Served<em title="professional_scientific_technical_services served"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Management<em title="management_of_companies_enterprises"><img src="images/tooltip.png" alt="tooltip"></th>'+
-			'<th>Management Served<em title="management_of_companies_enterprises served"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Administrative Services<em title="administrative_support_waste_management_remediation_services"><img src="images/tooltip.png" alt="tooltip"></th>'+
-			'<th>Administrative Services Served<em title="administrative_support_waste_management_remediation_services served"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Educational Services</th>'+
-			'<th>Educational Services Served</th>'+
 			'<th>Health Care<em title="health_care_social_assistance"><img src="images/tooltip.png" alt="tooltip"></th>'+
-			'<th>Health Care Served<em title="health_care_social_assistance served"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Art & Entertainment<em title=">arts_entertainment_recreation"><img src="images/tooltip.png" alt="tooltip"></th>'+
-			'<th>Art & Entertainment Served<em title="arts_entertainment_recreation served"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Accommodation Food Services</th>'+
-			'<th>Accommodation & Food Services Served</th>'+
 			'<th>Other Services<em title="other_services_except_public_administration"><img src="images/tooltip.png" alt="tooltip"></th>'+
-			'<th>Other Services Served<em title="other_services_except_public_administration served"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Public Administration</th>'+
-			'<th>Public Administration Served</th>'+
 			'<th>Manufacturing</th>'+
-			'<th>Manufacturing served</th>'+
 			'<th>Retail Trade</th>'+
-			'<th>Retail Trade Served</th>'+
 			'<th>Transportation Warehousing</th>'+
-			'<th>Transportation Warehousing Served</th>'+
 			'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
@@ -78,37 +57,13 @@ var html2 = '<tfoot>'+tmp+'</tfoot>';
 var key = Math.random();
 
 function pad(s) { return (s < 10) ? '0' + s : s; }
-/* qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/'); */
 
 function EscFunc(){
 	jQuery.event.trigger({ type : 'keydown', which : 27 });
 }
 
 $(document).ready(function(){
-	/* $.ajax({
-		type: 'GET',
-		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
-		async: false,
-		success: function(d){	
-			var select = document.getElementById("dbselect");
-			select.options.length = 0;
-		    var menusize = 0;
-		    $.each(d.DBelement, function(i,item){
-		    	var option = document.createElement('option');
-		        option.text = item;
-		        option.value = 'DB'+i;
-		        select.add(option, i);		    	
-		    	menusize++;
-		    });		    		    
-		    if (dbindex<0 || dbindex>menusize-1){
-		    	dbindex = 0;
-		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
-		    }
-		    select.options.size = menusize;
-		    select.selectedIndex = dbindex;		    				    
-		}			
-	}); */
+	
 	$(document).tooltip({
 		position: {
 	        my: "left bottom",
@@ -149,56 +104,35 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/emp?&report=counties&gap='+ gap+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/emp?&report='+reportType+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){			
-			$('h2').append('Counties Employment Report <br><hr>');
+			$('h2').append(reportType.replace(/%20/g, " ") +' Employment Report <br><hr>');
 			$.each(d.EmpDataList, function(i,item){
 				html += '<tr><td>'+ item.id + '</a></td>'+
 							'<td>' + item.name + '</td>'+
+							'<td>' + numWithCommas(item.population) + '</td>'+ 
 							'<td>' + numWithCommas(item.all_naics_sectors) + '</td>'+
-							'<td>' + numWithCommas(item.all_naics_sectors_served) + '</td>'+
-							'<td>' + numToPercent(item.popserved) + '</td>'+
 							'<td>' + numWithCommas(item.agriculture_forestry_fishing_hunting) + '</td>'+
-							'<td>' + numWithCommas(item.agriculture_forestry_fishing_hunting_served) + '</td>'+
 							'<td>' + numWithCommas(item.mining_quarrying_oil_gas_extraction) + '</td>'+
-							'<td>' + numWithCommas(item.mining_quarrying_oil_gas_extraction_served) + '</td>'+
 							'<td>' + numWithCommas(item.utilities) + '</td>'+
-							'<td>' + numWithCommas(item.utilities_served) + '</td>'+
 							'<td>' + numWithCommas(item.construction) + '</td>'+
-							'<td>' + numWithCommas(item.construction_served) + '</td>'+
 							'<td>' + numWithCommas(item.wholesale_trade) + '</td>'+
-							'<td>' + numWithCommas(item.wholesale_trade_served) + '</td>'+
 							'<td>' + numWithCommas(item.information) + '</td>'+
-							'<td>' + numWithCommas(item.information_served) + '</td>'+
 							'<td>' + numWithCommas(item.finance_insurance) + '</td>'+
-							'<td>' + numWithCommas(item.finance_insurance_served) + '</td>'+
 							'<td>' + numWithCommas(item.real_estate_rental_leasing) + '</td>'+
-							'<td>' + numWithCommas(item.real_estate_rental_leasing_served) + '</td>'+
 							'<td>' + numWithCommas(item.professional_scientific_technical_services) + '</td>'+
-							'<td>' + numWithCommas(item.professional_scientific_technical_services_served) + '</td>'+
 							'<td>' + numWithCommas(item.management_of_companies_enterprises) + '</td>'+
-							'<td>' + numWithCommas(item.management_of_companies_enterprises_served) + '</td>'+
 							'<td>' + numWithCommas(item.administrative_support_waste_management_remediation_services) + '</td>'+
-							'<td>' + numWithCommas(item.administrative_support_waste_management_remediation_services_served) + '</td>'+
 							'<td>' + numWithCommas(item.educational_services) + '</td>'+
-							'<td>' + numWithCommas(item.educational_services_served) + '</td>'+
 							'<td>' + numWithCommas(item.health_care_social_assistance) + '</td>'+
-							'<td>' + numWithCommas(item.health_care_social_assistance_served) + '</td>'+
 							'<td>' + numWithCommas(item.arts_entertainment_recreation) + '</td>'+
-							'<td>' + numWithCommas(item.arts_entertainment_recreation_served) + '</td>'+
 							'<td>' + numWithCommas(item.accommodation_food_services) + '</td>'+
-							'<td>' + numWithCommas(item.accommodation_food_services_served) + '</td>'+
 							'<td>' + numWithCommas(item.other_services_except_public_administration) + '</td>'+
-							'<td>' + numWithCommas(item.other_services_except_public_administration_served) + '</td>'+
 							'<td>' + numWithCommas(item.public_administration) + '</td>'+
-							'<td>' + numWithCommas(item.public_administration_served) + '</td>'+
 							'<td>' + numWithCommas(item.manufacturing) + '</td>'+
-							'<td>' + numWithCommas(item.manufacturing_served) + '</td>'+
 							'<td>' + numWithCommas(item.retail_trade) + '</td>'+
-							'<td>' + numWithCommas(item.retail_trade_served) + '</td>'+
 							'<td>' + numWithCommas(item.transportation_warehousing) + '</td>'+
-							'<td>' + numWithCommas(item.transportation_warehousing_served) + '</td>'+
 							'<td>' + d.metadata + '</td></tr>';							   			
 			});
 			html +='</tbody>'+html2+'</table>';
@@ -213,13 +147,13 @@ $(document).ready(function(){
 			     }; */
 			});
 			
-			var table = $('#CEmp').DataTable({
+			var table = $('#Emp').DataTable({
 				
 				"bSort" : true,
 				"paging": true,	
 				"scrollX": true,
 				"iDisplayLength": 10,
-				"aoColumnDefs": [{"visible": false, "targets": [6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,45]}],
+				"aoColumnDefs": [{"visible": false, "targets": [24]}],
 				"order": [[ 2, "des" ]],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
@@ -246,9 +180,9 @@ $(document).ready(function(){
 			} );
 		 
 		    //$('#CEmp_wrapper').css("width", $('#CEmp').css("width"));
-		    $('#CEmp_wrapper').css("margin", "auto");
-			$("#CEmp_length").remove();
-		    $("#CEmp_filter").insertBefore("#CEmp_info");
+		    $('#Emp_wrapper').css("margin", "auto");
+			$("#Emp_length").remove();
+		    $("#Emp_filter").insertBefore("#Emp_info");
 		    $( ".dataTables_filter" ).css( "float", "left");
 		    $( ".dataTables_filter" ).before( "<br>" );
     }});
@@ -275,15 +209,7 @@ function reloadC(){
 	history.pushState("", "", document.URL.replace('gap='+gap, 'gap='+tmpG));	
 	location.reload(); */	
 }
-function numWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
 
-function numToPercent(x){
-	x = x * 100;
-	x = parseFloat(Math.round(x * 100) / 100).toFixed(2);
-	return x + " %";
-}
 </script>
 
 
@@ -310,8 +236,8 @@ function numToPercent(x){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Maximum Spatial Gap For Emp. Served (ft.) <input type="text" name="gap" id="gap" class="utbox" onkeypress="return isWholeNumber(event)" value="500"/>
-			    	<input id="submit" type="button" onclick="reloadC()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
+			    	<!-- Maximum Spatial Gap For Emp. Served (ft.) <input type="text" name="gap" id="gap" class="utbox" onkeypress="return isWholeNumber(event)" value="500"/>
+			    	<input id="submit" type="button" onclick="reloadC()" title="Click submit to refresh the report"  value="Submit" class="button" />	 -->		    			    	    	
 		    	</div>
 			  </td>
 			</tr>

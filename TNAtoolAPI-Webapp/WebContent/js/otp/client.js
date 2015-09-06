@@ -1146,19 +1146,20 @@ $mylist
 		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Report</b></a></li>'+
 		    		'</ul></li>'+
 		    		'<li role="presentation" onclick="return;"><a id="" href="#" style="cursor:default">Employment Reports</a>'+
-		    		'<ul>'+
-		    		'<li role="presentation"><a id="CDEmp" href="#"><b>Congressional Districs</b></a></li>'+
-		    		'<li role="presentation"><a id="TREmp" href="#"><b>ODOT Transit Regions </b></a></li>'+
-		    		'<li role="presentation"><a id="UAEmp" href="#"><b>Urban Areas</b></a></li>'+
-		    		'<li role="presentation"><a id="CEmp" href="#"><b>Counties</b></a></li>'+
-		    		'<li role="presentation"><a id="AgEmp" href="#"><b>Agencies</b></a></li>'+
+		    		'<ul style="width:21em">'+
+		    		'<li role="presentation"><a id="CEmp" href="#"><b>Counties Emp. Report</b></a></li>'+
+		    		'<li role="presentation"><a id="CPEmp" href="#"><b>Census Places Emp. Report</b></a></li>'+
+		    		'<li role="presentation"><a id="CDEmp" href="#"><b>Congressional Districs Emp. Report</b></a></li>'+
+		    		'<li role="presentation"><a id="UAEmp" href="#"><b>Urban Areas Emp. Report</b></a></li>'+
+		    		'<li role="presentation"><a id="TREmp" href="#"><b>ODOT Transit Regions Emp. Report</b></a></li>'+
+		    		'<li role="presentation"><a id="AgEmp" href="#"><b>Agencies Emp. Report</b></a></li>'+
 		    		'</ul></li>'+
 		    		'</ul>');
 		 
 			div.appendTo(titlebar);
 			$( "#rmenu" ).menu();
-			$( ".ui-menu" ).css('width','18em');
-			$( ".ui-menu-item" ).css('width','18em');
+			$( ".ui-menu" ).css('width','21em');
+			$( ".ui-menu-item" ).css('width','21em');
 			$('.ui-dialog-titlebar-other').dropdown();			
 			$("#datepicker").multiDatesPicker({
 				changeMonth: false,
@@ -1298,15 +1299,25 @@ $mylist
 			    			localStorage.setItem(key, dates.join(","));			    			
 			    		}
 			    		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+parseInt(casestring.substring(2)));			    		    		
-			    }else if(casestring=="CEmp"){
-			    	var qstringx = '500';
-			    	window.open('/TNAtoolAPI-Webapp/EmpCountySReport.html'+'?&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession());	
-			    }else if(casestring=="UAEmp"){
-			    	var qstringx = '500';
-			    	window.open('/TNAtoolAPI-Webapp/EmpUrbanAreaReport.html'+'?&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession());	
+			    }else if(casestring=="CEmp"){	
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&type=Counties&dbindex='+dbindex+'&username='+getSession());
+			    }else if(casestring=="CPEmp"){
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&type=Census%20Places&dbindex='+dbindex+'&username='+getSession());
 			    }
-			    else if(casestring=="AgEmp" || casestring=="TREmp" || casestring=="CDEmp"){
-			    	alert('Under Construction');
+			    else if(casestring=="CDEmp"){
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&type=Congressional%20Districts&dbindex='+dbindex+'&username='+getSession());;	
+			    }else if(casestring=="UAEmp"){
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&type=Urban%20Areas&dbindex='+dbindex+'&username='+getSession());
+			    }
+			    else if(casestring=="TREmp"){
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&type=ODOT%20Transit%20Regions&dbindex='+dbindex+'&username='+getSession());
+			    }
+			    else if(casestring=="AgEmp"){
+			    	alert('UNDER CONSTRUCTION');
+			    	/*var qstringx = '0.1';
+			    	window.open('/TNAtoolAPI-Webapp/EmpAgenSReport.html'+'?&gap='+ qstringx +'&dbindex='+dbindex+'&username='+getSession());*/
+			    }else if(casestring=="AggrEmp"){
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&type=Counties&dbindex='+dbindex+'&username='+getSession());
 			    }
 			});
     	

@@ -28,9 +28,8 @@ var username = document.URL.split("&")[3].substr(document.URL.split("&")[3].inde
 var html = '<table id="CEmp" class="display" align="center">';
 var tmp = 	'<tr><th id="an"">County ID <em title="County ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 			'<th>County Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>All Sectors<em title="Total employment of the area"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>All Sectors served</th>'+
-			'<th>Population Served</th>'+
+			'<th>All Sectors</em></th>'+
+			'<th>All Sectors served</em></th>'+
 			'<th>Agriculture<em title="agriculture_forestry_fishing_hunting"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Agriculture Served<em title="agriculture_forestry_fishing_hunting served"><img src="images/tooltip.png" alt="tooltip"></th>'+
 			'<th>Mining<em title="mining_quarrying_oil_gas_extraction"><img src="images/tooltip.png" alt="tooltip"></th>'+
@@ -156,9 +155,9 @@ $(document).ready(function(){
 			$.each(d.EmpDataList, function(i,item){
 				html += '<tr><td>'+ item.id + '</a></td>'+
 							'<td>' + item.name + '</td>'+
+							/* '<td>' + item.population + '</td>'+ */
 							'<td>' + numWithCommas(item.all_naics_sectors) + '</td>'+
 							'<td>' + numWithCommas(item.all_naics_sectors_served) + '</td>'+
-							'<td>' + numToPercent(item.popserved) + '</td>'+
 							'<td>' + numWithCommas(item.agriculture_forestry_fishing_hunting) + '</td>'+
 							'<td>' + numWithCommas(item.agriculture_forestry_fishing_hunting_served) + '</td>'+
 							'<td>' + numWithCommas(item.mining_quarrying_oil_gas_extraction) + '</td>'+
@@ -219,7 +218,7 @@ $(document).ready(function(){
 				"paging": true,	
 				"scrollX": true,
 				"iDisplayLength": 10,
-				"aoColumnDefs": [{"visible": false, "targets": [3,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,45]}],
+				"aoColumnDefs": [{"visible": false, "targets": [44]}],
 				"order": [[ 2, "des" ]],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
@@ -278,12 +277,6 @@ function reloadC(){
 function numWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-
-function numToPercent(x){
-	x = x * 100;
-	x = parseFloat(Math.round(x * 100) / 100).toFixed(2);
-	return x + " %";
-}
 </script>
 
 
@@ -310,8 +303,8 @@ function numToPercent(x){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	<!-- Maximum Spatial Gap For Emp. Served (ft.) <input type="text" name="gap" id="gap" class="utbox" onkeypress="return isWholeNumber(event)" value="500"/>
-			    	<input id="submit" type="button" onclick="reloadC()" title="Click submit to refresh the report"  value="Submit" class="button" /> -->			    			    	    	
+			    	Maximum Spatial Gap For Emp. Served (ft.) <input type="text" name="gap" id="gap" class="utbox" onkeypress="return isWholeNumber(event)" value="500"/>
+			    	<input id="submit" type="button" onclick="reloadC()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
 		    	</div>
 			  </td>
 			</tr>

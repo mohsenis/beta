@@ -4,7 +4,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Urban Area Employment Report</title>
+	<title>Employment Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -30,7 +30,7 @@ var areaID = parseInt(document.URL.split("&")[6].substr(document.URL.split("&")[
 var gap = parseInt(document.URL.split("&")[7].substr(document.URL.split("&")[7].indexOf("=")+1));
 var dbindex = parseInt(document.URL.split("&")[8].substr(document.URL.split("&")[8].indexOf("=")+1));
 var username = document.URL.split("&")[9].substr(document.URL.split("&")[9].indexOf("=")+1);
-var areaName = document.URL.split("&")[10].substr(document.URL.split("&")[10].indexOf("=")+1).replace("%20", " ");
+var areaName = document.URL.split("&")[10].substr(document.URL.split("&")[10].indexOf("=")+1).replace(/%20/g, " ");
 var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 var tmp = '<tr><th>Metric</th><th>Value</th></tr>';
 
@@ -75,7 +75,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/getEmp?&criteria='+criteria+'&areaID='+areaID+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/getXEmpData?&criteria='+criteria+'&areaID='+areaID+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(x){
 			var item = x.EmpDataList[0];
@@ -229,7 +229,7 @@ function numWithCommas(x) {
 function numToPercent(x){
 	x = x * 100;
 	x = parseFloat(Math.round(x * 100) / 100).toFixed(2);
-	return x ;
+	return x + " %" ;
 }
 
 function reloadC(){	
@@ -265,8 +265,8 @@ function reloadC(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Maximum Spatial Gap For Emp. Served (ft.) <input type="text" name="gap" id="gap" class="utbox" onkeypress="return isWholeNumber(event)" value="500"/>
-			    	<input id="submit" type="button" onclick="reloadC()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
+			    	<!-- Maximum Spatial Gap For Emp. Served (ft.) <input type="text" name="gap" id="gap" class="utbox" onkeypress="return isWholeNumber(event)" value="500"/>
+			    	<input id="submit" type="button" onclick="reloadC()" title="Click submit to refresh the report"  value="Submit" class="button" />		 -->	    			    	    	
 		    	</div>
 			  </td>
 			</tr>

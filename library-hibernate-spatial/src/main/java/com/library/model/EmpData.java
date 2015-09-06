@@ -10,7 +10,7 @@ public class EmpData {
 
 	@XmlAttribute
 	@JsonSerialize
-	public int id;
+	public String id;
 	
 
 	@XmlAttribute

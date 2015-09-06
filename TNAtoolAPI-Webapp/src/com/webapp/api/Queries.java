@@ -787,7 +787,8 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    			// TODO Auto-generated catch block
 	    			e.printStackTrace();
 	    		}    			   		
-    		}    		
+    		}
+    		
     		ServiceMiles += TL * frequency;  
     		Stopportunity += frequency * stops;
     		ServiceHours += frequency * instance.getTlength();
@@ -1438,50 +1439,49 @@ Loop:  	for (Trip trip: routeTrips){
     }
     
     /**
-     * Counties Employment Reports
+     * Employment Summary Reports
      */
     @GET
 	@Path("/emp")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getEmp(@QueryParam("report") String reportType, @QueryParam("gap") double gap, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+	public Object getEmp(@QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
     	EmpDataList results = new EmpDataList();
     	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex];
     	System.out.println(results.metadata);
-    	results = PgisEventManager.getEmpData(reportType, gap, dbindex, username);
+    	results = PgisEventManager.getEmpData(reportType, dbindex, username);
     	return results;
     }
     
     /**
-     * Counties Employment Reports
+     * Agencies Employment Summary Reports
      */
     @GET
-	@Path("/getEmp")
+	@Path("/agenEmp")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getEmp2(@QueryParam("criteria") String criteria, @QueryParam("areaID") String areaID, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+	public Object getAgenEmp(@QueryParam("gap") Integer gap, @QueryParam("areaID") String areaID, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
     	EmpDataList results = new EmpDataList();
-    	results.metadata = "Report Type: "+criteria+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	results.metadata = "Report Type: Agencies Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex];
     	System.out.println(results.metadata);
-    	results = PgisEventManager.getEmpData(criteria, areaID, dbindex, username);
+    	results = PgisEventManager.getAgenEmpData(gap, dbindex, username);
     	return results;
     }
     
     /**
-     * Urban Areas Employment Reports
+     * Extended Employment Reports
      */
     @GET
-	@Path("/urbanareasemp")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getUAEmp(@QueryParam("report") String reportType, @QueryParam("gap") double gap, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
-    	EmpDataList results = new EmpDataList();
-    	results.metadata = "Report Type:Employment Counties Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
-    	System.out.println(results.metadata);
-    	results = PgisEventManager.getEmpData(reportType, gap, dbindex, username);
-    	return results;
-    }
-    
+   	@Path("/getXEmpData")
+   	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+   	public Object getXEmp(@QueryParam("criteria") String criteria, @QueryParam("areaID") String areaID, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+       	EmpDataList results = new EmpDataList();
+       	results.metadata = "Report Type: Agencies Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+       	    	"Selected Database:" +Databases.dbnames[dbindex];
+       	System.out.println(results.metadata);
+       	results = PgisEventManager.getXEmpData(criteria, areaID, dbindex, username);
+       	return results;
+       }
     
     /**
 	 * Generates The counties Summary report

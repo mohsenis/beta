@@ -26,7 +26,6 @@ var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].in
 var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 var keyName = document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1);
 var dbindex = parseInt(document.URL.split("&")[5].substr(document.URL.split("&")[5].indexOf("=")+1));
-var areaName;
 var dateID;
 var boo;
 var gg = 1.0/1.1;
@@ -39,6 +38,7 @@ html += '<thead>'+tmp+'</thead><tbody>';
 var fAverage = new Array();
 var fMedian = new Array();
 var key = Math.random();
+var areaName;
 var popServedLOS;
 var popWithinX;
 var popServed;
@@ -191,8 +191,10 @@ function openDetRep(){
 	if (reportType < 1){
 		alert('No report is selected.');
 	}
-	else{
+	else if (reportType ==1){
 		window.open('/TNAtoolAPI-Webapp/EmpXReport.html'+'?&type='+reportType+'&criteria=County&c1='+popWithinX+'&c2='+popServedLOS+'&c3='+popServed+'&areaID='+w_qstring+'&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession()+"&areaName="+areaName);
+	}else{
+		alert('Under Construction');
 	}
 }
 function dbchange(){
@@ -246,7 +248,7 @@ function dbchange(){
 			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reloadG()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
 			    	Minimum Level of Service (times) <input type="text" name="LoS" id="LoS" class="tbox" onkeypress="return isWholeNumber(event)"/><br>	
-			    	<label for="detailedreport">Select a report:</label>
+			    	<label for="detailedreport">Other reports:</label>
 			    	<select name="detailedreport" id="detailedreport" style="width: 12.4em;height: 25px;margin-top: 10px">
 						  <option value="0" selected></option>
 						  <option value="1" style="width:20em;">Employment Data Report</option>
