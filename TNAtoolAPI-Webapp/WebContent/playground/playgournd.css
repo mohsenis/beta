@@ -116,7 +116,8 @@ body {
 }
 
 .feedTable {
-	width:100%
+	width:100%;
+	margin: 1px;
 }
 
 .feedTable td, .feedTable th{

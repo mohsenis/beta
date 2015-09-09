@@ -148,7 +148,7 @@ public class CalendarServiceDataFactoryImpl implements
   }
 
   private void setTimeZonesForAgencies(CalendarServiceData data) {
-    for (Agency agency : _dao.getAllAgencies()) {
+    for (Agency agency : _dao.getAllAgencies(null)) {
       TimeZone timeZone = TimeZone.getTimeZone(agency.getTimezone());
       if (timeZone.getID().equals("GMT")
           && !agency.getTimezone().toUpperCase().equals("GMT")) {
