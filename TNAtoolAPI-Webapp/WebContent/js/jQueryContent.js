@@ -1,3 +1,18 @@
+function getDefaultDbIndex(){
+	var dbindex = -1;
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getDefaultDbIndex",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	dbindex = d.DBError;
+        }
+	});
+	
+	return dbindex;
+}
+
 function getSession(){
 	var username = "admin";
 	$.ajax({

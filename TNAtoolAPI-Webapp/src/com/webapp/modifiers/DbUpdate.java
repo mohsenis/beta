@@ -88,14 +88,14 @@ import org.xml.sax.SAXException;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-	private final static String basePath = "C:/Users/PB/git/TNAtool/";
-	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/";
+	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
+	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
 	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
-	private static final int DBINDEX = Databases.passwords.length-1;
+	private static final int DBINDEX = Databases.dbsize-1;
 	
 	public static List<String> getSelectedAgencies(String username){
 		List<String> selectedAgencies = new ArrayList<String>();
@@ -123,6 +123,16 @@ public class DbUpdate {
 			selectedAgencies.add("null");
 		}
 		return selectedAgencies;
+	}
+	
+	@GET
+    @Path("/getDefaultDbIndex")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getDefaultDbIndex(){
+		
+		PDBerror b = new PDBerror();
+		b.DBError = DBINDEX+"";
+		return b;
 	}
 	
 	@POST
@@ -944,7 +954,9 @@ public class DbUpdate {
 						statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+sqlString(agencyIdList,defAgencyIds[i][1])+"';");
 						
 					}else{
+						statement.executeUpdate("ALTER TABLE "+defAgencyIds[i][0]+" DISABLE TRIGGER ALL;");
 						statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+defAgencyIds[i][1]+"='"+agencyId+"';");
+						statement.executeUpdate("ALTER TABLE "+defAgencyIds[i][0]+" ENABLE TRIGGER ALL;");
 					}
 					
 				}catch (SQLException e) {
@@ -1095,7 +1107,7 @@ public class DbUpdate {
 		return "done";
 	}
 	
-	@GET
+	/*@GET
     @Path("/addPsqlFunctions")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object addPsqlFunctions(@QueryParam("db") String db){
@@ -1116,6 +1128,65 @@ public class DbUpdate {
 			pr = pb.start();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		
+		return "done";
+	}*/
+	
+	@GET
+    @Path("/addIndex")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object addIndex(@QueryParam("db") String db){
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		
+		String[][] defAgencyIds  = {{"census_congdists_trip_map","agencyid_def"},
+									{"census_places_trip_map","agencyid_def"},
+									{"census_urbans_trip_map","agencyid_def"},
+									{"census_counties_trip_map","agencyid_def"},
+									{"census_tracts_trip_map","agencyid_def"},
+									{"gtfs_fare_rules","fare_agencyid"},
+									{"gtfs_fare_attributes","agencyid"},
+									{"gtfs_trip_stops","stop_agencyid_origin"},
+									{"gtfs_stop_service_map","agencyid_def"},
+									{"gtfs_route_serviceid_map","agencyid_def"},
+									{"gtfs_stop_route_map","agencyid_def"},
+									{"gtfs_frequencies","defaultid"},
+									{"gtfs_pathways","agencyid"},
+									{"gtfs_shape_points","shapeid_agencyid"},
+									{"gtfs_stop_times","stop_agencyid"},
+									{"gtfs_transfers","defaultid"},
+									{"tempstopcodes","agencyid"},
+									{"tempetriptimes","agencyid"},
+									{"tempestshapes","agencyid"},
+									{"tempshapes","agencyid"},
+									{"gtfs_trips","serviceid_agencyid"},
+									{"gtfs_calendar_dates","serviceid_agencyid"},
+									{"gtfs_calendars","serviceid_agencyid"},
+									{"gtfs_stops","agencyid"},
+									{"gtfs_routes","defaultid"},
+									{"gtfs_agencies","defaultid"},
+									{"gtfs_feed_info","defaultid"}};
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			
+			for(int i=0;i<defAgencyIds.length;i++){
+				System.out.println("creating index for table: "+defAgencyIds[i][0]);
+				try{
+					statement.executeUpdate("CREATE INDEX defaid"+i+" ON "+defAgencyIds[i][0]+" ("+defAgencyIds[i][1]+");");
+				}catch (SQLException e) {
+					System.out.println(e.getMessage());
+				}
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
 		return "done";

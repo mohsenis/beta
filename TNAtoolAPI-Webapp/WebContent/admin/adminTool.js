@@ -1,3 +1,15 @@
+function runPlayground(b){
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&runPlayground="+b,
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+}
+
 function deleteDb(i){
 	$.ajax({
         type: "GET",
@@ -107,11 +119,25 @@ function runQueries(index){
 	
 }
 
-function addPsqlFunctions(index){
+/*function addPsqlFunctions(index){
 	db = dbInfo[index].toString();
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPsqlFunctions?&db="+db,
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+	
+}*/
+
+function addIndex(index){
+	db = dbInfo[index].toString();
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addIndex?&db="+db,
         dataType: "json",
         async: false,
         success: function(d) {
@@ -317,7 +343,8 @@ $(document).ready(function(){
             	html += "</table><br><input type='button' value='Delete/Drop' onclick='deleteDb("+dbInfo[i][0]+")'>";
             	html += "<input type='button' value='Modify Information' onclick='addModifyDB("+i+", "+dbInfo[i][0]+")' >";
             	html += "<input type='button' value='Run the Update Queries' onclick='runQueries("+i+")' >";
-            	html += "<input type='button' value='Add Functions' onclick='addPsqlFunctions("+i+")' >";
+            	/*html += "<input type='button' value='Add Functions' onclick='addPsqlFunctions("+i+")' >";*/
+            	html += "<input type='button' value='Add Index' onclick='addIndex("+i+")' >";
             	html += "<div style='width: auto; font-size:80%' id='accordion"+dbInfo[i][0]+"' class='accordion'><h3>Database Status</h3><div>";
             	html += "<div id='listOfFeeds"+dbInfo[i][0]+"' style='float:left'>"+listOfFeeds(i)+"</div>";
             	html += "<div id='listOfAgencies"+dbInfo[i][0]+"' style='width:50%; float:right; '>"+listOfAgencies(i)+"</div>";

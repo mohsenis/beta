@@ -1,5 +1,6 @@
 var key = Math.random();
-var dbindex = 0;
+var default_dbindex = getDefaultDbIndex();
+var dbindex = default_dbindex;
 var newdates = null;
 var URL = document.URL;
 if (URL.split("?").length >0){
@@ -862,8 +863,8 @@ $.ajax({
 	    });
 	    menucontent+='</ul>';
 	    if (dbindex<0 || dbindex>menusize-1){
-	    	dbindex =0;
-	    	history.pushState('data', '', document.URL.split("?")[0]+"?&n="+key+'&dbindex=0');	    	
+	    	dbindex = default_dbindex;
+	    	history.pushState('data', '', document.URL.split("?")[0]+"?&n="+key+'&dbindex='+default_dbindex);	    	
 	    }
 	}			
 });
@@ -1128,7 +1129,7 @@ $mylist
 	        .appendTo(div);		    
 
 		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4">'+
-		    		'<li role="presentation"><a id="SSR" href="#"><b>Statewide Report</b></a>'+
+		    		'<li role="presentation"><a id="SSR" href="#"><b>Statewide Reports</b></a>'+
 		    		'<ul>'+
 		    		'<li role="presentation"><a id="ASR" href="#"><b>Transit Agency Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Geographical Reports</a>'+
@@ -1142,10 +1143,10 @@ $mylist
 		    		'</ul></li>'+
 		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
 		    		'<ul>'+
-		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Report</b></a></li>'+
-		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Networks Report</b></a></li>'+
+		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Networks Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Agencies Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Report</b></a></li>'+
+		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
 		    		'</ul></li>'+
 		    		'</ul>');
 		 
@@ -1172,82 +1173,27 @@ $mylist
 								$("#datepick").css({"border":""});
 						}
 			      }
-			});			
-			$("#datepicker").append("<div id='datesdiv'><ul id='datesarea'></ul></div>");
+			});
+			
+			//$("#datesdiv").css({"width":"100%"});
+			$("#datepicker").append("<input type='button' value='Submit Dates' id='datepickerSubmit' onclick='updatepicker()'/>");
 			$("#datepicker").css({"display":"inline-block", "z-index":"1000", "position":"fixed"});
-			$("#datesdiv").css({"width":"100%"});
-			$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"}); 
+			//$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"}); 
 			$("#datepicker").hide();
 			
-			if (w_qstringd){				
-					$( "#datepicker" ).multiDatesPicker({
-						addDates: w_qstringd.split(","),
-						onSelect: function(date, inst) {					  
-							  dateID = date.replace("/","").replace("/","");					  
-								if($("#"+dateID).length==0){
-									//alert("add triggered");
-									addDate(date);							
-								}else{
-									//alert("del triggered");
-									$("#"+dateID).remove();							
-								}
-								if ($('#datepicker').multiDatesPicker('getDates').length>0){
-										$("#datepick").css({"border":"2px solid #900"});
-									} else {
-										$("#datepick").css({"border":""});
-									}
-					      }
-					});	
-					//alert(w_qstringd);
-					var cdate;
-					for(var i=0; i<w_qstringd.split(",").length; i++){
-						cdate = w_qstringd.split(",")[i];
-						dateID = cdate.replace("/","").replace("/","");
-						addDate(cdate);		
-					}									
-			}
-			/*$("#accordion").accordion({
-				collapsible: true,
-				active: false,
-				heightStyle: "content"
-			});
-			$("#accordion").accordion("refresh");*/
-			/*$("#datepicker").click(function(){			    
-			    $("#datepickerdiv").toggle();
-			});*/
-			/*$("#datepicker").datepicker({
-			    beforeShow: function() {
-			        $(".ui-datepicker-buttonpane")
-			            .html('')
-			            .append("<button>new button</button>");
-			    }
-			});*/
 			$('#datepick').click(function () {
 				$("#datepicker").toggle();
-				updatepicker();
-				/*if(!($(this).hasClass('open'))) {
-					updatepicker();
-			    }				*/
-			    /*if($(this).hasClass('open')) {
-			    	$("#datepickarea").show();
-			    } else{
-			    	$("#datepickarea").hide();
-			    }*/
+				//updatepicker();
+				
 			});
 			$('#dbb').click(function () {
 				$("#datepicker").hide();
-				updatepicker();
+				//updatepicker();
 			});
 			$('#repb').click(function () {
 				$("#datepicker").hide();
-				updatepicker();
-			});
-			/*$('#datepick').on('show.bs.dropdown', function () {
-				$("#datepicker").toggle();
-				});
-			$('#datepick').on('hide.bs.dropdown', function () {
-				$("#datepicker").toggle();
-				});*/			
+				//updatepicker();
+			});		
 			
 			$mylist.dialogExtend("collapse");
 			$("#minimize").attr("title", "Minimize");
@@ -1332,7 +1278,7 @@ $mylist
 		                 }
 		            ]
 	});   
-    //addRangeTooltip(dialogAgenciesId);
+	updateListDialog(dialogAgenciesId);
 })
 .bind("change_state.jstree", function (e, d) {
     var tagName = d.args[0].tagName;
@@ -1434,14 +1380,17 @@ function updatepicker(){
 	} else {						
 			$("#datepick").css({"border":""});
 			localStorage.removeItem(key);
-		}
-	if (w_qstringd!=newdates){
-		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
 	}
+	location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
+
+	/*if (w_qstringd!=newdates){
+		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
+	}*/
 }
 
-function addRangeTooltip(agenciesIds){
+function updateListDialog(agenciesIds){
 	var aList = $( "li[type='agency']" );
+	var count = aList.length;
 	var today = currentDateFormatted();
 	$.ajax({
 		type: 'GET',
@@ -1457,11 +1406,59 @@ function addRangeTooltip(agenciesIds){
 		    });	
 		}
 	});
+	$('.jstree-no-dots').prepend("<p style='margin-left:3%'><b>List of Agencies:</b></p>");
+	$('.jstree-no-dots').css({"height": "74%","padding-top": "2%"});
 	
-	/*$(document).tooltip({
-		position: {
-	        my: "left top",
-	        at: "left bottom",
-	    }
-	});*/
+	var noGTFS = ["Albany Transit System",
+	              "Burns Paiute Tribal Transit Service",
+	              "Corvallis Transit System", 
+	              "Linn-Benton Loop",
+	              "Malheur Council on Aging & Community Services",
+	              "Shawn's Rideshare",
+	              "South Clackamas Transportation District",
+	              "Warm Springs Transit"];
+	
+	if (!w_qstringd && getSession()=='admin'){
+		var html = 	"<br><br><p style='margin-left:3%'><b>Agencies with no GTFS feed:</b></p>";
+		html +=	"<ul style='margin-bottom: 20px;'>";
+		for(var i=0; i<noGTFS.length; i++){
+			html +=	"<li style='margin-left:52px'>"+(++count)+". "+noGTFS[i]+"</li>";
+		}
+		html +=	"</ul>";
+		$('.jstree-no-dots').append(html);
+	}
+	
+	$mylist.append( "<div id='listLegend'><p style='font-size: 90%;margin-left:2%;color:red;margin-top:1%'>-<i>Agencies in red color have an expired GTFS feed</i></p></div>" );
+	$mylist.append( "<div id='dateList'><p style='margin-left:3%'><b>Selected Dates:</b></p></div>" );
+	$("#dateList").append("<div id='datesdiv' style='padding-left: 4%;'><ul id='datesarea'></ul></div>");
+	//$("#datesdiv").css({"width":"100%"});
+	$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"});
+	
+	if (w_qstringd){				
+		$( "#datepicker" ).multiDatesPicker({
+			addDates: w_qstringd.split(","),
+			onSelect: function(date, inst) {					  
+				  dateID = date.replace("/","").replace("/","");					  
+					if($("#"+dateID).length==0){
+						//alert("add triggered");
+						addDate(date);							
+					}else{
+						//alert("del triggered");
+						$("#"+dateID).remove();							
+					}
+					if ($('#datepicker').multiDatesPicker('getDates').length>0){
+							$("#datepick").css({"border":"2px solid #900"});
+						} else {
+							$("#datepick").css({"border":""});
+						}
+		      }
+		});	
+		//alert(w_qstringd);
+		var cdate;
+		for(var i=0; i<w_qstringd.split(",").length; i++){
+			cdate = w_qstringd.split(",")[i];
+			dateID = cdate.replace("/","").replace("/","");
+			addDate(cdate);		
+		}									
+}
 }
