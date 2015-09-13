@@ -28,6 +28,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -697,7 +700,7 @@ public class FileUpload extends HttpServlet {
 		return newName+".zip";
 	}
 	
-	public String addFeed(String feed, String feedName, long fileSize, String username) throws IOException{
+	public static String addFeed(String feed, String feedName, long fileSize, String username) throws IOException{
 		String [] args = new String[5];
 		if(feedName.toLowerCase().contains(".zip")){
 			for(int i=0;i<4;i++){
@@ -798,7 +801,7 @@ public class FileUpload extends HttpServlet {
 		return "Feed added and updated";
 	}
 	
-	public void changeCSV(String feed, String username) throws IOException, ZipException{
+	public static void changeCSV(String feed, String username) throws IOException, ZipException{
 		String path=feed;
 		for(int j=0;j<4;j++){
 			path = removeLastChar(path); 
@@ -938,7 +941,7 @@ public class FileUpload extends HttpServlet {
         /*end zipping*/
 	}
 	
-	public int getFeedIndex(String agencyId, String username){
+	public static int getFeedIndex(String agencyId, String username){
 		int index =0;
 		
 		Connection c = null;
@@ -978,7 +981,7 @@ public class FileUpload extends HttpServlet {
 		return index;
 	}
 	
-	public void updateQuota(String username){
+	public static void updateQuota(String username){
 		Connection c = null;
 		Statement statement = null;
 		String usedspace="";
@@ -1015,7 +1018,7 @@ public class FileUpload extends HttpServlet {
 		}
 	}
 	
-	public String updateFeeds(){
+	public static String updateFeeds(){
 		
 		Process pr;
 		ProcessBuilder pb;
@@ -1036,14 +1039,14 @@ public class FileUpload extends HttpServlet {
 		return "Feed updated";
 	}
   	
-	public String removeLastChar(String str) {
+	public static String removeLastChar(String str) {
     	if (str.length() > 0) {
             str = str.substring(0, str.length()-1);
         }
         return str;
     }
 	
-	public String sqlString(String[] ids, String column){
+	public static String sqlString(String[] ids, String column){
 		String sql = "";
 		for(int i=0;i<ids.length-1;i++){
 			sql += column+" = '"+ids[i]+"' OR ";
@@ -1052,7 +1055,7 @@ public class FileUpload extends HttpServlet {
 		return sql;
 	}
 
-	public void runPlayground(String b) throws IOException, ZipException{
+	public static void runPlayground(String b) throws IOException, ZipException{
 		
 		List<AddRemoveFeed> addFeeds = new ArrayList<AddRemoveFeed>();
 		List<AddRemoveFeed> removeFeeds = new ArrayList<AddRemoveFeed>();
@@ -1108,9 +1111,9 @@ public class FileUpload extends HttpServlet {
 			statement.executeUpdate("VACUUM");
 			System.out.println("Post add vacuum finish");*/
 			
-			System.out.println("Full vacuum start");
+			/*System.out.println("Full vacuum start");
 			statement.executeUpdate("VACUUM FULL");
-			System.out.println("Full vacuum finish");
+			System.out.println("Full vacuum finish");*/
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		} finally {
@@ -1119,10 +1122,10 @@ public class FileUpload extends HttpServlet {
 		}
 	}
 	
-	public boolean checkTime(){
+	public static boolean checkTime(){
 		boolean b=false;
 		try {
-		    String t1 = "01:30:00";
+		    String t1 = "01:25:00";
 		    Date time1 = new SimpleDateFormat("HH:mm:ss").parse(t1);
 		    Calendar c1 = Calendar.getInstance();
 		    c1.setTime(time1);
@@ -1151,7 +1154,52 @@ public class FileUpload extends HttpServlet {
 		return b;
 	}
 	
-	public void feedDel(String username, String feedDel){
+	public static void schedulePlayground(){
+		long difference=0;
+		try {
+			String t = "01:30:00";
+		    Date time = new SimpleDateFormat("HH:mm:ss").parse(t);
+		    Calendar c = Calendar.getInstance();
+		    c.setTime(time);
+		    c.add(Calendar.DATE, 1);
+		    
+		    String current = new SimpleDateFormat("HH:mm:ss").format(new Date());
+		    Date now = new SimpleDateFormat("HH:mm:ss").parse(current);
+		    Calendar cal = Calendar.getInstance();
+		    cal.setTime(now);
+		    cal.add(Calendar.DATE, 1);
+
+		    Date x = cal.getTime();
+		    
+		    if (x.after(c.getTime())) {
+		        difference = 86400000 - (x.getTime() - c.getTime().getTime());
+		    }else{
+		    	difference = c.getTime().getTime() - x.getTime(); 
+		    }
+		}catch (java.text.ParseException e) {
+			e.printStackTrace();
+		}
+		
+		ScheduledExecutorService fScheduler = Executors.newScheduledThreadPool(1);    
+		Runnable runPlayground = new RunPlayground();
+		fScheduler.scheduleAtFixedRate(runPlayground, difference, 86400000, TimeUnit.MILLISECONDS);
+	}
+	
+	public static final class RunPlayground implements Runnable {
+	    @Override public void run() {
+	    	try {
+				runPlayground("false");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ZipException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	}
+	
+	public static void feedDel(String username, String feedDel){
 		String agencyId = "";
 		String agencyIds = "";
 		String[] agencyIdList;
