@@ -2538,9 +2538,7 @@ Loop:  	for (Trip trip: routeTrips){
 	    		clusterList.addAll(tempClusterList);
     		}
     		ctn = clusterList.size();
-    		if(getprogVal(key)<100){
-    			setprogVal(key, 40+((int) Math.round(progress*60/totalLoad)));
-    		}
+    		setprogVal(key, 40+((int) Math.round(progress*60/totalLoad)));
     	}         
         try {
 			Thread.sleep(1000);
