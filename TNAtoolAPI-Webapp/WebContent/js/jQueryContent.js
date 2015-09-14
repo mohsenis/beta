@@ -341,9 +341,12 @@ function gos(key){
 			success: function(item){
 				progVal = parseInt(item.progVal);
 				if(progVal==0){
-					progVal=false;
+					
 					if(prog){
+						progVal=100;
 						clearTimeout(timeVar);
+					}else{
+						progVal=false;
 					}
 				}else{
 					prog=true;
