@@ -1179,10 +1179,11 @@ public class FileUpload extends HttpServlet {
 		}catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}
-		
+		System.out.println("Scheduling..");
 		ScheduledExecutorService fScheduler = Executors.newScheduledThreadPool(1);    
 		Runnable runPlayground = new RunPlayground();
 		fScheduler.scheduleAtFixedRate(runPlayground, difference, 86400000, TimeUnit.MILLISECONDS);
+		System.out.println("done");
 	}
 	
 	public static final class RunPlayground implements Runnable {
