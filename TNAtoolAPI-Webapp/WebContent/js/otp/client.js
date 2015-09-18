@@ -1294,7 +1294,7 @@ $mylist
 			    		}
 			    		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+parseInt(casestring.substring(2)));			    		    		
 			    }else if(casestring=="Emp"){	
-			    	window.open('/TNAtoolAPI-Webapp/Emp2.html'+'?&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&dbindex='+dbindex+'&username='+getSession());
 			    }else if(casestring=="T6"){	
 			    	window.open('/TNAtoolAPI-Webapp/T6.html'+'?&dbindex='+dbindex+'&username='+getSession());
 			    }

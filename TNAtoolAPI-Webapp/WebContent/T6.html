@@ -42,12 +42,31 @@
 	    	$('h2').append(' Title VI Report');
 	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
 	    	mySlidebar.slidebars.open('left'); // Open the Slidebar
-	    	/*  $('aria-labelledby').qtip({ // Grab some elements to apply the tooltip to
-	    	    content: {
-	    	        text: 'My common piece of text here'
-	    	    }
-	    	}); */ 
-	    	//$('[title]').qtip();
+	    	
+	    	$.ajax({
+	    		type: 'GET',
+	    		datatype: 'json',
+	    		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
+	    		async: false,
+	    		success: function(d){	
+	    			var select = document.getElementById("dbselect");
+	    			select.options.length = 0;
+	    		    var menusize = 0;
+	    		    $.each(d.DBelement, function(i,item){
+	    		    	var option = document.createElement('option');
+	    		        option.text = item;
+	    		        option.value = 'DB'+i;
+	    		        select.add(option, i);		    	
+	    		    	menusize++;
+	    		    });		    		    
+	    		    if (dbindex<0 || dbindex>menusize-1){
+	    		    	dbindex = 0;
+	    		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
+	    		    }
+	    		    select.options.size = menusize;
+	    		    select.selectedIndex = dbindex;		    				    
+	    		}			
+	    	});
 	    	
 	    });
 	  }) (jQuery);
@@ -256,7 +275,20 @@
 		document.getElementById('displayReport').innerHTML = "";
 		$('#initialText').show();
 	}
+	
+	$(".export").on('click', function (event) {    
+		exportbutton.apply(this, ['export.csv']);
+	});
 
+	function exportbutton(){
+		var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
+		window.open(uri, 'AgencySummaryReport.csv');
+	}
+	function dbchange(){
+		if (document.getElementById("dbselect").selectedIndex !=dbindex){
+			location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
+		}
+	}
 	</script>
 
 	<!-- Beginning of the datatable -->
@@ -366,7 +398,7 @@
 						});
 						html+='<td>' + numWithCommas(summation) + '</td>';
 					}
-					html += '<td>' + 'd.metadata' + '</td></tr>'		
+					html += '<td>' + d.metadata + '</td></tr>'		
 			});
 		
 		var html2 = '<tfoot>'+tmp+'</tfoot>';
@@ -489,9 +521,9 @@
 					  <option value="Congressional Districts">Congressional Districts</option>
 					  <option value="Urban Areas">Urban Areas</option>
 					  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
-					  <option value="Agencies">Agencies</option>
+					 <!--  <option value="Agencies">Agencies</option> -->
 				 </select><br>
-			<b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;margin-bottom:5px" value="0.1" onkeypress="return isNumber(event)"/><br>
+			<!-- <b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;margin-bottom:5px" value="0.1" onkeypress="return isNumber(event)"/><br> -->
 			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>
 		<div id="jstree" class="demo" style="width:98%"></div>

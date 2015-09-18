@@ -19,7 +19,4 @@ public class EmpDataList {
 	@XmlElement(name = "EmpDataList")
 	public List<EmpData> EmpDataList = new ArrayList<EmpData>();
 	
-	@XmlElement(name = "EmpDataList2")
-	public List<EmpData2> EmpDataList2 = new ArrayList<EmpData2>();
-	
 }

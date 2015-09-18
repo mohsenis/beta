@@ -1437,67 +1437,21 @@ Loop:  	for (Trip trip: routeTrips){
     		return ""+value;
     	}
     }
-    
+       
     /**
      * Employment Summary Reports
      */
     @GET
 	@Path("/emp")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getEmp(@QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
-    	EmpDataList results = new EmpDataList();
-    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
-    	System.out.println(results.metadata);
-    	results = PgisEventManager.getEmpData(reportType, dbindex, username);
-    	return results;
-    }
-    
-    /**
-     * Employment Summary Reports
-     */
-    @GET
-	@Path("/emp2")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object getEmp2(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
     	EmpDataList results = new EmpDataList();
     	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex];
-    	System.out.println("dataSet:" + dataSet);
-    	results = PgisEventManager.getEmpData2(dataSet, reportType, dbindex, username);
+    	results = PgisEventManager.getEmpData(dataSet, reportType, dbindex, username);
     	return results;
     }
 
-    /**
-     * Agencies Employment Summary Reports
-     */
-    @GET
-	@Path("/agenEmp")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getAgenEmp(@QueryParam("gap") Integer gap, @QueryParam("areaID") String areaID, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
-    	EmpDataList results = new EmpDataList();
-    	results.metadata = "Report Type: Agencies Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
-    	System.out.println(results.metadata);
-    	results = PgisEventManager.getAgenEmpData(gap, dbindex, username);
-    	return results;
-    }
-    
-    /**
-     * Extended Employment Reports
-     */
-    @GET
-   	@Path("/getXEmpData")
-   	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-   	public Object getXEmp(@QueryParam("criteria") String criteria, @QueryParam("areaID") String areaID, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
-       	EmpDataList results = new EmpDataList();
-       	results.metadata = "Report Type: Agencies Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-       	    	"Selected Database:" +Databases.dbnames[dbindex];
-       	System.out.println(results.metadata);
-       	results = PgisEventManager.getXEmpData(criteria, areaID, dbindex, username);
-       	return results;
-       }
-        
     /**
      * Title VI Report
      */
