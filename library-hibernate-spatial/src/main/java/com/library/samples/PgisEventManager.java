@@ -555,6 +555,174 @@ public class PgisEventManager {
 	}
 	
 	/**
+	 * Queries employment data on a given area (based on the reportType)
+	 */
+	public static EmpDataList getEmpData2(String DS, String reportType, int dbindex, String username){
+		String dataSet = DS;
+		EmpDataList results = new EmpDataList();
+		Connection connection = makeConnection(dbindex);
+	    Statement stmt = null;
+	    String query = "";
+	    String criteria1 = "";
+	    String criteria2 = "";
+	    System.out.println(reportType);
+	    
+	    if (reportType.equals("Counties")){
+	    	criteria1 = "countyid";
+	    	criteria2 = "SELECT  census_counties.cname  AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_counties"
+			    		+ " ON temp2.id = census_counties.countyid" ;
+	    }else if (reportType.equals("Census Places")){
+	    	criteria1 = "placeid";
+	    	criteria2 = "SELECT  census_places.pname  AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_places"
+			    		+ " ON temp2.id = census_places.placeid" ;
+	    }
+	    else if (reportType.equals("ODOT Transit Regions")){
+	    	criteria1 = "regionid";
+	    	criteria2 = "SELECT  concat('Region ',temp2.id) AS name, temp2.*"
+	    				+ " FROM temp2 ";
+	    }
+	    else if (reportType.equals("Urban Areas")){
+	    	criteria1 = "urbanid";
+	    	criteria2 = " SELECT census_urbans.uname AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_urbans"
+			    		+ " ON temp2.id = census_urbans.urbanid";
+	    }
+	    else if (reportType.equals("Congressional Districts")){
+	    	criteria1 = "congdistid";
+	    	criteria2 = " SELECT census_congdists.cname AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_congdists"
+			    		+ " ON concat('410',temp2.id) = census_congdists.congdistid";
+	    }
+	    
+	    query = "WITH temp1 AS (SELECT "
+	    		+ "		LEFT(census_blocks.blockid,5) countyid,"
+	    		+ "		census_blocks.blockid,"
+	    		+ "		census_blocks.placeid,"
+	    		+ "		census_blocks.congdistid,"
+	    		+ "		census_blocks.regionid,"
+	    		+ "		census_blocks.urbanid,"
+	    		+ "		census_blocks.population"
+	    		+ "	FROM census_blocks"
+	    		+ "		),"
+	    		+ "temp2 AS ("
+	    		+ "		SELECT"
+	    		+ "		  temp1." + criteria1 + " id,"
+	    		+ "		  COALESCE(SUM(population),0)::int population,"
+	    		+ "		  COALESCE(SUM(c000), 0)::int c000,"
+	    		+ "		  COALESCE(SUM(ca01), 0)::int ca01,"
+	    		+ "		  COALESCE(SUM(ca02), 0)::int ca02,"
+	    		+ "		  COALESCE(SUM(ca03), 0)::int ca03,"
+	    		+ "		  COALESCE(SUM(ce01), 0)::int ce01,"
+	    		+ "		  COALESCE(SUM(ce02), 0)::int ce02,"
+	    		+ "		  COALESCE(SUM(ce03), 0)::int ce03,"
+	    		+ "		  COALESCE(SUM(cns01), 0)::int cns01,"
+	    		+ "		  COALESCE(SUM(cns02), 0)::int cns02,"
+	    		+ "		  COALESCE(SUM(cns03), 0)::int cns03,"
+	    		+ "		  COALESCE(SUM(cns04), 0)::int cns04,"
+	    		+ "		  COALESCE(SUM(cns05), 0)::int cns05,"
+	    		+ "		  COALESCE(SUM(cns06), 0)::int cns06,"
+	    		+ "		  COALESCE(SUM(cns07), 0)::int cns07,"
+	    		+ "		  COALESCE(SUM(cns08), 0)::int cns08,"
+	    		+ "		  COALESCE(SUM(cns09), 0)::int cns09,"
+	    		+ "		  COALESCE(SUM(cns10), 0)::int cns10,"
+	    		+ "		  COALESCE(SUM(cns11), 0)::int cns11,"
+	    		+ "		  COALESCE(SUM(cns12), 0)::int cns12,"
+	    		+ "		  COALESCE(SUM(cns13), 0)::int cns13,"
+	    		+ "		  COALESCE(SUM(cns14), 0)::int cns14,"
+	    		+ "		  COALESCE(SUM(cns15), 0)::int cns15,"
+	    		+ "		  COALESCE(SUM(cns16), 0)::int cns16,"
+	    		+ "		  COALESCE(SUM(cns17), 0)::int cns17,"
+	    		+ "		  COALESCE(SUM(cns18), 0)::int cns18,"
+	    		+ "		  COALESCE(SUM(cns19), 0)::int cns19,"
+	    		+ "		  COALESCE(SUM(cns20), 0)::int cns20,"
+	    		+ "		  COALESCE(SUM(cr01), 0)::int cr01,"
+	    		+ "		  COALESCE(SUM(cr02), 0)::int cr02,"
+	    		+ "		  COALESCE(SUM(cr03), 0)::int cr03,"
+	    		+ "		  COALESCE(SUM(cr04), 0)::int cr04,"
+	    		+ "		  COALESCE(SUM(cr05), 0)::int cr05,"
+	    		+ "		  COALESCE(SUM(cr07), 0)::int cr07,"
+	    		+ "		  COALESCE(SUM(ct01), 0)::int ct01,"
+	    		+ "		  COALESCE(SUM(ct02), 0)::int ct02,"
+	    		+ "		  COALESCE(SUM(cd01), 0)::int cd01,"
+	    		+ "		  COALESCE(SUM(cd02), 0)::int cd02,"
+	    		+ "		  COALESCE(SUM(cd03), 0)::int cd03,"
+	    		+ "		  COALESCE(SUM(cd04), 0)::int cd04,"
+	    		+ "		  COALESCE(SUM(cs01), 0)::int cs01,"
+	    		+ "		  COALESCE(SUM(cs02), 0)::int cs02"
+	    		+ ""
+	    		+ "		FROM temp1 INNER JOIN " + dataSet 
+	    		+ "		ON temp1.blockid = " + dataSet + ".blockid"
+	    		+ ""
+	    		+ "		GROUP BY " + criteria1
+	    		+ "		ORDER BY " + criteria1
+	    		+ "	) "
+	    		+ criteria2;
+	    System.out.println(query);
+
+	    try {
+	    	stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query); 
+			
+			while (rs.next()){
+				EmpData2 i = new EmpData2();
+				i.id = rs.getString("id");
+				i.name = rs.getString("name");
+				i.population = rs.getInt("population");
+				i.c000 = rs.getInt("c000");
+				i.ca01 = rs.getInt("ca01");
+				i.ca02 = rs.getInt("ca02");
+				i.ca03 = rs.getInt("ca03");
+				i.ce01 = rs.getInt("ce01");
+				i.ce02 = rs.getInt("ce02");
+				i.ce03 = rs.getInt("ce03");				
+				i.cns01 = rs.getInt("cns01");
+				i.cns02 = rs.getInt("cns02");
+				i.cns03 = rs.getInt("cns03");
+				i.cns04 = rs.getInt("cns04");
+				i.cns05 = rs.getInt("cns05");
+				i.cns06 = rs.getInt("cns06");
+				i.cns07 = rs.getInt("cns07");
+				i.cns08 = rs.getInt("cns08");
+				i.cns09 = rs.getInt("cns09");
+				i.cns10 = rs.getInt("cns10");
+				i.cns11 = rs.getInt("cns11");
+				i.cns12 = rs.getInt("cns12");
+				i.cns13 = rs.getInt("cns13");
+				i.cns14 = rs.getInt("cns14");
+				i.cns15 = rs.getInt("cns15");
+				i.cns16 = rs.getInt("cns16");
+				i.cns17 = rs.getInt("cns17");
+				i.cns18 = rs.getInt("cns18");
+				i.cns19 = rs.getInt("cns19");
+				i.cns20 = rs.getInt("cns20");
+				i.cr01 = rs.getInt("cr01");
+				i.cr02 = rs.getInt("cr02");
+				i.cr03 = rs.getInt("ce03");	
+				i.cr04 = rs.getInt("cr04");
+				i.cr05 = rs.getInt("cr05");
+				i.cr07 = rs.getInt("cr07");	
+				i.ct01 = rs.getInt("ct01");
+				i.ct02 = rs.getInt("ct02");
+				i.cd01 = rs.getInt("cd01");
+				i.cd02 = rs.getInt("cd02");
+				i.cd03 = rs.getInt("cd03");
+				i.cd04 = rs.getInt("cd04");
+				i.cs01 = rs.getInt("cs01");
+				i.cs02 = rs.getInt("cs02");
+				
+				results.EmpDataList2.add(i);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    dropConnection(connection);
+		return results;
+	}
+	
+	/**
 	 * Queries employment data on transit agencies
 	 */
 	public static EmpDataList getAgenEmpData(double gap, int dbindex, String username){
@@ -645,6 +813,132 @@ public class PgisEventManager {
 	    dropConnection(connection);
 		return results;
 	}
+	
+/*	*//**
+	 * Queries employment data on a given area (based on the reportType)
+	 *//*
+	public static EmpDataList getEmpData(String reportType, int dbindex, String username){
+		EmpDataList results = new EmpDataList();
+		Connection connection = makeConnection(dbindex);
+	    Statement stmt = null;
+	    String query = "";
+	    String criteria1 = "";
+	    String criteria2 = "";
+	    System.out.println(reportType);
+	    
+	    if (reportType.equals("Counties")){
+	    	criteria1 = "countyid";
+	    	criteria2 = "SELECT  census_counties.cname  AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_counties"
+			    		+ " ON temp2.id = census_counties.countyid" ;
+	    }else if (reportType.equals("Census Places")){
+	    	criteria1 = "placeid";
+	    	criteria2 = "SELECT  census_places.pname  AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_places"
+			    		+ " ON temp2.id = census_places.placeid" ;
+	    }
+	    else if (reportType.equals("ODOT Transit Regions")){
+	    	criteria1 = "regionid";
+	    	criteria2 = "SELECT  concat('Region ',temp2.id) AS name, temp2.*"
+	    				+ " FROM temp2 ";
+	    }
+	    else if (reportType.equals("Urban Areas")){
+	    	criteria1 = "urbanid";
+	    	criteria2 = " SELECT census_urbans.uname AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_urbans"
+			    		+ " ON temp2.id = census_urbans.urbanid";
+	    }
+	    else if (reportType.equals("Congressional Districts")){
+	    	criteria1 = "congdistid";
+	    	criteria2 = " SELECT census_congdists.cname AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_congdists"
+			    		+ " ON concat('410',temp2.id) = census_congdists.congdistid";
+	    }
+	    
+	    query = "WITH temp1 AS (SELECT census_counties.countyid,"
+	    		+ "		census_blocks.blockid,"
+	    		+ "		census_blocks.placeid,"
+	    		+ "		census_blocks.congdistid,"
+	    		+ "		census_blocks.regionid,"
+	    		+ "		census_blocks.urbanid,"
+	    		+ "		census_blocks.population,"
+	    		+ "		census_blocks.population/census_counties.population::FLOAT AS poppercent"
+	    		+ "		FROM census_blocks INNER JOIN census_counties"
+	    		+ "		ON LEFT(blockid,5) = census_counties.countyid"
+	    		+ "		),"
+	    		+ " temp2 AS ("
+	    		+ "		SELECT"
+	    		+ "		   " + criteria1 + " id,"
+	    		+ "		   COALESCE(SUM(population),0)::int population,"
+	    		+ "		   COALESCE(SUM(all_naics_sectors*poppercent),0)::int all_naics_sectors,"
+	    		+ "		   COALESCE(SUM(agriculture_forestry_fishing_hunting*poppercent),0)::int agriculture_forestry_fishing_hunting,"
+	    		+ "		   COALESCE(SUM(mining_quarrying_oil_gas_extraction*poppercent),0)::int mining_quarrying_oil_gas_extraction,"
+	    		+ "		   COALESCE(SUM(utilities*poppercent),0)::int utilities,"
+	    		+ "		   COALESCE(SUM(construction*poppercent),0)::int construction,"
+	    		+ "		   COALESCE(SUM(wholesale_trade*poppercent),0)::int wholesale_trade,"
+	    		+ "		   COALESCE(SUM(information*poppercent),0)::int information,"
+	    		+ "		   COALESCE(SUM(finance_insurance*poppercent),0)::int finance_insurance,"
+	    		+ "		   COALESCE(SUM(real_estate_rental_leasing*poppercent),0)::int real_estate_rental_leasing,"
+	    		+ "		   COALESCE(SUM(professional_scientific_technical_services*poppercent),0)::int professional_scientific_technical_services,"
+	    		+ "		   COALESCE(SUM(management_of_companies_enterprises*poppercent),0)::int management_of_companies_enterprises,"
+	    		+ "		   COALESCE(SUM(administrative_support_waste_management_remediation_services*poppercent),0)::int administrative_support_waste_management_remediation_services,"
+	    		+ "		   COALESCE(SUM(educational_services*poppercent),0)::int educational_services,"
+	    		+ "		   COALESCE(SUM(health_care_social_assistance*poppercent),0)::int health_care_social_assistance,"
+	    		+ "		   COALESCE(SUM(arts_entertainment_recreation*poppercent),0)::int arts_entertainment_recreation,"
+	    		+ "		   COALESCE(SUM(accommodation_food_services*poppercent),0)::int accommodation_food_services,"
+	    		+ "		   COALESCE(SUM(other_services_except_public_administration*poppercent),0)::int other_services_except_public_administration,"
+	    		+ "		   COALESCE(SUM(public_administration*poppercent),0)::int public_administration,"
+	    		+ "		   COALESCE(SUM(manufacturing*poppercent),0)::int manufacturing,"
+	    		+ "		   COALESCE(SUM(retail_trade*poppercent),0)::int retail_trade,"
+	    		+ "		   COALESCE(SUM(transportation_warehousing*poppercent),0)::int transportation_warehousing"
+	    		+ "		FROM temp1 INNER JOIN oregon_emp"
+	    		+ "		ON temp1.countyid = oregon_emp.county_id"
+	    		+ "		GROUP BY " + criteria1  
+	    		+ "		ORDER BY " + criteria1 
+	    		+ "		)"
+	    		+ criteria2;
+	    System.out.println(query);
+
+	    try {
+	    	stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query); 
+			
+			while (rs.next()){
+				EmpData i = new EmpData();
+				i.id = rs.getString("id");
+				i.name = rs.getString("name");
+				i.population = rs.getInt("population");
+				i.all_naics_sectors = rs.getInt("all_naics_sectors");
+				i.agriculture_forestry_fishing_hunting = rs.getInt("agriculture_forestry_fishing_hunting");
+				i.mining_quarrying_oil_gas_extraction = rs.getInt("mining_quarrying_oil_gas_extraction");
+				i.utilities = rs.getInt("utilities");
+				i.construction = rs.getInt("construction");
+				i.wholesale_trade = rs.getInt("wholesale_trade");
+				i.information = rs.getInt("information");
+				i.finance_insurance = rs.getInt("finance_insurance");
+				i.real_estate_rental_leasing = rs.getInt("real_estate_rental_leasing");
+				i.professional_scientific_technical_services = rs.getInt("professional_scientific_technical_services");
+				i.management_of_companies_enterprises = rs.getInt("management_of_companies_enterprises");
+				i.administrative_support_waste_management_remediation_services = rs.getInt("administrative_support_waste_management_remediation_services");
+				i.educational_services = rs.getInt("educational_services");
+				i.health_care_social_assistance = rs.getInt("health_care_social_assistance");
+				i.arts_entertainment_recreation = rs.getInt("arts_entertainment_recreation");
+				i.accommodation_food_services = rs.getInt("accommodation_food_services");
+				i.other_services_except_public_administration = rs.getInt("other_services_except_public_administration");
+				i.public_administration = rs.getInt("public_administration");
+				i.manufacturing = rs.getInt("manufacturing");
+				i.retail_trade = rs.getInt("retail_trade");
+				i.transportation_warehousing = rs.getInt("transportation_warehousing");
+				results.EmpDataList.add(i);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    dropConnection(connection);
+		return results;
+	}*/
+	
 	/**
 	 * Queries employment data on counties
 	 */
@@ -764,7 +1058,130 @@ public class PgisEventManager {
     dropConnection(connection);
 	return results;
 }
+	
+	/**
+	 * Queries employment data on a given area (based on the reportType)
+	 */
+	public static TitleVIDataList getTitleVIData(String reportType, int dbindex, String username){
+		TitleVIDataList results = new TitleVIDataList();
+		Connection connection = makeConnection(dbindex);
+	    Statement stmt = null;
+	    String query = "";
+	    String criteria1 = "";
+	    String criteria2 = "";
+	    System.out.println(reportType);
 	    
+	    if (reportType.equals("Counties")){
+	    	criteria1 = "countyid";
+	    	criteria2 = "SELECT  census_counties.cname  AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_counties"
+			    		+ " ON temp2.id = census_counties.countyid" ;
+	    }else if (reportType.equals("Census Places")){
+	    	criteria1 = "placeid";
+	    	criteria2 = "SELECT  census_places.pname  AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_places"
+			    		+ " ON temp2.id = census_places.placeid" ;
+	    }
+	    else if (reportType.equals("ODOT Transit Regions")){
+	    	criteria1 = "regionid";
+	    	criteria2 = "SELECT  concat('Region ',temp2.id) AS name, temp2.*"
+	    				+ " FROM temp2 ";
+	    }
+	    else if (reportType.equals("Urban Areas")){
+	    	criteria1 = "urbanid";
+	    	criteria2 = " SELECT census_urbans.uname AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_urbans"
+			    		+ " ON temp2.id = census_urbans.urbanid";
+	    }
+	    else if (reportType.equals("Congressional Districts")){
+	    	criteria1 = "congdistid";
+	    	criteria2 = " SELECT census_congdists.cname AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_congdists"
+			    		+ " ON concat('410',temp2.id) = census_congdists.congdistid";
+	    }
+	    
+	    query = "WITH temp1 AS (SELECT census_counties.countyid,"
+	    		+ "		census_blocks.blockid,"
+	    		+ "		census_blocks.placeid,"
+	    		+ "		census_blocks.congdistid,"
+	    		+ "		census_blocks.regionid,"
+	    		+ "		census_blocks.urbanid,"
+	    		+ "		census_blocks.population,"
+	    		+ "		census_blocks.population/census_counties.population::FLOAT AS poppercent"
+	    		+ "		FROM census_blocks INNER JOIN census_counties"
+	    		+ "		ON LEFT(blockid,5) = census_counties.countyid"
+	    		+ "		),"
+	    		+ "temp2 AS ("
+	    		+ "		SELECT"
+	    		+ "		   " + criteria1 + " id,"
+	    		+ "		   COALESCE(SUM(Population),0)::bigint population,"
+	    		+ "		   COALESCE(SUM(Pop_Disabled*poppercent),0)::bigint Pop_Disabled,"
+	    		+ "		   COALESCE(SUM(Tot_Pop_BP*poppercent),0)::bigint Tot_Pop_BP,"
+	    		+ "		   COALESCE(SUM(Tot_Pop_AP*poppercent),0)::bigint Tot_Pop_AP,"
+	    		+ "		   COALESCE(SUM(ENG_SPK*poppercent),0)::bigint ENG_SPK,"
+	    		+ "		   COALESCE(SUM(ESP_SPK*poppercent),0)::bigint ESP_SPK,"
+	    		+ "		   COALESCE(SUM(OTHER_INDO_SPK*poppercent),0)::bigint OTHER_INDO_SPK,"
+	    		+ "		   COALESCE(SUM(ASIAN_SPK*poppercent),0)::bigint ASIAN_SPK,"
+	    		+ "		   COALESCE(SUM(OTHER_LNG_SPK*poppercent),0)::bigint OTHER_LNG_SPK,"
+	    		+ "		   COALESCE(SUM(HH_Tot*poppercent),0)::bigint HH_Tot,"
+	    		+ "		   COALESCE(SUM(HH_White*poppercent),0)::bigint HH_White,"
+	    		+ "		   COALESCE(SUM(HH_Hispanic*poppercent),0)::bigint HH_Hispanic,"
+	    		+ "		   COALESCE(SUM(HH_Black*poppercent),0)::bigint HH_Black,"
+	    		+ "		   COALESCE(SUM(HH_American_Indian*poppercent),0)::bigint HH_American_Indian,"
+	    		+ "		   COALESCE(SUM(HH_Asian*poppercent),0)::bigint HH_Asian,"
+	    		+ "		   COALESCE(SUM(HH_Pacific_Islander*poppercent),0)::bigint HH_Pacific_Islander,"
+	    		+ "		   COALESCE(SUM(HH_Pacific_Other*poppercent),0)::bigint HH_Pacific_Other,"
+	    		+ "		   COALESCE(SUM(HH_White_Not_Hisp*poppercent),0)::bigint HH_White_Not_Hisp,"
+	    		+ "		   COALESCE(SUM(HH_Over_65*poppercent),0)::bigint HH_Over_65,"
+	    		+ "		   COALESCE(SUM(HH_Under_65*poppercent),0)::bigint HH_Under_65"
+	    		+ "		   "
+	    		+ "		FROM temp1 INNER JOIN oregon_titlevi"
+	    		+ "		ON temp1.countyid = oregon_titlevi.county_id"
+	    		+ ""
+	    		+ "		GROUP BY " + criteria1
+	    		+ "		ORDER BY " + criteria1
+	    		+ "	)"
+	    		+  criteria2;
+	    System.out.println(query);
+
+	    try {
+	    	stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query); 
+			
+			while (rs.next()){
+				TitleVIData i = new TitleVIData();
+				i.id = rs.getString("id");
+				i.name = rs.getString("name");
+				i.population = rs.getInt("population");
+				i.popDisabled = rs.getInt("pop_disabled");
+				i.popAP = rs.getInt("tot_pop_ap");
+				i.popBP = rs.getInt("tot_pop_bp");
+				i.engSpk = rs.getInt("eng_spk");
+				i.espSpk = rs.getInt("esp_spk");
+				i.otherIndoSpk= rs.getInt("other_indo_spk");
+				i.asianSpk = rs.getInt("asian_spk");
+				i.otherLngSpk = rs.getInt("other_lng_spk");
+				i.hhTotal = rs.getInt("hh_tot");
+				i.hhWhite= rs.getInt("hh_white");
+				i.hhHispanic= rs.getInt("hh_hispanic");
+				i.hhBlack= rs.getInt("hh_black");
+				i.hhAmericanIndian= rs.getInt("hh_american_indian");
+				i.hhAsian= rs.getInt("hh_asian");
+				i.hhPacificIslander= rs.getInt("hh_pacific_islander");
+				i.hhPacificOther= rs.getInt("hh_pacific_other");
+				i.hhWhiteNotHisp= rs.getInt("hh_white_not_hisp");
+				i.hhOver65= rs.getInt("hh_over_65");
+				i.hhUnder65= rs.getInt("hh_under_65");
+				results.TitleVIDataList.add(i);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    dropConnection(connection);
+		return results;
+	}
+	
 	/**
 	 *Queries Stops count, unduplicated urban pop and rural pop within x meters of all stops within the given geographic area
 	 */
@@ -1429,7 +1846,7 @@ public class PgisEventManager {
 			Point point = geometryFactory.createPoint(new Coordinate(lat[0], lon[0]));
 			Geometry targetGeometry = null;
 			try {
-				targetGeometry = JTS.transform( point, transform);
+				targetGeometry = JTS.transform( point , transform);
 			} catch (MismatchedDimensionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

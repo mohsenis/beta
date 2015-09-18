@@ -9,17 +9,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement(name = "EmpDataL")
-public class EmpDataList {
+@XmlRootElement(name = "TitleVIDataL")
+public class TitleVIDataList {
 	
 	@XmlAttribute
 	@JsonSerialize
 	public String metadata;
 
-	@XmlElement(name = "EmpDataList")
-	public List<EmpData> EmpDataList = new ArrayList<EmpData>();
-	
-	@XmlElement(name = "EmpDataList2")
-	public List<EmpData2> EmpDataList2 = new ArrayList<EmpData2>();
+	@XmlElement(name = "TitleVIDataList")
+	public List<TitleVIData> TitleVIDataList = new ArrayList<TitleVIData>();
 	
 }

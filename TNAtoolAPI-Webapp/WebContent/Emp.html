@@ -35,11 +35,14 @@
 	var username = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
 	var mySlidebar;
 	
-	$(document).ready(function(){
-		$('h2').append(reportType.replace(/%20/g, " ") +  ' Employment Report');
-		mySlidebar = new $.slidebars();
-		mySlidebar.slidebars.toggle();
-	});
+	(function($) {
+	    $(document).ready(function() {
+	    	$('#dialogPreLoader').hide();
+	    	$('h2').append(reportType.replace(/%20/g, " ") +  ' Employment Report');
+	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
+	    	mySlidebar.slidebars.open('left'); // Open the Slidebar.
+	    });
+	  }) (jQuery);
 	
 	$(function () {
 		$('#jstree').jstree({	
@@ -106,9 +109,10 @@
 								"label": "Remove",
 								"icon" : "js/lib/images/folder_delete.ico",
 								"action": function (obj) { 
-									if(tree.get_type($node) == 'category'){
-									alert('You cannot delete categories')
-									} else
+									var children = tree.get_children_dom($node);
+									$.each(children, function(ind,obj){
+										tree.move_node($(this).attr('id'), "#");
+									});
 									tree.delete_node($node);
 								}
 							}
@@ -196,6 +200,10 @@
 		return y;
 	} 
 	
+	function closebutton(){
+		$('slidebar').toggle('left');
+	}
+	
 	function clearReport(){
 		document.getElementById('displayReport').innerHTML = "";
 		$('#initialText').show();
@@ -214,6 +222,7 @@
 		
 		// close slidebar
 		mySlidebar.slidebars.close();
+		$('#dialogPreLoader').show();
 		
 		
 		$("#initialText").hide();
@@ -297,7 +306,7 @@
 								'<td>' + numWithCommas(item.population) + '</td>'+
 								'<td>' + numWithCommas(item.all_naics_sectors) + '</td>';
 					
-					// calculating the total employment selected and pushin to the datatable
+					// calculating the total employment selected and push into the datatable
 					var totalSelectedEmp = 0;
 					$('.jstree-node').each(function(){
 						 if (tree.is_selected($(this)) && tree.get_type($(this)) == 'category'){
@@ -323,6 +332,7 @@
 		var html2 = '<tfoot>'+tmp+'</tfoot>';
 		html +='</tbody>'+html2+'</table>';
 		$('#displayReport').append($(html));
+		$('#dialogPreLoader').hide();
 		
 		var table = $('#Emp').DataTable({
 			
@@ -414,7 +424,7 @@
 		<p id="displayReport" style="margin:5px; "><br></p>
 		<br>
 		<br>
-		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>
+		<img id="dialogPreLoader" src="images/287.GIF" alt="Page Loading" style="width:100px; height:100px; position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;" >
 	</div>
 </div> 
 	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="25%" style="height:100vh; width:23%; overflow:auto; border-style:groove; background-color:white; border-width:5px;">
