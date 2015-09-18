@@ -14,7 +14,24 @@ function userCount(){
 	
 }
 
+function checkTime(){
+	var b = false;
+	
+	var start = 1*3600;
+	var end = 6*3600;
+	var now = new Date();
+    now = now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
+    if(now>=start && now<=end){
+    	b = true;
+    }
+	return b;
+}
+
 function PGlogin(){
+	if(checkTime()){
+		alert("Playground interface is not available to users between 1:00am and 6:00am");
+		return false;
+	}
 	var password = $('#pass').val();
 	var username = $('#user').val();
 	$.ajax({
@@ -279,7 +296,7 @@ function addUser(username,password,email,firstname,lastname){
 
 function listOfFeeds(){
 	var b=false;
-	var html = "<table class='feedTable'><tr><th style='text-align:center;height:60px'>Feed Name</th><th style='text-align:center;height:60px;'>Public</th></tr>";
+	var html = "<table class='feedTable'><tr><th style='text-align:center;height:60px'>Feed Name</th><th style='text-align:center;height:60px;'></th></tr>";
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/FileUpload?&username="+username,
@@ -292,16 +309,18 @@ function listOfFeeds(){
 	        	
 	        	$.each(d.feeds, function(i,item){
 	        		if(d.names[i]!=null){
+	        			listedFeeds.push(item);
 		        		b=true;
-	        			html+="<tr><td>";
+	        			html+="<tr id='row-"+item+"'><td>";
 		        		var agencynames = d.names[i].split(",");
 		        		var html1 = "<br><span style='margin-left:3.5em'>Agencies:</span>";
 		        		for(var k=0; k<agencynames.length; k++){
 		        			html1 += "<br><span style='margin-left:6em'>"+agencynames[k]+"</span>";
 		        		}
-		        		html += "<p><input type='checkbox' class='selectFeed' id='"+item+"' style='margin-right:2em'><span>"+item+"</span>"
+		        		html += "<p><input type='checkbox' class='selectFeed' id='"+item+"' style='margin-right:2em'><span><b>"+item+"</b></span>"
 		        		+"<br><span style='margin-left:3.5em'>Start Date: "+stringToDate(d.startdates[i])+"</span>"+"<br><span style='margin-left:3.5em'>End Date: "+stringToDate(d.enddates[i])+"</span>"+html1+"</p></td>";
-		        		html += "<td style='padding-left:20px'>" +
+		        		html += "<td style='text-align:center'>" +
+		        				"<span>Public?</span><br>" +
 		        				"<select onchange='changePublic(this.value,\""+item+"\")'>";
 		        		if(d.isPublic[i]=="f"){
 		        			html +=	"<option value='TRUE'>Yes</option>" +
@@ -311,14 +330,42 @@ function listOfFeeds(){
     								"<option value='FALSE'>No</option>";
 		        		}
 		        				
-		        		html+="</select></td></tr>";
+		        		html+= "</select>";
+		        		html+= "<br><br><input id='del-button-"+item+"' type='button' value='Delete' onclick=\"deleteFeed('"+item+"',false)\" class='btn btn-danger delete'>" +
+		        			   "</td></tr>";
+		        		
 	        		}
 	        	});
-	        	html += "</table><br><input type='button' value='Delete feeds from database' onclick='deleteFeed()' class='btn btn-danger delete'>";
+	        	 //<br><input type='button' value='Delete feeds from database' onclick='deleteFeed()' class='btn btn-danger delete'>";
 	        	
         	}
         }
 	});
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&justAddedFeeds="+username,
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	if(undefined != d.DBError){
+        		return d.DBError;
+        	}else{
+	        	
+	        	$.each(d.feeds, function(i,item){
+	        		if(d.sizes[i]!=null){
+		        		b=true;
+	        			html += "<tr id='row1-"+item+"' style='text-align:center;opacity:0.4'><td>";
+		        		html += "<p><span><b>"+item+"</b></span></p></td><td>size (Byte):<br>"+d.sizes[i]+"</td></tr>";
+		        		html += "<tr id='row2-"+item+"' style='text-align:center'><td style='background-color:#D4A9A9'>Scheduled to be Added</td><td style='background-color:#D4A9A9'><a href=\"#\" onclick='undoAdd(\""+item+"\")'><u>Discard</u></a></td></tr>";
+		        		
+	        		}
+	        	});
+        	}
+        }
+	});
+	html += "</table>";
+	
 	if(!b){
 		return "";
 	}
@@ -398,9 +445,9 @@ function listOfPublicFeed(){
 		        		for(var k=0; k<agencynames.length; k++){
 		        			html1 += "<br><span style='margin-left:6em'>"+agencynames[k]+"</span>";
 		        		}
-		        		html += "<p><input type='checkbox' class='selectPublicFeed' id='"+item+"' style='margin-right:2em'><span>"+item+"</span>"
+		        		html += "<p><input type='checkbox' class='selectPublicFeed' id='"+item+"' style='margin-right:2em'><span><b>"+item+"</b></span>"
 		        		+"<br><span style='margin-left:3.5em'>Start Date: "+stringToDate(d.startdates[i])+"</span>"+"<br><span style='margin-left:3.5em'>End Date: "+stringToDate(d.enddates[i])+"</span>"+html1+"</p></td>";
-		        		html += "<td  style='padding-left:20px'><P>";
+		        		html += "<td  style='text-align:center'><P>";
 		        		html += "<span>"+d.ownerFirstname[i]+"</span><br>";
 		        		html += "<span>"+d.ownerLastname[i]+"</span>";
 		        		html += "</p></td></tr>";
@@ -437,7 +484,7 @@ function listOfOregonFeed(){
 		        		for(var k=0; k<agencynames.length; k++){
 		        			html1 += "<br><span style='margin-left:6em'>"+agencynames[k]+"</span>";
 		        		}
-		        		html += "<p><input type='checkbox' class='selectOregonFeed' id='"+item+"' style='margin-right:2em'><span>"+item+"</span>"
+		        		html += "<p><input type='checkbox' class='selectOregonFeed' id='"+item+"' style='margin-right:2em'><span><b>"+item+"</b></span>"
 		        		+"<br><span style='margin-left:3.5em'>Start Date: "+stringToDate(d.startdates[i])+"</span>"+"<br><span style='margin-left:3.5em'>End Date: "+stringToDate(d.enddates[i])+"</span>"+html1+"</p>";
 		        		
 	        		}
@@ -461,9 +508,95 @@ function stringToDate(str){
 	return sArr.join("/");
 }
 
-function deleteFeed(){
+
+function inDeleted(item){
+	var b = false;
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&inDeleted="+item,
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	if(d.DBError=="true"){
+        		b=true;
+        	}
+        }
+	});
+	return b;
+}
+
+
+function undoAdd(item){
+	$('#row1-'+item).remove();
+	$('#row2-'+item).remove();
 	
-	var feeds = new Array();
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&removeDel="+item+"&username="+username,
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+	location.reload(true);
+}
+
+function undoDelete(item){
+	$('#row-'+item+'-undo').hide('slow', function(){ $(this).remove(); });
+	$('#row-'+item+' :input').attr("disabled", false);
+	//$('#row-'+item+'-del').hide('slow', function(){ $(this).remove(); });
+	$('#row-'+item).fadeTo('slow',1);
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&removeDel="+item+"&username="+username,
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+}
+
+function deleteFeed(item, b){
+	$('#row-'+item).fadeTo('slow',0.4);
+	$('#row-'+item+' :input').attr("disabled", true);
+	//$('#row-'+item).append('<div id="row-'+item+'-del" style="position: absolute;z-index:2;opacity:0.4;width: 100%;height:100%;top:0;left:0"></div>');
+	$('#del-button-'+item).blur();
+	$('#row-'+item).after('<tr id="row-'+item+'-undo" style="text-align:center;"><td style="background-color:#D4A9A9">Scheduled to be Deleted</td><td style="background-color:#D4A9A9"><a href="#" onclick="undoDelete(\''+item+'\')"><u>Undo</u></a></td></tr>');
+
+	if(!b){
+		$.ajax({
+	        type: "GET",
+	        url: "/TNAtoolAPI-Webapp/FileUpload?&updateDel="+item+"&username="+username,
+	        dataType: "json",
+	        async: false,
+	        success: function(d) {
+	        	
+	        }
+		});
+	}
+	return;
+	
+	$("#panel-default").hide();
+	$("#dialogPreLoader").show();
+	$("#overlay").show();
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&feedname="+item+"&username="+username,
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+	for(var i=0; i<feeds.length; i++){
+		
+	}
+	location.reload(true);
+	
+	/*var feeds = new Array();
 	
 	$('.selectFeed').each(function(){
 		if($(this).is(':checked')){
@@ -484,7 +617,7 @@ function deleteFeed(){
 	        }
 		});
 	}
-	location.reload(true);
+	location.reload(true);*/
 }
 
 function getTotalSize(files) {
@@ -496,12 +629,17 @@ function getTotalSize(files) {
 }
 
 var username;
+var listedFeeds=new Array();
 function go(){
-	$('#oregonFeeds').html(listOfOregonFeed());
+	$('#oregonFeeds').html(listOfOregonFeed()).css('height','300px');
 	$( "#feedAccordion" ).accordion({
-	      collapsible: true
+	      collapsible: true,
+	      active: false,
+	      heightStyle: "content" 
 	});
-	$( ".ui-accordion-header" ).click();
+	//$( ".ui-accordion-header" ).click();
+	//$('#oregonFeeds').html(listOfOregonFeed()).css('height','300px');
+	
 	
 	$('.col-lg-7').css("width",'100%');
 	$('.col-lg-5').css("width",'100%');
@@ -512,6 +650,12 @@ function go(){
 	$('#helloUser').html("Hello "+userInfo[0]+" "+userInfo[1]);
 	$('#freeSpace').html((freeSpace/1000000).toFixed(3));
 	$('#feedList').html(listOfFeeds());
+	for(var i=0;i<listedFeeds.length;i++){
+		if(inDeleted(listedFeeds[i])){
+			deleteFeed(listedFeeds[i],true);
+		}
+	}
+	
 	$('#publicfeedList').html(listOfPublicFeed());
 	
 	

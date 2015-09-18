@@ -26,7 +26,7 @@ var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Number of Connected Agenies<em title="Number of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Agency Ids<em title="Agency Ids corresponding with transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Connected Agency Details<em title="Name of transit agencies that have at least one stop within the specified distance of the transit agency stops and minimum spatial gap in feet between between the transit agencies listed and the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Connected Agency Names<em title="Name of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Connected Agency Min Spatial Gaps<em title="Minimum spatial gap in feet between between the transit agencies listed and the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -77,9 +77,13 @@ $(document).ready(function(){
 	        at: "right bottom",
 	    }
 	});
+	var progressLabel = $( ".progress-label" );
 	$( "#progressbar" ).progressbar({
 	    value: false,
-	});
+	    change: function() {
+	        progressLabel.html( '<table><tr><td>Report in progress... </td><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
+	    }
+	}); 
 	document.getElementById("gap").value = gap;
 	jQuery('#gap').on('input', function() {		
 		$("#submit").trigger('mouseenter');		

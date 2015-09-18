@@ -18,13 +18,19 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -59,7 +65,7 @@ import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-//import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
 import org.onebusaway.gtfs.impl.Databases;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -67,6 +73,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.library.samples.UpdateEventManager;
+import com.webapp.api.model.AddRemoveFeed;
 import com.webapp.api.model.FeedNames;
 import com.webapp.api.model.FileMeta;
 import com.webapp.api.model.PDBerror;
@@ -80,13 +87,13 @@ import com.webapp.api.model.UserSession;
  */
 @MultipartConfig
 public class FileUpload extends HttpServlet {
-	private final static String basePath = "C:/Users/PB/git/TNAtool/";
-	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/";
+	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
+	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private static final long serialVersionUID = 1L;
 	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
-	private static final int DBINDEX = Databases.passwords.length-1;
+	private static final int DBINDEX = Databases.dbsize-1;
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -117,8 +124,69 @@ public class FileUpload extends HttpServlet {
 		String email = request.getParameter("email");
 		String firstname = request.getParameter("firstname");
 		String lastname = request.getParameter("lastname");
+		String updateDel = request.getParameter("updateDel");
+		String removeDel = request.getParameter("removeDel");
+		String inDeleted = request.getParameter("inDeleted");
+		String justAddedFeeds = request.getParameter("justAddedFeeds");
+		String runPlayground = request.getParameter("runPlayground");
 		
-		if(getURLpath!=null){
+		if(runPlayground!=null){
+			try {
+				runPlayground(runPlayground);
+			} catch (ZipException e) {
+				e.printStackTrace();
+			}
+		}else if(justAddedFeeds!=null){
+			FeedNames fn = new FeedNames();
+			
+			Boolean b = true;
+			try {
+				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+				
+				statement = c.createStatement();
+				rs = statement.executeQuery("SELECT feedname, feedsize "
+						+ "FROM gtfs_modified_feeds INNER JOIN gtfs_pg_users "
+						+ "ON gtfs_modified_feeds.username=gtfs_pg_users.username "
+						+ "where gtfs_modified_feeds.username = '"+justAddedFeeds+"' AND added='t';");
+				
+				while ( rs.next() ) {
+					fn.feeds.add(rs.getString("feedname"));
+					fn.names.add(rs.getString("feedsize"));
+				}
+				b=true;
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+				
+			} finally {
+				if (rs != null) try { rs.close(); } catch (SQLException e) {}
+				if (statement != null) try { statement.close(); } catch (SQLException e) {}
+				if (c != null) try { c.close(); } catch (SQLException e) {}
+			}
+			
+	    	try {
+	    		if(b){
+	    			obj.put("sizes", fn.names);
+					obj.put("feeds", fn.feeds);
+	    		}else{
+	    			obj.put("DBError", "");
+	    		}
+	    		out.print(obj);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}else if(inDeleted!=null){
+			boolean b = isInDeleted(inDeleted);
+			try {
+				obj.put("DBError", new Boolean(b).toString());
+				out.print(obj);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}else if(removeDel!=null){
+			removeUpdateInfo(removeDel, username);
+		}else if(updateDel!=null){
+			updateDelete(updateDel,username);
+		}else if(getURLpath!=null){
 			String URLpath  = request.getRequestURL().toString();
 	        int i = URLpath.indexOf(request.getServletPath());
 	        URLpath = URLpath.substring(0, i);
@@ -174,7 +242,7 @@ public class FileUpload extends HttpServlet {
 		}else if(email!=null){// send confirmation email
 		      String to = email;
 		      final String emailUser = "tnatooltech";
-		      final String emailPass = "OSUteam007";
+		      final String emailPass = "****";
 		      String host = "smtp.gmail.com";
 		 
 		      Properties properties = System.getProperties();
@@ -305,92 +373,7 @@ public class FileUpload extends HttpServlet {
 				e.printStackTrace();
 			}
 		}else if(feedDel!=null){//delete feed
-			String agencyId = "";
-			String agencyIds = "";
-			String[] agencyIdList;
-			
-			/*String root = new File(".").getAbsolutePath();
-            root = removeLastChar(root)+getServletContext().getContextPath();*/
-            File path = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/upload/uploaded/"+username);
-            File uploadedFile = new File(path + "/" + feedDel + ".zip");
-             
-			
-			String[][] defAgencyIds  = {{"census_congdists_trip_map","agencyid_def"},
-										{"census_places_trip_map","agencyid_def"},
-										{"census_urbans_trip_map","agencyid_def"},
-										{"census_counties_trip_map","agencyid_def"},
-										{"census_tracts_trip_map","agencyid_def"},
-										{"gtfs_fare_rules","fare_agencyid"},
-										{"gtfs_fare_attributes","agencyid"},
-										{"gtfs_trip_stops","stop_agencyid_origin"},
-										{"gtfs_stop_service_map","agencyid_def"},
-										{"gtfs_route_serviceid_map","agencyid_def"},
-										{"gtfs_stop_route_map","agencyid_def"},
-										{"gtfs_frequencies","defaultid"},
-										{"gtfs_pathways","agencyid"},
-										{"gtfs_shape_points","shapeid_agencyid"},
-										{"gtfs_stop_times","stop_agencyid"},
-										{"gtfs_transfers","defaultid"},
-										{"tempstopcodes","agencyid"},
-										{"tempetriptimes","agencyid"},
-										{"tempestshapes","agencyid"},
-										{"tempshapes","agencyid"},
-										{"gtfs_trips","serviceid_agencyid"},
-										{"gtfs_calendar_dates","serviceid_agencyid"},
-										{"gtfs_calendars","serviceid_agencyid"},
-										{"gtfs_stops","agencyid"},
-										{"gtfs_routes","defaultid"},
-										{"gtfs_agencies","defaultid"},
-										{"gtfs_feed_info","defaultid"}};
-			
-			try {
-				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
-				statement = c.createStatement();
-				
-				statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname = '"+feedDel+"';");
-				statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedDel+"';");
-				
-				updateQuota(username);
-				
-				rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info where feedname = '"+feedDel+"';");
-				if ( rs.next() ) {
-					agencyId = rs.getString("defaultid");
-				}
-				
-				rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname = '"+feedDel+"';");
-				if ( rs.next() ) {
-					agencyIds = rs.getString("agencyids");
-				}
-				agencyIdList = agencyIds.split(",");
-				
-				for(int i=0;i<defAgencyIds.length;i++){
-					System.out.println(defAgencyIds[i][0]);
-					try{
-						if(defAgencyIds[i][0].startsWith("temp")){
-							statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+sqlString(agencyIdList,defAgencyIds[i][1])+"';");
-							
-						}else{
-							statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+defAgencyIds[i][1]+"='"+agencyId+"';");
-						}
-						
-					}catch (SQLException e) {
-						System.out.println(e.getMessage());
-					}
-				}
-				
-				uploadedFile.delete();
-				System.out.println("vacuum start");
-				statement.executeUpdate("VACUUM");
-				System.out.println("vacuum finish");
-				System.out.println(System.currentTimeMillis());
-			} catch (SQLException e) {
-				System.out.println(e.getMessage());
-				
-			} finally {
-				if (rs != null) try { rs.close(); } catch (SQLException e) {}
-				if (statement != null) try { statement.close(); } catch (SQLException e) {}
-				if (c != null) try { c.close(); } catch (SQLException e) {}
-			}
+			feedDel(username, feedDel);
 			try {
 				obj.put("DBError", "");
 			} catch (JSONException e) {
@@ -459,7 +442,7 @@ public class FileUpload extends HttpServlet {
 		String error = "";
 		String username = "";
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-		System.out.println(System.currentTimeMillis());
+		//System.out.println(System.currentTimeMillis());
         if (isMultipart) {
 	        FileItemFactory factory = new DiskFileItemFactory();
 	
@@ -486,7 +469,7 @@ public class FileUpload extends HttpServlet {
 		                feed = uploadedFile.getAbsolutePath();
 		                item.write(uploadedFile);
 		                
-		                changeCSV(feed, username);
+		                //changeCSV(feed, username);
 		                
 		                JSONObject jsono = new JSONObject();
                         jsono.put("name", fileName);
@@ -497,8 +480,9 @@ public class FileUpload extends HttpServlet {
                         jsono.put("delete_type", "GET");
                         json.put(jsono);
                         
-		                error = addFeed(feed, fileName, item.getSize(),username);
-		                System.out.println(error);
+                        addUploadInfo(feed, fileName, item.getSize(),username);
+		                /*error = addFeed(feed, fileName, item.getSize(),username);
+		                System.out.println(error);*/
 		            }
 		        }
 	        } catch (FileUploadException e) {
@@ -521,6 +505,97 @@ public class FileUpload extends HttpServlet {
 	        //error = updateFeeds();
             //System.out.println(error);
         }
+	}
+	
+	public boolean isInDeleted(String feedname){
+		boolean b = false;
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_modified_feeds WHERE feedname='"+feedname+"';");
+			if ( rs.next() ) {
+				b = true;
+			}
+					
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		return b;
+	}
+	
+	public void removeUpdateInfo(String feedname, String username){
+		Connection c = null;
+		Statement statement = null;
+		String filename = "";
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_modified_feeds WHERE feedname='"+feedname+"';");
+			if ( rs.next() ) {
+				filename  = rs.getString("filename");
+			}
+			File uploadedFile = new File(filename);
+			uploadedFile.delete();
+			
+			statement.executeUpdate("DELETE FROM gtfs_modified_feeds"
+								  + " WHERE feedname='"+feedname+"';");
+					
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		updateQuota(username);
+	}
+	
+	public void updateDelete(String feedname, String username){
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			statement.executeUpdate("INSERT INTO gtfs_modified_feeds"
+								  + " (username,feedname,feedsize,deleted,added,filename)"
+								  + " VALUES ('"+username+"','"+feedname+"',0,TRUE,FALSE,'');");
+					
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+	}
+	
+	public void addUploadInfo(String filename, String feedname, long feedsize, String username){
+		for(int i=0;i<4;i++){
+			feedname = removeLastChar(feedname);
+		}
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			statement.executeUpdate("INSERT INTO gtfs_modified_feeds"
+								  + " (username,feedname,feedsize,deleted,added,filename)"
+								  + " VALUES ('"+username+"','"+feedname+"','"+feedsize+"',FALSE,TRUE,'"+filename+"');");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		updateQuota(username);
 	}
 	
 	public String setMessage(String username, String email, String firstname, String lastname, HttpServletRequest request){
@@ -600,6 +675,10 @@ public class FileUpload extends HttpServlet {
 				names.add(rs.getString("feedname"));
 			}
 			
+			rs = statement.executeQuery("SELECT feedname FROM gtfs_modified_feeds WHERE username='"+username+"';");
+			while ( rs.next() ) {
+				names.add(rs.getString("feedname"));
+			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			//e.printStackTrace();
@@ -610,7 +689,7 @@ public class FileUpload extends HttpServlet {
 		}
 		
 		while(true){
-			newName = feedName+"-"+index;
+			newName = feedName+"-"+username+"-"+index;
 			if(names.contains(newName)){
 				index++;
 			}else{
@@ -621,10 +700,12 @@ public class FileUpload extends HttpServlet {
 		return newName+".zip";
 	}
 	
-	public String addFeed(String feed, String feedName, long fileSize, String username) throws IOException{
+	public static String addFeed(String feed, String feedName, long fileSize, String username) throws IOException{
 		String [] args = new String[5];
-		for(int i=0;i<4;i++){
-			feedName = removeLastChar(feedName);
+		if(feedName.toLowerCase().contains(".zip")){
+			for(int i=0;i<4;i++){
+				feedName = removeLastChar(feedName);
+			}
 		}
 		
 		args[0] = "--driverClass=\"org.postgresql.Driver\"";
@@ -635,7 +716,7 @@ public class FileUpload extends HttpServlet {
 		
 		boolean b = true;
 		try{
-			//GtfsDatabaseLoaderMain.main(args);
+			GtfsDatabaseLoaderMain.main(args);
 			b = false;
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
@@ -720,7 +801,7 @@ public class FileUpload extends HttpServlet {
 		return "Feed added and updated";
 	}
 	
-	public void changeCSV(String feed, String username) throws IOException, ZipException{
+	public static void changeCSV(String feed, String username) throws IOException, ZipException{
 		String path=feed;
 		for(int j=0;j<4;j++){
 			path = removeLastChar(path); 
@@ -860,7 +941,7 @@ public class FileUpload extends HttpServlet {
         /*end zipping*/
 	}
 	
-	public int getFeedIndex(String agencyId, String username){
+	public static int getFeedIndex(String agencyId, String username){
 		int index =0;
 		
 		Connection c = null;
@@ -900,10 +981,11 @@ public class FileUpload extends HttpServlet {
 		return index;
 	}
 	
-	public void updateQuota(String username){
+	public static void updateQuota(String username){
 		Connection c = null;
 		Statement statement = null;
 		String usedspace="";
+		long us;
 		try {
 			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
@@ -914,8 +996,18 @@ public class FileUpload extends HttpServlet {
 			if(usedspace==null || usedspace.equals("")){
 				usedspace = 0+"";
 			}
+			us = Long.parseLong(usedspace);
 			
-			statement.executeUpdate("UPDATE gtfs_pg_users SET usedspace='"+usedspace+"' WHERE username='"+username+"';");
+			rs = statement.executeQuery("SELECT SUM(feedsize) FROM gtfs_modified_feeds where username = '"+username+"';");
+			if ( rs.next() ) {
+				usedspace = rs.getString("sum");
+			}
+			if(usedspace==null || usedspace.equals("")){
+				usedspace = 0+"";
+			}
+			us += Long.parseLong(usedspace);
+			
+			statement.executeUpdate("UPDATE gtfs_pg_users SET usedspace='"+us+"' WHERE username='"+username+"';");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			//e.printStackTrace();
@@ -926,7 +1018,7 @@ public class FileUpload extends HttpServlet {
 		}
 	}
 	
-	public String updateFeeds(){
+	public static String updateFeeds(){
 		
 		Process pr;
 		ProcessBuilder pb;
@@ -947,14 +1039,14 @@ public class FileUpload extends HttpServlet {
 		return "Feed updated";
 	}
   	
-	public String removeLastChar(String str) {
+	public static String removeLastChar(String str) {
     	if (str.length() > 0) {
             str = str.substring(0, str.length()-1);
         }
         return str;
     }
 	
-	public String sqlString(String[] ids, String column){
+	public static String sqlString(String[] ids, String column){
 		String sql = "";
 		for(int i=0;i<ids.length-1;i++){
 			sql += column+" = '"+ids[i]+"' OR ";
@@ -963,4 +1055,239 @@ public class FileUpload extends HttpServlet {
 		return sql;
 	}
 
+	public static void runPlayground(String b) throws IOException, ZipException{
+		
+		List<AddRemoveFeed> addFeeds = new ArrayList<AddRemoveFeed>();
+		List<AddRemoveFeed> removeFeeds = new ArrayList<AddRemoveFeed>();
+		AddRemoveFeed feed;
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_modified_feeds;");
+			while(rs.next()){
+				feed = new AddRemoveFeed();
+				feed.username = rs.getString("username");
+				feed.feedname = rs.getString("feedname");
+				if(rs.getString("deleted").equals("t")){
+					removeFeeds.add(feed);
+				}else{
+					feed.feedsize = rs.getString("feedsize");
+					feed.filename = rs.getString("filename");
+					addFeeds.add(feed);
+				}
+			}
+			
+			for(AddRemoveFeed f: removeFeeds){
+				if(b.equals("true") || checkTime()){
+					feedDel(f.username, f.feedname);
+					
+					statement.executeUpdate("DELETE FROM gtfs_modified_feeds "
+							+ "WHERE feedname='"+f.feedname+"';");
+					System.out.println("vacuum start");
+					statement.executeUpdate("VACUUM");
+					System.out.println("vacuum finish");
+				}
+			}
+			/*System.out.println("Post delete vacuum start");
+			statement.executeUpdate("VACUUM");
+			System.out.println("Post delete vacuum finish");*/
+			
+			for(AddRemoveFeed f: addFeeds){
+				if(b.equals("true") || checkTime()){
+					changeCSV(f.filename, f.username);
+					addFeed(f.filename, f.feedname, Long.parseLong(f.feedsize),f.username);
+					
+					statement.executeUpdate("DELETE FROM gtfs_modified_feeds "
+							+ "WHERE feedname='"+f.feedname+"';");
+					
+					System.out.println("vacuum start");
+					statement.executeUpdate("VACUUM");
+					System.out.println("vacuum finish");
+				}
+			}			
+			/*System.out.println("Post add vacuum start");
+			statement.executeUpdate("VACUUM");
+			System.out.println("Post add vacuum finish");*/
+			
+			/*System.out.println("Full vacuum start");
+			statement.executeUpdate("VACUUM FULL");
+			System.out.println("Full vacuum finish");*/
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+	}
+	
+	public static boolean checkTime(){
+		boolean b=false;
+		try {
+		    String t1 = "01:25:00";
+		    Date time1 = new SimpleDateFormat("HH:mm:ss").parse(t1);
+		    Calendar c1 = Calendar.getInstance();
+		    c1.setTime(time1);
+		    c1.add(Calendar.DATE, 1);
+
+		    String t2 = "06:00:00";
+		    Date time2 = new SimpleDateFormat("HH:mm:ss").parse(t2);
+		    Calendar c2 = Calendar.getInstance();
+		    c2.setTime(time2);
+		    c2.add(Calendar.DATE, 1);
+
+		    String current = new SimpleDateFormat("HH:mm:ss").format(new Date());
+		    Date d = new SimpleDateFormat("HH:mm:ss").parse(current);
+		    Calendar c3 = Calendar.getInstance();
+		    c3.setTime(d);
+		    c3.add(Calendar.DATE, 1);
+
+		    Date x = c3.getTime();
+		    if (x.after(c1.getTime()) && x.before(c2.getTime())) {
+		        b = true;
+		    }
+		} catch (java.text.ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return b;
+	}
+	
+	public static void schedulePlayground(){
+		long difference=0;
+		try {
+			String t = "01:30:00";
+		    Date time = new SimpleDateFormat("HH:mm:ss").parse(t);
+		    Calendar c = Calendar.getInstance();
+		    c.setTime(time);
+		    c.add(Calendar.DATE, 1);
+		    
+		    String current = new SimpleDateFormat("HH:mm:ss").format(new Date());
+		    Date now = new SimpleDateFormat("HH:mm:ss").parse(current);
+		    Calendar cal = Calendar.getInstance();
+		    cal.setTime(now);
+		    cal.add(Calendar.DATE, 1);
+
+		    Date x = cal.getTime();
+		    
+		    if (x.after(c.getTime())) {
+		        difference = 86400000 - (x.getTime() - c.getTime().getTime());
+		    }else{
+		    	difference = c.getTime().getTime() - x.getTime(); 
+		    }
+		}catch (java.text.ParseException e) {
+			e.printStackTrace();
+		}
+		/*System.out.println("Scheduling..");
+		ScheduledExecutorService fScheduler = Executors.newScheduledThreadPool(1);    
+		Runnable runPlayground = new RunPlayground();
+		fScheduler.scheduleAtFixedRate(runPlayground, difference, 86400000, TimeUnit.MILLISECONDS);
+		System.out.println("done");*/
+	}
+	
+	public static final class RunPlayground implements Runnable {
+	    @Override public void run() {
+	    	try {
+				runPlayground("false");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ZipException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	}
+	
+	public static void feedDel(String username, String feedDel){
+		String agencyId = "";
+		String agencyIds = "";
+		String[] agencyIdList;
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+        File path = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/upload/uploaded/"+username);
+        File uploadedFile = new File(path + "/" + feedDel + ".zip");
+         
+		
+		String[][] defAgencyIds  = {{"census_congdists_trip_map","agencyid_def"},
+									{"census_places_trip_map","agencyid_def"},
+									{"census_urbans_trip_map","agencyid_def"},
+									{"census_counties_trip_map","agencyid_def"},
+									{"census_tracts_trip_map","agencyid_def"},
+									{"gtfs_fare_rules","fare_agencyid"},
+									{"gtfs_fare_attributes","agencyid"},
+									{"gtfs_trip_stops","stop_agencyid_origin"},
+									{"gtfs_stop_service_map","agencyid_def"},
+									{"gtfs_route_serviceid_map","agencyid_def"},
+									{"gtfs_stop_route_map","agencyid_def"},
+									{"gtfs_frequencies","defaultid"},
+									{"gtfs_pathways","agencyid"},
+									{"gtfs_shape_points","shapeid_agencyid"},
+									{"gtfs_stop_times","stop_agencyid"},
+									{"gtfs_transfers","defaultid"},
+									{"tempstopcodes","agencyid"},
+									{"tempetriptimes","agencyid"},
+									{"tempestshapes","agencyid"},
+									{"tempshapes","agencyid"},
+									{"gtfs_trips","serviceid_agencyid"},
+									{"gtfs_calendar_dates","serviceid_agencyid"},
+									{"gtfs_calendars","serviceid_agencyid"},
+									{"gtfs_stops","agencyid"},
+									{"gtfs_routes","defaultid"},
+									{"gtfs_agencies","defaultid"},
+									{"gtfs_feed_info","defaultid"}};
+		
+		try {
+			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			statement = c.createStatement();
+			
+			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname = '"+feedDel+"';");
+			statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedDel+"';");
+			
+			updateQuota(username);
+			
+			rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info where feedname = '"+feedDel+"';");
+			if ( rs.next() ) {
+				agencyId = rs.getString("defaultid");
+			}
+			
+			rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname = '"+feedDel+"';");
+			if ( rs.next() ) {
+				agencyIds = rs.getString("agencyids");
+			}
+			agencyIdList = agencyIds.split(",");
+			
+			for(int i=0;i<defAgencyIds.length;i++){
+				System.out.println(defAgencyIds[i][0]);
+				try{
+					if(defAgencyIds[i][0].startsWith("temp")){
+						statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+sqlString(agencyIdList,defAgencyIds[i][1])+"';");
+						
+					}else{
+						statement.executeUpdate("ALTER TABLE "+defAgencyIds[i][0]+" DISABLE TRIGGER ALL;");
+						statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+defAgencyIds[i][1]+"='"+agencyId+"';");
+						statement.executeUpdate("ALTER TABLE "+defAgencyIds[i][0]+" ENABLE TRIGGER ALL;");
+					}
+					
+				}catch (SQLException e) {
+					System.out.println(e.getMessage());
+				}
+			}
+			
+			uploadedFile.delete();
+			/*System.out.println("vacuum start");
+			statement.executeUpdate("VACUUM");
+			System.out.println("vacuum finish");*/
+			//System.out.println(System.currentTimeMillis());
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+	}
 }

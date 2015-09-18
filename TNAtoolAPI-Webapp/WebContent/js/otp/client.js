@@ -1,5 +1,6 @@
 var key = Math.random();
-var dbindex = 0;
+var default_dbindex = getDefaultDbIndex();
+var dbindex = default_dbindex;
 var newdates = null;
 var URL = document.URL;
 if (URL.split("?").length >0){
@@ -42,7 +43,8 @@ var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
 var minimalLayer = new L.StamenTileLayer("toner");
 $("body").css("display","");
-var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> V.3.15.07';
+$("#overlay").show();
+var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> V.3.15.08';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
 /*var osmLayer = new L.TileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', 
@@ -172,7 +174,8 @@ function loadDialog2(node){
 		    	if($(this).hasClass('selected')){
 		    		connectionMarkers.removeLayer(connectionsClusters[$(this).index()]);
 		    		connectionPolylines.removeLayer(polylines[$(this).index()]);
-		    		selectedAgencies.remove($(this).children().eq(0).html());
+		    		// remove the selected agency from the list of agencies.
+		    		selectedAgencies.splice(selectedAgencies.indexOf($(this).children().eq(0).html()),1);
 		    	}else{
 		    		var index = $(this).index();
 		    		selectedAgencies.push($(this).children().eq(0).html());
@@ -193,7 +196,7 @@ function loadDialog2(node){
     					var lat = str[0];
     					var lon = str[1];
     					
-    					var marker = new L.marker([lat,lon] /*,{icon: onMapIcon}*/).on('click',onClick);
+    					var marker = new L.marker([lat,lon] /*,{icon: onMapIcon}*/).on('click',onMarkerClick);
     					marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
     					marker.agencyId = agencyId;
     					marker.lat = lat;
@@ -224,7 +227,7 @@ function loadDialog2(node){
 					});
 					
 					$.each(data.stopsList,function(i, item){
-						var marker = new L.marker([item.lat,item.lon] /*,{icon: onMapIcon})*/).on('click',onClick);
+						var marker = new L.marker([item.lat,item.lon] /*,{icon: onMapIcon})*/).on('click',onMarkerClick);
 						marker.bindPopup('<b>Agency:</b> '+item.agencyName+
 										'<br><b>Stop Name: </b> '+item.name);
 						marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
@@ -242,7 +245,7 @@ function loadDialog2(node){
 	});
 }
 
-function onClick(){
+function onMarkerClick(){
 	var id = this.id;
 	
 	if (polylines[id]==null){
@@ -250,8 +253,7 @@ function onClick(){
 		var selectedStopLat= this.lat;
 		var selectedStopLon=this.lon;
 		var color = this.color;
-				
-		selectedAgencies.remove(this.agencyId);
+		selectedAgencies.splice(selectedAgencies.indexOf(this.agencyId),1);
 		this.closePopup();
 		
 		$.ajax({
@@ -860,8 +862,8 @@ $.ajax({
 	    });
 	    menucontent+='</ul>';
 	    if (dbindex<0 || dbindex>menusize-1){
-	    	dbindex =0;
-	    	history.pushState('data', '', document.URL.split("?")[0]+"?&n="+key+'&dbindex=0');	    	
+	    	dbindex = default_dbindex;
+	    	history.pushState('data', '', document.URL.split("?")[0]+"?&n="+key+'&dbindex='+default_dbindex);	    	
 	    }
 	}			
 });
@@ -908,7 +910,7 @@ $mylist
             	catch(err) {
             		console.log("error");
             	}
-            	
+            	$("#overlay").hide();
             	return ops.data;            	
             }    	               
         },
@@ -1126,7 +1128,7 @@ $mylist
 	        .appendTo(div);		    
 
 		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4">'+
-		    		'<li role="presentation"><a id="SSR" href="#"><b>Statewide Report</b></a>'+
+		    		'<li role="presentation"><a id="SSR" href="#"><b>Statewide Reports</b></a>'+
 		    		'<ul>'+
 		    		'<li role="presentation"><a id="ASR" href="#"><b>Transit Agency Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Geographical Reports</a>'+
@@ -1138,12 +1140,12 @@ $mylist
 		    		'<li role="presentation"><a id="ORSR" href="#"><b>ODOT Transit Regions Reports</b></a></li>'+
 		    		'</ul></li>'+
 		    		'</ul></li>'+
-		    		'<li role="presentation" onclick="return;"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
+		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
 		    		'<ul>'+
-		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Report</b></a></li>'+
-		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Networks Report</b></a></li>'+
+		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Networks Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Agencies Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Report</b></a></li>'+
+		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
 		    		'</ul></li>'+
 		    		'<li role="presentation" onclick="return;"><a id="Emp" href="#" style="cursor:default">Employment Reports</a>'+
 		    		'<li role="presentation" onclick="return;"><a id="T6" href="#" style="cursor:default">Title VI Reports</a></ul>');
@@ -1167,87 +1169,33 @@ $mylist
 							//alert("del triggered");
 							$("#"+dateID).remove();							
 						}
-						if ($('#datepicker').multiDatesPicker('getDates').length>0){
+						if($('#datepicker').multiDatesPicker('getDates').length>0){
 								$("#datepick").css({"border":"2px solid #900"});
-							} else {
+						} else {
 								$("#datepick").css({"border":""});
-							}
+						}
 			      }
-			});			
-			$("#datepicker").append("<div id='datesdiv'><ul id='datesarea'></ul></div>");
+			});
+			
+			//$("#datesdiv").css({"width":"100%"});
+			$("#datepicker").append("<input type='button' value='Submit Dates' id='datepickerSubmit' onclick='updatepicker()'/>");
 			$("#datepicker").css({"display":"inline-block", "z-index":"1000", "position":"fixed"});
-			$("#datesdiv").css({"width":"100%"});
-			$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"}); 
+			//$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"}); 
 			$("#datepicker").hide();
 			
-			if (w_qstringd){				
-					$( "#datepicker" ).multiDatesPicker({
-						addDates: w_qstringd.split(","),
-						onSelect: function(date, inst) {					  
-							  dateID = date.replace("/","").replace("/","");					  
-								if($("#"+dateID).length==0){
-									//alert("add triggered");
-									addDate(date);							
-								}else{
-									//alert("del triggered");
-									$("#"+dateID).remove();							
-								}
-								if ($('#datepicker').multiDatesPicker('getDates').length>0){
-										$("#datepick").css({"border":"2px solid #900"});
-									} else {
-										$("#datepick").css({"border":""});
-									}
-					      }
-					});	
-					var cdate;
-					for(var i=0; i<w_qstringd.split(",").length; i++){
-						cdate = w_qstringd.split(",")[i];
-						dateID = cdate.replace("/","").replace("/","");
-						addDate(cdate);		
-					}									
-			}
-			/*$("#accordion").accordion({
-				collapsible: true,
-				active: false,
-				heightStyle: "content"
-			});
-			$("#accordion").accordion("refresh");*/
-			/*$("#datepicker").click(function(){			    
-			    $("#datepickerdiv").toggle();
-			});*/
-			/*$("#datepicker").datepicker({
-			    beforeShow: function() {
-			        $(".ui-datepicker-buttonpane")
-			            .html('')
-			            .append("<button>new button</button>");
-			    }
-			});*/
 			$('#datepick').click(function () {
 				$("#datepicker").toggle();
-				updatepicker();
-				/*if(!($(this).hasClass('open'))) {
-					updatepicker();
-			    }				*/
-			    /*if($(this).hasClass('open')) {
-			    	$("#datepickarea").show();
-			    } else{
-			    	$("#datepickarea").hide();
-			    }*/
+				//updatepicker();
+				
 			});
 			$('#dbb').click(function () {
 				$("#datepicker").hide();
-				updatepicker();
+				//updatepicker();
 			});
 			$('#repb').click(function () {
 				$("#datepicker").hide();
-				updatepicker();
-			});
-			/*$('#datepick').on('show.bs.dropdown', function () {
-				$("#datepicker").toggle();
-				});
-			$('#datepick').on('hide.bs.dropdown', function () {
-				$("#datepicker").toggle();
-				});*/			
+				//updatepicker();
+			});		
 			
 			$mylist.dialogExtend("collapse");
 			$("#minimize").attr("title", "Minimize");
@@ -1262,28 +1210,28 @@ $mylist
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="SSR"){			    	
-			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '500';
-			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '500';
-			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if(casestring=="CSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CPSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CDSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="UASR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&username='+getSession());	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="ORSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&username='+getSession());	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="PNRR"){
 			    	window.open('/TNAtoolAPI-Webapp/ParkRideReport.html'+'?&dbindex='+dbindex);
 			    }else if(casestring.substring(0,2)=="DB"){
@@ -1335,8 +1283,9 @@ $mylist
 		                    }
 		                 }
 		            ]
-	});        
-	    })
+	});   
+	updateListDialog(dialogAgenciesId);
+})
 .bind("change_state.jstree", function (e, d) {
     var tagName = d.args[0].tagName;
     var refreshing = d.inst.data.core.refreshing;
@@ -1437,8 +1386,85 @@ function updatepicker(){
 	} else {						
 			$("#datepick").css({"border":""});
 			localStorage.removeItem(key);
-		}
-	if (w_qstringd!=newdates){
-		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
 	}
+	location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
+
+	/*if (w_qstringd!=newdates){
+		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
+	}*/
+}
+
+function updateListDialog(agenciesIds){
+	var aList = $( "li[type='agency']" );
+	var count = aList.length;
+	var today = currentDateFormatted();
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/agenciesCalendarRange?agencies='+agenciesIds.join(',')+'&dbindex='+dbindex,
+		async: false,
+		success: function(d){	
+			$.each(d.SEDList, function(i,item){
+				if(today>item.Enddate){
+					$(aList[i]).children('a').css('color','red');
+				}
+		    	$(aList[i]).children('a').attr( "title", "Active Service Dates: "+stringToDate(item.Startdate)+" to "+stringToDate(item.Enddate));
+		    });	
+		}
+	});
+	$('.jstree-no-dots').prepend("<p style='margin-left:3%'><b>List of Agencies:</b></p>");
+	$('.jstree-no-dots').css({"height": "74%","padding-top": "2%"});
+	
+	var noGTFS = ["Albany Transit System",
+	              "Burns Paiute Tribal Transit Service",
+	              "Corvallis Transit System", 
+	              "Linn-Benton Loop",
+	              "Malheur Council on Aging & Community Services",
+	              "Shawn's Rideshare",
+	              "South Clackamas Transportation District",
+	              "Warm Springs Transit"];
+	
+	if (!w_qstringd && getSession()=='admin'){
+		var html = 	"<br><br><p style='margin-left:3%'><b>Agencies with no GTFS feed:</b></p>";
+		html +=	"<ul style='margin-bottom: 20px;'>";
+		for(var i=0; i<noGTFS.length; i++){
+			html +=	"<li style='margin-left:52px'>"+(++count)+". "+noGTFS[i]+"</li>";
+		}
+		html +=	"</ul>";
+		$('.jstree-no-dots').append(html);
+	}
+	
+	$mylist.append( "<div id='listLegend'><p style='font-size: 90%;margin-left:2%;color:red;margin-top:1%'>-<i>Agencies in red color have an expired GTFS feed</i></p></div>" );
+	$mylist.append( "<div id='dateList'><p style='margin-left:3%'><b>Selected Dates:</b></p></div>" );
+	$("#dateList").append("<div id='datesdiv' style='padding-left: 4%;'><ul id='datesarea'></ul></div>");
+	//$("#datesdiv").css({"width":"100%"});
+	$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"});
+	
+	if (w_qstringd){				
+		$( "#datepicker" ).multiDatesPicker({
+			addDates: w_qstringd.split(","),
+			onSelect: function(date, inst) {					  
+				  dateID = date.replace("/","").replace("/","");					  
+					if($("#"+dateID).length==0){
+						//alert("add triggered");
+						addDate(date);							
+					}else{
+						//alert("del triggered");
+						$("#"+dateID).remove();							
+					}
+					if ($('#datepicker').multiDatesPicker('getDates').length>0){
+							$("#datepick").css({"border":"2px solid #900"});
+						} else {
+							$("#datepick").css({"border":""});
+						}
+		      }
+		});	
+		//alert(w_qstringd);
+		var cdate;
+		for(var i=0; i<w_qstringd.split(",").length; i++){
+			cdate = w_qstringd.split(",")[i];
+			dateID = cdate.replace("/","").replace("/","");
+			addDate(cdate);		
+		}									
+}
 }

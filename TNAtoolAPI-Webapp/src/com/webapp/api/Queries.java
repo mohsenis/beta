@@ -64,7 +64,7 @@ public class Queries {
 	
 	private static final double STOP_SEARCH_RADIUS = 0.1;
 	private static final int LEVEL_OF_SERVICE = 2;
-	private static final int default_dbindex = Databases.defaultDBIndex;
+	private static final int default_dbindex = Databases.dbsize-1;
 	static AgencyRouteList[] menuResponse = new AgencyRouteList[Databases.dbsize];
 	static int dbsize = Databases.dbsize;	
 	
@@ -118,13 +118,14 @@ public class Queries {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
+		
 		ParknRideCountiesList response = new ParknRideCountiesList();
 		response = PgisEventManager.getCountiesPnrs(dbindex);
 		
 		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex];
 			    
-	    setprogVal(key, 0);
+	    setprogVal(key, 100);
 	    
 	    try {
 			Thread.sleep(1000);
@@ -153,7 +154,7 @@ public class Queries {
 		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex];
 			    
-	    setprogVal(key, 0);
+	    setprogVal(key, 100);
 	    
 	    try {
 			Thread.sleep(1000);
@@ -345,8 +346,6 @@ public class Queries {
    	return response;
     }
    
-
-
    /**
     * Identifies the stops and routes within 
     * a given radius of a park&ride lot.
@@ -433,7 +432,8 @@ public class Queries {
     			AgencyRouteList response = PgisEventManager.agencyMenu(null, null, username, dbindex);
     			return response;
     		}
-	    	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(dbindex);
+    		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+	    	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(selectedAgencies, dbindex);
 	    	if (menuResponse[dbindex]==null || menuResponse[dbindex].data.size()!=allagencies.size() ){
 	    		menuResponse[dbindex] = new AgencyRouteList();   	
 	    		menuResponse[dbindex] = PgisEventManager.agencyMenu(null, null, username, dbindex);
@@ -949,8 +949,7 @@ daysLoop:   for (int i=0; i<dates.length; i++){
         }
     	String[] stopIds = stops.split(",");
     	StopListR response = new StopListR();    	
-    	List<Stop> tmpStops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency, dbindex);
-    	String defAgency = tmpStops.get(0).getId().getAgencyId();
+    	String defAgency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getDefaultId();
     	for (String instance: stopIds){
     		
     		AgencyAndId stopId = new AgencyAndId(defAgency,instance);
@@ -2584,6 +2583,33 @@ Loop:  	for (Trip trip: routeTrips){
         progVal.remove(key);		
 		return response;
 		
+    }
+	
+	/**
+     * Get calendar range for a set of agencies
+     */
+    @GET
+    @Path("/agenciesCalendarRange")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object agenciesCalendarRange(@QueryParam("agencies") String agency, @QueryParam("dbindex") Integer dbindex){
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	StartEndDatesList sedlist = new StartEndDatesList();
+    	String[] agencies = agency.split(",");
+    	StartEndDates seDates;
+    	String defaultAgency;
+    	FeedInfo feed;
+    	for(String a:agencies){
+    		seDates = new StartEndDates();
+    		defaultAgency = GtfsHibernateReaderExampleMain.QueryAgencybyid(a, dbindex).getDefaultId();
+        	feed = GtfsHibernateReaderExampleMain.QueryFeedInfoByDefAgencyId(defaultAgency, dbindex).get(0);
+        	seDates.Startdate = feed.getStartDate().getAsString();
+        	seDates.Enddate = feed.getEndDate().getAsString();
+        	sedlist.SEDList.add(seDates);
+    	}
+    	
+		return sedlist;
     }
 	
 	/**

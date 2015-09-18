@@ -1,3 +1,18 @@
+function getDefaultDbIndex(){
+	var dbindex = -1;
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getDefaultDbIndex",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	dbindex = d.DBError;
+        }
+	});
+	
+	return dbindex;
+}
+
 function getSession(){
 	var username = "admin";
 	$.ajax({
@@ -147,6 +162,24 @@ function stringToDate(str){
 	return sArr.join("/");
 }
 
+function currentDateFormatted(){
+	var today = new Date();
+	var dd = today.getDate();
+	var mm = today.getMonth()+1; //January is 0!
+	var yyyy = today.getFullYear();
+
+	if(dd<10) {
+	    dd='0'+dd
+	} 
+
+	if(mm<10) {
+	    mm='0'+mm
+	} 
+
+	today = yyyy+mm+dd;
+	return today;
+}
+
 function parseDate(str) {
     var mdy = str.split('/');
     return new Date(mdy[2], mdy[0]-1, mdy[1]);
@@ -166,9 +199,13 @@ function go(key){
 	    }
 	});
 	
+	var progressLabel = $( ".progress-label" );
 	$( "#progressbar" ).progressbar({
 	    value: false,
-	}); 
+	    change: function() {
+	        progressLabel.html( '<table><tr><td>Report in progress... </td><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
+	    }
+	});  
 	var prog=false;
 	function progress() {
 		$.ajax({
@@ -291,8 +328,12 @@ function gos(key){
 	    }
 	});
 	
+	var progressLabel = $( ".progress-label" );
 	$( "#progressbar" ).progressbar({
 	    value: false,
+	    change: function() {
+	        progressLabel.html( '<table><tr><td>Report in progress... </td><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
+	    }
 	}); 
 	var prog=false;
 	function progress() {
@@ -304,9 +345,12 @@ function gos(key){
 			success: function(item){
 				progVal = parseInt(item.progVal);
 				if(progVal==0){
-					progVal=false;
+					
 					if(prog){
+						progVal=100;
 						clearTimeout(timeVar);
+					}else{
+						progVal=false;
 					}
 				}else{
 					prog=true;

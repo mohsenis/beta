@@ -84,8 +84,8 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   }
 
   @Override
-  public List<Agency> getAllAgencies() {
-    return _ops.find("from Agency");
+  public List<Agency> getAllAgencies(List<String> selectedAgencies) {
+    return _ops.findByNamedQueryAndNamedParam("allAgencies", "sa", selectedAgencies);
   }
 
   @Override
@@ -425,10 +425,10 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   @Override
   public Float getFareMedianForAgency(String agency, int farecount){
 	  if (farecount%2==0){		  
-		  List<Float> results= _ops.findByNamedQueryAndNamedParamLimited("fareMedianForAgency", "agency", agency,2 ,farecount/2);		  
+		  List<Float> results= _ops.findByNamedQueryAndNamedParamLimited("fareMedianForAgency", "agency", agency,2 ,(farecount/2)-1);		  
 		  return (float)(Math.round((results.get(0)+results.get(1))*50.0)/100.0);
 	  }else {
-		  List<Float> results= _ops.findByNamedQueryAndNamedParamLimited("fareMedianForAgency", "agency", agency,1 ,(farecount/2)+1);		  
+		  List<Float> results= _ops.findByNamedQueryAndNamedParamLimited("fareMedianForAgency", "agency", agency,1 ,(farecount/2));		  
 		  return results.get(0);
 	  }	  
     }
@@ -436,10 +436,10 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   @Override
   public Float getFareMedianForState(List<String> selectedAgencies,int farecount){
 	  if (farecount%2==0){		  
-		  List<Float> results= _ops.findByNamedQueryAndNamedParamLimited("fareMedianForState", "sa", selectedAgencies, 2 ,farecount/2);		  
+		  List<Float> results= _ops.findByNamedQueryAndNamedParamLimited("fareMedianForState", "sa", selectedAgencies, 2 ,(farecount/2)-1);		  
 		  return (float)(Math.round((results.get(0)+results.get(1))*50.0)/100.0);
 	  }else {
-		  List<Float> results= _ops.findByNamedQueryAndNamedParamLimited("fareMedianForState", "sa", selectedAgencies, 1 ,(farecount/2)+1);		  
+		  List<Float> results= _ops.findByNamedQueryAndNamedParamLimited("fareMedianForState", "sa", selectedAgencies, 1 ,(farecount/2));		  
 		  return results.get(0);
 	  }	  
     }
