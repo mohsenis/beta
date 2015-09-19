@@ -34,6 +34,10 @@ function dateRemove(e, d){
 	$("#submit").trigger('mouseenter');    
 }
 
+function numWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 function isNumber(evt) {
 	evt = (evt) ? evt : window.event;
 	//var havedot = (howManyDecimals(document.getElementById("Sradius").value));

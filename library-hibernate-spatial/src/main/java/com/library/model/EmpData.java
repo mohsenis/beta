@@ -1,153 +1,152 @@
 package com.library.model;
 
-import java.sql.Array;
-
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement (name = "PnrInCounty")
-public class PnrInCounty {
+@XmlRootElement( name = "EmpData")
+public class EmpData {
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String pnrid;
+	public String id;
+	
+
+	@XmlAttribute
+	@JsonSerialize
+	public String name;
+	
+
+	@XmlAttribute
+	@JsonSerialize
+	public int population;
+	@XmlAttribute
+	@JsonSerialize
+	public int c000;
+	@XmlAttribute
+	@JsonSerialize
+	public int ca01;
+	@XmlAttribute
+	@JsonSerialize
+	public int ca02;
+	@XmlAttribute
+	@JsonSerialize
+	public int ca03;	
+	@XmlAttribute
+	@JsonSerialize
+	public int ce01;
+	@XmlAttribute
+	@JsonSerialize
+	public int ce02;
+	@XmlAttribute
+	@JsonSerialize
+	public int ce03;	
+	@XmlAttribute
+	@JsonSerialize
+	public int cns01;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns02;	
+	@XmlAttribute
+	@JsonSerialize
+	public int cns03;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns04;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns05;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns06;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns07;	
+	@XmlAttribute
+	@JsonSerialize
+	public int cns08;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns09;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns10;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns11;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns12;	
+	@XmlAttribute
+	@JsonSerialize
+	public int cns13;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns14;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns15;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns16;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns17;	
+	@XmlAttribute
+	@JsonSerialize
+	public int cns18;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns19;
+	@XmlAttribute
+	@JsonSerialize
+	public int cns20;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String county;
+	public int cr01;
+	@XmlAttribute
+	@JsonSerialize
+	public int cr02;	
+	@XmlAttribute
+	@JsonSerialize
+	public int cr03;
+	@XmlAttribute
+	@JsonSerialize
+	public int cr04;
+	@XmlAttribute
+	@JsonSerialize
+	public int cr05;
+	@XmlAttribute
+	@JsonSerialize
+	public int cr07;	
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String lotname;
+	public int ct01;
+	@XmlAttribute
+	@JsonSerialize
+	public int ct02;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String city;
+	public int cd01;
+	@XmlAttribute
+	@JsonSerialize
+	public int cd02;	
+	@XmlAttribute
+	@JsonSerialize
+	public int cd03;
+	@XmlAttribute
+	@JsonSerialize
+	public int cd04;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String location;
-	
+	public int cs01;
 	@XmlAttribute
 	@JsonSerialize
-	public String zipcode;
+	public int cs02;	
 	
-	@XmlAttribute
-	@JsonSerialize
-	public String spaces;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String accessiblespaces;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String transitservices;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String lat;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String lon;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String bikerackspaces;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String bikelockerspaces;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String electricvehiclespaces;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String carsharing;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String availability;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String timelimit;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String restroom;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String benches;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String shelter;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String indoorwaitingarea;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String trashcan;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String lighting;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String securitycameras;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String sidewalks;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String pnrsignage;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String lotsurface;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String propertyowner;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String localexpert;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String metadata;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String agencies;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String stopids;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String stopnames;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String routeids;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String routenames;
 }

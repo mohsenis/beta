@@ -140,13 +140,16 @@ public class Queries {
 	@GET
 	@Path("/pnrsInCounty")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object pnrsInCounty(@QueryParam("key") double key, @QueryParam("countyId") String countyId, @QueryParam("dbindex") Integer dbindex ) throws JSONException {
+	public Object pnrsInCounty(@QueryParam("key") double key, @QueryParam("countyId") String countyId, 
+			@QueryParam("radius") String radius, @QueryParam("dbindex") Integer dbindex,
+			@QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
 		PnrInCountyList response = new PnrInCountyList();
 		
-		response = PgisEventManager.getPnrsInCounty(Integer.parseInt(countyId), dbindex);
+		int tmpRadius = (int) (Integer.parseInt(radius) / 3.2804);
+		response = PgisEventManager.getPnrsInCounty(Integer.parseInt(countyId), tmpRadius, dbindex, username);
 		
 		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex];
@@ -354,16 +357,18 @@ public class Queries {
    @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
    public Object getPnrStopsRoutes(@QueryParam("pnrId") String pnrId, @QueryParam("pnrCountyId") String pnrCountyId,
 		   @QueryParam("lat") Double lat, @QueryParam("lng") Double lng, @QueryParam ("radius") Double radius,
-		   @QueryParam("dbindex") Integer dbindex) throws JSONException {
+		   @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 	   
 	   MapPnrRecord response = new MapPnrRecord();
 	   response.id = pnrId;
 	   MapStop mapPnrStop;
 	   MapRoute mapPnrRoute;
+	   List<String> agencyList = DbUpdate.getSelectedAgencies(username);
+	   System.out.println(agencyList);
 	   List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
 	   List<GeoStopRouteMap> sRoutes = new ArrayList<GeoStopRouteMap>();
 		try { 
-			pnrGeoStops = EventManager.getstopswithincircle(radius, lat, lng, dbindex);
+			pnrGeoStops = EventManager.getstopswithincircle2(radius, lat, lng, dbindex, agencyList);
 			for (GeoStop s:pnrGeoStops){
 				mapPnrStop=new MapStop();
 				mapPnrStop.AgencyId=s.getAgencyId();
@@ -782,7 +787,8 @@ daysLoop:   for (int i=0; i<dates.length; i++){
 	    			// TODO Auto-generated catch block
 	    			e.printStackTrace();
 	    		}    			   		
-    		}    		
+    		}
+    		
     		ServiceMiles += TL * frequency;  
     		Stopportunity += frequency * stops;
     		ServiceHours += frequency * instance.getTlength();
@@ -1430,11 +1436,40 @@ Loop:  	for (Trip trip: routeTrips){
     		return ""+value;
     	}
     }
+       
+    /**
+     * Employment Summary Reports
+     */
+    @GET
+	@Path("/emp")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getEmp2(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+    	EmpDataList results = new EmpDataList();
+    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	results = PgisEventManager.getEmpData(dataSet, reportType, dbindex, username);
+    	return results;
+    }
+
+    /**
+     * Title VI Report
+     */
+    @GET
+	@Path("/titlevi")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getTitleVIData(@QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+    	TitleVIDataList results = new TitleVIDataList();
+    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	System.out.println(results.metadata);
+    	results = PgisEventManager.getTitleVIData(reportType, dbindex, username);
+    	return results;
+    }
+    
     
     /**
 	 * Generates The counties Summary report
-	 */
-	    
+	 */	    
 	@GET
 	@Path("/GeoCSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
