@@ -239,14 +239,17 @@
 									var newName = "Aggregated " + tree.get_text($node) + " " + counter;
 									
 									if ($.inArray(newName, nodesList) < 0){
-										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate", "state" : {"opened" : true} },'first',null,null);
-										console.log(tree.get_type($node));
-										console.log(newName);
+										var d = new Date();
+										var uniqeNo = d.getTime();
+										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate", "state" : {"opened" : true} },'first',null,null);
+										
 									}else{			
 										while ($.inArray(newName, nodesList) >= 0) {
 											newName = "Aggregated " + tree.get_text($node) + " " + counter++;
 										}
-										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
+										var d = new Date();
+										var uniqeNo = d.getTime();
+										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
 									}
 									tree.deselect_node($node);
 								}
@@ -374,13 +377,13 @@
 		$('#initialText').show();
 	}
 	
-	function selectFunction(){
+	/* function selectFunction(){
 		if(document.getElementById('reportType').value == 'Agencies'){
 			document.getElementById('Sradius').disabled = false;
 		}else{
 			document.getElementById('Sradius').disabled = true;
 		}
-	}
+	} */
 	
 	function datasetChange(e){
 		if (e.value == 'lodes_blocks_wac'){
@@ -549,7 +552,7 @@
 					html+='<td>' + numWithCommas(racSummation) + '</td>';
 					html+='<td>' + numWithCommas(wacSummation) + '</td>';
 				}
-				html += '<td>' + d.metadata + '</td></tr>';
+				html += '<td>' + racData.metadata + '</td></tr>';
 			};
 		}else if (racBool){
 			var resultSetRac = {};
@@ -584,7 +587,7 @@
 				});
 				html+='<td>' + numWithCommas(summation) + '</td>';
 			}
-			html += '<td>' + d.metadata + '</td></tr>';
+			html += '<td>' + racData.metadata + '</td></tr>';
 			});
 		}else{
 			var resultSetWac = {};
@@ -618,7 +621,7 @@
 						});
 						html+='<td>' + numWithCommas(summation) + '</td>';
 					}
-					html += '<td>' + 'd.metadata' + '</td></tr>';
+					html += '<td>' + wacData.metadata + '</td></tr>';
 			});
 			
 		};

@@ -192,18 +192,6 @@ function dbchange(){
 	}
 }
 
-function openDetRep(){
-	var reportType = document.getElementById("detailedreport").value;
-	if (reportType < 1){
-		alert('No report is selected.');
-	}
-	else if (reportType ==1){
-		window.open('/TNAtoolAPI-Webapp/EmpXReport.html'+'?&type='+reportType+'&criteria=Transit%20Region&c1='+popWithinX+'&c2='+popServedLOS+'&c3='+popServed+'&areaID='+w_qstring+'&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession()+"&areaName="+areaName);
-	}else{
-		alert('Under Construction');
-	}
-}
-</script>
 </head>
 <body >
 		<div class="container">
@@ -249,15 +237,7 @@ function openDetRep(){
 			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reloadG()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
 			    	Minimum Level of Service (times) <input type="text" name="LoS" id="LoS" class="tbox" onkeypress="return isWholeNumber(event)"/>	<br>
-			    	<label for="detailedreport">Other reports:</label>
-			    	<select name="detailedreport" id="detailedreport" style="width: 12.4em;height: 25px;margin-top: 10px">
-						  <option value="0" selected></option>
-						  <option value="1" style="width:20em;">Employment Data Report</option>
-						  <option value="2">Demographic Data Report</option>
-					 </select>
-					 <button id="dtlrprtbttn" onclick="openDetRep()" title="Click to open the selected report" type="button" style="width:4em" class="button">Open</button>	    	    	
-		    		    	    	
-		    	</div>
+			  </div>
 			  </td>
 			</tr>
 		</table>

@@ -73,7 +73,7 @@ function EscFunc(){
 
 $(document).ready(function(){
 	document.getElementById("radiusInput").value = radius;
-/* 	$.ajax({
+ 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
@@ -96,7 +96,7 @@ $(document).ready(function(){
 		    select.options.size = menusize;
 		    select.selectedIndex = dbindex;		    				    
 		}			
-	}); */
+	}); 
 	
 	$(document).tooltip({
 		position: {
@@ -141,7 +141,7 @@ $(document).ready(function(){
 		success: function(d){			
 			$('h2').append('Park & Ride Extended Report <br><hr>');
 			if (d.PnrCountiesList[0].county != null)
-				$('#PnrXReportCounty').append(d.PnrCountiesList[0].county +" County - ");
+				$('#PnrXReportCounty').append( d.PnrCountiesList[0].county + "  County - ");
 			$.each(d.PnrCountiesList, function(i,item){
 				html += '<tr><td>'+ item.pnrid + '</td>'+
 							'<td>' + item.lotname + '</td>'+

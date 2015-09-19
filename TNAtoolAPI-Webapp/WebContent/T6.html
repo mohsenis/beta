@@ -92,7 +92,7 @@
 										{"text" : "Other Languages", "type" : "language", "id" : "other"}
 							              ]            	  
 					},
-					{"text" : "House Holds", "type" : "hh_default", "id" : "hh",  "state" : {"opened" : true},
+					{"text" : "House Hold", "type" : "hh_default", "id" : "hh",  "state" : {"opened" : true},
 						"children" : [
 										{"text" : "White", "type" : "hh", "id" : "hhwhite"},
 										{"text" : "Hispanic", "type" : "hh", "id" : "hhhispanic"},
@@ -156,14 +156,17 @@
 									var newName = "Aggregated " + tree.get_text($node) + " " + counter;
 									
 									if ($.inArray(newName, nodesList) < 0){
-										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate", "state" : {"opened" : true} },'first',null,null);
-										console.log(tree.get_type($node));
-										console.log(newName);
+										var d = new Date();
+										var uniqeNo = d.getTime();
+										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate", "state" : {"opened" : true} },'first',null,null);
+										
 									}else{			
 										while ($.inArray(newName, nodesList) >= 0) {
 											newName = "Aggregated " + tree.get_text($node) + " " + counter++;
 										}
-										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
+										var d = new Date();
+										var uniqeNo = d.getTime();
+										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
 									}
 									tree.deselect_node($node);
 								}

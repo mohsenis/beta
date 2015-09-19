@@ -1,5 +1,6 @@
 package com.library.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -15,5 +16,5 @@ public class ParknRideCountiesList {
     public String metadata;
 	
 	@XmlElement(name = "PnrCountiesList")
-	public List<ParknRideCounties> PnrCountiesList;
+	public List<ParknRideCounties> PnrCountiesList = new ArrayList<ParknRideCounties>();
 }
