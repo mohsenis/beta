@@ -2,7 +2,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Census Places Summary Report</title>
+	<title>Counties Summary Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -21,20 +21,20 @@ var qstring = '';
 var qstringx = '0.1';
 var progVal = 0; 
 var qstringd = '';
-var agencyId = getURIParameter("agency");
-var nameString = ''
-var dbindex = parseInt(getURIParameter("dbindex"));
+var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
 var d = new Date();
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Name of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>ODOT Region ID<em title="ODOT transit region id associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>ODOT Transit Region <em title="ODOT transit region name associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Population (2010)<em title="Total population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Land Area <em title="Total land area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Agencies <em title="Total number of transit agencies operating in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Routes <em title="Total number of routes serving stops in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';		
+'<th>Tracts <em title="Total number of census tracts within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
 var fAverage = new Array();
@@ -110,31 +110,21 @@ $(document).ready(function(){
 	timeVar = setInterval(progress, 100);
 	
 	//document.getElementById("Sradius").value = window.opener.qstringx;
-	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=2'+'&dbindex='+dbindex+'&username='+getSession();
-	if (agencyId!=null){
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&agency='+agencyId+'&type=2'+'&dbindex='+dbindex+'&username='+getSession();
-	}
+	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: url,
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&agency='+'TriMet'+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
-		success: function(d){
-			if (agencyId!=null){
-				nameString ='For '+d.agencyName;
-			}
-			$('h2').append('Census Places Summary Report '+nameString+'<br><hr>');
+		success: function(d){			
+			$('h2').append('Counties Summary Report <br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
-				item.Name + '</td><td>' +numberconv(item.population) +
-				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>';
-				if (agencyId!=null){
-					html+='<td>1</td>';
-				} else {
-					html+='<td><a href="#" type="AC" id="'+item.id+'">'+item.AgenciesCount+'</a></td>';
-				}
-				html+='<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
-				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td><td>'+d.metadata+'</td></tr>';								   			
+				item.Name + '</td><td>' + item.ODOTRegion + '</td><td>' + item.ODOTRegionName +'</td><td>' + numberconv(item.population) +
+				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>'+
+		   '<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
+				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td>'+ 
+				'<td><a href="#" type="TC" id="'+item.id+'" name="'+item.Name+'" >'+item.TractsCount+'</a></td><td>'+d.metadata+'</td></tr>';							   			
 			});		
 			html +='</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
@@ -147,40 +137,20 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/GeoPlacesXreport1.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
-			    }else if($(this).attr('type')=="AC"){
-			    	qstring = $(this).attr('id');			    	
-			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=2'+'&dbindex='+dbindex+'&username='+getSession());
-			    }else if($(this).attr('type')=="RC"){
+			    		window.open('/TNAtoolAPI-Webapp/GeoCountiesXreport1.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex/* +'&username='+getSession() */);    		
+			    }else if($(this).attr('type')=="TC"){
 			    	qstring = $(this).attr('id');
-			    	qstringx = '0.1';
-			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    	var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);
-		    		url = '/TNAtoolAPI-Webapp/routereport.html?';
-		    		if (agencyId!=null){
-		    			url += '&agency='+agencyId
-		    		}
-		    		url +='&areaid='+qstring+'&type=2'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex;
-			    	window.open(url);			    	
-			    }else if($(this).attr('type')=="SC"){
-			    	qstring = $(this).attr('id');
-		    		qstringx = '0.1';
-		    		url = '/TNAtoolAPI-Webapp/stopreport.html?';
-		    		if (agencyId!=null){
-		    			url += '&agency='+agencyId
-		    		}
-		    		url +='&areaid='+qstring+'&type=2'+'&x='+qstringx+'&dbindex='+dbindex;
-		    		window.open(url);			    	
-			    };
+			    	qstringd =$(this).attr('name');
+			    	window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html?&county='+qstring+'&dbindex='+dbindex);
+			    } ;
 			});
 			
 			var table = $('#RT').DataTable( {
+				//"scrollY": "76%",
 				"paging": true,				
 				"iDisplayLength": 14,
-				"aoColumnDefs": [
-				                 {"visible": false, "targets": [8]}
-				               ],
+				"aoColumnDefs": [{"visible": false, "targets": [10]}],
+				"order": [[ 1, "asc" ]],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -196,9 +166,9 @@ $(document).ready(function(){
 		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
 		 		                    				  "mColumns": 'visible'},
 		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                    				  "mColumns": 'all'},
+		 		                                      "mColumns": 'all'},
 		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                    				  "mColumns": 'all'} ]
+		 		                                      "mColumns": 'all'} ]
 		 		                } 
 		 		            ]
 		        }
@@ -248,12 +218,7 @@ $(document).ready(function(){
 		    $( ".dataTables_filter" ).css( "float", "left");
 		    $( ".dataTables_filter" ).before( "<br>" );
     }});
-		
-	
-	
 });
-
-
 
 $(".export").on('click', function (event) {    
 	exportbutton.apply(this, ['export.csv']);

@@ -23,8 +23,9 @@ var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+docum
 //var w_qstringl = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
 var w_qstringx = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 //var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
-var keyName = document.URL.split("&")[2].substr(document.URL.split("&")[1].indexOf("=")+1);
-var dbindex = parseInt(document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1));
+//var w_qstring = '174'
+var keyName = parseFloat(getURIParameter("n"));
+var dbindex = parseInt(getURIParameter("dbindex"));
 var dateID;
 var boo;
 var gg = 1.0/1.1;
@@ -32,9 +33,14 @@ var progVal = 0;
 var w_qstringd = localStorage.getItem(keyName);
 var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 var tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based on its importance. Lower ID number means higher cluster importance."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Centroid <em title="Coordinates of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Transit Agencies <em title="Unduplicated list of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Counties <em title="Unduplicated list of counties that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban Areas <em title="Unduplicated list of urban areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>ODOT Transit Regions <em title="Unduplicated list of ODOT transit regions that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Routes <em title="Unduplicated list of routes that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops <em title="Detailed list of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban Population <em title="Sum of the population of urban areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Agency Count <em title="Total number of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route Count <em title="Total number of routes that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Visit Count <em title="Total number of times all stops in the cluster are served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -85,7 +91,8 @@ $(document).ready(function(){
 			var stopsSet = [];
 			$('h2').append('Transit Hubs Summary Report <br><hr>');			
 			$.each(d.HubR, function(i,item){
-				html+= '<tr><td>' + item.clusterid +'</td><td>' + item.agencies +'</td><td>'+ item.routes+'</td><td class="details-control"></td>';
+				html+= '<tr><td>' + item.clusterid +'</td><td>' + item.lat+', '+item.lon+'</td><td>'+item.aNames +'</td><td>'+ item.cNames+'</td><td>'+item.uNames+'</td><td>'+
+				item.rNames+'</td><td>'+item.routes+'</td><td class="details-control"></td><td>'+numberconv(item.uPop)+'</td>';
 				stopsCount = 0;
 				stopsString = "";				
 				stopsSet = [];
@@ -94,18 +101,26 @@ $(document).ready(function(){
 					//alert(inst.stopId);
 					stop.id = inst.stopId;
 					stop.agencyId = inst.agencyId;
+					stop.aName = inst.aNames;
+					stop.rName= inst.rName;
+					stop.region = inst.region;
+					stop.cName = inst.cName;
+					stop.uName = inst.uName;
+					stop.uPop = inst.uPop;
+					stop.coords = inst.lat+', '+inst.lon;
 					stop.name = inst.stopName;
 					stop.agencies = inst.realAgencyIds;
 					stop.routes = inst.routeIds;
 					stop.visits = inst.services;					
 					if (stopsCount>0)
 						stopsString+=" & ";
-					stopsString += stop.id+"-"+stop.agencyId+"-"+stop.name+"-"+stop.agencies+"-"+stop.routes+"-"+stop.visits;
+					stopsString += stop.id+"-"+stop.agencyId+"-"+stop.name+"-"+stop.coords+"-"+stop.agencies+"-"+stop.aName+"-"+stop.cName+"-"+stop.uName+"-"+stop.rName
+					+"-"+stop.uPop+"-"+stop.routes+"-"+stop.visits;
 					stopsCount++;
 					stopsSet.push(stop);
 				});
 				stops.push(stopsSet);
-				html+= '<td>'+(item.agencies).split(";").length +'</td><td>' + (item.routes).split(";").length +'</td><td>'+item.services+'</td><td>'+stopsCount+'</td><td>'+
+				html+= '<td>'+(item.agencies).split(";").length +'</td><td>' + (item.routes).split(";").length +'</td><td>'+numberconv(item.services)+'</td><td>'+stopsCount+'</td><td>'+
 				stopsString+'</td><td>'+d.metadata+'</td></tr>';
 			});			
 			//html = html + '</tbody></table>';
@@ -120,8 +135,8 @@ $(document).ready(function(){
 				//"width": "100%",
 				"paging": true,				
 				"iDisplayLength": 12,
-				"aoColumnDefs": [{ 	 "targets": [8,9],"visible": false}, 
-				                 { "bSortable": false, "aTargets": [ 1,2,3 ]}],
+				"aoColumnDefs": [{ 	 "targets": [13,14],"visible": false}, 
+				                 { "bSortable": false, "aTargets": [1,2,3,4,5,6,7]}],
 				//"bAutoWidth": false,
 				"order": [[ 0, "asc" ]],
 				"dom": 'T<"clear">lfrtip',
@@ -164,10 +179,14 @@ $(document).ready(function(){
 		    });	
 			function format ( p ) {
 		        //var html;
-		        var subTable = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;"><tr><th>Agency Id</th><th>Stop Id</th><th>Stop Name</th><th>Agency Ids Served</th><th>Route Ids</th><th>Visits</th></tr>'
+		        var subTable = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;"><tr><th>Agency Id</th><th>Stop Id</th><th>Stop Name</th><th>Coordinates</th>'
+		        +'<th>Agency Ids Served</th><th>Agency Names Served</th><th>County</th><th>Urban Area</th><th>ODOT Transit Region</th><th>Urban Area Population</th><th>Route Ids</th>'
+		        +'<th>Visits</th></tr>'
 		        	var displayedStops = stops[p];
 		        	for (var i=0; i<displayedStops.length; i++){
-		        		subTable+='<tr><td>'+displayedStops[i].agencyId+'</td><td>'+displayedStops[i].id+'</td><td>'+displayedStops[i].name+'</td><td>'+displayedStops[i].agencies+'</td><td>'+displayedStops[i].routes+'</td><td>'+displayedStops[i].visits+'</td></tr>';
+		        		subTable+='<tr><td>'+displayedStops[i].agencyId+'</td><td>'+displayedStops[i].id+'</td><td>'+displayedStops[i].name+'</td><td>'+displayedStops[i].coords
+		        		+'</td><td>'+displayedStops[i].agencies+'</td><td>'+displayedStops[i].aName+'</td><td>'+displayedStops[i].cName+'</td><td>'+displayedStops[i].uName+'</td><td>'
+		        		+displayedStops[i].rName+'</td><td>'+numberconv(displayedStops[i].uPop)+'</td><td>'+displayedStops[i].routes+'</td><td>'+displayedStops[i].visits+'</td></tr>';
 		        	}
 		        subTable+='</table>';
 		        	return subTable;

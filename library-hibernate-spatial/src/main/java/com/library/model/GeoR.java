@@ -11,40 +11,55 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-package com.webapp.api.model;
-
-import java.util.List;
+package com.library.model;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import com.webapp.api.model.RouteType;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement(name = "AgencySR")
-public class AgencySR {
+@XmlRootElement(name = "CountyR")
+public class GeoR {
 	
 	
 	@XmlAttribute
     @JsonSerialize
-	public String AgencyName;
+	public String Name;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String AgencyId;
+    public String id;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String URL;
+    public String population;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String Phone;
+    public String urbanpop;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String FareURL;
+    public String ruralpop;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String landArea;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String waterArea;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String ODOTRegion;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String ODOTRegionName;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String AgenciesCount;	
 	
 	@XmlAttribute
     @JsonSerialize
@@ -56,19 +71,31 @@ public class AgencySR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String ServiceMiles;
+    public String UrbansCount;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String RouteMiles;
+    public String CountiesCount;
+		
+	@XmlAttribute
+    @JsonSerialize
+    public String TractsCount;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String PopServed;
+    public String PlacesCount;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String AreaServed;
+    public String RegionsCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String CongDistsCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String BlocksCount;
 	
 	@XmlAttribute
     @JsonSerialize
@@ -77,8 +104,5 @@ public class AgencySR {
 	@XmlAttribute
     @JsonSerialize
     public String MedianFare;
-    
-    @XmlElementWrapper
-    public List<RouteType> routes;
-	
+       	
 }

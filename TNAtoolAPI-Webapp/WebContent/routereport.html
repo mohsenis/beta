@@ -23,10 +23,12 @@ var endDate;
 var qstring = '';
 var qstringx = '0.1';
 var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3]+"&"+document.URL.split("&")[4],"");
-var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
-var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
-var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
-var dbindex = parseInt(document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1));
+var w_qstringx = parseFloat(getURIParameter("x"));
+var w_qstring = getURIParameter("agency");
+var keyName = parseFloat(getURIParameter("n"));
+var dbindex = parseInt(getURIParameter("dbindex"));
+var areaId = getURIParameter("areaid");
+var type = parseInt(getURIParameter("type"));
 var dateID;
 var gg = 1.0/1.1;
 var progVal = 0; 
@@ -34,19 +36,23 @@ var d = new Date();
 var boo;
 var w_qstringd = localStorage.getItem(keyName);
 var html = '<table id="RT" class="display" align="center">';
-var tmp = '<tr><th>Route ID <em title="Unique route identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+var tmp = '<tr><th>Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Route ID <em title="Unique route identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="rn">Route Name <em title="Route short name as reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route Long Name <em title="Route long name as reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route Type <em title="Type of transportation used on a route: 0-Tram, Streetcar & Light rail 1-Subway & Metro 2-Rail 3-Bus 4-Ferry 5-Cable car 6-Gondola & Suspended cable car 7-Funicular"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route Length <em title="Length of the longest route variant for the given route."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops on the route."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Unduplicated Population (2010)<em title="Summation of the unduplicated population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Unduplicated Urban Population (2010)<em title="Summation of the unduplicated urban population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Unduplicated Rural Population (2010)<em title="Summation of the unduplicated rural population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Stops <em title="Number of stops scheduled on all trips in a route. The service stops for a route is calculated as its stop count multiplied by the number of visits per stop."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population (2010) Served by Route <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops on all trips. The Population Served by Route for a route is calculated as route service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops on all trips."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban Population (2010) Served by Route <em title="Total unduplicated urban population impacted within an X-mile radius (i.e., stop distance) of all stops on all trips. The Population Served by Route for a route is calculated as route service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops on all trips."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Rural Population (2010) Served by Route <em title="Total unduplicated rural population impacted within an X-mile radius (i.e., stop distance) of all stops on all trips. The Population Served by Route for a route is calculated as route service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops on all trips."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Miles <em title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific date or a set of dates specified using the calendar."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Hours <em title="Total hours a transit agency spends on serving all round trips of a route. Service hours may be calculated for a specific date or a set of dates specified using the calendar."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>More.. <em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>More.. <em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Route Description<em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 
 html += '<thead>'+tmp+'</thead><tbody>';
@@ -78,51 +84,77 @@ $(document).ready(function(){
 		    select.selectedIndex = dbindex;		    				    
 		}			
 	});
-	gos(key);	
+	gos(key);
+	var url = '/TNAtoolAPI-Webapp/queries/transit/RoutesR?';
+	if (w_qstring!=null){
+		url+='agency='+w_qstring+'&';		
+	}
+	if (areaId!=null){
+		url+='areaid='+areaId+'&type='+type+'&';
+	}
+	url+='&x='+w_qstringx+'&day='+w_qstringd+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession();
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/RoutesR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&dbindex='+dbindex,
+		url: url,
 		async: true,
 		success: function(d){
-			$('h2').append(d.AgencyName+' Routes Report<br><hr>');
+			var namestring = (d.AgencyName!=null)? d.AgencyName:'';
+				namestring+= ' Routes Report'+((d.AreaName!=null)?' for '+d.AreaName:'');
+			$('h2').append(namestring+'<br><hr>');
 			$.each(d.RouteR, function(i,item){
-				html += '<tr><td><a href="#" class="schedulereport" id="'+ item.RouteId+'">'+item.RouteId+'</a></td><td>' + item.RouteSName + '</td><td>' + item.RouteLName 
-				+'</td><td>'+ item.RouteType +'</td><td>'+item.RouteLength +'</td><td><a href="#" class="stopreport" id="'+ item.RouteId+'">'+item.StopsCount
-				+'</a></td><td class="serviceCol">'+ numberconv(item.PopWithinX)+'</td><td class="serviceCol">'+numberconv(item.Stopportunity)+'</td><td class="serviceCol">'
-				+numberconv(item.PopStopportunity)+'</td><td class="serviceCol">'+numberconv(item.ServiceMiles)+'</td><td class="serviceCol">'+numberconv(item.ServiceHours)
-				+'</td><td class="details-control"></td><td>'+item.RouteDesc+'</td><td>'+d.metadata+'</td></tr>';
-				description.push(item.RouteDesc);					    
+				html += '<tr><td>'+ item.AgencyId+'</td><td>'+item.AgencyName+'</td><td><a href="#" class="schedulereport" aid="'+item.AgencyId+'" id="'+ item.RouteId+'">'+item.RouteId+'</a></td>'; 
+				if (item.RouteURL!=null){
+					if (item.RouteSName!=null){
+						html += '<td><a href="'+item.RouteURL+'" target="_blank">'+item.RouteSName+'</a></td><td>'+item.RouteLName+'</td>';
+					}else if (item.RouteLName!=null){
+						html += '<td>-</td><td><a href="'+item.RouteURL+'" target="_blank">'+item.RouteLName+'</a></td>';
+					} else{
+						html+='<td>-</td><td>-</td>';
+					}					
+				}else{
+					//if item.
+					html+='<td>'+((item.RouteSName!=null)?item.RouteSName:"-")+'</td><td>'+((item.RouteLName!=null)?item.RouteLName:"-")+'</td>';
+				}
+				html+='<td>'+ item.RouteType +'</td><td>'+item.RouteLength +'</td><td><a href="#" class="stopreport" aid="'+item.AgencyId+'" id="'+ item.RouteId+'">'+item.StopsCount
+				+'</a></td><td class="serviceCol">'+ numberconv(item.UPopWithinX)+'</td><td class="serviceCol">'+numberconv(item.RPopWithinX)+'</td><td class="serviceCol">'
+				+numberconv(item.ServiceStops)+'</td><td class="serviceCol">'+numberconv(item.UServicePop)+'</td><td class="serviceCol">'+numberconv(item.RServicePop)
+				+'</td><td class="serviceCol">'+numberconv(item.ServiceMiles)+'</td><td class="serviceCol">'+numberconv(item.ServiceHours)
+				+'</td><td class="details-control"></td><td>'+((item.RouteDesc!=null)?item.RouteDesc:"-")+'</td><td>'+d.metadata+'</td></tr>';
+				description.push(((item.RouteDesc!=null)?item.RouteDesc:"-"));					    
 			});		
 			html = html + '</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));	
 			progressbar.remove();			
 			$('.stopreport').click(function(e){
-				if ($(this).attr('id')!==undefined){
-				    qstring = '&agency='+w_qstring+'&x='+qstringx+ '&route=' + $(this).attr('id');	    
-				    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring+'&dbindex='+dbindex);
+				if ($(this).attr('id')!=undefined){					
+					url = '/TNAtoolAPI-Webapp/stopreport.html?agency='+$(this).attr('aid')+'&x='+qstringx+ '&route=' + $(this).attr('id');
+					if (areaId!=null){
+						url+='&areaid='+areaId+'&type='+type;
+					}
+					url+='&dbindex='+dbindex;
+				    window.open(url);
 			}});
 			$('.schedulereport').click(function(e){
-				if ($(this).attr('id')!==undefined){
-					
+				if ($(this).attr('id')!==undefined){					
 				    var d = new Date();
 				    qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 				    var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);
-		    		qstring = w_qstring + '&route=' + $(this).attr('id');
-				    window.open('/TNAtoolAPI-Webapp/schedulereport.html?&agency='+qstring+'&n='+keyName+'&dbindex='+dbindex);
+		    		localStorage.setItem(keyName, qstringd);		    		
+				    window.open('/TNAtoolAPI-Webapp/schedulereport.html?&agency='+$(this).attr('aid') + '&route=' + $(this).attr('id')+'&n='+keyName+'&dbindex='+dbindex);
 			}});
 			
 			var table = $('#RT').DataTable( {
 				//"scrollY": "76%",
 				"paging": true,
 				"iDisplayLength": 14,
-				
+				"sScrollX": "100%",				
+				"width": "auto",
 				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [ 11 ] },
-				                 {"visible": false, "targets": [12,13]}				                 
+				                 { "bSortable": false, "aTargets": [ 15 ] },
+				                 {"visible": false, "targets": [16,17]}				                 
 				               ],
-				"order": [[ 1, "asc" ]],
+				"order": [[ 2, "asc" ]],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -136,11 +168,11 @@ $(document).ready(function(){
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
 		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
-		 		                    				  "mColumns": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]},
+		 		                    				  "mColumns": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]},
 		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                                      "mColumns": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13 ]},
+		 		                                      "mColumns": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 17 ]},
 		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                                      "mColumns": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13 ]}]
+		 		                                      "mColumns": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]}]
 		 		                } 
 		 		         ]
 		        }

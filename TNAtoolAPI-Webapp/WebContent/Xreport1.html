@@ -1,0 +1,207 @@
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Transit Agency Extended Report</title>
+	<script src="js/lib/jquery-1.9.1.min.js"></script>
+	<script src="js/lib/jquery-ui.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/date.js"></script>
+	<script src="js/jQueryContent.js"></script>
+	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
+	 
+<script type="text/javascript">
+var startDate;
+var endDate;
+var qstring = '';
+var qstringx = '0.1';
+var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
+var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
+var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
+var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
+var dbindex = parseInt(document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1));
+var dateID;
+var boo;
+var gg = 1.0/1.1;
+var progVal = 0; 
+var w_qstringd = localStorage.getItem(keyName);
+var html = '<table id="RT" class="display" align="center">';
+var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Route Miles <em title="Summation of the lengths of the longest route variant for all routes that the transit agency serves."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Route Stops <em title="Total number of stops served by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Stops Per Route Mile <em title="Route stops divided by Route Miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Population(2010) Served By Agency (Unduplicated) <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Service Miles <em title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Service Hours <em title="Total hours a transit agency spends on serving all round trips of routes. Service hours may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Service Stops <em title="The number of trips scheduled at a stop in a route. The service stops for a route is calculated as its stop count multiplied by the number of visits per stop. Reported number are cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Population(2010) Served By Service <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops on trips served by the transit agency. Population served by service is calculated as service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops for every trip. Reported number are cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Hours of Service<em title="Earliest and latest arrival and departure times of all stops served by the transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+
+html += '<thead>'+tmp+'</thead><tbody>';
+
+var key = Math.random();
+$(document).ready(function(){
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
+		async: false,
+		success: function(d){	
+			var select = document.getElementById("dbselect");
+			select.options.length = 0;
+		    var menusize = 0;
+		    $.each(d.DBelement, function(i,item){
+		    	var option = document.createElement('option');
+		        option.text = item;
+		        option.value = 'DB'+i;
+		        select.add(option, i);		    	
+		    	menusize++;
+		    });		    		    
+		    if (dbindex<0 || dbindex>menusize-1){
+		    	dbindex = 0;
+		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
+		    }
+		    select.options.size = menusize;
+		    select.selectedIndex = dbindex;		    				    
+		}			
+	});
+	gos(key);	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		async: true,
+		success: function(item){			
+			$('h2').append('Transit Agency Extended Report <br><hr>');	
+			html += '<tr><td>' + item.AgencyId +'</td><td>' + item.AgencyName +'</td><td>' + numberconv(item.RouteMiles) +'</td><td><a href="#" class="stopreport" id="'+
+			item.RouteId+'">' + numberconv(item.StopCount) +'</a></td><td>' + numberconv(item.StopPerRouteMile) +
+			'</td><td  class="serviceCol" id="popServed"><img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px"> Calculating...</td><td  class="serviceCol">'+
+			numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'+numberconv(item.ServiceHours)+'</td><td  class="serviceCol">'+ numberconv(item.ServiceStops) +
+			'</td><td  class="serviceCol">'+numberconv(item.PopServedByService)+'</td><td class="serviceCol">'+ item.HoursOfService+'</td><td>'+item.metadata+'</td></tr>';
+							    
+			html = html + '</tbody></table>';
+			$('#displayReport').append($(html));	
+			progressbar.remove();
+			
+			
+			var table = $('#RT').DataTable( {
+				"paging": false,
+				"bSort" : false,
+				"aoColumnDefs": [{"visible": false, "targets": [11]}],
+				"dom": 'T<"clear">lfrtip',
+		        "tableTools": {
+		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+		            "aButtons": [
+						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+							"sMessage": ""
+								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
+						
+						{
+						    "sExtends":    "collection",
+						    "sButtonText": "Export Report",
+						    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+						    				  "mColumns": 'visible'},
+						                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+						                      "mColumns": 'all'},
+						                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+						                      "mColumns": 'all'} ]
+						}  
+		            ]
+		        }
+			});
+			$('#RT_wrapper').css("width", $('#RT').css("width"));
+		    $('#RT_wrapper').css("margin", "auto");
+			$("#RT_length").remove();
+			$("#RT_filter").remove();
+			$("#RT_info").remove();
+			
+			$('.stopreport').click(function(e){
+				qstringx = '0.1';
+				qstring = '&agency='+w_qstring+'&x='+qstringx;	    
+			    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring);
+			});
+			$.ajax({
+				type: 'GET',
+				datatype: 'json',
+				url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXRS?&agency='+w_qstring+'&x='+w_qstringx,
+				async: true,
+				success: function(d){
+					//$('#popServed').html(numberconv(d.PopServed));
+					$('#RT').dataTable().fnUpdate(numberconv(d.PopServed),$('tr') ,5);
+					
+				}
+			});
+    }});		
+});
+function dbchange(){
+	if (document.getElementById("dbselect").selectedIndex !=dbindex){
+		location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
+	}
+}
+</script>
+</head>
+<body >
+		<div class="container">
+			<div class="headerL">
+				<h1>Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">
+				<select id='dbselect' onchange='dbchange()'></select>
+				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+			</div>
+		</div>	
+		
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  <td id="td2"> 
+			  	<div class="headerBC" id="accordion" >
+					<h3></h3>
+					<div>
+						<table style="width:100%;">
+							<tr>
+								<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+									<ul data-role="listview">
+							
+									</ul>
+								</td>
+								<td style="vertical-align:top;padding-top:15px">
+									<div id="datepicker" ></div>
+								</td>
+							</tr>
+						</table>
+						
+					</div>
+				</div>
+			  </td> 
+			  <td id="td3">
+			  	<div class="headerBR" > 
+			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
+			    	<input id="submit" type="button" onclick="reload()" title="Click submit to refresh the report"  value="Submit" class="button" />
+		    	    	
+		    	</div>
+			  </td>
+			</tr>
+		</table>
+		
+		<p id="displayReport"><br></p>
+		<br>
+		<br>
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>
+
+</body>
+</html>

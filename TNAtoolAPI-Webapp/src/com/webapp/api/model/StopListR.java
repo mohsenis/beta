@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.library.model.StopR;
 
 
 @XmlRootElement(name = "AgencySRList")
@@ -29,6 +30,14 @@ public class StopListR {
 	@XmlAttribute
     @JsonSerialize
 	public String AgencyName;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String AreaName;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String AreaType;
 	
 	@XmlAttribute
     @JsonSerialize

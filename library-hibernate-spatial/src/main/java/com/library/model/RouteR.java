@@ -11,7 +11,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-package com.webapp.api.model;
+package com.library.model;
 
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -25,71 +25,77 @@ public class RouteR {
 	
 	@XmlAttribute
 	@JsonSerialize
+	public String AgencyId;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String AgencyName;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String RouteId;	
+	
+	@XmlAttribute
+	@JsonSerialize
 	public String RouteSName;
 	
+	@XmlAttribute
+	@JsonSerialize
+	public String RouteLName;	
 	
 	@XmlAttribute
 	@JsonSerialize
-	public String RouteLName;
-	
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String RouteDesc;
-	
+	public String RouteDesc;	
 	
 	@XmlAttribute
 	@JsonSerialize
 	public String RouteType;
-	
+		
+	@XmlAttribute
+	@JsonSerialize
+    public String RouteURL;	
 	
 	@XmlAttribute
 	@JsonSerialize
-    public String RouteId;
-	
-	
-	@XmlAttribute
-	@JsonSerialize
-    public String StopsCount;
-	
+    public String StopsCount;	
 	
 	@XmlAttribute
 	@JsonSerialize
-    public String Trips;
-	
-	
-	@XmlAttribute
-	@JsonSerialize
-    public String ServiceHours;
-	
+    public String Trips;	
 	
 	@XmlAttribute
 	@JsonSerialize
-    public String RouteLength;
-	
-	
-	@XmlAttribute
-	@JsonSerialize
-    public String ServiceMiles;
-	
+    public String ServiceHours;	
 	
 	@XmlAttribute
 	@JsonSerialize
-    public String Stopportunity;
-	
-	
-	@XmlAttribute
-	@JsonSerialize
-    public String PopStopportunity;
-	
+    public String RouteLength;	
 	
 	@XmlAttribute
 	@JsonSerialize
-    public String AreaServed;
-    
+    public String ServiceMiles;	
 	
 	@XmlAttribute
 	@JsonSerialize
-    public String PopWithinX;
-	    	
+    public String ServiceStops;	
+	
+	@XmlAttribute
+	@JsonSerialize
+    public String UServicePop;
+	
+	@XmlAttribute
+	@JsonSerialize
+    public String RServicePop;	
+	
+	@XmlAttribute
+	@JsonSerialize
+    public String AreaServed;    
+	
+	@XmlAttribute
+	@JsonSerialize
+    public String UPopWithinX;
+	
+	@XmlAttribute
+	@JsonSerialize
+    public String RPopWithinX;	    	
 }

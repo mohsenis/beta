@@ -457,7 +457,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   
   @Override
   public Long getStopsCount(List<String> selectedAgencies) {
-     List<Long> results = _ops.findByNamedQueryAndNamedParam("allStopsCount", "selectedAgencies", selectedAgencies);
+     List<Long> results = _ops.findByNamedQueryAndNamedParam("allStopsCount", "sa", selectedAgencies);
      return results.get(0);
   }
   
@@ -470,7 +470,7 @@ public class HibernateGtfsRelationalDaoImpl implements GtfsMutableRelationalDao 
   
   @Override
   public Double getRouteMiles(List<String> selectedAgencies) {
-    Double response = (Double)_ops.findByNamedQueryAndNamedParam("RouteMilesForState", "selectedAgencies", selectedAgencies).get(0);
+    Double response = (Double)_ops.findByNamedQueryAndNamedParam("RouteMilesForState", "sa", selectedAgencies).get(0);
     response = Math.round(response*100.00)/100.00;
     return response;
   }

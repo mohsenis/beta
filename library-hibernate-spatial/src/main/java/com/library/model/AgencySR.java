@@ -11,91 +11,55 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-package com.webapp.api.model;
+package com.library.model;
+
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement(name = "CountyR")
-public class GeoR {
+@XmlRootElement(name = "AgencySR")
+public class AgencySR {
 	
 	
 	@XmlAttribute
     @JsonSerialize
-	public String Name;
+	public String AgencyName;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String id;
+    public String AgencyId;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String population;
+    public String URL;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String urbanpop;
+    public String Phone;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String ruralpop;
+    public String FareURL;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String landArea;
+    public String ServiceMiles;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String waterArea;
+    public String RouteMiles;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String ODOTRegion;
+    public String PopServed;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String ODOTRegionName;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String AgenciesCount;	
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String StopsCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String RoutesCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String UrbansCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String CountiesCount;
-		
-	@XmlAttribute
-    @JsonSerialize
-    public String TractsCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String PlacesCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String RegionsCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String CongDistsCount;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String BlocksCount;
+    public String AreaServed;
 	
 	@XmlAttribute
     @JsonSerialize
@@ -104,5 +68,68 @@ public class GeoR {
 	@XmlAttribute
     @JsonSerialize
     public String MedianFare;
-       	
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String MinFare;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String MaxFare;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String FeedName;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String FeedVersion;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String FeedStartDate;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String FeedEndDate;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String FeedPublisherName;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String FeedPublisherUrl;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String PlacesCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String CountiesCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String OdotRegionsCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UrbansCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String CongDistsCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String StopsCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RoutesCount;
+    
+    /*@XmlElementWrapper
+    public List<RouteType> routes;*/
+	
 }

@@ -1,8 +1,16 @@
+function getURIParameter(param, asArray) {
+    return document.location.search.substring(1).split('&').reduce(function(p,c) {
+        var parts = c.split('=', 2).map(function(param) { return decodeURIComponent(param); });
+        if(parts.length == 0 || parts[0] != param) return (p instanceof Array) && !asArray ? null : p;
+        return asArray ? p.concat(parts.concat(true)[1]) : parts.concat(true)[1];
+    }, []);
+}
+
 function getSession(){
 	var username = "admin";
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/FileUpload?&getSessionUser=gsu",
+        url: "/TNAtoolAPI-Webapp/FileUpload?getSessionUser=gsu",
         dataType: "json",
         async: false,
         success: function(d) {
@@ -59,7 +67,7 @@ function numberconv(x) {
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return parts.join(".");
 }
-
+/*agency extended report*/
 function reload(){		
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();	
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
@@ -199,11 +207,11 @@ function go(key){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex='+dbindex+'&username='+getSession(),
 		async: false,
 		success: function(d){
-			startDateUnion = d.Startdateunion;
-			endDateUnion = d.Enddateunion;
+			startDateUnion = d.Startdate;
+			endDateUnion = d.Enddate;
 			
 		}			
 	});
@@ -278,7 +286,7 @@ function go(key){
 		  }
 		});
 }
-
+/*Agency Extended report*/
 function gos(key){
 	$(document).tooltip({
 		position: {
@@ -295,7 +303,7 @@ function gos(key){
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/PorgVal?&key='+key,
+			url: '/TNAtoolAPI-Webapp/queries/transit/PorgVal?key='+key,
 			async: true,
 			success: function(item){
 				progVal = parseInt(item.progVal);
@@ -319,10 +327,13 @@ function gos(key){
 	timeVar = setInterval(progress, 100);
 	
 	//check if the selected dates are within the agency's start and end date.
+	if (typeof w_qstring == 'undefined') {
+	   var w_qstring = null;	   
+	}	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/agencyCalendarRange?&dbindex='+dbindex+'&agency='+w_qstring,
+		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex='+dbindex+'&agency='+w_qstring+'&username='+getSession(),
 		async: false,
 		success: function(d){
 			startDate = d.Startdate;

@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.library.model.RouteR;
 
 
 @XmlRootElement(name = "RouteListReport")
@@ -33,6 +34,14 @@ public class RouteListR {
 	@XmlAttribute 
 	@JsonSerialize
 	public String AgencyName;
+	
+	@XmlAttribute 
+	@JsonSerialize
+	public String AreaType;
+	
+	@XmlAttribute 
+	@JsonSerialize
+	public String AreaName;
     
     @XmlElement(name = "RouteListR")
     public Collection<RouteR> RouteR = new ArrayList<RouteR>();

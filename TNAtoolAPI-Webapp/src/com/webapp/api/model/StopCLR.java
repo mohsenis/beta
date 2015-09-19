@@ -28,6 +28,34 @@ public class StopCLR {
 	
 	@XmlAttribute
     @JsonSerialize
+	public String cName;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String uName;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String rName;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String region;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String uPop;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String lat;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String lon;
+	
+	@XmlAttribute
+    @JsonSerialize
 	public String stopId;
 	
 	@XmlAttribute
@@ -37,6 +65,10 @@ public class StopCLR {
 	@XmlAttribute
     @JsonSerialize
     public String realAgencyIds;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String aNames;
 	
 	@XmlAttribute
     @JsonSerialize

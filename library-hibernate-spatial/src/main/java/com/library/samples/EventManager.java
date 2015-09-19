@@ -744,7 +744,7 @@ static{
 	    }
 /**
  * returns list of routes for a given county
- */
+ *//*
 	public static int getroutescountsbycounty(String countyId, int sessionindex) throws FactoryException, TransformException {			
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_COUNTY");
@@ -753,8 +753,10 @@ static{
 		List<GeoStopRouteMap> result = q.list();
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
-	    }
-	
+	    }*/
+/**
+ * returns count of routes for a given county
+ */	
 	public static int getroutescountsbycounty(String countyId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_COUNTY_SEL_AGENCIES");
@@ -766,7 +768,7 @@ static{
         return result.size();
 	    }
 /**
- * returns list of routes for a given census place
+ * returns count of routes for a given census place
  */
 	public static int getroutescountsbyplace(String placeId, int sessionindex) throws FactoryException, TransformException {			
 		session[sessionindex].beginTransaction();
@@ -776,6 +778,62 @@ static{
 		List<GeoStopRouteMap> result = q.list();
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
+	    }
+	
+/**
+ * returns count of agencies for a given geographic area
+ */
+	@SuppressWarnings("unchecked")
+	public static int getAgencyCountByArea(String areaId, int type, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
+		session[sessionindex].beginTransaction();
+		Query q;
+		List<String> results = new ArrayList<String>();
+		
+		switch (type) {
+		case 0: //counties	
+			//System.out.println("The SA size is: "+selectedAgencies.size());
+			//System.out.println("SA list: "+selectedAgencies.size());
+			q = session[sessionindex].getNamedQuery("AGENCIES_BY_COUNTY_SEL_AGENCIES");
+			q.setParameter("id",areaId);	
+			q.setParameterList("sa", selectedAgencies);
+	        results = q.list();	
+			System.out.println("The result size for county "+areaId+" is :"+results.size());
+			//System.out.println("Query result is: "+results.get(0));
+
+			break;						
+		case 1:	//census tract
+			q = session[sessionindex].getNamedQuery("AGENCIES_BY_TRACT_SEL_AGENCIES");
+			q.setParameter("id",areaId);	
+			q.setParameterList("sa", selectedAgencies);
+	        results = q.list();			
+			break;
+		case 2:	//census place
+			q = session[sessionindex].getNamedQuery("AGENCIES_BY_PLACE_SEL_AGENCIES");
+			q.setParameter("id",areaId);	
+			q.setParameterList("sa", selectedAgencies);
+	        results = q.list();
+			break;
+		case 3:	//urban area
+			q = session[sessionindex].getNamedQuery("AGENCIES_BY_URBAN_SEL_AGENCIES");
+			q.setParameter("id",areaId);	
+			q.setParameterList("sa", selectedAgencies);
+	        results = q.list();
+			break;
+		case 4:	//ODOT region
+			q = session[sessionindex].getNamedQuery("AGENCIES_BY_REGION_SEL_AGENCIES");
+			q.setParameter("id",areaId);	
+			q.setParameterList("sa", selectedAgencies);
+	        results = q.list();
+			break;
+		case 5:	//Congressional District
+			q = session[sessionindex].getNamedQuery("AGENCIES_BY_CONGDIST_SEL_AGENCIES");
+			q.setParameter("id",areaId);	
+			q.setParameterList("sa", selectedAgencies);
+		    results = q.list();
+			break;
+		}		
+        Hutil.getSessionFactory()[sessionindex].close();
+        return results.size();
 	    }
 	
 	public static int getroutescountsbyplace(String placeId, List<String> selectedAgencies, int sessionindex) throws FactoryException, TransformException {			
@@ -1323,7 +1381,7 @@ static{
 			if (results.size()>0 && results.get(0)!=null){ 
 			ct = (Tract) results.get(0);
 			response.setId(ct.getTractId());
-			response.setName(ct.getName());
+			response.setName(ct.getLongname());
 			response.setLandarea(ct.getLandarea());
 			response.setWaterarea(ct.getWaterarea());
 			response.setPopulation(ct.getPopulation());
@@ -1365,6 +1423,19 @@ static{
 			if (results.size()>0 && results.get(0)!=null){ 
 			cns = (List<County>) results;
 			//pop = (Integer) results.get(0);
+			long LandArea = 0;
+			long WaterArea = 0;
+			long Population = 0;
+			for (County inst:cns){
+				LandArea+=inst.getLandarea();
+				WaterArea+=inst.getWaterarea();
+				Population+=inst.getPopulation();
+			}
+			response.setId(cns.get(0).getRegionId());			
+			response.setName("ODOT Transit "+cns.get(0).getRegionName());
+			response.setLandarea(LandArea);
+			response.setWaterarea(WaterArea);
+			response.setPopulation(Population);
 			}
 			break;
 		case 5:	//Congressional District

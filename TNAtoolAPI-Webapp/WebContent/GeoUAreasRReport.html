@@ -147,9 +147,9 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);			    		
-			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport1.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());    		
 			    } else if ($(this).attr('type')=="SR"){
-			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&dbindex='+dbindex);
+			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&dbindex='+dbindex+'&username='+getSession());
 			    };
 			});
 			
