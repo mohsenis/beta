@@ -2493,7 +2493,7 @@ Loop:  	for (Trip trip: routeTrips){
 	/**
      * Get calendar range for a set of agencies
      */
-    /*@GET
+    @GET
     @Path("/agenciesCalendarRange")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object agenciesCalendarRange(@QueryParam("agencies") String agency, @QueryParam("dbindex") Integer dbindex){
@@ -2515,7 +2515,7 @@ Loop:  	for (Trip trip: routeTrips){
     	}
     	
 		return sedlist;
-    }*/
+    }
 	
 	/**
      * Get calendar range for agency
