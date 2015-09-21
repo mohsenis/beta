@@ -39,7 +39,6 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-
 public class PgisEventManager {
 	//public static Connection connection;
 	
@@ -76,6 +75,46 @@ public class PgisEventManager {
 	}
 	
 	/////GEO AREA EXTENDED REPORTS QUERIES
+
+	///// CONNECTED AGENCIES ON-MAP REPORT QUERIES
+	/**
+	 * Queries stops within a certain distance of a given stop while filtering the agencies.
+	 */
+	public static CAStopsList getConnectedStops(double lat, double lon, int gap, String agencies, int dbindex){
+		CAStopsList results=new CAStopsList();	// This object is declared to hold the stops
+		
+		Connection connection = makeConnection(dbindex);
+	    Statement stmt = null;
+	    String query = "WITH main AS (SELECT agencyid, id, name, description, lat, lon "
+  						+ "FROM gtfs_stops WHERE agencyid = ANY('{"+agencies+"}'::text[]) "
+  						+ "AND ST_Dwithin(ST_transform(ST_setsrid(ST_MakePoint("+lon+", "+lat+"),4326), 2993), location, "+gap+")) "
+  						+ "SELECT main.id, main.name stopname, main.description, main.agencyid, gtfs_agencies.name agencyname, main.lat, main.lon "
+  						+ "FROM main INNER JOIN gtfs_agencies ON main.agencyid=gtfs_agencies.id";
+	    System.out.println(query);
+
+	    try {
+			stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			
+			while(rs.next()){
+				CAStop instance  = new CAStop();
+				
+				instance.id = rs.getString("id");
+				instance.name = rs.getString("stopname");
+				instance.agencyName = rs.getString("agencyname");
+				instance.agencyId = rs.getString("agencyid");
+				instance.lat = rs.getString("lat");
+				instance.lon = rs.getString("lon");
+				results.stopsList.add(instance);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	      
+		return results;
+	}
+	
+	/////GEO AREA EXTENDED REORTS QUERIES
 	
 	/**
 	 *Queries Route miles for a geographic area
@@ -164,6 +203,530 @@ public class PgisEventManager {
       return response;
     }
 	
+	/** Queries all P&Rs nationwide grouped by county*/
+	public static ParknRideCountiesList getCountiesPnrs(int dbindex){
+		ParknRideCountiesList results = new ParknRideCountiesList();
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		String querytext =	"SELECT pr.countyid, pr.county, count(pr.countyid) count, sum(pr.spaces) spaces, sum(pr.accessiblespaces) accessiblespaces " +
+				"FROM parknride pr " + 
+				"GROUP BY pr.countyid, pr.county;";
+		try {
+	        stmt = connection.createStatement();
+	        ResultSet rs = stmt.executeQuery(querytext); 
+	        List<ParknRideCounties> list=new ArrayList<ParknRideCounties>();
+	        while ( rs.next() ) {
+	        	ParknRideCounties instance = new ParknRideCounties();
+	        	instance.countyId = rs.getString("countyid");
+	        	instance.cname = rs.getString("county");
+	        	instance.count = rs.getString("count");
+	        	instance.spaces = rs.getString("spaces");
+	        	instance.accessibleSpaces = rs.getString("accessiblespaces");
+	        	list.add(instance);
+	        }
+//	        results.PnrCountiesList.add(instance);
+	        rs.close();
+	        stmt.close(); 
+	        results.PnrCountiesList=list;
+	      } catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        e.getStackTrace();
+	        //System.exit(0);
+	      }
+	      dropConnection(connection);
+	      
+	      return results;
+	}
+	
+	/** Queries all detailed information on all the PnRs within a given county.
+	 * 
+	 */
+	public static PnrInCountyList  getPnrsInCounty(int countyId, int radius, int dbindex, String username){
+		PnrInCountyList results = new PnrInCountyList();
+		String id = countyId+"";
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		String query =	"WITH aids AS ("
+						+ "SELECT agency_id AS aid "
+						+ "FROM gtfs_selected_feeds "
+						+ "WHERE username='"+username+"'), "
+						
+						+ "temp1 AS ("
+						+ "SELECT parknride.*,"+
+							"	gtfs_stops.name stopname, "+
+							"	gtfs_stops.id stopid "+
+							"FROM parknride CROSS JOIN gtfs_stops "+
+							"WHERE ST_dwithin(parknride.geom, gtfs_stops.location, "+radius+") "+
+							"ORDER BY pnrid), "+
+			
+							"temp2 AS (SELECT temp1.*, gtfs_stop_route_map.agencyid , gtfs_stop_route_map.routeid "+
+							"FROM temp1 CROSS JOIN gtfs_stop_route_map "+
+							"WHERE temp1.stopid=gtfs_stop_route_map.stopid), "+
+			
+							"temp3 AS (SELECT temp2.*, gtfs_routes.longname routename, gtfs_routes.agencyid agenid "+
+							"FROM temp2 CROSS JOIN gtfs_routes "+
+							"WHERE temp2.routeid = gtfs_routes.id), "
+							+ "temp4 AS ("
+							+ "	SELECT temp3.* "
+							+ "	FROM temp3 INNER JOIN aids "
+							+ "	ON temp3.agenid = aids.aid "
+							+ "	)," +
+							
+							"temp5 AS (SELECT temp4.*, gtfs_agencies.name agencyname "+
+							"FROM temp4 CROSS JOIN gtfs_agencies "+
+							"WHERE temp4.agenid=gtfs_agencies.id), "+
+			
+							"temp6 AS (SELECT pnrid,  "+
+							"	lotname, "+
+							"	location, "+
+							"	city, "+
+							"	zipcode, "+
+							"	spaces,  "+
+							"	accessiblespaces, "+
+							"	lat, "+
+							"	lon, "+
+							"	bikerackspaces, "+
+							"	bikelockerspaces,  "+
+							"	electricvehiclespaces, "+ 
+							"	carsharing, "+
+							"	transitservice, "+
+							"	availability, "+
+							"	timelimit, "+
+							"	restroom, "+
+							"	benches, "+
+							"	shelter, "+
+							"	indoorwaitingarea, "+ 
+							"	trashcan, "+
+							"	lighting, "+
+							"	securitycameras, "+
+							"	sidewalks, "+
+							"	pnrsignage, "+
+							"	lotsurface, "+
+							"	propertyowner, "+
+							"	localexpert, "+
+							"	county, "+
+							"   countyid, "+
+							"	array_agg(agencyname) agencies,"
+							+ "	array_agg(stopid) stopids,"
+							+ "	array_agg(stopname) stopnames,"
+							+ "	array_agg(routeid) routeids,"
+							+ "	array_agg(routename) routenames,"
+							+ "array_agg(stopname) stops, "+
+							" count(stopname) count "+
+							"FROM temp5 "+
+							"GROUP BY pnrid, "+
+							"lotname, "+
+							"	location, "+
+							"	city, "+
+							"	zipcode, "+
+							"	spaces, "+
+							"	accessiblespaces, "+
+							"	lat, "+
+							"	lon, "+
+							"	bikerackspaces, "+
+							"	bikelockerspaces, "+
+							"	electricvehiclespaces, "+
+							"	carsharing, "+
+							"	transitservice, "+
+							"	availability, "+
+							"	timelimit, "+
+							"	restroom, "+
+							"	benches, "+
+							"	shelter, "+
+							"	indoorwaitingarea,"+
+							"	trashcan, "+
+							"	lighting, "+
+							"	securitycameras, "+
+							"	sidewalks, "+
+							"	pnrsignage, "+
+							"	lotsurface,"+
+							"	propertyowner, "+
+							"	localexpert, "+
+							"	county, "+
+							"   countyid),"
+							+ " temp7 AS (SELECT parknride.*, temp6.agencies, temp6.stopids, temp6.stopnames, temp6.routeids, temp6.routenames FROM parknride LEFT OUTER JOIN temp6"
+							+ "	ON temp6.pnrid = parknride.pnrid)"
+							
+							+ " SELECT * FROM temp7"
+							+ " WHERE countyid='"+id+"'"
+							+ "	ORDER BY pnrid;";
+		
+		try {
+	        stmt = connection.createStatement();
+	        ResultSet rs = stmt.executeQuery(query); 
+	        List<PnrInCounty> list=new ArrayList<PnrInCounty>();
+	        while ( rs.next() ) {
+	        	PnrInCounty instance = new PnrInCounty();
+	        	instance.pnrid = rs.getString("pnrid");
+	        	instance.lotname = rs.getString("lotname");
+	        	instance.city = rs.getString("city");
+	        	instance.zipcode=rs.getString("zipcode");
+	        	instance.location = rs.getString("location");	  
+	        	if (rs.getString("spaces").equals("0"))
+	        		instance.spaces = "N/A";
+	        	else
+	        		instance.spaces =instance.spaces = rs.getString("spaces");	
+	        	if (rs.getString("accessiblespaces").equals("0"))
+	        		instance.accessiblespaces = "N/A";
+	        	else 
+	        		instance.accessiblespaces = rs.getString("accessiblespaces");	
+	        	instance.transitservices = rs.getString("transitservice");
+	        	if (rs.getString("lat").length()>8)
+	        		instance.lat = rs.getString("lat").substring(0,7);
+	        	else
+	        		instance.lat = rs.getString("lat");
+	        	if (rs.getString("lon").length()>10)
+	        		instance.lon = rs.getString("lon").substring(0,9);
+	        	else
+	        		instance.lon = rs.getString("lon");
+	        	if (rs.getString("bikerackspaces").equals("0"))
+	        		instance.bikerackspaces = "N/A";
+	        	else
+	        		instance.bikerackspaces = rs.getString("bikerackspaces");
+	        	if (rs.getString("bikelockerspaces").equals("0"))
+	        		instance.bikelockerspaces = "N/A";
+	        	else
+	        		instance.bikelockerspaces = rs.getString("bikelockerspaces");
+	        	if (rs.getString("electricvehiclespaces").equals("0"))
+	        		instance.electricvehiclespaces = "N/A";
+	        	else
+	        		instance.electricvehiclespaces = rs.getString("electricvehiclespaces");
+	        	instance.carsharing = rs.getString("carsharing");
+	        	instance.availability = rs.getString("availability");
+	        	instance.timelimit = rs.getString("timelimit");
+	        	instance.restroom = rs.getString("restroom");
+	        	instance.benches = rs.getString("benches");
+	        	instance.shelter = rs.getString("shelter");
+	        	instance.indoorwaitingarea = rs.getString("indoorwaitingarea");
+	        	instance.trashcan = rs.getString("trashcan");
+	        	instance.lighting = rs.getString("lighting");
+	        	instance.securitycameras = rs.getString("securitycameras");
+	        	instance.sidewalks = rs.getString("sidewalks");
+	        	instance.pnrsignage = rs.getString("pnrsignage");
+	        	instance.lotsurface = rs.getString("lotsurface");
+	        	instance.propertyowner = rs.getString("propertyowner");
+	        	instance.localexpert = rs.getString("localexpert");
+	        	instance.county = rs.getString("county");
+	        	if (rs.getString("routenames")==null){
+	        		instance.agencies = "N/A";
+	        		instance.stopids = "N/A";
+	        		instance.stopnames = "N/A";
+	        		instance.routeids = "N/A";
+	        		instance.routenames = "N/A";
+	        	}else{
+	        		instance.agencies = rs.getString("agencies");
+		        	instance.stopids = rs.getString("stopids");
+		        	instance.stopnames = rs.getString("stopnames");
+		        	instance.routeids = rs.getString("routeids");
+		        	instance.routenames = rs.getString("routenames");
+		        		 
+	        	}
+	        	list.add(instance);
+	        }
+	        rs.close();
+	        stmt.close(); 
+	        results.PnrCountiesList=list;
+	      } catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	        e.getStackTrace();
+	        //System.exit(0);
+	      }
+	      dropConnection(connection);
+		
+		return results;
+	}
+	
+	/**
+	 * Queries employment data on a given area (based on the reportType)
+	 */
+	public static EmpDataList getEmpData(String DS, String reportType, int dbindex, String username){
+		String dataSet = DS;
+		EmpDataList results = new EmpDataList();
+		Connection connection = makeConnection(dbindex);
+	    Statement stmt = null;
+	    String query = "";
+	    String criteria1 = "";
+	    String criteria2 = "";
+	    System.out.println(reportType);
+	    
+	    if (reportType.equals("Counties")){
+	    	criteria1 = "countyid";
+	    	criteria2 = "SELECT  census_counties.cname  AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_counties"
+			    		+ " ON temp2.id = census_counties.countyid" ;
+	    }else if (reportType.equals("Census Places")){
+	    	criteria1 = "placeid";
+	    	criteria2 = "SELECT  census_places.pname  AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_places"
+			    		+ " ON temp2.id = census_places.placeid" ;
+	    }
+	    else if (reportType.equals("ODOT Transit Regions")){
+	    	criteria1 = "regionid";
+	    	criteria2 = "SELECT  concat('Region ',temp2.id) AS name, temp2.*"
+	    				+ " FROM temp2 ";
+	    }
+	    else if (reportType.equals("Urban Areas")){
+	    	criteria1 = "urbanid";
+	    	criteria2 = " SELECT census_urbans.uname AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_urbans"
+			    		+ " ON temp2.id = census_urbans.urbanid";
+	    }
+	    else if (reportType.equals("Congressional Districts")){
+	    	criteria1 = "congdistid";
+	    	criteria2 = " SELECT census_congdists.cname AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_congdists"
+			    		+ " ON concat('410',temp2.id) = census_congdists.congdistid";
+	    }
+	    
+	    query = "WITH temp1 AS (SELECT "
+	    		+ "		LEFT(census_blocks.blockid,5) countyid,"
+	    		+ "		census_blocks.blockid,"
+	    		+ "		census_blocks.placeid,"
+	    		+ "		census_blocks.congdistid,"
+	    		+ "		census_blocks.regionid,"
+	    		+ "		census_blocks.urbanid,"
+	    		+ "		census_blocks.population"
+	    		+ "	FROM census_blocks"
+	    		+ "		),"
+	    		+ "temp2 AS ("
+	    		+ "		SELECT"
+	    		+ "		  temp1." + criteria1 + " id,"
+	    		+ "		  COALESCE(SUM(population),0)::int population,"
+	    		+ "		  COALESCE(SUM(c000), 0)::int c000,"
+	    		+ "		  COALESCE(SUM(ca01), 0)::int ca01,"
+	    		+ "		  COALESCE(SUM(ca02), 0)::int ca02,"
+	    		+ "		  COALESCE(SUM(ca03), 0)::int ca03,"
+	    		+ "		  COALESCE(SUM(ce01), 0)::int ce01,"
+	    		+ "		  COALESCE(SUM(ce02), 0)::int ce02,"
+	    		+ "		  COALESCE(SUM(ce03), 0)::int ce03,"
+	    		+ "		  COALESCE(SUM(cns01), 0)::int cns01,"
+	    		+ "		  COALESCE(SUM(cns02), 0)::int cns02,"
+	    		+ "		  COALESCE(SUM(cns03), 0)::int cns03,"
+	    		+ "		  COALESCE(SUM(cns04), 0)::int cns04,"
+	    		+ "		  COALESCE(SUM(cns05), 0)::int cns05,"
+	    		+ "		  COALESCE(SUM(cns06), 0)::int cns06,"
+	    		+ "		  COALESCE(SUM(cns07), 0)::int cns07,"
+	    		+ "		  COALESCE(SUM(cns08), 0)::int cns08,"
+	    		+ "		  COALESCE(SUM(cns09), 0)::int cns09,"
+	    		+ "		  COALESCE(SUM(cns10), 0)::int cns10,"
+	    		+ "		  COALESCE(SUM(cns11), 0)::int cns11,"
+	    		+ "		  COALESCE(SUM(cns12), 0)::int cns12,"
+	    		+ "		  COALESCE(SUM(cns13), 0)::int cns13,"
+	    		+ "		  COALESCE(SUM(cns14), 0)::int cns14,"
+	    		+ "		  COALESCE(SUM(cns15), 0)::int cns15,"
+	    		+ "		  COALESCE(SUM(cns16), 0)::int cns16,"
+	    		+ "		  COALESCE(SUM(cns17), 0)::int cns17,"
+	    		+ "		  COALESCE(SUM(cns18), 0)::int cns18,"
+	    		+ "		  COALESCE(SUM(cns19), 0)::int cns19,"
+	    		+ "		  COALESCE(SUM(cns20), 0)::int cns20,"
+	    		+ "		  COALESCE(SUM(cr01), 0)::int cr01,"
+	    		+ "		  COALESCE(SUM(cr02), 0)::int cr02,"
+	    		+ "		  COALESCE(SUM(cr03), 0)::int cr03,"
+	    		+ "		  COALESCE(SUM(cr04), 0)::int cr04,"
+	    		+ "		  COALESCE(SUM(cr05), 0)::int cr05,"
+	    		+ "		  COALESCE(SUM(cr07), 0)::int cr07,"
+	    		+ "		  COALESCE(SUM(ct01), 0)::int ct01,"
+	    		+ "		  COALESCE(SUM(ct02), 0)::int ct02,"
+	    		+ "		  COALESCE(SUM(cd01), 0)::int cd01,"
+	    		+ "		  COALESCE(SUM(cd02), 0)::int cd02,"
+	    		+ "		  COALESCE(SUM(cd03), 0)::int cd03,"
+	    		+ "		  COALESCE(SUM(cd04), 0)::int cd04,"
+	    		+ "		  COALESCE(SUM(cs01), 0)::int cs01,"
+	    		+ "		  COALESCE(SUM(cs02), 0)::int cs02"
+	    		+ ""
+	    		+ "		FROM temp1 INNER JOIN " + dataSet 
+	    		+ "		ON temp1.blockid = " + dataSet + ".blockid"
+	    		+ ""
+	    		+ "		GROUP BY " + criteria1
+	    		+ "		ORDER BY " + criteria1
+	    		+ "	) "
+	    		+ criteria2;
+	    System.out.println(query);
+
+	    try {
+	    	stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query); 
+			
+			while (rs.next()){
+				EmpData i = new EmpData();
+				i.id = rs.getString("id");
+				i.name = rs.getString("name");
+				i.population = rs.getInt("population");
+				i.c000 = rs.getInt("c000");
+				i.ca01 = rs.getInt("ca01");
+				i.ca02 = rs.getInt("ca02");
+				i.ca03 = rs.getInt("ca03");
+				i.ce01 = rs.getInt("ce01");
+				i.ce02 = rs.getInt("ce02");
+				i.ce03 = rs.getInt("ce03");				
+				i.cns01 = rs.getInt("cns01");
+				i.cns02 = rs.getInt("cns02");
+				i.cns03 = rs.getInt("cns03");
+				i.cns04 = rs.getInt("cns04");
+				i.cns05 = rs.getInt("cns05");
+				i.cns06 = rs.getInt("cns06");
+				i.cns07 = rs.getInt("cns07");
+				i.cns08 = rs.getInt("cns08");
+				i.cns09 = rs.getInt("cns09");
+				i.cns10 = rs.getInt("cns10");
+				i.cns11 = rs.getInt("cns11");
+				i.cns12 = rs.getInt("cns12");
+				i.cns13 = rs.getInt("cns13");
+				i.cns14 = rs.getInt("cns14");
+				i.cns15 = rs.getInt("cns15");
+				i.cns16 = rs.getInt("cns16");
+				i.cns17 = rs.getInt("cns17");
+				i.cns18 = rs.getInt("cns18");
+				i.cns19 = rs.getInt("cns19");
+				i.cns20 = rs.getInt("cns20");
+				i.cr01 = rs.getInt("cr01");
+				i.cr02 = rs.getInt("cr02");
+				i.cr03 = rs.getInt("ce03");	
+				i.cr04 = rs.getInt("cr04");
+				i.cr05 = rs.getInt("cr05");
+				i.cr07 = rs.getInt("cr07");	
+				i.ct01 = rs.getInt("ct01");
+				i.ct02 = rs.getInt("ct02");
+				i.cd01 = rs.getInt("cd01");
+				i.cd02 = rs.getInt("cd02");
+				i.cd03 = rs.getInt("cd03");
+				i.cd04 = rs.getInt("cd04");
+				i.cs01 = rs.getInt("cs01");
+				i.cs02 = rs.getInt("cs02");
+				
+				results.EmpDataList.add(i);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    dropConnection(connection);
+		return results;
+	}
+	
+	/**
+	 * Queries Title VI data on a given area (based on the reportType)
+	 */
+	public static TitleVIDataList getTitleVIData(String reportType, int dbindex, String username){
+		TitleVIDataList results = new TitleVIDataList();
+		Connection connection = makeConnection(dbindex);
+	    Statement stmt = null;
+	    String query = "";
+	    String criteria1 = "";
+	    String criteria2 = "";
+	    System.out.println(reportType);
+	    
+	    if (reportType.equals("Counties")){
+	    	criteria1 = "countyid";
+	    	criteria2 = "SELECT  census_counties.cname  AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_counties"
+			    		+ " ON temp2.id = census_counties.countyid" ;
+	    }else if (reportType.equals("Census Places")){
+	    	criteria1 = "placeid";
+	    	criteria2 = "SELECT  census_places.pname  AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_places"
+			    		+ " ON temp2.id = census_places.placeid" ;
+	    }
+	    else if (reportType.equals("ODOT Transit Regions")){
+	    	criteria1 = "regionid";
+	    	criteria2 = "SELECT  concat('Region ',temp2.id) AS name, temp2.*"
+	    				+ " FROM temp2 ";
+	    }
+	    else if (reportType.equals("Urban Areas")){
+	    	criteria1 = "urbanid";
+	    	criteria2 = " SELECT census_urbans.uname AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_urbans"
+			    		+ " ON temp2.id = census_urbans.urbanid";
+	    }
+	    else if (reportType.equals("Congressional Districts")){
+	    	criteria1 = "congdistid";
+	    	criteria2 = " SELECT census_congdists.cname AS name, temp2.*"
+			    		+ " FROM temp2 INNER JOIN census_congdists"
+			    		+ " ON concat('410',temp2.id) = census_congdists.congdistid";
+	    }
+	    
+	    query = "WITH temp1 AS (SELECT census_counties.countyid,"
+	    		+ "		census_blocks.blockid,"
+	    		+ "		census_blocks.placeid,"
+	    		+ "		census_blocks.congdistid,"
+	    		+ "		census_blocks.regionid,"
+	    		+ "		census_blocks.urbanid,"
+	    		+ "		census_blocks.population,"
+	    		+ "		census_blocks.population/census_counties.population::FLOAT AS poppercent"
+	    		+ "		FROM census_blocks INNER JOIN census_counties"
+	    		+ "		ON LEFT(blockid,5) = census_counties.countyid"
+	    		+ "		),"
+	    		+ "temp2 AS ("
+	    		+ "		SELECT"
+	    		+ "		   " + criteria1 + " id,"
+	    		+ "		   COALESCE(SUM(Population),0)::bigint population,"
+	    		+ "		   COALESCE(SUM(Pop_Disabled*poppercent),0)::bigint Pop_Disabled,"
+	    		+ "		   COALESCE(SUM(Tot_Pop_BP*poppercent),0)::bigint Tot_Pop_BP,"
+	    		+ "		   COALESCE(SUM(Tot_Pop_AP*poppercent),0)::bigint Tot_Pop_AP,"
+	    		+ "		   COALESCE(SUM(ENG_SPK*poppercent),0)::bigint ENG_SPK,"
+	    		+ "		   COALESCE(SUM(ESP_SPK*poppercent),0)::bigint ESP_SPK,"
+	    		+ "		   COALESCE(SUM(OTHER_INDO_SPK*poppercent),0)::bigint OTHER_INDO_SPK,"
+	    		+ "		   COALESCE(SUM(ASIAN_SPK*poppercent),0)::bigint ASIAN_SPK,"
+	    		+ "		   COALESCE(SUM(OTHER_LNG_SPK*poppercent),0)::bigint OTHER_LNG_SPK,"
+	    		+ "		   COALESCE(SUM(HH_Tot*poppercent),0)::bigint HH_Tot,"
+	    		+ "		   COALESCE(SUM(HH_White*poppercent),0)::bigint HH_White,"
+	    		+ "		   COALESCE(SUM(HH_Hispanic*poppercent),0)::bigint HH_Hispanic,"
+	    		+ "		   COALESCE(SUM(HH_Black*poppercent),0)::bigint HH_Black,"
+	    		+ "		   COALESCE(SUM(HH_American_Indian*poppercent),0)::bigint HH_American_Indian,"
+	    		+ "		   COALESCE(SUM(HH_Asian*poppercent),0)::bigint HH_Asian,"
+	    		+ "		   COALESCE(SUM(HH_Pacific_Islander*poppercent),0)::bigint HH_Pacific_Islander,"
+	    		+ "		   COALESCE(SUM(HH_Pacific_Other*poppercent),0)::bigint HH_Pacific_Other,"
+	    		+ "		   COALESCE(SUM(HH_White_Not_Hisp*poppercent),0)::bigint HH_White_Not_Hisp,"
+	    		+ "		   COALESCE(SUM(HH_Over_65*poppercent),0)::bigint HH_Over_65,"
+	    		+ "		   COALESCE(SUM(HH_Under_65*poppercent),0)::bigint HH_Under_65"
+	    		+ "		   "
+	    		+ "		FROM temp1 INNER JOIN oregon_titlevi"
+	    		+ "		ON temp1.countyid = oregon_titlevi.county_id"
+	    		+ ""
+	    		+ "		GROUP BY " + criteria1
+	    		+ "		ORDER BY " + criteria1
+	    		+ "	)"
+	    		+  criteria2;
+	    System.out.println(query);
+
+	    try {
+	    	stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query); 
+			
+			while (rs.next()){
+				TitleVIData i = new TitleVIData();
+				i.id = rs.getString("id");
+				i.name = rs.getString("name");
+				i.population = rs.getInt("population");
+				i.popDisabled = rs.getInt("pop_disabled");
+				i.popAP = rs.getInt("tot_pop_ap");
+				i.popBP = rs.getInt("tot_pop_bp");
+				i.engSpk = rs.getInt("eng_spk");
+				i.espSpk = rs.getInt("esp_spk");
+				i.otherIndoSpk= rs.getInt("other_indo_spk");
+				i.asianSpk = rs.getInt("asian_spk");
+				i.otherLngSpk = rs.getInt("other_lng_spk");
+				i.hhTotal = rs.getInt("hh_tot");
+				i.hhWhite= rs.getInt("hh_white");
+				i.hhHispanic= rs.getInt("hh_hispanic");
+				i.hhBlack= rs.getInt("hh_black");
+				i.hhAmericanIndian= rs.getInt("hh_american_indian");
+				i.hhAsian= rs.getInt("hh_asian");
+				i.hhPacificIslander= rs.getInt("hh_pacific_islander");
+				i.hhPacificOther= rs.getInt("hh_pacific_other");
+				i.hhWhiteNotHisp= rs.getInt("hh_white_not_hisp");
+				i.hhOver65= rs.getInt("hh_over_65");
+				i.hhUnder65= rs.getInt("hh_under_65");
+				results.TitleVIDataList.add(i);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    dropConnection(connection);
+		return results;
+	}
+	
 	/**
 	 *Queries Stops count, unduplicated urban pop and rural pop within x meters of all stops within the given geographic area
 	 */
@@ -193,6 +756,7 @@ public class PgisEventManager {
       		+ "(select COALESCE(sum(population),0) upop from census where poptype = 'U'), ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'),"
       		+ " stopcount as (select count(stops.id) as stopscount from stops) select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop, COALESCE(rpop,0) as "
       		+ "ruralpop from stopcount inner join urbanpop on true inner join ruralpop on true";
+     // System.out.println(querytext);
       long[] results = new long[3];
       //System.out.println(querytext);
       try {
@@ -1081,6 +1645,7 @@ public class PgisEventManager {
     		+ "(select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) select svcmiles, svchours, svcstops, upoplos, rpoplos, uspop, rspop, svdays, fromtime, "
     		+ "totime from service inner join upopatlos on true inner join rpopatlos on true inner join upopserved on true inner join rpopserved on true inner join svcdays "
     		+ "on true inner join svchrs on true";
+   // System.out.println(query);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
@@ -1352,6 +1917,7 @@ public class PgisEventManager {
 		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pairs as (select stp1.agencyid as aid1,"
+			String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pairs as (select stp1.agencyid as aid1,"
 					+ " stp1.id as sid1, array[stp1.lat, stp1.lon]::text as stp1loc, stp1.name as name1, stp2.agencyid as aid2, stp2.id as sid2, array[stp2.lat, stp2.lon]::text "
 					+ "as stp2loc, stp2.name as name2, st_distance(stp1.location,stp2.location) as dist from gtfs_stops stp1 inner join gtfs_stops stp2 on "
 					+ "st_dwithin(stp1.location, stp2.location,"+String.valueOf(dist)+") inner join aids on stp1.agencyid=aids.aid inner join aids aids2 on stp2.agencyid=aids2.aid)"
@@ -1359,9 +1925,11 @@ public class PgisEventManager {
 					+ "agencies as (select agency.id as aid, map.agencyid_def as aid_def, agency.name as aname, map.stopid as sid from gtfs_agencies agency inner join "
 					+ "gtfs_stop_service_map map on agency.id=map.agencyid where agency.id!='"+agencyId+"') select ag1.aid as aid1, ag2.aid as aid2, ag2.aname, count(pairs.sid2) "
 					+ "as size, round((3.28084*min(pairs.dist))::numeric, 2) as min_gap, round((3.28084*max(pairs.dist))::numeric, 2) as max_gap, "
-					+ "round((3.28084*avg(pairs.dist))::numeric, 2) as avg_gap, array_agg(name1) as names1, array_agg(stp1loc) as locs1,array_agg(name2) as names2, "
+					+ "round((3.28084*avg(pairs.dist))::numeric, 2) as avg_gap, array_agg(name1) as names1, array_agg(stp1loc) as locs1, array_agg(sid2) as sids2, array_agg(name2) as names2, "
 					+ "array_agg(stp2loc) as locs2, array_agg(round((3.28084*dist)::numeric, 2)::text) as dists from agency ag1 inner join pairs on ag1.aid_def=pairs.aid1 and "
-					+ "ag1.sid= pairs.sid1 inner join agencies ag2 on ag2.aid_def=pairs.aid2 and ag2.sid= pairs.sid2 where ag1.aid!=ag2.aid group by ag1.aid, ag2.aid, ag2.aname");					
+					+ "ag1.sid= pairs.sid1 inner join agencies ag2 on ag2.aid_def=pairs.aid2 and ag2.sid= pairs.sid2 where ag1.aid!=ag2.aid group by ag1.aid, ag2.aid, ag2.aname";					
+			System.out.println(query);
+			ResultSet rs = stmt.executeQuery(query);
 			while ( rs.next() ) {
 				agencyCluster instance = new agencyCluster();
 				instance.agencyId = rs.getString("aid2");
@@ -1379,7 +1947,9 @@ public class PgisEventManager {
 				buffer = (String[]) rs.getArray("locs1").getArray();
 				instance.sourceStopCoords = Arrays.asList(buffer);
 				buffer = (String[]) rs.getArray("locs2").getArray();
-				instance.destStopCoords = Arrays.asList(buffer);				
+				instance.destStopCoords = Arrays.asList(buffer);
+				buffer = (String[]) rs.getArray("sids2").getArray();
+				instance.destStopIds = Arrays.asList(buffer);
 		        response.add(instance);
 		        }
 		} catch ( Exception e ) {
@@ -1388,6 +1958,40 @@ public class PgisEventManager {
 	      }
 		dropConnection(connection);
 		return response;
+	}
+	
+	/**
+	 * Queries stops of a given agency.
+	 * Used to generate Connecteg Agencies On-map report,
+	 */
+	public static CAStopsList getAgenStops(String agencyId, int dbindex){
+		CAStopsList result = new CAStopsList();
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		
+		try {
+			stmt = connection.createStatement();
+			String query = "WITH main AS (SELECT id stopid, name stopname, agencyid, lat, lon, location "
+					+ "FROM gtfs_stops WHERE agencyid='" + agencyId + "') "
+							+ "SELECT main.stopid, main.stopname, main.agencyid, gtfs_agencies.name agencyname, main.lat, main.lon, gtfs_agencies.url "
+							+ "FROM main INNER JOIN gtfs_agencies ON main.agencyid = gtfs_agencies.id";
+			
+			ResultSet rs = stmt.executeQuery(query);
+			while (rs.next()){
+				CAStop instance = new CAStop();
+				instance.id = rs.getString("stopid");
+				instance.name = rs.getString("stopname");
+				instance.agencyId = rs.getString("agencyid");
+				instance.agencyName = rs.getString("agencyname");
+				instance.lat = rs.getString("lat");
+				instance.lon = rs.getString("lon");
+				result.stopsList.add(instance);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
 	}
 	
 	/**

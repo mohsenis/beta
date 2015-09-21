@@ -22,7 +22,9 @@
     <query name="agencyIdsReferencingServiceId" read-only="true">
         SELECT trip.id.agencyId FROM Trip trip WHERE trip.serviceId = :serviceId GROUP BY trip.id.agencyId
     </query>
-     
+     <query name="allAgencies" read-only="true">
+        FROM Agency agency WHERE agency.defaultId in (:sa)
+    </query>
      <query name="updatedTripShpaeLength" read-only="false">
         update Trip set length = :length, estlength = :estlength, shape = :shape WHERE id = :tripid    
     </query>
@@ -105,7 +107,7 @@
         select fr.fare.price FROM FareRule fr WHERE concat(fr.route.id.agencyId,',',fr.route.id.id) in (:routes) order by fr.fare.price
     </query>
     <query name="selectedAgenies" read-only="true">
-        FROM Agency a WHERE a.defaultId in (:selectedAgencies)
+        FROM Agency a WHERE a.defaultId in (:sa)
     </query>
     <query name="feedInfoByDefAgency" read-only="true">
         FROM FeedInfo fi WHERE fi.defaultId = :defaultAgencyId
@@ -156,6 +158,6 @@
         select concat(min(st.arrivalTime),'-',max(st.departureTime)) FROM StopTime st WHERE concat(st.trip.id.agencyId, st.trip.id.id) in (:trips) and st.arrivalTime>0 and st.departureTime>0
     </query>
     <query name="counts" read-only="true">
-        select (select count(id) from Agency WHERE defaultId in (:selectedAgencies))as agency, (select count(id.id) from Stop WHERE agencyid in (:selectedAgencies))as stop, (select count(id.id) from Route WHERE defaultid in (:selectedAgencies))as route from Agency
+        select (select count(id) from Agency WHERE defaultId in (:sa))as agency, (select count(id.id) from Stop WHERE agencyid in (:sa))as stop, (select count(id.id) from Route WHERE defaultid in (:sa))as route from Agency
     </query>
 </hibernate-mapping>

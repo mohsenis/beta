@@ -58,7 +58,8 @@ public class GtfsHibernateReaderExampleMain {
 
   public static Agency QueryAgencybyid(String id, int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
-	  return dao.getAgencyForId(id);
+	  Agency a = dao.getAgencyForId(id);
+	  return a;
   }
   
   public static Stop QueryStopbyid(AgencyAndId id, int dbindex){
@@ -189,9 +190,9 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getAllFeedInfos();
   }
   
-  public static Collection<Agency> QueryAllAgencies (int dbindex){
+  public static Collection<Agency> QueryAllAgencies (List<String> selectedAgencies, int dbindex){
 	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
-	  return dao.getAllAgencies();
+	  return dao.getAllAgencies(selectedAgencies);
   }
   
   public static Collection<Agency> QuerySelectedAgencies (List<String> selectedAgencies, int dbindex){

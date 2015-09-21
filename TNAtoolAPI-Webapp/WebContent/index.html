@@ -20,6 +20,7 @@
 	<link rel="stylesheet" href="js/lib/MarkerCluster/MarkerCluster.css" />
 	<link rel="stylesheet" href="js/lib/MarkerCluster/MarkerCluster.styles.css" />
 	<link rel="stylesheet" href="js/lib/MarkerCluster/MarkerCluster.Default.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
 	<script src="js/lib/simple-expand.min.js"></script>
 	<script src="js/lib/MarkerCluster/leaflet_markercluster-src.js"></script>
 	<!-- <script src="js/lib/MarkerCluster/leaflet.markercluster1.js"></script> -->
@@ -69,10 +70,19 @@
 
 </head>
 
-<body>
+<body style="display:none">
 	<div id="overlay"></div>
 	<div id='list' class='list'>
 	</div>
+	
+			<div id="connectedAgencies-form" title="On-Map Connected Agencies Report" style="text-size=50%">
+	<p style="font-size:80%"> Maximum Spatial Gap (ft.) <input type="number" name="gap" id="gap" class="utbox" required value='500'/>
+			    	<input id="submit" type="button" onclick="reloadDialog2(document.getElementById('gap').value)" title="Click submit to refresh the report"  value="Submit" class="button" /></p>		    			    	    	
+	<p><br><span>Agencies connected to: <b><br>- <span style="font-size:80%; align:center;" id="dialogSelectedAgency"></span></b></span><br>
+	<p id="displayConAgenciesTable"></p>
+	<img id="dialogPreLoader2" src="images/287.GIF" alt="Page Loading" width="85" height="85" style="margin:100px" >
+	</div>
+	
 	<div id="dialog-form" title="On-Map Report">
 	  <p><b>Centroid</b>:<br>
     	<span style="padding-left:3em">Latitude: <span style="padding-left:1.5em" id="dialogLat"></span></span><br>
@@ -85,8 +95,9 @@
       <input  type="text" autofocus style="visibility:hidden">
 	  <div id="tabs">
 		  <ul>
-		    <li><a href="#transit">Transit Agencies Report</a></li>
-		    <li><a href="#geography">Geographical Report</a></li>
+		    <li><a href="#transit">Transit Agencies</a></li>
+		    <li><a href="#geography">Census</a></li>
+		    <li><a href="#parknride">Park and Ride</a></li>
 		  </ul>
 		  <div id="transit">
 		  	<b>Show Transit: </b><input type="radio" name="transitShow" id="stopsCheck" value="stops" style="margin-left:2em" onclick="transitRadio(this)">Stops
@@ -141,6 +152,22 @@
 		  	<br> -->		  	
 		  	<p id="displayGeoReport"></p>
 		  </div>
+		  
+		  <div id="parknride">
+		  	<table id="parknrideInfo" style="border:none; font-size:100%">
+		  		<tr>
+		  			<td><b>Number of P&R Lots:</b></td>
+		  			<td class="onMapdata" id="npnr"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Number of Available Spaces:</b></td>
+		  			<td class="onMapdata" id="nspc"></td>
+		  		</tr>
+		  	</table>
+		  	<br>
+		  	<p id="displayPnrCounties"></p>
+		  </div>
+		  
 	  </div>
       <img id="dialogPreLoader" src="images/287.GIF" alt="Page Loading" style="margin:9em;margin-top:22em" >	
       <!-- <label><i>Select the report you want to be displayed</i></label>

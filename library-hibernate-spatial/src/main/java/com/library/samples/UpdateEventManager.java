@@ -1,5 +1,7 @@
 package com.library.samples;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -272,6 +274,8 @@ public class UpdateEventManager {
 	public static void updateTables(int dbindex, String agencyId){	
 		  Connection connection = makeConnection(dbindex);
 		  
+		  System.out.println("Adding Function");
+		  addFunction(connection, dbindex);
 		  System.out.println("Updating gtfs_trips");
 		  updateTrip(connection, agencyId);
 		  System.out.println("Updating gtfs_stops");
@@ -317,6 +321,7 @@ public class UpdateEventManager {
 		create_gtfs_trip_stops(connection);
 	      try {
 	        stmt = connection.createStatement();
+	        stmt.executeUpdate("ALTER TABLE gtfs_trip_stops DISABLE TRIGGER ALL;");
 	        
 	        stmt.executeUpdate("with seq as (select trip_agencyid as taid, trip_id as tripid, min(stopsequence) as mins, max(stopsequence) as maxs from gtfs_stop_times stime where stop_agencyid='"+agencyId+"' group by trip_agencyid, trip_id),"
 	        		+ "tpoints as (select stime1.stop_agencyid as osaid, stime1.stop_id as ostopid, stime2.stop_agencyid as dsaid, stime2.stop_id as dstopid, seq.taid as taid, seq.tripid as tripid from gtfs_stop_times stime1 inner join seq "
@@ -327,6 +332,7 @@ public class UpdateEventManager {
 	        		+ "on stop1.agencyid = tpoints.osaid and stop1.id = tpoints.ostopid inner join gtfs_stops stop2 on stop2.agencyid = tpoints.dsaid and stop2.id = tpoints.dstopid) "
 	        		+ "insert into gtfs_trip_stops (trip_agencyid, trip_id, stop_name_origin, stop_agencyid_origin, stop_id_origin, stop_name_destination, stop_agencyid_destination, stop_id_destination) select * from tripstops;");
 	        
+	        stmt.executeUpdate("ALTER TABLE gtfs_trip_stops ENABLE TRIGGER ALL;");
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
@@ -369,6 +375,7 @@ public class UpdateEventManager {
 		create_gtfs_stop_service_map(connection);
 	      try {
 	        stmt = connection.createStatement();
+	        stmt.executeUpdate("ALTER TABLE gtfs_stop_service_map DISABLE TRIGGER ALL;");
 	        
 	        stmt.executeUpdate("insert into gtfs_stop_service_map(stopid, agencyid, agencyid_def) "
 	        		+ "select distinct stimes.stop_id , agencies.id, stimes.stop_agencyId  "
@@ -378,6 +385,7 @@ public class UpdateEventManager {
 	        		+ "inner join gtfs_stop_times stimes on trips.id = stimes.trip_id and trips.agencyId = stimes.trip_agencyId "
 	        		+ "where agencies.defaultid = '"+agencyId+"';");
 	        
+	        stmt.executeUpdate("ALTER TABLE gtfs_stop_service_map ENABLE TRIGGER ALL;");
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
@@ -405,11 +413,37 @@ public class UpdateEventManager {
 	      
 	      try{
 	    	  stmt = connection.createStatement();
+	    	  stmt.executeUpdate("ALTER TABLE gtfs_stops DISABLE TRIGGER ALL;");
+	    	  
 	    	  stmt.executeUpdate("update gtfs_stops set location = ST_transform(ST_setsrid(ST_MakePoint(lon, lat),4326), 2993) where agencyid='"+agencyId+"';");  
+	    	  
+	    	  stmt.executeUpdate("ALTER TABLE gtfs_stops ENABLE TRIGGER ALL;");
 	    	  stmt.close();
 	      }catch ( Exception e ) {
 	    	  e.printStackTrace();
 	      }
+	      
+	}
+	
+	/**
+	 *Adding SQL functions
+	 */
+	public static void addFunction(Connection connection, int dbindex){
+		/*String basePath = System.getProperty("user.dir").replace('\\', '/')+"/";
+		Process pr;
+		ProcessBuilder pb;
+		String name = Databases.dbnames[dbindex];
+		String usrn = Databases.usernames[dbindex];
+		String pass = Databases.passwords[dbindex];
+		try {
+			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/addFunctions.bat", pass, usrn, name,
+					psqlPath+"psql.exe",
+					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
+			pb.redirectErrorStream(true);
+			pr = pb.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}*/
 	      
 	}
 	
@@ -431,6 +465,8 @@ public class UpdateEventManager {
 		
 	      try{
 	    	  stmt = connection.createStatement();
+	    	  stmt.executeUpdate("ALTER TABLE gtfs_trips DISABLE TRIGGER ALL;");
+	    	  
 	    	  stmt.executeUpdate("update gtfs_trips trip set shape = tss.shape, epshape=GoogleEncodeLine(tss.shape), length = (tss.length)/1609.34, estlength=0 FROM "
 	    	  		+ "(select ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)) as shape, ST_Length(st_transform(ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)),2993)) as length,"
 	    	  		+ "shppoint.shapeid_agencyid as agencyid, shppoint.shapeid_id as shapeid from (select * from gtfs_shape_points where shapeid_agencyid='"+agencyId+"' order by shapeid_agencyid, shapeid_id, sequence) as shppoint "
@@ -452,6 +488,8 @@ public class UpdateEventManager {
 	    	  		+ "and stop_agencyid='"+agencyId+"' group by trip_id, trip_agencyid) "
 	    	  		+ "update gtfs_trips trips set tlength=tripfinish-tripstart from tempetriptimes result where result.tripid = trips.id and result.agencyid = trips.agencyid;");
 	    	  stmt.executeUpdate("update gtfs_trips set tlength=0 where tlength isnull or tlength<0;");
+	    	  
+	    	  stmt.executeUpdate("ALTER TABLE gtfs_trips ENABLE TRIGGER ALL;");
 	    	  stmt.close();
 	      }catch ( Exception e ) {
 	    	  e.printStackTrace();
@@ -477,6 +515,7 @@ public class UpdateEventManager {
 		  
 		  try {
 		    stmt = connection.createStatement();
+		    stmt.executeUpdate("ALTER TABLE gtfs_stop_route_map DISABLE TRIGGER ALL;");
 		    
 		    stmt.executeUpdate("insert into gtfs_stop_route_map(stopid, agencyid, agencyid_def, routeid) "
 		    		+ "select distinct stimes.stop_id, routes.agency, stimes.stop_agencyId, routes.id "
@@ -485,6 +524,7 @@ public class UpdateEventManager {
 		    		+ "inner join gtfs_stop_times stimes on trips.id = stimes.trip_id and trips.agencyId = stimes.trip_agencyId "
 		    		+ "where routes.defaultid='"+agencyId+"';");
 		    
+		    stmt.executeUpdate("ALTER TABLE gtfs_stop_route_map ENABLE TRIGGER ALL;");
 		    stmt.close();
 		  } catch ( Exception e ) {
 			  e.printStackTrace();
@@ -498,6 +538,7 @@ public class UpdateEventManager {
 		Statement stmt = null;
 	      try {
 	        stmt = connection.createStatement();
+	        stmt.executeUpdate("ALTER TABLE gtfs_stops DISABLE TRIGGER ALL;");
 	        
 	        stmt.executeUpdate("update gtfs_stops stop set blockid=shape.geoid10 from census_blocks_reference shape where stop.agencyid='"+agencyId+"' and st_within(ST_MakePoint(stop.lon, stop.lat),shape.geom)=true ;");
 	        stmt.executeUpdate("update gtfs_stops stop set placeid=shape.placeid from census_places shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true ;");
@@ -505,6 +546,7 @@ public class UpdateEventManager {
 	        stmt.executeUpdate("update gtfs_stops stop set regionid = county.odotregionid from census_counties county where stop.agencyid='"+agencyId+"' and left(stop.blockid,5)= county.countyid::varchar(5);");
 	        stmt.executeUpdate("update gtfs_stops stop set urbanid=shape.urbanid from census_urbans shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true;");
 	        
+	        stmt.executeUpdate("ALTER TABLE gtfs_stops ENABLE TRIGGER ALL;");
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
@@ -528,6 +570,7 @@ public class UpdateEventManager {
 		create_census_congdists_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
+	        stmt.executeUpdate("ALTER TABLE census_congdists_trip_map DISABLE TRIGGER ALL;");
 	        
 	        stmt.executeUpdate("insert into census_congdists_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  congdistid, shape, length, uid) "
 	        		+ "select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, congdist.congdistid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,congdist.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,congdist.shape),2993))/1609.34), trip.uid "
@@ -551,6 +594,7 @@ public class UpdateEventManager {
 	        		+ "where res.agencyid = map.agencyid and res.tripid=map.tripid and res.geoid=map.congdistid;");
 	        stmt.executeUpdate("update census_congdists_trip_map set tlength=0 where tlength isnull;");
 
+	        stmt.executeUpdate("ALTER TABLE census_congdists_trip_map ENABLE TRIGGER ALL;");
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
@@ -574,6 +618,7 @@ public class UpdateEventManager {
 		create_census_counties_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
+	        stmt.executeUpdate("ALTER TABLE census_counties_trip_map DISABLE TRIGGER ALL;");
 	        
 	        stmt.executeUpdate("insert into census_counties_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  countyid, regionid, shape, length, uid) "
 	        		+ "select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, county.countyid, county.odotregionid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,county.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,county.shape),2993))/1609.34), trip.uid "
@@ -595,6 +640,7 @@ public class UpdateEventManager {
 	        		+ "where res.agencyid = map.agencyid and res.tripid=map.tripid and res.geoid=map.countyid;");
 	        stmt.executeUpdate("update census_counties_trip_map set tlength=0 where tlength isnull;");
 
+	        stmt.executeUpdate("ALTER TABLE census_counties_trip_map ENABLE TRIGGER ALL;");
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
@@ -618,6 +664,7 @@ public class UpdateEventManager {
 		create_census_tracts_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
+	        stmt.executeUpdate("ALTER TABLE census_tracts_trip_map DISABLE TRIGGER ALL;");
 	        
 	        stmt.executeUpdate("insert into census_tracts_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  tractid, shape, length, uid) "
 	        		+ "select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, tract.tractid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,tract.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,tract.shape),2993))/1609.34), trip.uid "
@@ -639,6 +686,7 @@ public class UpdateEventManager {
 	        		+ "where res.agencyid = map.agencyid and res.tripid=map.tripid and res.geoid=map.tractid;");
 	        stmt.executeUpdate("update census_tracts_trip_map set tlength=0 where tlength isnull;");
 
+	        stmt.executeUpdate("ALTER TABLE census_tracts_trip_map ENABLE TRIGGER ALL;");
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
@@ -662,6 +710,7 @@ public class UpdateEventManager {
 		create_census_places_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
+	        stmt.executeUpdate("ALTER TABLE census_places_trip_map DISABLE TRIGGER ALL;");
 	        
 	        stmt.executeUpdate("insert into census_places_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  placeid, shape, length, uid) "
 	        		+ "select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, place.placeid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,place.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,place.shape),2993))/1609.34), trip.uid "
@@ -683,6 +732,7 @@ public class UpdateEventManager {
 	        		+ "where res.agencyid = map.agencyid and res.tripid=map.tripid and res.geoid=map.placeid;");
 	        stmt.executeUpdate("update census_places_trip_map set tlength=0 where tlength isnull;");
 
+	        stmt.executeUpdate("ALTER TABLE census_places_trip_map ENABLE TRIGGER ALL;");
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
@@ -706,6 +756,7 @@ public class UpdateEventManager {
 		create_census_urbans_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
+	        stmt.executeUpdate("ALTER TABLE census_urbans_trip_map DISABLE TRIGGER ALL;");
 	        
 	        stmt.executeUpdate("insert into census_urbans_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  urbanid, shape, length, uid) "
 	        		+ "select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, urban.urbanid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,urban.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,urban.shape),2993))/1609.34), trip.uid "
@@ -727,6 +778,7 @@ public class UpdateEventManager {
 	        		+ "where res.agencyid = map.agencyid and res.tripid=map.tripid and res.geoid=map.urbanid;");
 	        stmt.executeUpdate("update census_urbans_trip_map set tlength=0 where tlength isnull;");
 
+	        stmt.executeUpdate("ALTER TABLE census_urbans_trip_map ENABLE TRIGGER ALL;");
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();

@@ -1,11 +1,17 @@
-function getURIParameter(param, asArray) {
-    return document.location.search.substring(1).split('&').reduce(function(p,c) {
-        var parts = c.split('=', 2).map(function(param) { return decodeURIComponent(param); });
-        if(parts.length == 0 || parts[0] != param) return (p instanceof Array) && !asArray ? null : p;
-        return asArray ? p.concat(parts.concat(true)[1]) : parts.concat(true)[1];
-    }, []);
+function getDefaultDbIndex(){
+	var dbindex = -1;
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getDefaultDbIndex",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	dbindex = d.DBError;
+        }
+	});
+	
+	return dbindex;
 }
-
 function getSession(){
 	var username = "admin";
 	$.ajax({
@@ -25,6 +31,10 @@ function dateRemove(e, d){
 	$("#datepicker").multiDatesPicker('removeDates', d);
 	$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected");	
 	$("#submit").trigger('mouseenter');    
+}
+
+function numWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function isNumber(evt) {
@@ -151,6 +161,24 @@ function stringToDate(str){
 	return sArr.join("/");
 }
 
+function currentDateFormatted(){
+	var today = new Date();
+	var dd = today.getDate();
+	var mm = today.getMonth()+1; //January is 0!
+	var yyyy = today.getFullYear();
+
+	if(dd<10) {
+	    dd='0'+dd
+	} 
+
+	if(mm<10) {
+	    mm='0'+mm
+	} 
+
+	today = yyyy+mm+dd;
+	return today;
+}
+
 function parseDate(str) {
     var mdy = str.split('/');
     return new Date(mdy[2], mdy[0]-1, mdy[1]);
@@ -170,9 +198,13 @@ function go(key){
 	    }
 	});
 	
+	var progressLabel = $( ".progress-label" );
 	$( "#progressbar" ).progressbar({
 	    value: false,
-	}); 
+	    change: function() {
+	        progressLabel.html( '<table><tr><td>Report in progress... </td><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
+	    }
+	});  
 	var prog=false;
 	function progress() {
 		$.ajax({
@@ -295,8 +327,12 @@ function gos(key){
 	    }
 	});
 	
+	var progressLabel = $( ".progress-label" );
 	$( "#progressbar" ).progressbar({
 	    value: false,
+	    change: function() {
+	        progressLabel.html( '<table><tr><td>Report in progress... </td><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
+	    }
 	}); 
 	var prog=false;
 	function progress() {
@@ -308,9 +344,12 @@ function gos(key){
 			success: function(item){
 				progVal = parseInt(item.progVal);
 				if(progVal==0){
-					progVal=false;
+					
 					if(prog){
+						progVal=100;
 						clearTimeout(timeVar);
+					}else{
+						progVal=false;
 					}
 				}else{
 					prog=true;
@@ -327,9 +366,6 @@ function gos(key){
 	timeVar = setInterval(progress, 100);
 	
 	//check if the selected dates are within the agency's start and end date.
-	if (typeof w_qstring == 'undefined') {
-	   var w_qstring = null;	   
-	}	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -372,7 +408,7 @@ function gos(key){
 				$("#"+dateID).remove();
 				$("#submit").trigger('mouseenter');
 			}
-			$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected<span style='margin-left:3em;font-size:85%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>");
+			$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected");
 	    }
 	});
 	
@@ -389,7 +425,7 @@ function gos(key){
 		heightStyle: "content"
 	});
 	$("#accordion").accordion("refresh");
-	$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected<span style='margin-left:3em;font-size:85%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>");
+	$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected");
 	
 	
 	document.getElementById("Sradius").value = w_qstringx;

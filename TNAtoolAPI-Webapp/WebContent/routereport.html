@@ -113,7 +113,6 @@ $(document).ready(function(){
 						html+='<td>-</td><td>-</td>';
 					}					
 				}else{
-					//if item.
 					html+='<td>'+((item.RouteSName!=null)?item.RouteSName:"-")+'</td><td>'+((item.RouteLName!=null)?item.RouteLName:"-")+'</td>';
 				}
 				html+='<td>'+ item.RouteType +'</td><td>'+item.RouteLength +'</td><td><a href="#" class="stopreport" aid="'+item.AgencyId+'" id="'+ item.RouteId+'">'+item.StopsCount
@@ -134,6 +133,9 @@ $(document).ready(function(){
 					}
 					url+='&dbindex='+dbindex;
 				    window.open(url);
+				if ($(this).attr('id')!==undefined){
+				    qstring = '&agency='+w_qstring+'&x='+qstringx+ '&route=' + $(this).attr('id');	    
+				    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring+'&dbindex='+dbindex);
 			}});
 			$('.schedulereport').click(function(e){
 				if ($(this).attr('id')!==undefined){					
