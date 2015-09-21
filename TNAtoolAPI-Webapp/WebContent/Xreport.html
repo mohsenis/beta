@@ -70,7 +70,7 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
 		async: true,
 		success: function(item){			
-			$('h2').append(item.AreaName+' Extended Report <br><hr>');	
+			$('h2').append(item.AgencyName+' Extended Report <br><hr>');	
 			html += '<tr><td>Agency ID<em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png"></em><td>'+ item.AgencyId 
 			+'</td></tr><tr><td>Agency Name<em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png"></em></td><td>' + item.AgencyName 
 			+'</td></tr><tr><td>Route Miles <em title="Summation of the lengths of the longest route variant for all routes that the transit agency serves."><img src="images/tooltip.png"></em></td><td>'+ numberconv(item.RouteMiles) 

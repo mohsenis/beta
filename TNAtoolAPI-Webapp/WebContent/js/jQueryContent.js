@@ -1,3 +1,10 @@
+function getURIParameter(param, asArray) {
+    return document.location.search.substring(1).split('&').reduce(function(p,c) {
+        var parts = c.split('=', 2).map(function(param) { return decodeURIComponent(param); });
+        if(parts.length == 0 || parts[0] != param) return (p instanceof Array) && !asArray ? null : p;
+        return asArray ? p.concat(parts.concat(true)[1]) : parts.concat(true)[1];
+    }, []);
+}
 function getDefaultDbIndex(){
 	var dbindex = -1;
 	$.ajax({
@@ -366,6 +373,9 @@ function gos(key){
 	timeVar = setInterval(progress, 100);
 	
 	//check if the selected dates are within the agency's start and end date.
+	if (typeof w_qstring == 'undefined') {
+		   var w_qstring = null;	   
+		}
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',

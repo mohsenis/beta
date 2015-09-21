@@ -132,10 +132,7 @@ $(document).ready(function(){
 						url+='&areaid='+areaId+'&type='+type;
 					}
 					url+='&dbindex='+dbindex;
-				    window.open(url);
-				if ($(this).attr('id')!==undefined){
-				    qstring = '&agency='+w_qstring+'&x='+qstringx+ '&route=' + $(this).attr('id');	    
-				    window.open('/TNAtoolAPI-Webapp/stopreport.html?'+qstring+'&dbindex='+dbindex);
+				    window.open(url);				
 			}});
 			$('.schedulereport').click(function(e){
 				if ($(this).attr('id')!==undefined){					

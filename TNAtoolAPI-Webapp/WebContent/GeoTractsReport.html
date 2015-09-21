@@ -153,7 +153,7 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/GeoTractsXreport1.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoTractsXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
 			    }else if($(this).attr('type')=="AC"){
 			    	qstring = $(this).attr('id');			    	
 			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=1'+'&dbindex='+dbindex+'&username='+getSession());
@@ -179,8 +179,7 @@ $(document).ready(function(){
 			    		url +='&areaid='+qstring+'&type=1'+'&x='+qstringx+'&dbindex='+dbindex;
 			    		window.open(url);			    	
 				    };
-			    };
-			});
+			   });
 			
 			var table = $('#RT').DataTable( {
 				//"scrollY": "76%",
