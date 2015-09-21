@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
+import com.library.model.AgencySR;
 
 @XmlRootElement(name = "AgencySRList")
 public class AgencySRList {
@@ -32,5 +32,12 @@ public class AgencySRList {
     @XmlAttribute 
 	@JsonSerialize
 	public String metadata;
-
+    
+    @XmlAttribute 
+	@JsonSerialize
+	public String areaName;
+    
+    @XmlAttribute 
+	@JsonSerialize
+	public String areaType;
 }

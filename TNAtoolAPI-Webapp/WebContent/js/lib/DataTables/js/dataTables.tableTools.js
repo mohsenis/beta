@@ -939,6 +939,15 @@ TableTools.prototype = {
 			if ( aColumnsInc[i] )
 			{
 				iWidth = aoCols[i].nTh.offsetWidth;
+				//I added this code to fix hidden columns with 0 width in exported PDF file
+				/*-------- BEGIN NEW CODE ---------------------------------*/
+	            if (iWidth == 0) {
+	                var oTable = this.s.dt.oInstance;
+	                oTable.fnSetColumnVis(i, true);
+	                iWidth = aoCols[i].nTh.offsetWidth;
+	                oTable.fnSetColumnVis(i, false);
+	            }
+	            /*-------- END NEW CODE -----------------------------------*/
 				iTotal += iWidth;
 				aColWidths.push( iWidth );
 			}

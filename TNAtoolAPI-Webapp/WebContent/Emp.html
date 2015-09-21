@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- <meta charset="utf-8"> -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Aggregated Employment Report</title>
+	<link rel="stylesheet" href="js/lib/jstree-themes/default/style.min.css" />
+	<script src="js/lib/jquery-1.11.1.min.js"></script>
+	<script src="js/lib/jstree.min.js"></script>
+	<script src="js/jQueryContent.js"></script>
+	<script src="js/lib/jquery-ui.js"></script>
+	<script src="js/lib/sorttable.js"></script>
+	<script src="js/lib/slidebars.min.js"></script>
+	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
+	<script src="js/lib/jquery.qtip.min.js"></script>
+	<script src="js/jQueryContent.js"></script>
+	<script src="js/EmpDescription.js"></script>
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/slidebars.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery.qtip.min.css" />
+	
+	<style>
+	.navicon-line{
+		width:25px;
+		height:4px;
+		border:1px solid #565656; 
+		background-color:white; 
+		margin:4px;
+		}
+	
+	</style>
+	<script>
+	/* var reportType = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1); */
+	var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
+	var username = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
+	var mySlidebar;
+	var wacBool = true;
+	var racBool = false;
+	var wacData = {};
+	var racData = {};
+	var html = "";
+	var tmp = "";
+	
+	(function($) {
+	    $(document).ready(function() {
+	    	$.ajax({
+	    		type: 'GET',
+	    		datatype: 'json',
+	    		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
+	    		async: false,
+	    		success: function(d){	
+	    			var select = document.getElementById("dbselect");
+	    			select.options.length = 0;
+	    		    var menusize = 0;
+	    		    $.each(d.DBelement, function(i,item){
+	    		    	var option = document.createElement('option');
+	    		        option.text = item;
+	    		        option.value = 'DB'+i;
+	    		        select.add(option, i);		    	
+	    		    	menusize++;
+	    		    });		    		    
+	    		    if (dbindex<0 || dbindex>menusize-1){
+	    		    	dbindex = 0;
+	    		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
+	    		    }
+	    		    select.options.size = menusize;
+	    		    select.selectedIndex = dbindex;		    				    
+	    		}			
+	    	});
+	    	
+	    	$('#dialogPreLoader').hide();
+	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Employment Report <span style="font-size:small;margin-left:1em">(For description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf">here</a></span>.)');
+	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
+	    	mySlidebar.slidebars.open('left'); // Open the Slidebar
+	    	    	
+	    });
+	  }) (jQuery);
+	
+	$(function () {
+		$('#jstree').jstree({	
+			"core":{
+				"check_callback" : true,
+				"themes" : { "stripes" : true },
+				"data" : [
+					{"text" : "CA", "type" : "CA_default", "id" : "CA", "state" : {"opened" : true},
+						"children" : [
+									{"text" : "CA01", "type" : "CA", "id" : "CA01"},
+									{"text" : "CA02", "type" : "CA", "id" : "CA02"},
+									{"text" : "CA03", "type" : "CA", "id" : "CA03"}
+						              ]
+					},
+					{"text" : "CE", "type" : "CE_default", "id" : "CE", "state" : {"opened" : true},
+						"children" : [
+										{"text" : "CE01", "type" : "CE", "id" : "CE01"},
+										{"text" : "CE02", "type" : "CE", "id" : "CE02"},
+										{"text" : "CE03", "type" : "CE", "id" : "CE03"}
+							              ]            	  
+					},
+					{"text" : "CNS", "type" : "CNS_default", "id" : "CNS",  "state" : {"opened" : true},
+						"children" : [
+										{"text" : "CNS01", "type" : "CNS", "id" : "CNS01"},
+										{"text" : "CNS02", "type" : "CNS", "id" : "CNS02"},
+										{"text" : "CNS03", "type" : "CNS", "id" : "CNS03"},
+										{"text" : "CNS04", "type" : "CNS", "id" : "CNS04"},
+										{"text" : "CNS05", "type" : "CNS", "id" : "CNS05"},
+										{"text" : "CNS06", "type" : "CNS", "id" : "CNS06"},
+										{"text" : "CNS07", "type" : "CNS", "id" : "CNS07"},
+										{"text" : "CNS08", "type" : "CNS", "id" : "CNS08"},
+										{"text" : "CNS09", "type" : "CNS", "id" : "CNS09"},
+										{"text" : "CNS10", "type" : "CNS", "id" : "CNS10"},
+										{"text" : "CNS11", "type" : "CNS", "id" : "CNS11"},
+										{"text" : "CNS12", "type" : "CNS", "id" : "CNS12"},
+										{"text" : "CNS13", "type" : "CNS", "id" : "CNS13"},
+										{"text" : "CNS14", "type" : "CNS", "id" : "CNS14"},
+										{"text" : "CNS15", "type" : "CNS", "id" : "CNS15"},
+										{"text" : "CNS16", "type" : "CNS", "id" : "CNS16"},
+										{"text" : "CNS17", "type" : "CNS", "id" : "CNS17"},
+										{"text" : "CNS18", "type" : "CNS", "id" : "CNS18"},
+										{"text" : "CNS19", "type" : "CNS", "id" : "CNS19"},
+										{"text" : "CNS20", "type" : "CNS", "id" : "CNS20"}
+							              ]
+					},
+					{"text" : "CR", "type" : "CR_default", "id" : "CR", "state" : {"opened" : true},
+						"children" : [
+										{"text" : "CR01", "type" : "CR", "id" : "CR01"},
+										{"text" : "CR02", "type" : "CR", "id" : "CR02"},
+										{"text" : "CR03", "type" : "CR", "id" : "CR03"},
+										{"text" : "CR04", "type" : "CR", "id" : "CR04"},
+										{"text" : "CR05", "type" : "CR", "id" : "CR05"},
+										{"text" : "CR07", "type" : "CR", "id" : "CR07"},
+							              ]            	  
+					},
+					{"text" : "CT", "type" : "CT_default", "id" : "CT", "state" : {"opened" : true},
+						"children" : [
+										{"text" : "CT01", "type" : "CT", "id" : "CT01"},
+										{"text" : "CT02", "type" : "CT", "id" : "CT02"}
+							              ]            	  
+					},
+					{"text" : "CD", "type" : "CD_default", "id" : "CD", "state" : {"opened" : true},
+						"children" : [
+										{"text" : "CD01", "type" : "CD", "id" : "CD01"},
+										{"text" : "CD02", "type" : "CD", "id" : "CD02"},
+										{"text" : "CD03", "type" : "CD", "id" : "CD03"},
+										{"text" : "CD04", "type" : "CD", "id" : "CD04"}
+							              ]            	  
+					},
+					{"text" : "CS", "type" : "CS_default", "id" : "CS", "state" : {"opened" : true},
+						"children" : [
+										{"text" : "CS01", "type" : "CS", "id" : "CS01"},
+										{"text" : "CS02", "type" : "CS", "id" : "CS02"}
+							              ]            	  
+					}
+			]},
+			
+			"types" : {
+				"CA_default" : {
+					"icon" : "js/lib/images/folder_closed-go.ico",
+					"valid_children" : ["CA", "CA_default"]					
+				},
+				"CA" : {
+					"icon" : "js/lib/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				"CE_default" : {
+					"icon" : "js/lib/images/folder_closed-go.ico",
+					"valid_children" : ["CE", "CE_default"]					
+				},
+				"CE" : {
+					"icon" : "js/lib/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				"CNS_default" : {
+					"icon" : "js/lib/images/folder_closed-go.ico",
+					"valid_children" : ["CNS", "CNS_default"]					
+				},
+				"CNS" : {
+					"icon" : "js/lib/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				"CR_default" : {
+					"icon" : "js/lib/images/folder_closed-go.ico",
+					"valid_children" : ["CR", "CR-default"]					
+				},
+				"CR" : {
+					"icon" : "js/lib/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				"CT_default" : {
+					"icon" : "js/lib/images/folder_closed-go.ico",
+					"valid_children" : ["CT", "CT_default"]					
+				},
+				"CT" : {
+					"icon" : "js/lib/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				
+				"CD_default" : {
+					"icon" : "js/lib/images/folder_closed-go.ico",
+					"valid_children" : ["CD", "CD_default"]					
+				},
+				"CD" : {
+					"icon" : "js/lib/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				"CS_default" : {
+					"icon" : "js/lib/images/folder_closed-go.ico",
+					"valid_children" : ["CS", "CS_default"]					
+				},
+				"CS" : {
+					"icon" : "js/lib/images/arrow-right.ico",
+					"valid_children" : []
+				}					
+			},
+			"contextmenu":{         
+				"items": function($node) {
+					var tree = $("#jstree").jstree(true);
+					if (tree.get_type($node).indexOf('default') > -1 && tree.get_parent($node) == '#'){
+						return {
+							"Add group":{
+								"separator_before": false,
+								"separator_after": false,
+								"label": "Add group",
+								"icon" : "js/lib/images/folder_closed-add.ico",
+								"action": function (obj){
+									var nodesList = [];
+									$('.jstree-node').each(function(){
+									  if (tree.get_type($(this)) == tree.get_type($node)){
+										  var id   = $(this).attr('id');
+										  var text = $(this).children('a').text();
+										  nodesList.push(text);
+										 }
+									});
+
+									var counter = 1;
+									var newName = "Aggregated " + tree.get_text($node) + " " + counter;
+									
+									if ($.inArray(newName, nodesList) < 0){
+										var d = new Date();
+										var uniqeNo = d.getTime();
+										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate", "state" : {"opened" : true} },'first',null,null);
+										
+									}else{			
+										while ($.inArray(newName, nodesList) >= 0) {
+											newName = "Aggregated " + tree.get_text($node) + " " + counter++;
+										}
+										var d = new Date();
+										var uniqeNo = d.getTime();
+										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
+									}
+									tree.deselect_node($node);
+								}
+							},
+							"Rename": {
+								"separator_before": false,
+								"separator_after": false,
+								"label": "Rename",
+								"icon" : "js/lib/images/Rename.ico",
+								"action": function (obj) { 
+									tree.edit($node);
+								}
+							}
+						};	
+					}else if (tree.get_type($node).indexOf('default') > -1 && tree.get_parent($node) != '#'){
+						return {
+							"Rename": {
+								"separator_before": false,
+								"separator_after": false,
+								"label": "Rename",
+								"icon" : "js/lib/images/Rename.ico",
+								"action": function (obj) { 
+									tree.edit($node);
+								}
+							},                         
+							"Remove": {
+								"separator_before": false,
+								"separator_after": false,
+								"label": "Remove",
+								"icon" : "js/lib/images/folder_open-delete.ico",
+								"action": function (obj) { 
+									var children = tree.get_children_dom($node);
+									$.each(children, function(ind,obj){
+										tree.move_node($(this).attr('id'), tree.get_type($(this)));
+									});
+									tree.delete_node($node);
+								}
+							}
+						};	
+					}else{
+						return {
+							"Rename": {
+								"separator_before": false,
+								"separator_after": false,
+								"label": "Rename",
+								"icon" : "js/lib/images/Rename.ico",
+								"action": function (obj) { 
+									tree.edit($node);
+								}
+							}
+						};	
+					}					
+				}
+			},
+			"plugins" : [
+						"dnd",
+						"contextmenu",
+						"sort",
+						/* "state", */
+						"types",
+						"unique",
+						"checkbox"
+						]
+		});
+				
+		$(document).on("dnd_stop.vakata", function (e, data) {
+			$('#jstree').jstree(true).deselect_all();
+			
+		});
+
+		$("#jstree").bind("ready.jstree", function (e, data){
+			$('.jstree-leaf').each(function(){
+				$(this).attr('title', description[$(this).attr('id')]); 
+			
+			});
+		});		
+	});
+	
+	
+	
+	function toggleCheckbox(checkbox){	
+		var tree= $('#jstree').jstree(true);
+		if (checkbox.checked){
+		tree.select_all();
+		}else{
+		tree.deselect_all();
+		}	
+	}
+
+	function getTableHeaders(){
+		var nodesList = [];
+		var tree = $('#jstree').jstree(true);
+		$('.jstree-node').each(function(){
+			if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#')
+					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) ) {
+				nodesList.push($(this));
+			}
+		});
+		var y = "";
+		if (racBool && wacBool){
+			y += '<th>Total Employment - RAC</em></th>'+
+					'<th>Total Employment - WAC</em></th>'+
+					'<th>Total Selected Employment - RAC</em></th>'+
+					'<th>Total Selected Employment - WAC</em></th>';			
+			nodesList.forEach (function (item, index, array){
+				y += '<th>'+ tree.get_text(item) +' - RAC</th>';
+				y += '<th>'+ tree.get_text(item) +' - WAC</th>';
+			});
+		}else{
+			y += '<th>Total Employment</em></th>'+
+			'<th>Total Selected Employment</em></th>';
+			nodesList.forEach (function (item, index, array){				
+				y += '<th>'+ tree.get_text(item) +'</th>'
+			});	
+		}
+		return y;
+	} 
+	
+	function closebutton(){
+		$('slidebar').toggle('left');
+	}
+	
+	function clearReport(){
+		document.getElementById('displayReport').innerHTML = "";
+		$('#initialText').show();
+	}
+	
+	 function selectFunction(){
+		$('#reportTitle').html($('#reportType').val());
+		/* if(document.getElementById('reportType').value == 'Agencies'){
+			document.getElementById('Sradius').disabled = false;
+		}else{
+			document.getElementById('Sradius').disabled = true;
+		} */
+	} 
+	
+	function datasetChange(e){
+		if (e.value == 'lodes_blocks_wac'){
+			racBool = false;
+			wacBool = true;
+		}else if (e.value == 'lodes_blocks_rac'){
+			racBool = true;
+			wacBool = false;
+		}else{
+			racBool = true;
+			wacBool = true
+		}
+	}
+	
+	$(".export").on('click', function (event) {    
+		exportbutton.apply(this, ['export.csv']);
+	});
+
+	function exportbutton(){
+		var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
+		window.open(uri, 'AgencySummaryReport.csv');
+	}
+	
+	function dbchange(){
+		if (document.getElementById("dbselect").selectedIndex !=dbindex){
+			location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
+		}
+	}
+
+	</script>
+
+	<!-- Beginning of the datatable -->
+	<script type="text/javascript">
+	
+	function openReport(){	
+		if ($('#jstree').jstree(true).get_selected()==""){
+			alert('At least select 1 category');
+			return 0;
+		}
+		
+		// close slidebar
+		mySlidebar.slidebars.close();
+		$('#dialogPreLoader').show();
+		
+		$("#initialText").hide();
+		document.getElementById('displayReport').innerHTML = "";
+		html = '<table id="Emp" class="display" align="center">';
+		tmp = 	'<tr><th id="an">Area ID <em title="ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+					'<th>Area Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+					'<th>Population</em></th>'+
+					getTableHeaders()+
+					'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+		html += '<thead>'+tmp+'</thead><tbody>';
+		if (racBool){
+			$.ajax({
+				type: 'GET',
+				datatype: 'json',
+				url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + document.getElementById("reportType").value + '&dbindex='+dbindex+'&username='+getSession(),
+				async: false,
+				success: function(d){
+					var temp = d.EmpDataList;
+					racData.EmpDataList2 = [];
+					temp.forEach(function(i, ind, arr){
+						racData.EmpDataList2.push(i);
+					});
+				}
+			});
+		}
+		if(wacBool){
+			$.ajax({
+				type: 'GET',
+				datatype: 'json',
+				url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + document.getElementById("reportType").value + '&dbindex='+dbindex+'&username='+getSession(),
+				async: false,
+				success: function(d){
+					var temp = d.EmpDataList;
+					wacData.EmpDataList2 = [];
+					temp.forEach(function(i, ind, arr){
+						wacData.EmpDataList2.push(i);
+					});
+				}
+			});
+		}
+		openReport2();
+	}
+	
+	function openReport2(){
+		// making a 2D array based on the selected categories and aggregated categories
+		var tableContent = [];
+		var rootList = [];
+		var tree = $('#jstree').jstree(true);
+		$('.jstree-node').each(function(){
+		  if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#')
+					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) ){
+			 	rootList.push(this);
+			 }
+		});
+		
+		tree.open_all();
+		rootList.forEach (function (item, index, array){
+			var parentID = $(item).attr('id');
+			if (tree.is_parent(item)){						
+				var children = tree.get_children_dom(item);
+				//console.log('Children: ' + typeof children);
+				var childrenIDs = [];
+				$.each(children, function(ind,obj){
+					//console.log($(obj).attr('id'));
+					if (tree.is_selected(obj)){
+						childrenIDs.push($(obj).attr('id'));
+					}							
+				});
+				tableContent.push([parentID,childrenIDs]);
+			}else{
+				var childrenIDs = [parentID];
+				tableContent.push([parentID,childrenIDs]);
+			}
+		});
+		
+		// making a hashmap of the query results and Filling in the first 3 columns of the datatable
+		if (racBool && wacBool){
+			var resultSetRac = {};
+			for (var i=0; i<racData.EmpDataList2.length;i++){
+				html += '<tr><td>'+ racData.EmpDataList2[i].id + '</a></td>'+
+				'<td>' + racData.EmpDataList2[i].name + '</td>'+
+				'<td>' + numWithCommas(racData.EmpDataList2[i].population) + '</td>'+
+				'<td>' + numWithCommas(racData.EmpDataList2[i].c000) + '</td>'+
+				'<td>' + numWithCommas(wacData.EmpDataList2[i].c000) + '</td>';
+				
+				var resultSetRac = {};
+				var resultSetWac = {};
+				$('.jstree-leaf').each(function(){
+					resultSetRac[$(this).attr('id')] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
+				});
+				$('.jstree-leaf').each(function(){
+					resultSetWac[$(this).attr('id')] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
+				});
+				
+				// RAC Total Employment
+				var totalSelectedEmp = 0;
+				$('.jstree-node').each(function(){
+					 if (tree.is_selected($(this)) && tree.is_leaf($(this))){
+						totalSelectedEmp += resultSetRac[$(this).attr('id')];
+					 }
+				});
+				html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>';
+				
+				// WAC Total Employment
+				totalSelectedEmp = 0;
+				$('.jstree-node').each(function(){
+					 if (tree.is_selected($(this)) && tree.is_leaf($(this))){
+						totalSelectedEmp += resultSetWac[$(this).attr('id')];
+					 }
+				});
+				html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>';
+				// filling in the other columns of the datatable
+				for (var index in tableContent){
+					var racSummation = 0;
+					var wacSummation = 0;
+					tableContent[index][1].forEach(function(i, ind, arr){
+						var node = $('#jstree').find("[id='"+i+"']");
+						if (tree.is_selected(node)){
+							racSummation += resultSetRac[i];
+							wacSummation += resultSetWac[i];	
+						}							
+					});
+					html+='<td>' + numWithCommas(racSummation) + '</td>';
+					html+='<td>' + numWithCommas(wacSummation) + '</td>';
+				}
+				html += '<td>' + racData.metadata + '</td></tr>';
+			};
+		}else if (racBool){
+			var resultSetRac = {};
+			
+			$.each(racData.EmpDataList2, function(i,item){
+				$('.jstree-leaf').each(function(){
+					resultSetRac[$(this).attr('id')] = item[($(this).attr('id')).toLowerCase()];
+				});
+				
+				html += '<tr><td>'+ item.id + '</a></td>'+
+				'<td>' + item.name + '</td>'+
+				'<td>' + numWithCommas(item.population) + '</td>'+
+				'<td>' + numWithCommas(item.c000) + '</td>';				
+			
+			// calculating the total employment selected and push into the datatable
+			var totalSelectedEmp = 0;
+			$('.jstree-node').each(function(){
+				 if (tree.is_selected($(this)) && tree.is_leaf($(this))){
+					totalSelectedEmp += resultSetRac[$(this).attr('id')];
+				 }
+			});
+			html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>';
+			
+			// filling in the other columns of the datatable
+			for (var index in tableContent){
+				var summation = 0;
+				tableContent[index][1].forEach(function(i, ind, arr){
+					var node = $('#jstree').find("[id='"+i+"']");
+					if (tree.is_selected(node)){
+						summation += resultSetRac[i];	
+					}							
+				});
+				html+='<td>' + numWithCommas(summation) + '</td>';
+			}
+			html += '<td>' + racData.metadata + '</td></tr>';
+			});
+		}else{
+			var resultSetWac = {};
+			$.each(wacData.EmpDataList2, function(i,item){
+				$('.jstree-leaf').each(function(){
+					resultSetWac[$(this).attr('id')] = item[($(this).attr('id')).toLowerCase()];
+				});
+				html += '<tr><td>'+ item.id + '</a></td>'+
+					'<td>' + item.name + '</td>'+
+					'<td>' + numWithCommas(item.population) + '</td>'+
+					'<td>' + numWithCommas(item.c000) + '</td>';
+					// calculating the total employment selected and push into the datatable
+					var totalSelectedEmp = 0;
+					$('.jstree-node').each(function(){
+						 if (tree.is_selected($(this)) && tree.is_leaf($(this))){
+							totalSelectedEmp += resultSetWac[$(this).attr('id')];
+						 }
+					});
+					
+					html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>';
+					
+					// filling in the other columns of the datatable
+					for (var index in tableContent){
+						var summation = 0;
+						tableContent[index][1].forEach(function(i, ind, arr){
+							var node = $('#jstree').find("[id='"+i+"']");
+							if (tree.is_selected(node)){
+								summation += resultSetWac[i];	
+							}		
+							console.log(summation);
+						});
+						html+='<td>' + numWithCommas(summation) + '</td>';
+					}
+					html += '<td>' + wacData.metadata + '</td></tr>';
+			});
+			
+		};
+		
+		
+		var html2 = '<tfoot>'+tmp+'</tfoot>';
+		html +='</tbody>'+html2+'</table>';
+		$('#displayReport').append($(html));
+		$('#dialogPreLoader').hide();
+		
+    var table = $('#Emp').DataTable({
+			
+			"bSort" : true,
+			"paging": true,	
+			"scrollX": true,
+			"iDisplayLength": 25,
+			"aoColumnDefs": [{"visible": false, "targets": [$('#Emp thead th').length - 1]}],
+			"order": [[ 2, "des" ]],
+			"dom": 'T<"clear">lfrtip',
+	        "tableTools": {
+	        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+	        	"sRowSelect": "os",
+	        	"aButtons": [
+	 						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+	 							"sMessage": ""
+	 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
+	 		                
+	 		                {
+	 		                    "sExtends":    "collection",
+	 		                    "sButtonText": "Export Report",
+	 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+	 		                    				  "mColumns": 'visible'},
+	 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+	 		                                      "mColumns": 'all'},
+	 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+	 		                                      "mColumns": 'all'} ]
+	 		                } 
+	 		            ]
+	        }
+			
+		});
+	 
+	    $('#Emp_wrapper').css("margin", "auto");
+		$("#Emp_length").remove();
+	    $("#Emp_filter").insertBefore("#Emp_info");
+	    $( ".dataTables_filter" ).css( "float", "left");
+	    $( ".dataTables_filter" ).before( "<br>" ); 
+	}
+	</script>
+</head>
+
+<body>
+<div id="sb-site">	
+	 <div class="container">
+		<div class="headerL">
+			<div class="sb-toggle-left navbar-left" style="float:left">
+				<div class="navicon-line"> <!-- style="background-color: #87F786" --></div>
+				<div class="navicon-line"> <!-- style="background-color: #FFED28"> --></div>
+				<div class="navicon-line"> <!-- style="background-color: #FF7373"> --></div>
+			</div>
+			<h1 >Transit Network Analysis Tool Reports</h1>
+		</div>	
+			
+		<div class="headerR">
+			<select id='dbselect' onchange='dbchange()'></select>
+			<input type="button" style="margin:3px" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+			
+		</div>
+	</div>
+	<div class="headerBL" style=" height:25px" >
+		<h2 id='h2' style="margin-top:10px; margin-bottom:0px; text-indent: 45px"></h2>
+		
+	</div>
+	<br>	
+	 <div style="width:100%; height: 93.7vh; overflow:auto; float:left; border-style:groove; border-width:5px; backgroun-color: #E8E8E8">
+		<p id="initialText" style="text-align: center; margin-top:150px; line-height: 70vh;" > <b>Choose categories and click "Generate Report".</b></p>
+		
+		<!-- <table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  
+			  <td id="td3">
+			  	<div class="headerBR" > 
+			    			    			    	    	
+		    	</div>
+			  </td>
+			</tr>
+		</table> -->		
+		
+		
+		<p id="displayReport" style="margin:5px; "><br></p>
+		<br>
+		<br>
+		<img id="dialogPreLoader" src="images/287.GIF" alt="Page Loading" style="width:100px; height:100px; position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;" >
+	</div>
+</div> 
+	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="20%" style="height:100vh; overflow:auto; border-style:groove; background-color:white; border-width:5px;">
+		<!-- <button type="button" class="Button" onclick="createNode();" style="width:35%; margin-top:3px; height:30px; background-color: #FF7373; border-color:#FF7373; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Create Category</button> -->
+		<button type="button" class="Button" onclick="openReport();" style="width:50%; height:30px;  background-color: #87F786; border-color:#4F964F; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Generate Report</button>
+		<button type="button" class="Button" onclick="clearReport();" style="; width:45%; height:30px; border-radius: 6px; background-color: #FF7373; border-color:#FB0303;"><i class="glyphicon glyphicon-asterisk"></i>Clear Report</button>
+		<br>
+		<br>
+		<div>
+			<label for="dataSet"><b>Select Data Set:</b></label>
+		    	<select name="dataSet" id="dataSet" onchange=datasetChange(this) style="width: 12.4em;height: 25px;margin-top: 5px; margin-bottom:5px">
+					  <option value="lodes_blocks_wac" selected>WAC -  Workplace Area Characteristic data</option>
+					  <option value="lodes_blocks_rac">RAC - Residence Area Characteristic data</option>
+					  <option value="3">WAC & RAC</option>
+				 </select><br>
+			<label for="reportType"><b>Select report type:</b></label>
+			    	<select name="reportType" id="reportType" onchange="selectFunction()" style="width: 12.4em;height: 25px;margin-top: 5px; margin-bottom:5px">
+						  <option value="Counties" selected>Counties</option>
+						  <option value="Census Places">Census Places</option>
+						  <option value="Congressional Districts">Congressional Districts</option>
+						  <option value="Urban Areas">Urban Areas</option>
+						  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
+						  <!-- <option value="Agencies">Agencies</option> -->
+					 </select><br>
+			<!-- <b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;" value="0.1" onkeypress="return isNumber(event)"/><br> -->	
+			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
+		</div>
+		<div id="jstree" class="demo" style="width:98%"></div>
+		<br>
+	</div>
+		
+</body>
+</html>

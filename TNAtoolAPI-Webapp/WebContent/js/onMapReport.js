@@ -348,7 +348,7 @@ function showOnMapReport(lat, lon, date, x){
 		    		onMapTractCluster.addLayer(tractCluster[$(this).index()]);
 		    	}
 		    });		    
-		    geoRadio(document.getElementById('blocksCheck'));
+		    
 		    //Beginning point of the Park n Ride table
 		    $('#npnr').html(numberWithCommas(data.MapPnR.totalPnR));
 			$('#nspc').html(numberWithCommas(data.MapPnR.totalSpaces));
@@ -385,6 +385,7 @@ function showOnMapReport(lat, lon, date, x){
 					marker.markerLon = jtem.lon;
 					var temp='<b>County Name:</b> '+jtem.countyName+
 							'<br><b>Lot Name:</b> '+jtem.lotName+
+							'<br><b>Transit Services:</b> '+jtem.transitSerives+
 							'<br><b>Total Spaces: </b> '+jtem.spaces+
 							'<br><b>Availability: </b> '+jtem.availability+
 							'<br><b>Display stops within:</b><input type="text" style="width:3em" id="'+jtem.lat+'pnrRadius" name="radius" class="utbox" size="5" value='+ pnrRadius +' required class="utbox">ft.'+
@@ -459,7 +460,7 @@ function nearbyStops(markerId, countyId, lat ,lon, radius){
 		datatype: 'json',
 		url: 	'/TNAtoolAPI-Webapp/queries/transit/pnrstopsroutes?&pnrId=' + markerId +
 				'&pnrCountyId=' + countyId + '&lat=' + lat +
-				'&lng=' + lon + '&radius=' + PnrRadius + '&dbindex=' + dbindex,
+				'&lng=' + lon + '&radius=' + PnrRadius + '&dbindex=' + dbindex + '&username=' + getSession(),
 		async: true,
 		success: function(data){
 			var tmpPnrRouteCluster = new L.FeatureGroup();

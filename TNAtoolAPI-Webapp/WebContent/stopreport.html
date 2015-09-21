@@ -20,18 +20,24 @@
 <script type="text/javascript">
 var qstring = '';
 var qstringx = '0.1';
-//var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
-var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
-var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
-var dbindex = parseInt(document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1));
+var type = parseInt(getURIParameter("type"));
+type = (isNaN(type))?0:type;
+var dbindex = parseInt(getURIParameter("dbindex"));
+var w_qstringx = parseFloat(getURIParameter("x"));
+var areaId = getURIParameter("areaid");
+var agency = getURIParameter("agency");
+var route = getURIParameter("route");
 var dateID;
 var gg = 1.0/1.1;
 var progVal = 0; 
 var html = '<table id="RT" class="display" align="center">';
-var tmp = '<tr><th>Stop ID <em title="Unique stop identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+var tmp = '<tr><th id="aid">Agency ID <em title="Agency identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Stop ID <em title="Unique stop identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="sn">Stop Name <em title="Name of a stop reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Routes Stop Belongs To <em title="Unique route ID (or IDs) that the stop belongs to."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population (2010)<em title="Unduplicated population count within an X-mile radius (i.e., stop distance) of a stop. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban Population (2010)<em title="Urban population count within an X-mile radius of a stop. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Rural Population (2010)<em title="Rural population count within an X-mile radius of a stop. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
@@ -62,7 +68,7 @@ $(document).ready(function(){
 		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
 		    }
 		    select.options.size = menusize;
-		    select.selectedIndex = dbindex;		    				    
+		    select.selectedIndex = dbindex;		    
 		}			
 	});
 	$(document).tooltip({
@@ -103,23 +109,40 @@ $(document).ready(function(){
 			clearTimeout(timeVar);
 	  	}
 	} 
-	timeVar = setInterval(progress, 100);	
+	timeVar = setInterval(progress, 100);
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?'+ajaxURL+'&key='+ key+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?agency='+agency+'&route='+route+'&areaid='+areaId+'&type='+type+'&key='+ key+'&dbindex='+dbindex+'&username=admin',
 		async: true,
 		success: function(d){
-			$('h2').append(d.AgencyName+' Stops Report<br><hr>');
+			var namestring = " Stops Report";
+			if (areaId==null){
+				if (route==null){
+					namestring = d.AgencyName + namestring;
+				}else {
+					namestring = d.AgencyName + namestring+" for Route "+route;
+				}
+			} else {
+				if (agency==null){
+					namestring = d.AreaName + namestring;
+				} else {
+					if (route==null){
+						namestring = d.AreaName + namestring+" for "+d.AgencyName;
+					} else {
+						namestring = d.AreaName + namestring+" for "+d.AgencyName+" and Route "+route;
+					}
+				}
+			}
+			$('h2').append(namestring+'<br><hr>');
 			$.each(d.StopR, function(i,item){
-			html += '<tr class="tablerow"><td>' + item.StopId + '</td>'; 
+			html += '<tr class="tablerow"><td>' + item.AgencyId + '</td><td>' + item.AgencyName + '</td><td>' + item.StopId + '</td>'; 
 			if (item.URL !== null){
 				html = html + '<td> <a href="' + item.URL + '">'+item.StopName+'</a> </td>';
 				} else {
 					html = html + '<td>'+item.StopName+'</td>';
 					};
-			html += '<td class="routeName"><img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px"></td><td class="pop"><img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px"></td>'+
-			   		'<td>'+d.metadata+'</td></tr>';					   			
+			html += '<td>'+item.Routes+'</td><td>'+item.UPopWithinX+'</td><td>'+item.RPopWithinX+'</td><td>'+d.metadata+'</td></tr>';					   			
 			});					
 			html = html + '</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));	
@@ -127,9 +150,8 @@ $(document).ready(function(){
 			table = $('#RT').DataTable( {
 				"paging": true,
 				"iDisplayLength": 14,
-				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [ 2,3 ]},
-				                {"visible": false, "targets": [4]}
+				"aoColumnDefs": [                 
+				                {"visible": false, "targets": [7]}
 				               ],
 				
 				"dom": 'T<"clear">lfrtip',
@@ -144,11 +166,11 @@ $(document).ready(function(){
 		                    "sExtends":    "collection",
 		                    "sButtonText": "Export Report",
 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
-		                    				  "mColumns": [ 0, 1 , 2, 3]},
+		                    				  "mColumns": 'visible'},
 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		                                      "mColumns": [ 0, 1, 4 ]},
+		                                      "mColumns": 'all'},
 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		                                      "mColumns": [ 0, 1, 4 ]}]
+		                                      "mColumns": 'visible'}]
 		                } 
 		            ]
 		        },
@@ -166,7 +188,7 @@ $(document).ready(function(){
 				    $("#RT_filter").insertBefore("#RT_info");
 				    $( ".dataTables_filter" ).css( "float", "left");
 				    
-		            //alert( 'DataTables has redrawn the table' );
+		            /* //alert( 'DataTables has redrawn the table' );
 		        	var routeName = document.getElementsByClassName('routeName');
 				    var pop = document.getElementsByClassName('pop');
 				    var row = document.getElementsByClassName('tablerow');
@@ -182,9 +204,9 @@ $(document).ready(function(){
 				    stopIds = stopIds.join();
 				    if (xhr != '') {
 				    	xhr.abort();
-				    }
+				    } */
 				    
-				    xhr = $.ajax({
+				    /* xhr = $.ajax({
 						type: 'GET',
 						datatype: 'json',
 						url: '/TNAtoolAPI-Webapp/queries/transit/StopsRX?'+ajaxURL+'&key='+ key+'&stopids='+ stopIds+'&dbindex='+dbindex,
@@ -195,7 +217,7 @@ $(document).ready(function(){
 								$('#RT').dataTable().fnUpdate(item.PopWithinX,row[jj],3,false,false); 								
 							});
 						}
-					});
+					}); */
 		        }
 				
 			} );

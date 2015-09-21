@@ -6,6 +6,14 @@ import java.util.List;
 public class StopCluster implements Comparable<StopCluster> {
 	public String clid;	
 	public List<String>agencies;
+	public List<String>anames;
+	public List<String>cnames;
+	public List<String>unames;
+	public List<String>rnames;
+	public List<String>regions;
+	public double lat;
+	public double lon;
+	public long upop;
 	public List<String>routes;
 	public int size;
 	public int visits;
@@ -22,6 +30,54 @@ public class StopCluster implements Comparable<StopCluster> {
 	}
 	public void setAgencies(List<String> agencies) {
 		this.agencies = agencies;
+	}
+	public List<String> getAnames() {
+		return anames;
+	}
+	public void setAnames(List<String> anames) {
+		this.anames = anames;
+	}
+	public List<String> getCnames() {
+		return cnames;
+	}
+	public void setCnames(List<String> cnames) {
+		this.cnames = cnames;
+	}
+	public List<String> getUnames() {
+		return unames;
+	}
+	public void setUnames(List<String> unames) {
+		this.unames = unames;
+	}
+	public List<String> getRnames() {
+		return rnames;
+	}
+	public void setRnames(List<String> rnames) {
+		this.rnames = rnames;
+	}
+	public List<String> getRegions() {
+		return regions;
+	}
+	public void setRegions(List<String> regions) {
+		this.regions = regions;
+	}
+	public double getLat() {
+		return lat;
+	}
+	public void setLat(double lat) {
+		this.lat = lat;
+	}
+	public double getLon() {
+		return lon;
+	}
+	public void setLon(double lon) {
+		this.lon = lon;
+	}
+	public long getUpop() {
+		return upop;
+	}
+	public void setUpop(long upop) {
+		this.upop = upop;
 	}
 	public List<String> getRoutes() {
 		return routes;
@@ -77,6 +133,41 @@ public class StopCluster implements Comparable<StopCluster> {
 					if (!agencies.contains(agency))
 						agencies.add(agency);
 				}}}		
+	}
+	//this method synchronizes parameters not used in sorting clusters
+	public void syncOtherParams(){
+		anames = new ArrayList<String>();
+		cnames = new ArrayList<String>();
+		unames = new ArrayList<String>();
+		rnames = new ArrayList<String>();
+		regions = new ArrayList<String>();
+		upop = 0;
+		double clat = 0;
+		double clon = 0;
+		int count = 0;
+		for (ClusteredStop stop: stops){
+			for (String aname: stop.getAgencyNames()){
+				if (!anames.contains(aname))
+					anames.add(aname);
+			}
+			if (!cnames.contains(stop.getCounty()))
+				cnames.add(stop.getCounty());
+			if (!unames.contains(stop.getUrban())){
+				unames.add(stop.getUrban());
+				upop += stop.getUrbanPop();
+			}				
+			if (!rnames.contains(stop.getOdotregionname()))
+				rnames.add(stop.getOdotregionname());
+			if (!regions.contains(stop.getOdotregion()))
+				regions.add(stop.getOdotregion());			
+			clat +=stop.getLat();
+			clon +=stop.getLon();
+			count++;		
+		}
+		if (count>0){
+			lat = clat/count;
+			lon = clon/count;
+		}		
 	}
 	
 	@Override

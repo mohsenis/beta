@@ -1,0 +1,372 @@
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Transit Agency Summary Report</title>
+	<script src="js/lib/jquery-1.9.1.min.js"></script>
+	<script src="js/lib/jquery-ui.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/date.js"></script>
+	<script src="js/jQueryContent.js"></script>
+	<!-- <script src="js/lib/sorttable.js"></script>  -->
+	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
+	
+<script type="text/javascript">
+var qstring = '';
+//var w_qstringx = window.opener.qstringx;
+var w_qstringx = parseFloat(getURIParameter("x"));
+var dbindex = parseInt(getURIParameter("dbindex"));
+var qstringx = '0.1';
+var progVal = 0; 
+var qstringd = '';
+var type = parseInt(getURIParameter("type"));
+var areaId = getURIParameter("areaid");
+var d = new Date();
+var boo;
+var html = '<table id="RT" class="display" align="center">';
+var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Phone # <em title="Phone number to contact the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total Routes <em title="Total number of routes operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total Stops <em title="Total number of stops operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Fare<em title="If available, this field points to the fare information published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Minimum Fare<em title="If available, this field points to the minimum fare price published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Average Fare<em title="If available, this field points to the average fare price published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Median Fare<em title="If available, this field points to the median fare price published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Maximum Fare<em title="If available, this field points to the maximum fare price published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Fare URL<em title="If available, this field points to the URL where fare information is published by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Service Start Date<em title="The earliest service date specified in the transit agency feed in YYYYMMDD format."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Service End Date<em title="The latest service date specified in the transit agency feed in YYYYMMDD format."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Feed Information<em title="If available, this field points to the feed information such as name, version, publisher name and publisher URL."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Feed Name<em title="Name of the GTFS feed file."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Feed Version<em title="Version of the GTFS feed file."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Feed Publisher Name<em title="Name of the GTFS feed file publisher."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Feed Publisher URL<em title="URL of the GTFS feed file publisher."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+html += '<thead>'+tmp+'</thead><tbody>';
+var html2 = '<tfoot>'+tmp+'</tfoot>';
+var counties = new Array();
+var cplaces = new Array();
+var uareas = new Array();
+var cdistricts = new Array();
+var ODOTregions = new Array();
+var fURL = new Array();
+var fAverage = new Array();
+var fMedian = new Array();
+var fMin = new Array();
+var fMax = new Array();
+var feedName = new Array();
+var feedVersion = new Array();
+var feedPubName = new Array();
+var feedPubUrl = new Array();
+var agencyIds = new Array();
+
+var key = Math.random();
+
+function pad(s) { return (s < 10) ? '0' + s : s; }
+qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+
+function EscFunc(){
+	jQuery.event.trigger({ type : 'keydown', which : 27 });
+}
+
+$(document).ready(function(){
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
+		async: false,
+		success: function(d){	
+			var select = document.getElementById("dbselect");
+			select.options.length = 0;
+		    var menusize = 0;
+		    $.each(d.DBelement, function(i,item){
+		    	var option = document.createElement('option');
+		        option.text = item;
+		        option.value = 'DB'+i;
+		        select.add(option, i);		    	
+		    	menusize++;
+		    });		    		    
+		    if (dbindex<0 || dbindex>menusize-1){
+		    	dbindex = 0;
+		    	history.pushState('data', '', document.URL.split("?")[0]+'?&x=0.1&dbindex=0');
+		    }
+		    select.options.size = menusize;
+		    select.selectedIndex = dbindex;		    				    
+		}			
+	});	
+	$(document).tooltip({
+		position: {
+	        my: "left bottom",
+	        at: "right bottom",
+	    }
+	});
+	$( "#progressbar" ).progressbar({
+	    value: false,
+	}); 
+	var prog = false;
+	function progress() {
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/PorgVal?&key='+key,
+			async: true,
+			success: function(item){
+				progVal = parseInt(item.progVal);
+				if(progVal==0){
+					progVal=false;
+					if(prog){
+						clearTimeout(timeVar);
+					}
+				}else{
+					prog=true;
+				}
+				$( "#progressbar" ).progressbar( "value", progVal );	
+			}			
+		});	
+	    if ( progVal == 100 ) {
+			clearTimeout(timeVar);
+	  	}
+	} 
+	timeVar = setInterval(progress, 100);
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&type='+type+'&areaid='+areaId+'&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		async: true,
+		success: function(d){
+			$('h2').append('Transit Agency Summary Report for '+d.areaName+'<br><hr>');			
+			$.each(d.agencySR, function(i,item){
+				agencytxt = "null";
+				if (item.AgencyId != ''){
+					agencytxt = item.AgencyId;
+				}		
+				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.AgencyId+'">'+agencytxt+'</a></td>'+ '<td><a href="' 
+				+ item.URL + '">'+ item.AgencyName + '</a></td>'+ '<td>' + item.Phone +'</td>'+ '<td><a href="#" type="RC" id="'
+				+ item.AgencyId+'">'+item.RoutesCount+'</a></td>'+ '<td><a href="#" type="SC" id="'+item.AgencyId+'">'+item.StopsCount
+				+'</a></td>'+'<td class="details-control" type="FA"></td><td>'+item.MinFare+'</td><td>'+item.AverageFare+'</td><td>'+item.MedianFare
+				+'</td><td>'+item.MaxFare+'</td><td>'+item.FareURL+'</td><td>'+item.FeedStartDate+'</td><td>'+item.FeedEndDate+'</a></td><td class="details-control" type="FE"></td><td>'
+				+item.FeedName+'</td><td>'+item.FeedVersion+'</td><td>'+item.FeedPublisherName+'</td><td>'+item.FeedPublisherUrl+'</td><td>'+d.metadata+'</td></tr>';
+				counties.push(item.CountiesCount);
+				cplaces.push(item.PlacesCount);
+				uareas.push(item.UrbansCount);
+				cdistricts.push(item.CongDistsCount);				
+				ODOTregions.push(item.OdotRegionsCount);
+				fAverage.push(item.AverageFare);
+				fMedian.push(item.MedianFare);
+				fMin.push(item.MinFare);
+				fMax.push(item.MaxFare);
+				agencyIds.push(item.AgencyId);
+				if (item.FareURL != null){
+					fURL.push(item.FareURL);
+				}else {					
+					fURL.push("-");
+				}
+				feedName.push(item.FeedName);
+				feedVersion.push(item.FeedVersion);
+				feedPubName.push(item.FeedPublisherName);
+				feedPubUrl.push(item.FeedPublisherUrl);				
+			});		
+			html = html + '</tbody>'+html2+'</table>'
+			$('#displayReport').append($(html));
+			progressbar.remove();			
+			function SetEvents(){
+				$('a').click(function(e){
+					var d = new Date();
+				    if ($(this).attr('type')=="RC"){
+				    	qstring = $(this).attr('id');
+				    	qstringx = '0.1';				    	
+				    	var keyName = Math.random();
+				    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+			    		localStorage.setItem(keyName, qstringd);
+				    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);
+				    }else if($(this).attr('type')=="SC"){
+				    	qstring = $(this).attr('id');
+			    		qstringx = '0.1';			    					    		
+			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&dbindex='+dbindex);	    		
+				    }else if($(this).attr('type')=="XR"){
+			    		qstring = $(this).attr('id');
+			    		qstringx = '0.1';
+			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+			    		var keyName = Math.random();
+			    		localStorage.setItem(keyName, qstringd);
+			    		window.open('/TNAtoolAPI-Webapp/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);	    		
+				    };
+				});
+			}			
+			var table = $('#RT').DataTable( {
+				//"scrollY": "76%",
+				"paging": true,
+				"iDisplayLength": 14,				
+				"aoColumnDefs": [
+				                 { "bSortable": false, "aTargets": [5,13] },
+				                 {"visible": false, "targets": [6,7,8,9,10,14,15,16,17,18]}
+				               ],
+			    "order": [[ 1, "asc" ]],
+				
+				"dom": 'T<"clear">lfrtip',
+		        "tableTools": {
+		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+		        	"sRowSelect": "os",
+		            "aButtons": [
+						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+							"sMessage": ""
+								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
+		                
+		                {
+		                    "sExtends":    "collection",
+		                    "sButtonText": "Export Report",
+		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		                    				  "mColumns": [0,1,2,3,4,11,12]},
+		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		                                      "mColumns": [0,1,2,3,4,6,7,8,9,10,11,12,14,15,16,17,18]},
+		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		                                      "mColumns": [0,1,2,3,4,6,7,8,9,10,11,12,14,15,16,17]} ]
+		                } 
+		            ]
+		        }
+				
+			} );
+			SetEvents();
+		    $('#RT tbody').on('click', 'td.details-control', function () {
+		    	//var cobj = $('td', this).eq(0);
+		    	var tr = $(this).parents('tr');	
+		    	//var td = $(this).parents('td');
+		        var row = table.row( tr );		        
+		        var ctype = '';
+		        var type = $(this).attr('type');
+		        if (row.child.isShown()) {
+		        	row.child.hide("slow");
+		            tr.removeClass('shown');
+		            ctype = row.child().attr('type');		            
+		        if (type!=ctype){
+		        	showdetails(tr,type);
+		        }
+		        } else {
+		        	showdetails(tr,type);
+		        }		        
+		    });
+		    function showdetails(tr,type){
+		    	var row = table.row( tr ); 
+		    	var p = row.index();
+		    	var html;
+		    	switch(type){		    	
+		    	case "FA":
+		    		if (fURL[p]=="-"){
+			        	html = '<td>'+fURL[p]+'</td>';
+			        }else{
+			        	html = '<td><a href="'+fURL[p]+'">'+fURL[p]+'</a></td>';
+			        }
+			    	html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Minimum Fare: </td><td>'+showDollarSign(fMin[p])+fMin[p]+'</td></tr>'
+			    	+'<tr><td>Average Fare: </td><td>'+showDollarSign(fAverage[p])+fAverage[p]+'</td></tr>'+'<tr><td>Median Fare: </td><td>'+showDollarSign(fMedian[p])+fMedian[p]+'</td></tr>'
+			    	+'<tr><td>Maximum Fare: </td><td>'+showDollarSign(fMax[p])+fMax[p]+'</td></tr>'+'<tr><td>Fare URL: </td>'+html+'</tr>'+'</table>';
+		    	break;
+		    	case "FE":
+		    		html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Feed Name: </td><td>'+feedName[p]+'</td></tr>'
+			    	+'<tr><td>Feed Version: </td><td>'+feedVersion[p]+'</td></tr>'+'<tr><td>Feed Publisher Name: </td><td>'+feedPubName[p]+'</td></tr>'
+			    	+'<tr><td>Feed Publisher URL: </td><td><a href="'+feedPubUrl[p]+'">'+feedPubUrl[p]+'</a></td>'+'</table>';
+		  		break;
+	    	}		    	
+		    row.child(html).show();
+		    row.child().attr('type',type);		    
+	        tr.addClass('shown');	        
+		    }		    
+		    
+		    $('#RT_wrapper').css("width", $('#RT').css("width"));
+		    $('#RT_wrapper').css("margin", "auto");
+			$("#RT_length").remove();
+		    $("#RT_filter").insertBefore("#RT_info");
+		    $( ".dataTables_filter" ).css( "float", "left");
+		    $( ".dataTables_filter" ).before( "<br>" );
+    }});
+		
+	
+	
+});
+
+function dbchange(){
+	if (document.getElementById("dbselect").selectedIndex !=dbindex){
+		location.replace(document.URL.split("?")[0]+'?&x=0.1&dbindex='+document.getElementById("dbselect").selectedIndex);
+	}
+}
+
+function reload(){	
+	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
+	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
+	location.reload();
+	
+}
+
+$(".export").on('click', function (event) {    
+	exportbutton.apply(this, ['export.csv']);
+});
+
+function exportbutton(){
+	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
+	window.open(uri, 'AgencySummaryReport.csv');
+}
+
+function showDollarSign(v){
+	if(!isNaN(v)){
+		return '$';
+	}else{
+		return '';
+	}
+}
+
+function pageLoad(){
+	
+	
+}
+
+
+</script>
+
+
+
+</head>
+<body onload="pageLoad()">
+		<div class="container">
+			<div class="headerL">
+				<h1>Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">
+				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
+				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
+				<select id='dbselect' onchange='dbchange()'></select>
+				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+			</div>
+		</div>	
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  
+			  <td id="td3">
+			  	<div class="headerBR" > 
+			    	<!-- Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
+			    	<input type="button" onclick="reload()" title="Refresh Report"  value="Submit" class="button" /> -->
+		    	    	
+		    	</div>
+			  </td>
+			</tr>
+		</table>		
+		
+		
+		<p id="displayReport"><br></p>
+		<br>
+		<br>
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	
+</body>
+</html>

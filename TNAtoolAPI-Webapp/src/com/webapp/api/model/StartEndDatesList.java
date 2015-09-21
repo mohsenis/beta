@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.library.model.StartEndDates;
 
 @XmlRootElement(name = "StartEndDatesList")
 public class StartEndDatesList {

@@ -289,7 +289,6 @@ function onMarkerClick(){
 	}else{
 		this.closePopup();
 		connectionPolylines.removeLayer(polylines[id]);
-//		polylines.splice(id,5);		
 		delete polylines[id];
 	}
 }
@@ -1148,12 +1147,15 @@ $mylist
 		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Agencies Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
 		    		'</ul></li>'+
-		    		'</ul>');
+		    		'<li role="presentation" onclick="return;"><a id="Emp" href="#" style="cursor:default">Employment Reports</a>'+
+		    		'<li role="presentation" onclick="return;"><a id="T6" href="#" style="cursor:default">Title VI Reports</a></ul>');
+		    		
+		    		
 		 
 			div.appendTo(titlebar);
 			$( "#rmenu" ).menu();
-			$( ".ui-menu" ).css('width','18em');
-			$( ".ui-menu-item" ).css('width','18em');
+			$( ".ui-menu" ).css('width','21em');
+			$( ".ui-menu-item" ).css('width','21em');
 			$('.ui-dialog-titlebar-other').dropdown();			
 			$("#datepicker").multiDatesPicker({
 				changeMonth: false,
@@ -1239,7 +1241,11 @@ $mylist
 			    			localStorage.setItem(key, dates.join(","));			    			
 			    		}
 			    		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+parseInt(casestring.substring(2)));			    		    		
-			    }				
+			    }else if(casestring=="Emp"){	
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&dbindex='+dbindex+'&username='+getSession());
+			    }else if(casestring=="T6"){	
+			    	window.open('/TNAtoolAPI-Webapp/T6.html'+'?&dbindex='+dbindex+'&username='+getSession());
+			    }
 			});
     	
 		  $mylist.dialogExtend("collapse");
