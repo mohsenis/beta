@@ -73,7 +73,7 @@
 	    	});
 	    	
 	    	$('#dialogPreLoader').hide();
-	    	$('h2').append(' Employment Report - for description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf">here</a>.');
+	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Employment Report <span style="font-size:small;margin-left:1em">(For description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf">here</a></span>.)');
 	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
 	    	mySlidebar.slidebars.open('left'); // Open the Slidebar
 	    	    	
@@ -377,13 +377,14 @@
 		$('#initialText').show();
 	}
 	
-	/* function selectFunction(){
-		if(document.getElementById('reportType').value == 'Agencies'){
+	 function selectFunction(){
+		$('#reportTitle').html($('#reportType').val());
+		/* if(document.getElementById('reportType').value == 'Agencies'){
 			document.getElementById('Sradius').disabled = false;
 		}else{
 			document.getElementById('Sradius').disabled = true;
-		}
-	} */
+		} */
+	} 
 	
 	function datasetChange(e){
 		if (e.value == 'lodes_blocks_wac'){
