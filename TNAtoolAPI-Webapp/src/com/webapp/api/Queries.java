@@ -2528,7 +2528,7 @@ Loop:  	for (Trip trip: routeTrips){
 	/**
      * Get calendar range for agency
      */
-    @GET
+    /*@GET
     @Path("/agencyCalendarRange")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object agencyCalendarRange(@QueryParam("agency") String agency, @QueryParam("dbindex") Integer dbindex){
@@ -2543,7 +2543,7 @@ Loop:  	for (Trip trip: routeTrips){
     	seDates.Enddate = feed.getEndDate().getAsString();
     	
 		return seDates;
-    }
+    }*/
     
     /**
      * Get overall calendar range
