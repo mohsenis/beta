@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @XmlRootElement(name = "StartEndDate")
 public class StartEndDates {
 	
+	@XmlAttribute
+    @JsonSerialize
+	public String Agency;
 	
 	@XmlAttribute
     @JsonSerialize

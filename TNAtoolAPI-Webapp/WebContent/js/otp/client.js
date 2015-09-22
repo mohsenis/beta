@@ -1147,8 +1147,8 @@ $mylist
 		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Agencies Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
 		    		'</ul></li>'+
-		    		'<li role="presentation" onclick="return;"><a id="Emp" href="#" style="cursor:default">Employment Reports</a>'+
-		    		'<li role="presentation" onclick="return;"><a id="T6" href="#" style="cursor:default">Title VI Reports</a></ul>');
+		    		'<li role="presentation" onclick="return;"><a id="Emp" href="#" style="cursor:default"><b>Employment Reports</b></a>'+
+		    		'<li role="presentation" onclick="return;"><a id="T6" href="#" style="cursor:default"><b>Title VI Reports</b></a></ul>');
 		    		
 		    		
 		 
@@ -1409,7 +1409,8 @@ function updateListDialog(agenciesIds){
 					$(aList[i]).children('a').css('color','red');
 				}
 		    	$(aList[i]).children('a').attr( "title", "Active Service Dates: "+stringToDate(item.Startdate)+" to "+stringToDate(item.Enddate));
-		    });	
+		    	
+			});	
 		}
 	});
 	$('.jstree-no-dots').prepend("<p style='margin-left:3%'><b>List of Agencies:</b></p>");
@@ -1466,5 +1467,5 @@ function updateListDialog(agenciesIds){
 			dateID = cdate.replace("/","").replace("/","");
 			addDate(cdate);		
 		}									
-}
+	}
 }
