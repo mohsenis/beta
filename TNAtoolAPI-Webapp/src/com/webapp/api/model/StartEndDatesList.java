@@ -2,6 +2,7 @@ package com.webapp.api.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -14,6 +15,6 @@ import com.library.model.StartEndDates;
 public class StartEndDatesList {
 	
 	@XmlElement(name = "SEDList")
-	public Collection<StartEndDates> SEDList = new ArrayList<StartEndDates>();
+	public List<StartEndDates> SEDList = new ArrayList<StartEndDates>();
 
 }

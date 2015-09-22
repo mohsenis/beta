@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -2505,14 +2506,21 @@ Loop:  	for (Trip trip: routeTrips){
     	StartEndDates seDates;
     	String defaultAgency;
     	FeedInfo feed;
+    	Agency ag;
     	for(String a:agencies){
     		seDates = new StartEndDates();
-    		defaultAgency = GtfsHibernateReaderExampleMain.QueryAgencybyid(a, dbindex).getDefaultId();
+    		ag = GtfsHibernateReaderExampleMain.QueryAgencybyid(a, dbindex);
+    		defaultAgency = ag.getDefaultId();
         	feed = GtfsHibernateReaderExampleMain.QueryFeedInfoByDefAgencyId(defaultAgency, dbindex).get(0);
         	seDates.Startdate = feed.getStartDate().getAsString();
         	seDates.Enddate = feed.getEndDate().getAsString();
+        	seDates.Agency = ag.getName();
         	sedlist.SEDList.add(seDates);
     	}
+    	/*Collections.sort(sedlist.SEDList, new Comparator<StartEndDates>(){
+            public int compare(StartEndDates s1,StartEndDates s2){
+                return s1.Agency.compareTo(s2.Agency);
+        }});*/
     	
 		return sedlist;
     }

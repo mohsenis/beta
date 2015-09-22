@@ -1409,7 +1409,8 @@ function updateListDialog(agenciesIds){
 					$(aList[i]).children('a').css('color','red');
 				}
 		    	$(aList[i]).children('a').attr( "title", "Active Service Dates: "+stringToDate(item.Startdate)+" to "+stringToDate(item.Enddate));
-		    });	
+		    	
+			});	
 		}
 	});
 	$('.jstree-no-dots').prepend("<p style='margin-left:3%'><b>List of Agencies:</b></p>");
@@ -1466,5 +1467,5 @@ function updateListDialog(agenciesIds){
 			dateID = cdate.replace("/","").replace("/","");
 			addDate(cdate);		
 		}									
-}
+	}
 }

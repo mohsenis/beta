@@ -2517,7 +2517,7 @@ public class PgisEventManager {
 					+ "from tripagency trip inner join gtfs_trip_stops stop on trip.aid = stop.trip_agencyid and trip.tripid = stop.trip_id), triproute as (select trip.aid, "
 					+ "trip.agency, trip.tripid, trip.routeid, trip.sname, trip.sign, trip.length, trip.uid, trip.stop_agencyid_origin, trip.stop_id_origin, trip.stop_name_origin, "
 					+ "trip.stop_agencyid_destination, trip.stop_id_destination, trip.stop_name_destination, route.shortname as rsname, route.longname as rlname from tripstops trip "
-					+ "inner join gtfs_routes route on trip.aid = route.agencyid and trip.routeid = route.id) select * from triproute order by aid, routeid, length desc, tripid";
+					+ "inner join gtfs_routes route on trip.aid = route.agencyid and trip.routeid = route.id) select * from triproute order by agency, routeid, length desc, tripid";
 		}else {	
 			mainquery += "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), trips as (select trip.agencyid as aid, trip.tripshortname "
 					+ "as sname, round((trip.length+trip.estlength)::numeric,2) as length, trip.tripheadsign as sign, trip.id as tripid, trip.uid as uid, trip.route_id as routeid "
@@ -2528,7 +2528,7 @@ public class PgisEventManager {
 					+ "gtfs_trip_stops stop on trip.aid = stop.trip_agencyid and trip.tripid = stop.trip_id), triproute as (select trip.aid, trip.agency, trip.tripid, trip.routeid, "
 					+ "trip.sname, trip.sign, trip.uid, trip.length, trip.stop_agencyid_origin, trip.stop_id_origin, trip.stop_name_origin, trip.stop_agencyid_destination, "
 					+ "trip.stop_id_destination, trip.stop_name_destination, route.shortname as rsname, route.longname as rlname from tripstops trip inner join gtfs_routes route on "
-					+ "trip.aid = route.agencyid and trip.routeid = route.id) select * from triproute order by aid, routeid, length desc, tripid";							
+					+ "trip.aid = route.agencyid and trip.routeid = route.id) select * from triproute order by agency, routeid, length desc, tripid";							
 		}		
 		//System.out.println(mainquery);
 		try{
@@ -2548,6 +2548,7 @@ public class PgisEventManager {
 			int agencies_cntr = 0;
 			int routes_cntr = 0;
 			int trips_cntr = 0;
+			int c = 1;
 			while (rs.next()) {	    			    		
 				aid = rs.getString("aid");					        	
 	        	if (!(caid.equals(aid))){
@@ -2564,7 +2565,8 @@ public class PgisEventManager {
 					}					
 					caid  = aid;				
 					instance.state = "closed";
-					instance.data = rs.getString("agency");
+					instance.data = formattedIndex(c)+". "+rs.getString("agency");
+					c+=1;
 					attribute.id = caid;
 					attribute.type = "agency";
 					instance.attr = attribute;					
@@ -2677,5 +2679,14 @@ public class PgisEventManager {
 		response.Startdate = startDate;
 		response.Enddate = endDate;		
 		return response;
+	}
+	
+	public static String formattedIndex(int c){
+		
+		if(c<10){
+			return "0"+c;
+		}else{
+			return ""+c;
+		}
 	}
 }
