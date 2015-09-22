@@ -374,7 +374,7 @@ function gos(key){
 	
 	//check if the selected dates are within the agency's start and end date.
 	if (typeof w_qstring == 'undefined') {
-		   var w_qstring = null;	   
+		   w_qstring = null;	   
 		}
 	$.ajax({
 		type: 'GET',
