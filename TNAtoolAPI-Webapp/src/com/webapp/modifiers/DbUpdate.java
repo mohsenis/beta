@@ -238,14 +238,16 @@ public class DbUpdate {
         
         String email="";
         String lastname="";
+        String firstname="";
 		if(passkey.equals(key)){
 			try {
 				statement = c.createStatement();
 				statement.executeUpdate("UPDATE gtfs_pg_users SET active=true WHERE username='"+username+"';");
-				ResultSet rs = statement.executeQuery("select email,lastname from gtfs_pg_users where username='"+username+"';");
+				ResultSet rs = statement.executeQuery("select email,lastname,firstname from gtfs_pg_users where username='"+username+"';");
 				if(rs.next()){
 					email = rs.getString("email");
 					lastname = rs.getString("lastname");
+					firstname = rs.getString("firstname");
 				}
 				
 			} catch (SQLException e) {
@@ -288,7 +290,7 @@ public class DbUpdate {
 	         
 	         Multipart multipart = new MimeMultipart("alternative");
 	         BodyPart messageBodyPart = new MimeBodyPart();
-	         String htmlMessage = lastname+",<br><br>"+"Your GTFS Playground account has been successfully activated!<br>"
+	         String htmlMessage = firstname+" "+lastname+",<br><br>"+"Your GTFS Playground account was successfully activated!<br>"
 	         		+ "You can now log into the website using your credentials.";
 	         messageBodyPart.setContent(htmlMessage, "text/html");
 	         multipart.addBodyPart(messageBodyPart);
