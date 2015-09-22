@@ -243,7 +243,7 @@ public class FileUpload extends HttpServlet {
 		}else if(email!=null){// send confirmation email
 		      String to = email;
 		      final String emailUser = "tnatooltech";
-		      final String emailPass = "****";
+		      final String emailPass = "***";
 		      String host = "smtp.gmail.com";
 		 
 		      Properties properties = System.getProperties();
