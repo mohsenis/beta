@@ -16,23 +16,26 @@
   		
 	  $(document).ready(function(){
 		  
-		  
-		  $('#oregonFeeds').html(listOfOregonFeed());
-		  $( "#oregonAccordion" ).accordion({
-			      collapsible: true
-		  });
-			
-		  $('#publicFeeds').html(listOfPublicFeed());
-		  $( "#publicAccordion" ).accordion({
-			      collapsible: true
-		  });
-		  $( ".ui-accordion-header" ).click();
-		  
 		  $( "#guestDialog" ).dialog({
 			  autoOpen: false,
 			  width: '40%',
 			  position: { my: "top", at: "top", of: ".login-card" },
-			  modal: true
+			  modal: true,
+			  open: function(){
+				  $('#oregonFeeds').html(listOfOregonFeed()).css('height','300px');
+				  $( "#oregonAccordion" ).accordion({
+					  collapsible: true,
+				      active: false,
+				      heightStyle: "content"
+				  });
+					
+				  $('#publicFeeds').html(listOfPublicFeed()).css('height','300px');
+				  $( "#publicAccordion" ).accordion({
+					  collapsible: true,
+				      active: false,
+				      heightStyle: "content"
+				  });
+			  } 
 		  });
 		  $('body').css('display','');
 	  });
