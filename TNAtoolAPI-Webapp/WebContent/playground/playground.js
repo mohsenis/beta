@@ -205,14 +205,17 @@ function launchTNAguest(){
 	if(checkUser(user)=="false"){
 		var au = addUser(user,"guest","guest","guest","guest");
 	}
+	//endSession();
+	if(getSession()=="admin"){
+		openSeession(user);
+	}
 	
 	var isEmpty = selectFeed();
 	if (isEmpty){
 		alert('You must at least select one feed.');
 		return;
 	}
-	endSession();
-	openSeession(user);
+	
 	window.open(
 			URLpath.split(',')[0]+'/?&dbindex='+URLpath.split(',')[1],
 	  '_blank'
