@@ -211,6 +211,22 @@ function sendRequestEmail(username,email,firstname,lastname){
 
 function launchTNAguest(){
 	var URLpath = getURLpath();
+	var isEmpty = selectFeed();
+	alert(username);
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/FileUpload?&getIp=getIp",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	alert(d.DBError);
+        }
+	});
+	return;
+	if (isEmpty){
+		alert('You must at least select one feed.');
+		return;
+	}
 	window.open(
 			URLpath.split(',')[0]+'/?&dbindex='+URLpath.split(',')[1],
 	  '_blank'

@@ -130,8 +130,17 @@ public class FileUpload extends HttpServlet {
 		String inDeleted = request.getParameter("inDeleted");
 		String justAddedFeeds = request.getParameter("justAddedFeeds");
 		String runPlayground = request.getParameter("runPlayground");
+		String getIp = request.getParameter("getIp");
 		
-		if(runPlayground!=null){
+		if(getIp!=null){
+			
+			try {
+				obj.put("DBError", getClientIp(request));
+				out.print(obj);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}else if(runPlayground!=null){
 			try {
 				runPlayground(runPlayground);
 			} catch (ZipException e) {
@@ -1290,5 +1299,25 @@ public class FileUpload extends HttpServlet {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
+	}
+	
+	public static String getClientIp(HttpServletRequest request){
+		String ip = request.getHeader("X-Forwarded-For");  
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getHeader("Proxy-Client-IP");  
+        }  
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getHeader("WL-Proxy-Client-IP");  
+        }  
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getHeader("HTTP_CLIENT_IP");  
+        }  
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");  
+        }  
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getRemoteAddr();  
+        }  
+        return ip;  
 	}
 }
