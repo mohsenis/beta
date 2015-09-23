@@ -219,6 +219,14 @@ function launchTNAguest(){
 	);
 }
 
+function openRegister(){
+	  if(checkTime()){
+			alert("Playground interface is not available to users between 1:00am and 6:00am");
+			return false;
+	  }
+	  window.location.href = "register.html";
+}
+
 function launchTNA(){
 	var URLpath = getURLpath();
 	var isEmpty = selectFeed();
@@ -247,6 +255,10 @@ function getURLpath(){
 }
 
 function guestUser(){
+	if(checkTime()){
+		alert("Playground interface is not available to users between 1:00am and 6:00am");
+		return false;
+	}
 	$( "#guestDialog" ).dialog("open");
 }
 
