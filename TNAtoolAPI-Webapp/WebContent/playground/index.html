@@ -67,8 +67,9 @@
 	
 	<div id="guestDialog" title="Enter as a guest:" style="text-align:center">
 		<br>
-    	<p id="launchTNA" onclick="launchTNAguest()">
-			<span class="btn btn-success fileinput-button">Launch TNA Software Tool</span>
+    	<p>
+			<span id="launchTNA" onclick="launchTNAguest()" class="btn btn-success fileinput-button">Launch TNA Software Tool</span>
+			<input type='button' value='End Guest Session' onclick='endSession()' style='margin-left:20px' class='btn btn-danger delete'>
 		</p>
 		
 		<br>

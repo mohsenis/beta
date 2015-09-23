@@ -2507,15 +2507,19 @@ Loop:  	for (Trip trip: routeTrips){
     	String defaultAgency;
     	FeedInfo feed;
     	Agency ag;
-    	for(String a:agencies){
-    		seDates = new StartEndDates();
-    		ag = GtfsHibernateReaderExampleMain.QueryAgencybyid(a, dbindex);
-    		defaultAgency = ag.getDefaultId();
-        	feed = GtfsHibernateReaderExampleMain.QueryFeedInfoByDefAgencyId(defaultAgency, dbindex).get(0);
-        	seDates.Startdate = feed.getStartDate().getAsString();
-        	seDates.Enddate = feed.getEndDate().getAsString();
-        	seDates.Agency = ag.getName();
-        	sedlist.SEDList.add(seDates);
+    	try{
+	    	for(String a:agencies){
+	    		seDates = new StartEndDates();
+	    		ag = GtfsHibernateReaderExampleMain.QueryAgencybyid(a, dbindex);
+	    		defaultAgency = ag.getDefaultId();
+	        	feed = GtfsHibernateReaderExampleMain.QueryFeedInfoByDefAgencyId(defaultAgency, dbindex).get(0);
+	        	seDates.Startdate = feed.getStartDate().getAsString();
+	        	seDates.Enddate = feed.getEndDate().getAsString();
+	        	seDates.Agency = ag.getName();
+	        	sedlist.SEDList.add(seDates);
+	    	}
+    	}catch(Exception e){
+    		
     	}
     	/*Collections.sort(sedlist.SEDList, new Comparator<StartEndDates>(){
             public int compare(StartEndDates s1,StartEndDates s2){

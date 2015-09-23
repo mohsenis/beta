@@ -47,6 +47,7 @@ function PGlogin(){
         			return false;
         		}
     			//sessionStorage.setItem("username", username);
+        		endSession();
         		openSeession(username);
     			window.location.href = "playground.html";
     			
@@ -112,7 +113,20 @@ function endSession(){
         	
         }
 	});
-	window.location.href = "playground.html";
+	var loc = window.location.href;
+	if(loc.indexOf("playground.html") > -1){
+		window.location.href = "playground.html";
+	}else{
+		$('.selectPublicFeed').each(function(){
+			$(this).prop('checked', false);
+		});
+		
+		$('.selectOregonFeed').each(function(){
+			$(this).prop('checked', false);
+		});
+		$( "#guestDialog" ).dialog("close");
+	}
+	
 }
 
 function PGregister(){
@@ -157,42 +171,7 @@ function PGregister(){
 	}else{
 		return false;
 	}
-	/*$.ajax({
-        type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/validatePass?&pass="+passkey,
-        dataType: "json",
-        async: false,
-        success: function(d) {
-        	if(d.DBError=="true"){
-        		var cu = checkUser(username);
-        		var ce = checkUser(email);
-        		if(cu=="false" && ce=="false"){
-        			var au = addUser(username,password,email,firstname,lastname);
-        			sendRequestEmail(username,email,firstname,lastname);
-        			if(au=="true"){
-        				alert("You are successfully registered. Your account has to get approved and activated before using." +
-        						" Once approved, you'll receive an email indicating that you can use your credentials to log into the website.");
-        				
-        				window.location.href = "index.html";
-        			}else{
-        				alert(au);
-        				return false;
-        			}
-        		}else if(cu=="true"){
-        			alert("The Username \""+username+"\" already exists");
-        			return false;
-        		}else if(ce=="true"){
-        			alert("The Email \""+email+"\" already exists");
-        			return false;
-        		}else{
-        			return false;
-        		}
-        	}else{
-        		alert("The Passkey is incorrect. Please try again");
-        		return false;
-        	}
-        }
-	});*/
+	
 }
 
 function sendRequestEmail(username,email,firstname,lastname){
@@ -211,22 +190,29 @@ function sendRequestEmail(username,email,firstname,lastname){
 
 function launchTNAguest(){
 	var URLpath = getURLpath();
-	var isEmpty = selectFeed();
-	alert(username);
+	var user="guest@";
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/FileUpload?&getIp=getIp",
         dataType: "json",
         async: false,
         success: function(d) {
-        	alert(d.DBError);
+        	user+=d.DBError;
         }
 	});
-	return;
+
+	username = user;
+	if(checkUser(user)=="false"){
+		var au = addUser(user,"guest","guest","guest","guest");
+	}
+	
+	var isEmpty = selectFeed();
 	if (isEmpty){
 		alert('You must at least select one feed.');
 		return;
 	}
+	endSession();
+	openSeession(user);
 	window.open(
 			URLpath.split(',')[0]+'/?&dbindex='+URLpath.split(',')[1],
 	  '_blank'
