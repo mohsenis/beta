@@ -182,7 +182,7 @@ function currentDateFormatted(){
 	    mm='0'+mm;
 	} 
 
-	today = yyyy+mm+dd+'';
+	today = ''+yyyy+mm+dd;
 	return today;
 }
 
