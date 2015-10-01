@@ -877,10 +877,10 @@ public class PgisEventManager {
       }
       if (type==0){//county: tracts are queries and summed up to reflect the true number of census tracts in the results
     	  criteria = "left(blockid,11)";      
-    	  areaquery = "areas as (select countyid as areaid, cname as areaname, population, landarea, waterarea, odotregionid, odotregionname from census_counties), "
+    	  areaquery = "areas as (select countyid as areaid, cname as areaname, population, landarea, waterarea, odotregionid, regionname from census_counties), "
     	  		+ "tracts as (select count(distinct areaid) as tracts, left(areaid,5) as areaid from stops group by left(areaid,5)) ";    	  
     	  selectquery = "select areaid, areaname, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, coalesce(stops,0) as stops,"
-    	  		+ " odotregionid, odotregionname, tracts from areas "+join+" join stoproutes using(areaid) left join tracts using (areaid)";
+    	  		+ " odotregionid, regionname, tracts from areas "+join+" join stoproutes using(areaid) left join tracts using (areaid)";
     	  stoproutes = "left(areaid,5)";
       } else if (type==1){//census tract
     	  criteria = "left(blockid,11)";      
@@ -889,8 +889,8 @@ public class PgisEventManager {
     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)";
       } else if (type==4) { //ODOT Regions
     	  criteria = Types.getIdColumnName(type);
-    	  areaquery = "areas as (select regionid as areaid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties, "
-    	  		+ "sum(population) as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by regionid, regionname)";
+    	  areaquery = "areas as (select odotregionid as areaid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties, "
+    	  		+ "sum(population) as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname)";
     	  selectquery = " select areas.areaid, areaname, counties, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)";
       } else {// census place, urban area, or congressional district    	  
