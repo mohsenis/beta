@@ -921,7 +921,7 @@ public class PgisEventManager {
         	instance.AgenciesCount = String.valueOf(rs.getLong("agencies"));
         	if (type==0){
         		instance.ODOTRegion = rs.getString("odotregionid");
-        		instance.ODOTRegionName = rs.getString("odotregionname");
+        		instance.ODOTRegionName = rs.getString("regionname");
         		instance.TractsCount = String.valueOf(rs.getLong("tracts"));
         	}
         	if (type==4){
@@ -2040,7 +2040,7 @@ public class PgisEventManager {
 		String mainquery = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), cluster as (select stp1.agencyid||stp1.id as "
 				+ "cid, stp2.id as sid, stp2.name as name, stp2.agencyid as aid from gtfs_stops stp1 inner join gtfs_stops stp2 on st_dwithin(stp1.location, stp2.location,"+
 				String.valueOf(dist)+")), map as (select agencyid_def as aid, array_agg(distinct map.agencyid) as agencies, array_agg(distinct agency.name) as anames, "
-				+ "stopid as sid, max(stop.lat) as lat, max(stop.lon) as lon, coalesce(string_agg(distinct county.cname,','),'') as cname, coalesce(string_agg(distinct county.odotregionname,','),'') "
+				+ "stopid as sid, max(stop.lat) as lat, max(stop.lon) as lon, coalesce(string_agg(distinct county.cname,','),'') as cname, coalesce(string_agg(distinct county.regionname,','),'') "
 				+ "as region, string_agg(distinct county.regionname,',') as rname, coalesce(string_agg(distinct urban.uname,','),'') as uname, coalesce(max(urban.population),0) as upop, "
 				+ "array_agg(distinct routeid) as routes from gtfs_stop_route_map map inner join aids on aids.aid=agencyid_def inner join gtfs_stops stop on "
 				+ "map.agencyid_def = stop.agencyid and map.stopid = stop.id inner join gtfs_agencies agency on map.agencyid = agency.id left join census_counties county on "
