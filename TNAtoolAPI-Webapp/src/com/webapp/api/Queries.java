@@ -1443,11 +1443,11 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
 	@Path("/emp")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getEmp2(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+	public Object getEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
     	EmpDataList results = new EmpDataList();
-    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
     	results = PgisEventManager.getEmpData(dataSet, reportType, dbindex, username);
+    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex];    	
     	return results;
     }
 
@@ -1459,10 +1459,9 @@ Loop:  	for (Trip trip: routeTrips){
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object getTitleVIData(@QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
     	TitleVIDataList results = new TitleVIDataList();
+    	results = PgisEventManager.getTitleVIData(reportType, dbindex, username);
     	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex];
-    	System.out.println(results.metadata);
-    	results = PgisEventManager.getTitleVIData(reportType, dbindex, username);
     	return results;
     }
     

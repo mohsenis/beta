@@ -36,7 +36,6 @@
 	<script>
 	/* var reportType = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1); */
 	var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-	var username = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
 	var mySlidebar;
 	var wacBool = true;
 	var racBool = false;
@@ -430,15 +429,19 @@
 		html = '<table id="Emp" class="display" align="center">';
 		tmp = 	'<tr><th id="an">Area ID <em title="ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 					'<th>Area Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-					'<th>Population</em></th>'+
+					//'<th>Population</em></th>'+
 					getTableHeaders()+
 					'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 		html += '<thead>'+tmp+'</thead><tbody>';
 		if (racBool){
+			var sRadius = '';
+			if (document.getElementById("reportType").value == 'Agencies'){
+				sRadius = ',' + $('#Sradius').val() * 1609.34;
+			}
 			$.ajax({
 				type: 'GET',
 				datatype: 'json',
-				url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + document.getElementById("reportType").value + '&dbindex='+dbindex+'&username='+getSession(),
+				url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + document.getElementById("reportType").value + sRadius + '&dbindex='+dbindex+'&username='+getSession(),
 				async: false,
 				success: function(d){
 					var temp = d.EmpDataList;
@@ -450,10 +453,14 @@
 			});
 		}
 		if(wacBool){
+			var sRadius = '';
+			if (document.getElementById("reportType").value == 'Agencies'){
+				sRadius = ',' + $('#Sradius').val() * 1609.34;
+			}
 			$.ajax({
 				type: 'GET',
 				datatype: 'json',
-				url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + document.getElementById("reportType").value + '&dbindex='+dbindex+'&username='+getSession(),
+				url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + document.getElementById("reportType").value + sRadius + '&dbindex='+dbindex+'&username='+getSession(),
 				async: false,
 				success: function(d){
 					var temp = d.EmpDataList;
@@ -505,7 +512,7 @@
 			for (var i=0; i<racData.EmpDataList2.length;i++){
 				html += '<tr><td>'+ racData.EmpDataList2[i].id + '</a></td>'+
 				'<td>' + racData.EmpDataList2[i].name + '</td>'+
-				'<td>' + numWithCommas(racData.EmpDataList2[i].population) + '</td>'+
+				//'<td>' + numWithCommas(racData.EmpDataList2[i].population) + '</td>'+
 				'<td>' + numWithCommas(racData.EmpDataList2[i].c000) + '</td>'+
 				'<td>' + numWithCommas(wacData.EmpDataList2[i].c000) + '</td>';
 				
@@ -549,7 +556,7 @@
 					html+='<td>' + numWithCommas(racSummation) + '</td>';
 					html+='<td>' + numWithCommas(wacSummation) + '</td>';
 				}
-				html += '<td>' + d.metadata + '</td></tr>';
+				html += '<td>' + 'd.metadata' + '</td></tr>';
 			};
 		}else if (racBool){
 			var resultSetRac = {};
@@ -561,7 +568,7 @@
 				
 				html += '<tr><td>'+ item.id + '</a></td>'+
 				'<td>' + item.name + '</td>'+
-				'<td>' + numWithCommas(item.population) + '</td>'+
+				//'<td>' + numWithCommas(item.population) + '</td>'+
 				'<td>' + numWithCommas(item.c000) + '</td>';				
 			
 			// calculating the total employment selected and push into the datatable
@@ -584,7 +591,7 @@
 				});
 				html+='<td>' + numWithCommas(summation) + '</td>';
 			}
-			html += '<td>' + d.metadata + '</td></tr>';
+			html += '<td>' + 'd.metadata' + '</td></tr>';
 			});
 		}else{
 			var resultSetWac = {};
@@ -594,7 +601,7 @@
 				});
 				html += '<tr><td>'+ item.id + '</a></td>'+
 					'<td>' + item.name + '</td>'+
-					'<td>' + numWithCommas(item.population) + '</td>'+
+					//'<td>' + numWithCommas(item.population) + '</td>'+
 					'<td>' + numWithCommas(item.c000) + '</td>';
 					// calculating the total employment selected and push into the datatable
 					var totalSelectedEmp = 0;
@@ -614,7 +621,6 @@
 							if (tree.is_selected(node)){
 								summation += resultSetWac[i];	
 							}		
-							console.log(summation);
 						});
 						html+='<td>' + numWithCommas(summation) + '</td>';
 					}
@@ -634,6 +640,7 @@
 			"bSort" : true,
 			"paging": true,	
 			"scrollX": true,
+			//"autoWidth": true,
 			"iDisplayLength": 25,
 			"aoColumnDefs": [{"visible": false, "targets": [$('#Emp thead th').length - 1]}],
 			"order": [[ 2, "des" ]],
@@ -663,9 +670,9 @@
 	 
 	    $('#Emp_wrapper').css("margin", "auto");
 		$("#Emp_length").remove();
-	    $("#Emp_filter").insertBefore("#Emp_info");
+	    $("#Emp_filter").insertBefore("#Emp_info");	    
 	    $( ".dataTables_filter" ).css( "float", "left");
-	    $( ".dataTables_filter" ).before( "<br>" ); 
+	    $( ".dataTables_filter" ).before( "<br>" );	    
 	}
 	</script>
 </head>
@@ -739,9 +746,9 @@
 						  <option value="Congressional Districts">Congressional Districts</option>
 						  <option value="Urban Areas">Urban Areas</option>
 						  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
-						  <!-- <option value="Agencies">Agencies</option> -->
+						  <option value="Agencies">Agencies</option>
 					 </select><br>
-			<!-- <b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;" value="0.1" onkeypress="return isNumber(event)"/><br> -->	
+			<b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;" value="0.1" onkeypress="return isNumber(event)"/><br>	
 			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>
 		<div id="jstree" class="demo" style="width:98%"></div>

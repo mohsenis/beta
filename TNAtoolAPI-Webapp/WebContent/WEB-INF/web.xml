@@ -62,4 +62,15 @@
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
     </security-constraint> -->
+    <!-- <filter>
+		<filter-name>FilterRequests</filter-name>
+		<filter-class>com.webapp.filters.FilterRequests</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>FilterRequests</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping> -->
+	<listener>
+   		<listener-class>com.webapp.listeners.Listener</listener-class>
+	</listener>
 </web-app>

@@ -7,9 +7,9 @@ function getDefaultDbIndex(){
         async: false,
         success: function(d) {
         	dbindex = d.DBError;
+        	alert(d);
         }
-	});
-	
+	});	
 	return dbindex;
 }
 

@@ -33,7 +33,6 @@
 	</style>
 	<script>
 	var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-	var username = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
 	var mySlidebar;
 	
 	(function($) {
@@ -232,11 +231,6 @@
 		$(document).on("dnd_stop.vakata", function (e, data) {
 			$('#jstree').jstree(true).deselect_all();
 		});
-		
-		 /* $("#jstree").bind("hover_node.jstree", function (e, data){
-		    alert($(e).attr("id"));
-		}); */
-		
 	});
 	
 	
@@ -314,11 +308,14 @@
 					getTableHeaders()+
 					'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 		html += '<thead>'+tmp+'</thead><tbody>';
-		
+		var sRadius = '';
+		if (document.getElementById("reportType").value == 'Agencies'){
+			sRadius = ',' + $('#Sradius').val() * 1609.34;
+		}
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?&report='+document.getElementById('reportType').value+'&dbindex='+dbindex+'&username='+getSession(),
+			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?&report='+document.getElementById('reportType').value+sRadius+'&dbindex='+dbindex+'&username='+getSession(),
 			async: true,
 			success: function(d){			
 				// making a 2D array based on the selected categories and aggregated categories
@@ -411,7 +408,7 @@
 			"bSort" : true,
 			"paging": true,	
 			"scrollX": true,
-			"iDisplayLength": 25,
+			"iDisplayLength": 20,
 			"aoColumnDefs": [{"visible": false, "targets": [$('#Emp thead th').length - 1]}],
 			"order": [[ 2, "des" ]],
 			"dom": 'T<"clear">lfrtip',
@@ -521,9 +518,9 @@
 					  <option value="Congressional Districts">Congressional Districts</option>
 					  <option value="Urban Areas">Urban Areas</option>
 					  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
-					 <!--  <option value="Agencies">Agencies</option> -->
+					  <option value="Agencies">Agencies</option>
 				 </select><br>
-			<!-- <b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;margin-bottom:5px" value="0.1" onkeypress="return isNumber(event)"/><br> -->
+			<b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;margin-bottom:5px" value="0.1" onkeypress="return isNumber(event)"/><br>
 			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>
 		<div id="jstree" class="demo" style="width:98%"></div>
