@@ -96,6 +96,7 @@ public class DbUpdate {
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
 	private static final int DBINDEX = Databases.dbsize-1;
+	public final static String VERSION = "V3.15.10";
 	
 	public static List<String> getSelectedAgencies(String username){
 		List<String> selectedAgencies = new ArrayList<String>();
@@ -132,6 +133,16 @@ public class DbUpdate {
 		
 		PDBerror b = new PDBerror();
 		b.DBError = DBINDEX+"";
+		return b;
+	}
+	
+	@GET
+    @Path("/getVersion")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getVersion(){
+		
+		PDBerror b = new PDBerror();
+		b.DBError = VERSION;
 		return b;
 	}
 	

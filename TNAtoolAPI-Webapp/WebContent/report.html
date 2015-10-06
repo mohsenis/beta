@@ -22,7 +22,7 @@ var qstring = '';
 //var w_qstringx = window.opener.qstringx;
 var w_qstringx = parseFloat(getURIParameter("x"));
 var dbindex = parseInt(getURIParameter("dbindex"));
-var qstringx = '0.1';
+var qstringx = '0.25';
 var progVal = 0; 
 var qstringd = '';
 var d = new Date();
@@ -99,7 +99,7 @@ $(document).ready(function(){
 		    });		    		    
 		    if (dbindex<0 || dbindex>menusize-1){
 		    	dbindex = 0;
-		    	history.pushState('data', '', document.URL.split("?")[0]+'?&x=0.1&dbindex=0');
+		    	history.pushState('data', '', document.URL.split("?")[0]+'?&x=0.25&dbindex=0');
 		    }
 		    select.options.size = menusize;
 		    select.selectedIndex = dbindex;		    				    
@@ -193,18 +193,18 @@ $(document).ready(function(){
 					var d = new Date();
 				    if ($(this).attr('type')=="RC"){
 				    	qstring = $(this).attr('id');
-				    	qstringx = '0.1';
+				    	qstringx = '0.25';
 				    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 				    	var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
 				    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);
 				    }else if($(this).attr('type')=="SC"){
 			    		qstring = $(this).attr('id');
-			    		qstringx = '0.1';			    					    		
+			    		qstringx = '0.25';			    					    		
 			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&x='+qstringx+'&dbindex='+dbindex);	    		
 				    }else if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
-			    		qstringx = '0.1';
+			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
@@ -334,7 +334,7 @@ $(document).ready(function(){
 
 function dbchange(){
 	if (document.getElementById("dbselect").selectedIndex !=dbindex){
-		location.replace(document.URL.split("?")[0]+'?&x=0.1&dbindex='+document.getElementById("dbselect").selectedIndex);
+		location.replace(document.URL.split("?")[0]+'?&x=0.25&dbindex='+document.getElementById("dbselect").selectedIndex);
 	}
 }
 

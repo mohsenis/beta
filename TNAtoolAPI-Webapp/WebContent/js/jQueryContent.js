@@ -19,6 +19,20 @@ function getDefaultDbIndex(){
 	
 	return dbindex;
 }
+function getVersion(){
+	var version = "";
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getVersion",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	version = d.DBError;
+        }
+	});
+	
+	return version;
+}
 function getSession(){
 	var username = "admin";
 	$.ajax({

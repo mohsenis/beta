@@ -18,7 +18,7 @@
 	
 <script type="text/javascript">
 var qstring = '';
-var qstringx = '0.1';
+var qstringx = '0.25';
 var progVal = 0; 
 var qstringd = '';
 var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
@@ -133,7 +133,7 @@ $(document).ready(function(){
 				var d = new Date();
 			    if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
-			    		qstringx = '0.1';
+			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
