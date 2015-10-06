@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @XmlRootElement(name = "AgencySRList")
 public class AgencySRList {
 
-    @XmlElement(name = "AgencySR")
+    @XmlElement(name = "agencySR")
     public Collection<AgencySR> agencySR = new ArrayList<AgencySR>();
     
     @XmlAttribute 

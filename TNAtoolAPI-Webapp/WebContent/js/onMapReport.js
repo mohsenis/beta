@@ -105,7 +105,7 @@ var blockCluster;
 var tractCluster;
 var pnrCluster;
 var pnrStopCluster;
-var pnrRadius=500;
+var pnrRadius=0.1;
 
 function transitRadio(r){
 	//alert(r.value);
@@ -388,7 +388,7 @@ function showOnMapReport(lat, lon, date, x){
 							'<br><b>Transit Services:</b> '+jtem.transitSerives+
 							'<br><b>Total Spaces: </b> '+jtem.spaces+
 							'<br><b>Availability: </b> '+jtem.availability+
-							'<br><b>Display stops within:</b><input type="text" style="width:3em" id="'+jtem.lat+'pnrRadius" name="radius" class="utbox" size="5" value='+ pnrRadius +' required class="utbox">ft.'+
+							'<br><b>Display stops within:</b><input type="text" style="width:3em" id="'+jtem.lat+'pnrRadius" name="radius" class="utbox" size="5" value='+ pnrRadius +' required class="utbox">miles'+
 							'<br><input type="submit" style="margin:1px auto;width:100px; text-align:center;" value="submit" onclick="nearbyStops(\''+marker.markerId+'\',\''+marker.markerCountyId+'\', \''+marker.markerLat+'\', \''+marker.markerLon+'\', \''+marker.markerLat+'pnrRadius\')" title="Click submit to reload the near stop(s)" class="button">';
 					marker.bindPopup(temp);
 					marker.markerId = jtem.id;
@@ -447,13 +447,13 @@ function showOnMapReport(lat, lon, date, x){
 
 function nearbyStops(markerId, countyId, lat ,lon, radius){
 	PnrRadius = document.getElementById(radius).value;
-	if (!isNormalInteger(PnrRadius)){
-		
-		alert('Please enter a positive integer.');
+	if (exceedsMaxRadius(PnrRadius)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for the population search radius.');
 		return;
 	}
 	
-	PnrRadius = PnrRadius/3.280;
+	
+	PnrRadius = PnrRadius*1609.34;
 	
 	$.ajax({
 		type: 'GET',
@@ -462,7 +462,7 @@ function nearbyStops(markerId, countyId, lat ,lon, radius){
 				'&pnrCountyId=' + countyId + '&lat=' + lat +
 				'&lng=' + lon + '&radius=' + PnrRadius + '&dbindex=' + dbindex + '&username=' + getSession(),
 		async: true,
-		success: function(data){
+		success: function(data){			
 			var tmpPnrRouteCluster = new L.FeatureGroup();
 			var c = i % 6;
 			var tmpPnrStopCluster = new L.MarkerClusterGroup({
@@ -502,6 +502,9 @@ function nearbyStops(markerId, countyId, lat ,lon, radius){
 				onMapPnrRouteCluster.removeLayer(layer);
 				});
 			onMapPnrRouteCluster.addLayer(pnrRouteCluster); // No need for the index
+			if (data.MapPnrSL.length == 0){
+				alert('There is no stop within the specified distance');
+			}
 		}
 	});				
 }

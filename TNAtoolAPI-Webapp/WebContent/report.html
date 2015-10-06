@@ -123,7 +123,7 @@ $(document).ready(function(){
 		success: function(d){			
 
 			$('h2').append('Transit Agency Summary Report <br><hr>');			
-			$.each(d.AgencySR, function(i,item){
+			$.each(d.agencySR, function(i,item){
 				agencytxt = "null";
 				if (item.AgencyId != ''){
 					agencytxt = item.AgencyId;

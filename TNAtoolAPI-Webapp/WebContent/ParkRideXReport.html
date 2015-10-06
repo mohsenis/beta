@@ -23,7 +23,7 @@
 
 var progVal = 0;
 var countyId = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-var radius= parseInt(document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1));
+var radius= parseFloat(document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1));
 var dbindex = parseInt(document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1));
 var key = Math.random();
 var html = '<table id="PRS" class="display" align="center">';
@@ -73,6 +73,7 @@ function EscFunc(){
 
 $(document).ready(function(){
 	document.getElementById("radiusInput").value = radius;
+	
  	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -336,6 +337,10 @@ $(".export").on('click', function (event) {
 });
 
 function reloadC(){
+	if (exceedsMaxRadius($('#radiusInput').val())){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Transit Service Search Radius Search Radius.');
+		return 0;
+	}
 	var tmpR = (parseFloat(document.getElementById("radiusInput").value)).toString();	
 	history.pushState("", "", document.URL.replace('radius='+radius, 'radius='+tmpR));
 	location.reload();
@@ -377,7 +382,7 @@ function dbchange(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" >
-			  	Transit Service Search Radius (ft.) <input id="radiusInput" type="text" value="500" style="width:5em" name="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
+			  	Transit Service Search Radius (miles) <input id="radiusInput" type="text" value="0.1" style="width:5em" name="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
 			    	<input type="button" onclick="reloadC()" title="Refresh Report"  value="Submit" class="button" /> 		    	    	
 		    	</div>
 			  </td>

@@ -238,6 +238,10 @@ function dbchange(){
 
 function reloadC(){		
 	var tmpG = (parseFloat(document.getElementById("gap").value)).toString();	
+	if (exceedsMaxRadius(tmpG)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Population Search Radius.');
+		return;
+	}
 	history.pushState("", "", document.URL.replace('gap='+gap, 'gap='+tmpG));	
 	location.reload();	
 }

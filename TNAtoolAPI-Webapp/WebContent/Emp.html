@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<!-- <meta charset="utf-8"> -->
+	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>Aggregated Employment Report</title>
-	<link rel="stylesheet" href="js/lib/jstree-themes/default/style.min.css" />
+	
 	<script src="js/lib/jquery-1.11.1.min.js"></script>
 	<script src="js/lib/jstree.min.js"></script>
 	<script src="js/jQueryContent.js"></script>
@@ -15,13 +15,18 @@
 	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
 	<script src="js/lib/jquery.qtip.min.js"></script>
 	<script src="js/jQueryContent.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/date.js"></script>
 	<script src="js/EmpDescription.js"></script>
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/slidebars.min.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery.qtip.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/jstree-themes/default/style.min.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
 	
 	<style>
 	.navicon-line{
@@ -36,6 +41,11 @@
 	<script>
 	/* var reportType = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1); */
 	var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
+	var key = Math.random();
+	var keyName = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
+	var w_qstringd = localStorage.getItem(keyName);
+	var w_qstringx = $('#Sradius').val();
+	if (w_qstringx == null) {w_qstringx = 0.1};
 	var mySlidebar;
 	var wacBool = true;
 	var racBool = false;
@@ -45,6 +55,7 @@
 	var tmp = "";
 	
 	(function($) {
+		
 	    $(document).ready(function() {
 	    	$.ajax({
 	    		type: 'GET',
@@ -72,7 +83,7 @@
 	    	});
 	    	
 	    	$('#dialogPreLoader').hide();
-	    	$('h2').append(' Employment Report - for description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf">here</a>.');
+	    	$('h2').append(' Employment Report - for description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf" target="_blank">here</a>.');
 	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
 	    	mySlidebar.slidebars.open('left'); // Open the Slidebar
 	    	    	
@@ -408,13 +419,18 @@
 			location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
 		}
 	}
-
+	go(key);
 	</script>
 
 	<!-- Beginning of the datatable -->
 	<script type="text/javascript">
 	
-	function openReport(){	
+	function openReport(){			
+		if (exceedsMaxRadius($('#Sradius').val())){	// Checks if the entered search radius exceeds the maximum.
+			alert('Enter a number less than ' + maxRadius + ' miles for the population search radius.');
+			return 0;
+		}
+		
 		if ($('#jstree').jstree(true).get_selected()==""){
 			alert('At least select 1 category');
 			return 0;
@@ -430,7 +446,14 @@
 		tmp = 	'<tr><th id="an">Area ID <em title="ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 					'<th>Area Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 					//'<th>Population</em></th>'+
-					getTableHeaders()+
+					//'<th>Service data</th>'+
+					//'<th>Urban Population Served (Unduplicated) <em title="Summation of unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."><img src="images/tooltip.png"></em></th>'+
+					//'<th>Rural Population Served (Unduplicated) <em title="Summation of unduplicated rural population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."><img src="images/tooltip.png"></em></th>'+
+					//'<th>Percent of Population Served <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total population of the given geographic area."><img src="images/tooltip.png"></em></th>'+
+					//'<th>Percent of Population Served at Level of Service <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total population of the given geographic area."><img src="images/tooltip.png"></em></th>'+
+					//'<th>Urban Population Served at Level of Service <em title="Summation of unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service."><img src="images/tooltip.png"></em></th>'+
+					//'<th>Rural Population Served at Level of Service <em title="Summation of unduplicated rural population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service."><img src="images/tooltip.png"></em></th>'+
+					getTableHeaders() +
 					'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 		html += '<thead>'+tmp+'</thead><tbody>';
 		if (racBool){
@@ -733,6 +756,24 @@
 		<br>
 		<br>
 		<div>
+			<div class="headerBC" id="accordion" >
+				<h3></h3>
+				<div>
+					<table style="width:100%;">
+						<tr>
+							<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+								<ul data-role="listview">
+						
+								</ul>
+							</td>
+							<td style="vertical-align:top;padding-top:15px">
+								<div id="datepicker" ></div>
+							</td>
+						</tr>
+					</table>
+					
+				</div>
+			</div>
 			<label for="dataSet"><b>Select Data Set:</b></label>
 		    	<select name="dataSet" id="dataSet" onchange=datasetChange(this) style="width: 12.4em;height: 25px;margin-top: 5px; margin-bottom:5px">
 					  <option value="lodes_blocks_wac" selected>WAC -  Workplace Area Characteristic data</option>

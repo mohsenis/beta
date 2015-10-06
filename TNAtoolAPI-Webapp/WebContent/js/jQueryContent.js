@@ -1,3 +1,17 @@
+/**
+ * Checks if x is larger than the maximum search radius (maxRadius)
+ * @param x
+ * @returns {Boolean}
+ */
+var maxRadius = 5;	// defines the maximum acceptable search radius defined by user
+function exceedsMaxRadius(x){
+	if (x>maxRadius){
+		return true;
+	}else{
+		return false;
+	}
+}
+
 function getDefaultDbIndex(){
 	var dbindex = -1;
 	$.ajax({
@@ -7,7 +21,6 @@ function getDefaultDbIndex(){
         async: false,
         success: function(d) {
         	dbindex = d.DBError;
-        	alert(d);
         }
 	});	
 	return dbindex;
@@ -80,7 +93,11 @@ function numberconv(x) {
 }
 
 function reload(){		
-	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();	
+	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
+	if (exceedsMaxRadius(tmpX)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
+		return;
+	}
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	var dates = $('#datepicker').multiDatesPicker('getDates');
 	if(dates.length==0){
@@ -103,6 +120,10 @@ function reloadU(){
 function reloadG(){		
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
 	var tmpLos = (parseFloat(document.getElementById("LoS").value)).toString();
+	if (exceedsMaxRadius(tmpX)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
+		return;
+	}
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	history.pushState("", "", document.URL.replace('l='+w_qstringl, 'l='+tmpLos));
 	var dates = $('#datepicker').multiDatesPicker('getDates');
@@ -121,6 +142,10 @@ function reloadUG(){
 	var tmpU = (parseFloat(document.getElementById("Upop").value)).toString();
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
 	var tmpLos = (parseFloat(document.getElementById("LoS").value)).toString();
+	if (exceedsMaxRadius(tmpX)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
+		return;
+	}
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	history.pushState("", "", document.URL.replace('l='+w_qstringl, 'l='+tmpLos));
 	history.pushState("", "", document.URL.replace('pop='+w_qstring, 'pop='+tmpU));

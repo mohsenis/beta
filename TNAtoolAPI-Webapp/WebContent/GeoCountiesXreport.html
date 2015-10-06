@@ -33,7 +33,6 @@ var progVal = 0;
 var w_qstringd = localStorage.getItem(keyName);
 var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 var tmp = '<tr><th>Metric</th><th>Value</th></tr>';
-
 html += '<thead>'+tmp+'</thead><tbody>';
 var fAverage = new Array();
 var fMedian = new Array();
@@ -42,7 +41,6 @@ var areaName;
 var popServedLOS;
 var popWithinX;
 var popServed;
-alert(w_qstringd);
 $(document).ready(function(){
 	$.ajax({
 		type: 'GET',

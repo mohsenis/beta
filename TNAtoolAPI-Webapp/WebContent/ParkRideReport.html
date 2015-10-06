@@ -124,10 +124,8 @@ $(document).ready(function(){
 			progressbar.remove();
 
 			$('a').click(function(e){
-			   /*  if($(this).attr('type')=="XR"){ */
 			    	id = $(this).attr('id');
-		    		window.open('/TNAtoolAPI-Webapp/ParkRideXReport.html'+'?&countyid='+id+ '&radius=500&dbindex='+dbindex);    		
-			    /* }; */
+		    		window.open('/TNAtoolAPI-Webapp/ParkRideXReport.html'+'?&countyid='+id+ '&radius=0.1&dbindex='+dbindex); 
 			});
 			
 			var table = $('#RT').DataTable({

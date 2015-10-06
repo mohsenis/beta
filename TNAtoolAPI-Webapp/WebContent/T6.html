@@ -289,6 +289,12 @@
 	<script type="text/javascript">
 	
 	function openReport(){	
+		
+		if (exceedsMaxRadius($('#Sradius').val())){	// Checks if the entered search radius exceeds the maximum.
+			alert('Enter a number less than ' + maxRadius + ' miles for the population search radius.');
+			return;
+		}
+		
 		if ($('#jstree').jstree(true).get_selected()==""){
 			alert('At least select 1 category');
 			return 0;
