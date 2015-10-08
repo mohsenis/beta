@@ -293,7 +293,7 @@
 	</query>
 	<query name = "STOP_BY_COORDINATES_SEL_AGENCIES">
     <![CDATA[from GeoStop where id.agencyId in (:sa) AND dwithin(location, :point, :radius) = true ]]>
-	</query>
+	</query>	
 	<query name = "CENSUS_WITHIN_RECTANGLE">
     <![CDATA[from Census where within(location, :polygon) = true]]>
 	</query>
@@ -405,12 +405,18 @@
 	</query>
 	<query name = "ROUTES_BY_REGION_SEL_AGENCIES">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.regionId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "AGENCIES_BY_REGION_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.regionId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
 	</query>		
 	<query name = "ROUTES_BY_COUNTY">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
 	<query name = "ROUTES_BY_COUNTY_SEL_AGENCIES">
-    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId,gsr.routeId]]>
+	</query>
+	<query name = "AGENCIES_BY_COUNTY_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
 	</query>
 	<query name = "TRIPS_BY_COUNTY">
     <![CDATA[from CountyTripMap where countyId=:id order by agencyId_def, routeId, uid]]>
@@ -439,17 +445,26 @@
 	<query name = "ROUTES_BY_PLACE_SEL_AGENCIES">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.placeId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
 	</query>
+	<query name = "AGENCIES_BY_PLACE_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.placeId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
+	</query>
 	<query name = "ROUTES_BY_TRACT">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,11)=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
 	<query name = "ROUTES_BY_TRACT_SEL_AGENCIES">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,11)=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
 	</query>
+	<query name = "AGENCIES_BY_TRACT_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,11)=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
+	</query>
 	<query name = "ROUTES_BY_URBAN">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id group by gsr.routeId, gsr.agencyId]]>
 	</query>
 	<query name = "ROUTES_BY_URBAN_SEL_AGENCIES">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "AGENCIES_BY_URBAN_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
 	</query>
 	<query name = "ROUTES_BY_AURBAN">
 	<![CDATA[from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id]]>
@@ -462,6 +477,9 @@
 	</query>
 	<query name = "ROUTES_BY_CONGDIST_SEL_AGENCIES">
     <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.congdistId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "AGENCIES_BY_CONGDIST_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.congdistId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
 	</query>
 	<query name = "POP_UNDUP_BATCH">
     <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true ) ]]>

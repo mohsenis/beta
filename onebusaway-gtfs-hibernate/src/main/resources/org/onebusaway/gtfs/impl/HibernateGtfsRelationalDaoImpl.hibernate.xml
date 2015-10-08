@@ -83,7 +83,7 @@
         FROM Trip trip WHERE trip.route = :route order by trip.length+trip.estlength desc
     </query>
     <query name="RouteMilesForState" read-only="true">
-        select sum(length+estlength) from Trip where length+estlength in (select max(length+estlength) from Trip trip WHERE trip.id.agencyId in (:sa) group by trip.route.id.agencyId, trip.route.id.id)
+	select sum(length+estlength) from Trip where length+estlength in (select max(length+estlength) from Trip trip WHERE trip.id.agencyId in (:sa) group by trip.route.id.agencyId, trip.route.id.id)
     </query>
     <query name="tripsByShapeId" read-only="true">
         FROM Trip trip WHERE trip.shapeId = :shapeId

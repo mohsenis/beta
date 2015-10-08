@@ -42,9 +42,8 @@ var map = new L.Map('map', {
 var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
 var minimalLayer = new L.StamenTileLayer("toner");
-$("body").css("display","");
-$("#overlay").show();
-var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> V.3.15.08';
+
+var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> '+getVersion();
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
 /*var osmLayer = new L.TileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', 
@@ -54,7 +53,8 @@ var aerialLayer = new L.TileLayer(aerialURL,
 		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 19, attribution: osmAttrib});
 
 map.addLayer(osmLayer);
-
+$("body").css("display","");
+$("#overlay").show();
 ///******Variables declared for the on-Map connected agencies report ********///
 var connectionMarkers = new L.FeatureGroup();
 var connectionPolylines = new L.FeatureGroup();
@@ -752,7 +752,7 @@ function disponmap(layerid,k,points,popup,node){
 				'<span style="padding-left:1em">Latitude: <span style="padding-left:1.5em">'+p[0].lat+'</span></span><br>'+
 		    	'<span style="padding-left:1em">Longitude: <span>'+p[0].lng+'</span></span>'+
 				'<p><b>Date:</b> <input readonly type="text" class="POPcal" id="'+marLat+'POPdatepicker'+marLng+'"></p>'+
-				'<p><b>Population Search Radius (miles):</b> <input type="text" value="0.1" id="'+marLat+'POPx'+marLng+'" style="width:40px"></p>'+
+				'<p><b>Population Search Radius (miles):</b> <input type="text" value="0.25" id="'+marLat+'POPx'+marLng+'" style="width:40px"></p>'+
 				'<p><button type="button" id="'+marLat+'POPbutton'+marLng+'" style="width:100%" onclick="onMapBeforeSubmit('+p[0].lat+','+p[0].lng+','+marLat+','+marLng+')">Generate Report</button></p>'+
 				'<p><button type="button" style="width:100%" id="'+marLat+'streetViewButton" onclick="openStreetView('+p[0].lat+','+p[0].lng+')">Open Street View</button></p>'				
 				,popupOptions);
@@ -1147,8 +1147,8 @@ $mylist
 		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Agencies Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
 		    		'</ul></li>'+
-		    		'<li role="presentation" onclick="return;"><a id="Emp" href="#" style="cursor:default">Employment Reports</a>'+
-		    		'<li role="presentation" onclick="return;"><a id="T6" href="#" style="cursor:default">Title VI Reports</a></ul>');
+		    		'<li role="presentation" onclick="return;"><a id="Emp" href="#" style="cursor:default"><b>Employment Reports</b></a>'+
+		    		'<li role="presentation" onclick="return;"><a id="T6" href="#" style="cursor:default"><b>Title VI Reports</b></a></ul>');
 		    		
 		    		
 		 
@@ -1214,7 +1214,7 @@ $mylist
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
-			    	var qstringx = '0.1';
+			    	var qstringx = '0.25';
 			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '500';
@@ -1407,13 +1407,14 @@ function updateListDialog(agenciesIds){
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/agenciesCalendarRange?agencies='+agenciesIds.join(',')+'&dbindex='+dbindex,
 		async: false,
-		success: function(d){	
+		success: function(d){
 			$.each(d.SEDList, function(i,item){
 				if(today>item.Enddate){
 					$(aList[i]).children('a').css('color','red');
 				}
 		    	$(aList[i]).children('a').attr( "title", "Active Service Dates: "+stringToDate(item.Startdate)+" to "+stringToDate(item.Enddate));
-		    });	
+		    	
+			});	
 		}
 	});
 	$('.jstree-no-dots').prepend("<p style='margin-left:3%'><b>List of Agencies:</b></p>");
@@ -1470,5 +1471,5 @@ function updateListDialog(agenciesIds){
 			dateID = cdate.replace("/","").replace("/","");
 			addDate(cdate);		
 		}									
-}
+	}
 }

@@ -12,6 +12,14 @@ function exceedsMaxRadius(x){
 	}
 }
 
+function getURIParameter(param, asArray) {
+    return document.location.search.substring(1).split('&').reduce(function(p,c) {
+        var parts = c.split('=', 2).map(function(param) { return decodeURIComponent(param); });
+        if(parts.length == 0 || parts[0] != param) return (p instanceof Array) && !asArray ? null : p;
+        return asArray ? p.concat(parts.concat(true)[1]) : parts.concat(true)[1];
+    }, []);
+}
+
 function getDefaultDbIndex(){
 	var dbindex = -1;
 	$.ajax({
@@ -25,12 +33,25 @@ function getDefaultDbIndex(){
 	});	
 	return dbindex;
 }
-
+function getVersion(){
+	var version = "";
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getVersion",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	version = d.DBError;
+        }
+	});
+	
+	return version;
+}
 function getSession(){
 	var username = "admin";
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/FileUpload?&getSessionUser=gsu",
+        url: "/TNAtoolAPI-Webapp/FileUpload?getSessionUser=gsu",
         dataType: "json",
         async: false,
         success: function(d) {
@@ -91,7 +112,7 @@ function numberconv(x) {
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return parts.join(".");
 }
-
+/*agency extended report*/
 function reload(){		
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
 	if (exceedsMaxRadius(tmpX)){	// Checks if the entered search radius exceeds the maximum.
@@ -194,14 +215,14 @@ function currentDateFormatted(){
 	var yyyy = today.getFullYear();
 
 	if(dd<10) {
-	    dd='0'+dd
+	    dd='0'+dd;
 	} 
 
 	if(mm<10) {
-	    mm='0'+mm
+	    mm='0'+mm;
 	} 
 
-	today = yyyy+mm+dd;
+	today = ''+yyyy+mm+dd;
 	return today;
 }
 
@@ -265,11 +286,11 @@ function go(key){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex='+dbindex+'&username='+getSession(),
 		async: false,
 		success: function(d){
-			startDateUnion = d.Startdateunion;
-			endDateUnion = d.Enddateunion;
+			startDateUnion = d.Startdate;
+			endDateUnion = d.Enddate;
 			
 		}			
 	});
@@ -344,7 +365,7 @@ function go(key){
 		  }
 		});
 }
-
+/*Agency Extended report*/
 function gos(key){
 	$(document).tooltip({
 		position: {
@@ -365,7 +386,7 @@ function gos(key){
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/PorgVal?&key='+key,
+			url: '/TNAtoolAPI-Webapp/queries/transit/PorgVal?key='+key,
 			async: true,
 			success: function(item){
 				progVal = parseInt(item.progVal);
@@ -392,37 +413,34 @@ function gos(key){
 	timeVar = setInterval(progress, 100);
 	
 	//check if the selected dates are within the agency's start and end date.
-	var activeHTML="";
-	try{
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/agencyCalendarRange?&dbindex='+dbindex+'&agency='+w_qstring,
-			async: false,
-			success: function(d){
-				startDate = d.Startdate;
-				endDate = d.Enddate;
-			}			
-		});
-		var tmpdates= new Array();
-		for(var i=0;i<w_qstringd.split(",").length;i++){
-			if(startDate<=dateToString(w_qstringd.split(",")[i]) && dateToString(w_qstringd.split(",")[i])<=endDate){
-				tmpdates.push(w_qstringd.split(",")[i]);
-			}
+	if (typeof w_qstring == 'undefined') {
+		   w_qstring = null;	   
 		}
-		
-		if(tmpdates.length==0){
-			w_qstringd=stringToDate(endDate);
-		}else{
-			w_qstringd = tmpdates.join(",");
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex='+dbindex+'&agency='+w_qstring+'&username='+getSession(),
+		async: false,
+		success: function(d){
+			startDate = d.Startdate;
+			endDate = d.Enddate;
+		}			
+	});
+	var tmpdates= new Array();
+	for(var i=0;i<w_qstringd.split(",").length;i++){
+		if(startDate<=dateToString(w_qstringd.split(",")[i]) && dateToString(w_qstringd.split(",")[i])<=endDate){
+			tmpdates.push(w_qstringd.split(",")[i]);
 		}
-		
-		var maxDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(endDate))));
-		var minDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(startDate))));
-		
-		activeHTML = "<span style='margin-left:3em;font-size:85%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>";
-	}catch(err){
 	}
+	
+	if(tmpdates.length==0){
+		w_qstringd=stringToDate(endDate);
+	}else{
+		w_qstringd = tmpdates.join(",");
+	}
+	
+	var maxDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(endDate))));
+	var minDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(startDate))));
 	//*****************//
 	
 	$( "#datepicker" ).multiDatesPicker({
@@ -440,7 +458,7 @@ function gos(key){
 				$("#"+dateID).remove();
 				$("#submit").trigger('mouseenter');
 			}
-			$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected"+activeHTML);
+			$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected");
 	    }
 	});
 	
@@ -457,7 +475,7 @@ function gos(key){
 		heightStyle: "content"
 	});
 	$("#accordion").accordion("refresh");
-	$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected"+activeHTML);
+	$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected");
 	
 	
 	document.getElementById("Sradius").value = w_qstringx;

@@ -96,6 +96,7 @@ public class DbUpdate {
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
 	private static final int DBINDEX = Databases.dbsize-1;
+	public final static String VERSION = "V3.15.10";
 	
 	public static List<String> getSelectedAgencies(String username){
 		List<String> selectedAgencies = new ArrayList<String>();
@@ -131,6 +132,16 @@ public class DbUpdate {
     public Object getDefaultDbIndex(){
 		PDBerror b = new PDBerror();
 		b.DBError = DBINDEX+"";
+		return b;
+	}
+	
+	@GET
+    @Path("/getVersion")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getVersion(){
+		
+		PDBerror b = new PDBerror();
+		b.DBError = VERSION;
 		return b;
 	}
 	
@@ -237,14 +248,16 @@ public class DbUpdate {
         
         String email="";
         String lastname="";
+        String firstname="";
 		if(passkey.equals(key)){
 			try {
 				statement = c.createStatement();
 				statement.executeUpdate("UPDATE gtfs_pg_users SET active=true WHERE username='"+username+"';");
-				ResultSet rs = statement.executeQuery("select email,lastname from gtfs_pg_users where username='"+username+"';");
+				ResultSet rs = statement.executeQuery("select email,lastname,firstname from gtfs_pg_users where username='"+username+"';");
 				if(rs.next()){
 					email = rs.getString("email");
 					lastname = rs.getString("lastname");
+					firstname = rs.getString("firstname");
 				}
 				
 			} catch (SQLException e) {
@@ -259,7 +272,7 @@ public class DbUpdate {
 		
 		  String to = email;
 	      final String emailUser = "tnatooltech";
-	      final String emailPass = "OSUteam007";
+	      final String emailPass = "***";
 	      String host = "smtp.gmail.com";
 	
 	      Properties properties = System.getProperties();
@@ -287,7 +300,7 @@ public class DbUpdate {
 	         
 	         Multipart multipart = new MimeMultipart("alternative");
 	         BodyPart messageBodyPart = new MimeBodyPart();
-	         String htmlMessage = lastname+",<br><br>"+"Your GTFS Playground account has been successfully activated!<br>"
+	         String htmlMessage = firstname+" "+lastname+",<br><br>"+"Your GTFS Playground account was successfully activated!<br>"
 	         		+ "You can now log into the website using your credentials.";
 	         messageBodyPart.setContent(htmlMessage, "text/html");
 	         multipart.addBodyPart(messageBodyPart);

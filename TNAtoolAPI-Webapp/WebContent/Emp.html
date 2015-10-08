@@ -83,7 +83,7 @@
 	    	});
 	    	
 	    	$('#dialogPreLoader').hide();
-	    	$('h2').append(' Employment Report - for description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf" target="_blank">here</a>.');
+	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Employment Report <span style="font-size:small;margin-left:1em">(For description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf">here</a></span>.)');
 	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
 	    	mySlidebar.slidebars.open('left'); // Open the Slidebar
 	    	    	
@@ -249,14 +249,16 @@
 									var newName = "Aggregated " + tree.get_text($node) + " " + counter;
 									
 									if ($.inArray(newName, nodesList) < 0){
-										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate", "state" : {"opened" : true} },'first',null,null);
-										console.log(tree.get_type($node));
-										console.log(newName);
+										var d = new Date();
+										var uniqeNo = d.getTime();
+										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate", "state" : {"opened" : true} },'first',null,null);
 									}else{			
 										while ($.inArray(newName, nodesList) >= 0) {
 											newName = "Aggregated " + tree.get_text($node) + " " + counter++;
 										}
-										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
+										var d = new Date();
+										var uniqeNo = d.getTime();
+										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
 									}
 									tree.deselect_node($node);
 								}
@@ -326,6 +328,13 @@
 			$('#jstree').jstree(true).deselect_all();
 			
 		});
+		
+		$("#jstree").bind("changed.jstree", function (e, data) {
+			$('.jstree-leaf').each(function(){
+				$(this).attr('title', description[$(this).attr('id')]); 
+			
+			});
+		});
 
 		$("#jstree").bind("ready.jstree", function (e, data){
 			$('.jstree-leaf').each(function(){
@@ -385,6 +394,7 @@
 	}
 	
 	function selectFunction(){
+		$('#reportTitle').html($('#reportType').val());
 		if(document.getElementById('reportType').value == 'Agencies'){
 			document.getElementById('Sradius').disabled = false;
 		}else{
@@ -419,7 +429,7 @@
 			location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
 		}
 	}
-	go(key);
+	//go(key);
 	</script>
 
 	<!-- Beginning of the datatable -->

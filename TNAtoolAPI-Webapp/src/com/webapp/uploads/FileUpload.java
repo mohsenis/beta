@@ -129,8 +129,17 @@ public class FileUpload extends HttpServlet {
 		String inDeleted = request.getParameter("inDeleted");
 		String justAddedFeeds = request.getParameter("justAddedFeeds");
 		String runPlayground = request.getParameter("runPlayground");
+		String getIp = request.getParameter("getIp");
 		
-		if(runPlayground!=null){
+		if(getIp!=null){
+			
+			try {
+				obj.put("DBError", getClientIp(request));
+				out.print(obj);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}else if(runPlayground!=null){
 			try {
 				runPlayground(runPlayground);
 			} catch (ZipException e) {
@@ -242,7 +251,7 @@ public class FileUpload extends HttpServlet {
 		}else if(email!=null){// send confirmation email
 		      String to = email;
 		      final String emailUser = "tnatooltech";
-		      final String emailPass = "****";
+		      final String emailPass = "***";
 		      String host = "smtp.gmail.com";
 		 
 		      Properties properties = System.getProperties();
@@ -656,7 +665,7 @@ public class FileUpload extends HttpServlet {
 	
 	public String changeFeedName(String feedName, String username){
 		String newName="";
-		int index = 0;
+		int index = 1;
 		
 		for(int i=0;i<4;i++){
 			feedName = removeLastChar(feedName);
@@ -801,7 +810,7 @@ public class FileUpload extends HttpServlet {
 		return "Feed added and updated";
 	}
 	
-	public static void changeCSV(String feed, String username) throws IOException, ZipException{
+	public static void changeCSV(String feed, String username, String firstname, String lastname) throws IOException, ZipException{
 		String path=feed;
 		for(int j=0;j<4;j++){
 			path = removeLastChar(path); 
@@ -860,7 +869,7 @@ public class FileUpload extends HttpServlet {
 		    	feedIndex = getFeedIndex(agnecyName, username);
 		    	lineAsList.add(agnecyName.replace(' ', '-')+"_"+username+"_"+feedIndex);
 		    }
-		    
+		    lineAsList.set(agencyNameIndex, agnecyName+" (Added by "+firstname+" "+lastname+" - ("+feedIndex+"))");
 		    CSVarray = lineAsList.toArray(new String[lineAsList.size()]);
 		    writer.writeNext(CSVarray);
 		}
@@ -942,7 +951,7 @@ public class FileUpload extends HttpServlet {
 	}
 	
 	public static int getFeedIndex(String agencyId, String username){
-		int index =0;
+		int index =1;
 		
 		Connection c = null;
 		Statement statement = null;
@@ -1065,11 +1074,14 @@ public class FileUpload extends HttpServlet {
 		try {
 			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_modified_feeds;");
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_modified_feeds gmf"
+					+ " inner join gtfs_pg_users gpu on gmf.username=gpu.username;");
 			while(rs.next()){
 				feed = new AddRemoveFeed();
 				feed.username = rs.getString("username");
 				feed.feedname = rs.getString("feedname");
+				feed.firstname = rs.getString("firstname");
+				feed.lastname = rs.getString("lastname");
 				if(rs.getString("deleted").equals("t")){
 					removeFeeds.add(feed);
 				}else{
@@ -1096,7 +1108,7 @@ public class FileUpload extends HttpServlet {
 			
 			for(AddRemoveFeed f: addFeeds){
 				if(b.equals("true") || checkTime()){
-					changeCSV(f.filename, f.username);
+					changeCSV(f.filename, f.username, f.firstname, f.lastname);
 					addFeed(f.filename, f.feedname, Long.parseLong(f.feedsize),f.username);
 					
 					statement.executeUpdate("DELETE FROM gtfs_modified_feeds "
@@ -1289,5 +1301,25 @@ public class FileUpload extends HttpServlet {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
+	}
+	
+	public static String getClientIp(HttpServletRequest request){
+		String ip = request.getHeader("X-Forwarded-For");  
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getHeader("Proxy-Client-IP");  
+        }  
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getHeader("WL-Proxy-Client-IP");  
+        }  
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getHeader("HTTP_CLIENT_IP");  
+        }  
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");  
+        }  
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getRemoteAddr();  
+        }  
+        return ip;  
 	}
 }

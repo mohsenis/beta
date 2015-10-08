@@ -72,7 +72,7 @@ $(document).ready(function(){
 		    });		    		    
 		    if (dbindex<0 || dbindex>menusize-1){
 		    	dbindex = 0;
-		    	history.pushState('data', '', document.URL.split("?")[0]+'?&x=0.1&dbindex=0');
+		    	history.pushState('data', '', document.URL.split("?")[0]+'?&x=0.25&dbindex=0');
 		    }
 		    select.options.size = menusize;
 		    select.selectedIndex = dbindex;		    				    
@@ -140,13 +140,13 @@ $(document).ready(function(){
 			$('a').click(function(e){
 				var d = new Date();
 			    if ($(this).attr('type')=="SXR"){
-			    	qstringx = '0.1';
+			    	qstringx = '0.25';
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    	var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex/* +'&username='+getSession() */);			    	   
 			    }else if($(this).attr('type')=="ASR"){
-		    		qstringx = '0.1';
+		    		qstringx = '0.25';
 		    		window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex/* +'&username='+getSession() */);	    		
 			    }else if($(this).attr('type')=="USR"){
 		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex/* +'&username='+getSession() */);	    		

@@ -19,7 +19,7 @@
 	 
 <script type="text/javascript">
 var qstring = '';
-var qstringx = '0.1';
+var qstringx = '0.25';
 var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[4],"");
 var w_qstringl = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
 var w_qstringx = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
@@ -39,11 +39,6 @@ html += '<thead>'+tmp+'</thead><tbody>';
 var fAverage = new Array();
 var fMedian = new Array();
 var key = Math.random();
-
-var areaName;
-var popServedLOS;
-var popWithinX;
-var popServed;
 
 $(document).ready(function(){
 	$.ajax({
@@ -68,7 +63,7 @@ $(document).ready(function(){
 		    }
 		    select.options.size = menusize;
 		    select.selectedIndex = dbindex;		    				    
-		}
+		}	
 	});
 	go(key);	
 	$.ajax({
@@ -108,12 +103,6 @@ $(document).ready(function(){
 			fAverage.push(item.AverageFare);
 			fMedian.push(item.MedianFare);							    
 			html +='</tr></tbody></table>';
-			
-			areaName = item.AreaName;
-			popWithinX = numberconv(item.PopServed);
-			popServedLOS = numberconv(item.PopServedAtLoService);
-			popServed = parseFloat(item.RPopServedByService) + parseFloat(item.UPopServedByService);
-			
 			$('#displayReport').append($(html));	
 			progressbar.remove();
 			
@@ -191,18 +180,6 @@ function dbchange(){
 		location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
 	}
 }
-
-function openDetRep(){
-	var reportType = document.getElementById("detailedreport").value;
-	if (reportType < 1){
-		alert('No report is selected.');
-	}
-	else if (reportType ==1){
-		window.open('/TNAtoolAPI-Webapp/EmpXReport.html'+'?&type='+reportType+'&criteria=Transit%20Region&c1='+popWithinX+'&c2='+popServedLOS+'&c3='+popServed+'&areaID='+w_qstring+'&gap='+qstringx+'&dbindex='+dbindex+'&username='+getSession()+"&areaName="+areaName);
-	}else{
-		alert('Under Construction');
-	}
-}
 </script>
 </head>
 <body >
@@ -248,7 +225,7 @@ function openDetRep(){
 			  	<div class="headerBR" > 
 			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reloadG()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
-			    	Minimum Level of Service (times) <input type="text" name="LoS" id="LoS" class="tbox" onkeypress="return isWholeNumber(event)"/>	<br>			    	   	    	
+			    	Minimum Level of Service (times) <input type="text" name="LoS" id="LoS" class="tbox" onkeypress="return isWholeNumber(event)"/>		    	    	
 		    	</div>
 			  </td>
 			</tr>

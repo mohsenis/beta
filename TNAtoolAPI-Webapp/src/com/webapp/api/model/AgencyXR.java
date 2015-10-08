@@ -43,7 +43,11 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String PopServed;
+    public String UPopWithinX;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RPopWithinX;
 	
 	@XmlAttribute
     @JsonSerialize
@@ -59,15 +63,11 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String PopServedByService;
+    public String UPopServedByService;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String Stopportunity;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String PopStopportunity;
+    public String RPopServedByService;
 	
 	@XmlAttribute
     @JsonSerialize
@@ -80,4 +80,8 @@ public class AgencyXR {
 	@XmlAttribute
     @JsonSerialize
     public String ServiceHours;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String ServiceDays;
 }
