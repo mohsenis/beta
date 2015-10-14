@@ -2,7 +2,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Multimodal Hub Summary Report</title>
+	<title>Transit Hub Summary Report</title>
 	<script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
@@ -17,6 +17,7 @@
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	 
 <script type="text/javascript">
+var reportName = "Transit Hub Summary";
 var qstring = '';
 var qstringx = '0.1';
 var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[2],"");
@@ -79,6 +80,7 @@ $(document).ready(function(){
 		}			
 	});
 	gos(key);
+	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
