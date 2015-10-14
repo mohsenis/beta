@@ -449,7 +449,7 @@ function gos(key){
 		heightStyle: "content"
 	});
 	$("#accordion").accordion("refresh");
-	$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected");
+	$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected"+"<span style='margin-left:3em;font-size:80%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>");
 	
 	
 	document.getElementById("Sradius").value = w_qstringx;

@@ -588,6 +588,16 @@ function style(feature) {
         fillOpacity: 0.1
     };
 }
+function styleU(feature) {
+    return {
+        fillColor: 'orange',
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.3
+    };
+}
 function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
 }
@@ -605,7 +615,20 @@ function highlightFeature(e) {
     });    
     info.update(layer.feature.properties);    
 }
-
+function resetHighlightU(e) {	
+	var layer = e.target;
+    layer.setStyle({              
+        fillOpacity: 0.3
+    });
+    info.update();
+}
+function onEachFeatureU(feature, layer) {
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlightU,
+        click: zoomToFeature        
+    });
+}
 function onEachFeature(feature, layer) {
     layer.on({
         mouseover: highlightFeature,
@@ -618,7 +641,7 @@ var routes = new L.LayerGroup().addTo(map);
 
 var county = L.geoJson(countyshape, {style: style, onEachFeature: onEachFeature});
 var odot = L.geoJson(odotregionshape, {style: style, onEachFeature: onEachFeature}); 
-var urban = L.geoJson(urbanshapes, {style: style, onEachFeature: onEachFeature});
+var urban = L.geoJson(urbanshapes, {style: styleU, onEachFeature: onEachFeatureU});
 var congdist = L.geoJson(congdistshape, {style: style, onEachFeature: onEachFeature});
 
 var colorset = ["#6ECC39","#FF33FF","#05FAFC","#FE0A0A", "#7A00F5", "#CC6600"];
