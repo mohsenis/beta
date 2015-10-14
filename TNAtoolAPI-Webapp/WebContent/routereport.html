@@ -21,7 +21,7 @@
 var startDate;
 var endDate;
 var qstring = '';
-var qstringx = '0.1';
+var qstringx = '0.25';
 var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3]+"&"+document.URL.split("&")[4],"");
 var w_qstringx = parseFloat(getURIParameter("x"));
 var w_qstring = getURIParameter("agency");
@@ -44,8 +44,8 @@ var tmp = '<tr><th>Agency ID <em title="Identification number reported in the tr
 '<th>Route Type <em title="Type of transportation used on a route: 0-Tram, Streetcar & Light rail 1-Subway & Metro 2-Rail 3-Bus 4-Ferry 5-Cable car 6-Gondola & Suspended cable car 7-Funicular"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route Length <em title="Length of the longest route variant for the given route."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops on the route."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Unduplicated Urban Population (2010)<em title="Summation of the unduplicated urban population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Unduplicated Rural Population (2010)<em title="Summation of the unduplicated rural population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Unduplicated Urban Population (2010)<em title="Summation of the unduplicated urban population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Unduplicated Rural Population (2010)<em title="Summation of the unduplicated rural population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Stops <em title="Number of stops scheduled on all trips in a route. The service stops for a route is calculated as its stop count multiplied by the number of visits per stop."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Urban Population (2010) Served by Route <em title="Total unduplicated urban population impacted within an X-mile radius (i.e., stop distance) of all stops on all trips. The Population Served by Route for a route is calculated as route service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops on all trips."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Rural Population (2010) Served by Route <em title="Total unduplicated rural population impacted within an X-mile radius (i.e., stop distance) of all stops on all trips. The Population Served by Route for a route is calculated as route service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops on all trips."><img src="images/tooltip.png" alt="tooltip"></em></th>'+

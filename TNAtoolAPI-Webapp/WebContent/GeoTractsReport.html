@@ -18,7 +18,7 @@
 	
 <script type="text/javascript">
 var qstring = '';
-var qstringx = '0.1';
+var qstringx = '0.25';
 var progVal = 0; 
 var qstringd = '';
 var d = new Date();
@@ -149,7 +149,7 @@ $(document).ready(function(){
 				var d = new Date();
 			    if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
-			    		qstringx = '0.1';
+			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
@@ -159,7 +159,7 @@ $(document).ready(function(){
 			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=1'+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if($(this).attr('type')=="RC"){
 				    	qstring = $(this).attr('id');
-				    	qstringx = '0.1';
+				    	qstringx = '0.25';
 				    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 				    	var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
@@ -171,7 +171,7 @@ $(document).ready(function(){
 				    	window.open(url);			    	
 				 }else if($(this).attr('type')=="SC"){
 				    	qstring = $(this).attr('id');
-			    		qstringx = '0.1';
+			    		qstringx = '0.25';
 			    		url = '/TNAtoolAPI-Webapp/stopreport.html?';
 			    		if (agencyId!=null){
 			    			url += '&agency='+agencyId

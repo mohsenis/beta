@@ -19,7 +19,7 @@
 	
 <script type="text/javascript">
 var qstring = '';
-var qstringx = '0.1';
+var qstringx = '0.25';
 var type = parseInt(getURIParameter("type"));
 type = (isNaN(type))?0:type;
 var dbindex = parseInt(getURIParameter("dbindex"));
@@ -36,8 +36,8 @@ var tmp = '<tr><th id="aid">Agency ID <em title="Agency identification number re
 '<th>Stop ID <em title="Unique stop identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="sn">Stop Name <em title="Name of a stop reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Routes Stop Belongs To <em title="Unique route ID (or IDs) that the stop belongs to."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Urban Population (2010)<em title="Urban population count within an X-mile radius of a stop. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Rural Population (2010)<em title="Rural population count within an X-mile radius of a stop. The default value for X is 0.1 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban Population (2010)<em title="Urban population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Rural Population (2010)<em title="Rural population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
