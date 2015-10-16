@@ -1220,7 +1220,7 @@ Loop:  	for (Trip trip: routeTrips){
 	@Path("/Xemp")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object getXEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
-    	
+    	return null;
     }
 
     /**
