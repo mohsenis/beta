@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
+	<!-- <meta charset="utf-8"> -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>Aggregated Title VI Report</title>
 	<link rel="stylesheet" href="js/lib/jstree-themes/default/style.min.css" />
@@ -33,8 +33,8 @@
 	</style>
 	<script>
 	var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-	var username = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
 	var mySlidebar;
+	var maxRadius = 5;
 	
 	(function($) {
 	    $(document).ready(function() {
@@ -77,7 +77,7 @@
 				"check_callback" : true,
 				"themes" : { "stripes" : true },
 				"data" : [
-					{"text" : "Poverty Level", "type" : "poverty_default", "id" : "Poverty", "state" : {"opened" : true},
+					{"text" : "Povery Level", "type" : "poverty_default", "id" : "Povery", "state" : {"opened" : true},
 						"children" : [
 									{"text" : "Below Poverty Line", "type" : "poverty", "id" : "belowpoverty"},
 									{"text" : "Above Poverty Line", "type" : "poverty", "id" : "abovepoverty"}
@@ -94,16 +94,16 @@
 					},
 					{"text" : "House Hold", "type" : "hh_default", "id" : "hh",  "state" : {"opened" : true},
 						"children" : [
-										{"text" : "White", "type" : "hh", "id" : "hhwhite"},
-										{"text" : "Hispanic", "type" : "hh", "id" : "hhhispanic"},
-										{"text" : "Black", "type" : "hh", "id" : "hhblack"},
-										{"text" : "American Indian", "type" : "hh", "id" : "hhamericanindian"},
-										{"text" : "Asian", "type" : "hh", "id" : "hhasian"},
-										{"text" : "Pacific Islander", "type" : "hh", "id" : "hhpacificislander"},
-										{"text" : "Pacific Other", "type" : "hh", "id" : "hhpacificother"},
-										{"text" : "White Not Hispanic", "type" : "hh", "id" : "hhwhitenothisp"},
-										{"text" : "Over 65 Years Old", "type" : "hh", "id" : "hhover65"},
-										{"text" : "Under 65 Years Old", "type" : "hh", "id" : "hhunder65"}
+										{"text" : "HouseHold - White", "type" : "hh", "id" : "hhwhite"},
+										{"text" : "HouseHold - Hispanic", "type" : "hh", "id" : "hhhispanic"},
+										{"text" : "HouseHold - Black", "type" : "hh", "id" : "hhblack"},
+										{"text" : "HouseHold - American Indian", "type" : "hh", "id" : "hhamericanindian"},
+										{"text" : "HouseHold - Asian", "type" : "hh", "id" : "hhasian"},
+										{"text" : "HouseHold - Pacific Islander", "type" : "hh", "id" : "hhpacificislander"},
+										{"text" : "HouseHold - Pacific Other", "type" : "hh", "id" : "hhpacificother"},
+										{"text" : "HouseHold - White Not Hispanic", "type" : "hh", "id" : "hhwhitenothisp"},
+										{"text" : "HouseHold - Over 65 Years Old", "type" : "hh", "id" : "hhover65"},
+										{"text" : "HouseHold - Under 65 Years Old", "type" : "hh", "id" : "hhunder65"}
 					]}
 			]},
 			"types" : {
@@ -156,17 +156,14 @@
 									var newName = "Aggregated " + tree.get_text($node) + " " + counter;
 									
 									if ($.inArray(newName, nodesList) < 0){
-										var d = new Date();
-										var uniqeNo = d.getTime();
-										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate", "state" : {"opened" : true} },'first',null,null);
-										
+										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate", "state" : {"opened" : true} },'first',null,null);
+										console.log(tree.get_type($node));
+										console.log(newName);
 									}else{			
 										while ($.inArray(newName, nodesList) >= 0) {
 											newName = "Aggregated " + tree.get_text($node) + " " + counter++;
 										}
-										var d = new Date();
-										var uniqeNo = d.getTime();
-										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
+										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
 									}
 									tree.deselect_node($node);
 								}
@@ -235,7 +232,6 @@
 		$(document).on("dnd_stop.vakata", function (e, data) {
 			$('#jstree').jstree(true).deselect_all();
 		});
-		
 	});
 	
 	
@@ -294,6 +290,12 @@
 	<script type="text/javascript">
 	
 	function openReport(){	
+		
+		if (exceedsMaxRadius($('#Sradius').val())){	// Checks if the entered search radius exceeds the maximum.
+			alert('Enter a number less than ' + maxRadius + ' miles for the population search radius.');
+			return;
+		}
+		
 		if ($('#jstree').jstree(true).get_selected()==""){
 			alert('At least select 1 category');
 			return 0;
@@ -307,17 +309,27 @@
 		$("#initialText").hide();
 		document.getElementById('displayReport').innerHTML = "";
 		var html = '<table id="Emp" class="display" align="center">';
-		var tmp = 	'<tr><th id="an">Area ID <em title="ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-					'<th>Area Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-					'<th>Total Population</em></th>'+
-					getTableHeaders()+
-					'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+		var tmp = '';
+		if ($('#reportType').val() == 'Agencies'){
+			tmp = '<tr><th id="an">Agency ID <em title="ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+			'<th>Agency Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+			'<th>Total population served by the agency</th>';
+		}else{
+			tmp = '<tr><th id="an">Area ID</th>'+
+			'<th>Area Name</th>'+
+			'<th>Total population of the area</em></th>';
+		}			
+		tmp += getTableHeaders()+
+			'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 		html += '<thead>'+tmp+'</thead><tbody>';
-		
+		var sRadius = '';
+		if (document.getElementById("reportType").value == 'Agencies'){
+			sRadius = ',' + $('#Sradius').val() * 1609.34;
+		}
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?&report='+document.getElementById('reportType').value+'&dbindex='+dbindex+'&username='+getSession(),
+			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?&report='+document.getElementById('reportType').value+sRadius+'&dbindex='+dbindex+'&username='+getSession(),
 			async: true,
 			success: function(d){			
 				// making a 2D array based on the selected categories and aggregated categories
@@ -410,9 +422,9 @@
 			"bSort" : true,
 			"paging": true,	
 			"scrollX": true,
-			"iDisplayLength": 25,
+			"iDisplayLength": 20,
 			"aoColumnDefs": [{"visible": false, "targets": [$('#Emp thead th').length - 1]}],
-			"order": [[ 2, "des" ]],
+			"order": [[ 0, "asc" ]],
 			"dom": 'T<"clear">lfrtip',
 	        "tableTools": {
 	        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -449,11 +461,11 @@
 	
 	function selectFunction(){
 		$('#reportTitle').html($('#reportType').val());
-		/* if(document.getElementById('reportType').value == 'Agencies'){
+		if(document.getElementById('reportType').value == 'Agencies'){
 			document.getElementById('Sradius').disabled = false;
 		}else{
 			document.getElementById('Sradius').disabled = true;
-		} */
+		}
 	}
 	</script>
 </head>
@@ -521,9 +533,9 @@
 					  <option value="Congressional Districts">Congressional Districts</option>
 					  <option value="Urban Areas">Urban Areas</option>
 					  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
-					 <!--  <option value="Agencies">Agencies</option> -->
+					  <option value="Agencies">Agencies</option>
 				 </select><br>
-			<!-- <b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;margin-bottom:5px" value="0.1" onkeypress="return isNumber(event)"/><br> -->
+			<b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;margin-bottom:5px" value="0.1" onkeypress="return isNumber(event)"/><br>
 			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>
 		<div id="jstree" class="demo" style="width:98%"></div>
@@ -531,4 +543,3 @@
 	</div>
 		
 </body>
-</html>

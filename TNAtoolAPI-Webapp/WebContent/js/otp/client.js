@@ -3,6 +3,7 @@ var default_dbindex = getDefaultDbIndex();
 var dbindex = default_dbindex;
 var newdates = null;
 var URL = document.URL;
+var maxRadius = 5;
 if (URL.split("?").length >0){
 	URL = URL.split("?")[0];
 	if (document.URL.indexOf("n=")<1){
@@ -1240,10 +1241,10 @@ $mylist
 			    	var qstringx = '0.25';
 			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
-			    	var qstringx = '500';
+			    	var qstringx = '0.1';
 			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CNSR"){
-			    	var qstringx = '500';
+			    	var qstringx = '0.1';
 			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if(casestring=="CSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
@@ -1264,10 +1265,14 @@ $mylist
 			    			localStorage.setItem(key, dates.join(","));			    			
 			    		}
 			    		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+parseInt(casestring.substring(2)));			    		    		
-			    }else if(casestring=="Emp"){	
-			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&dbindex='+dbindex+'&username='+getSession());
+			    }else if(casestring=="Emp"){
+			    	var keyName = Math.random();
+		    		localStorage.setItem(keyName, qstringd);
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&dbindex='+dbindex+'&n='+keyName);
 			    }else if(casestring=="T6"){	
-			    	window.open('/TNAtoolAPI-Webapp/T6.html'+'?&dbindex='+dbindex+'&username='+getSession());
+			    	var keyName = Math.random();
+		    		localStorage.setItem(keyName, qstringd);
+			    	window.open('/TNAtoolAPI-Webapp/T6.html'+'?&dbindex='+dbindex+'&n='+keyName);
 			    }
 			});
     	

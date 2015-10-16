@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>Aggregated Employment Report</title>
-	<link rel="stylesheet" href="js/lib/jstree-themes/default/style.min.css" />
+	
 	<script src="js/lib/jquery-1.11.1.min.js"></script>
 	<script src="js/lib/jstree.min.js"></script>
 	<script src="js/jQueryContent.js"></script>
@@ -15,13 +15,18 @@
 	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
 	<script src="js/lib/jquery.qtip.min.js"></script>
 	<script src="js/jQueryContent.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/date.js"></script>
 	<script src="js/EmpDescription.js"></script>
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/slidebars.min.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery.qtip.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/jstree-themes/default/style.min.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
 	
 	<style>
 	.navicon-line{
@@ -34,9 +39,13 @@
 	
 	</style>
 	<script>
-	/* var reportType = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1); */
+	var maxRadius = 5;
 	var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-	var username = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
+	var key = Math.random();
+	var keyName = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
+	var w_qstringd = localStorage.getItem(keyName);
+	var w_qstringx = $('#Sradius').val();
+	if (w_qstringx == null) {w_qstringx = 0.1};
 	var mySlidebar;
 	var wacBool = true;
 	var racBool = false;
@@ -46,6 +55,7 @@
 	var tmp = "";
 	
 	(function($) {
+		
 	    $(document).ready(function() {
 	    	$.ajax({
 	    		type: 'GET',
@@ -242,7 +252,6 @@
 										var d = new Date();
 										var uniqeNo = d.getTime();
 										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate", "state" : {"opened" : true} },'first',null,null);
-										
 									}else{			
 										while ($.inArray(newName, nodesList) >= 0) {
 											newName = "Aggregated " + tree.get_text($node) + " " + counter++;
@@ -308,7 +317,6 @@
 						"dnd",
 						"contextmenu",
 						"sort",
-						/* "state", */
 						"types",
 						"unique",
 						"checkbox"
@@ -335,7 +343,39 @@
 		});		
 	});
 	
+	function racAjax(sRadius){
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + document.getElementById("reportType").value + sRadius + '&dbindex='+dbindex+'&username='+getSession(),
+			async: false,
+			success: function(d){
+				var temp = d.EmpDataList;
+				racData.metadata = d.metadata;
+				racData.EmpDataList2 = [];
+				temp.forEach(function(i, ind, arr){
+					racData.EmpDataList2.push(i);
+				});
+			}
+		});
+	}
 	
+	function wacAjax(sRadius){
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + document.getElementById("reportType").value + sRadius + '&dbindex='+dbindex+'&username='+getSession(),
+			async: false,
+			success: function(d){
+				var temp = d.EmpDataList;
+				wacData.metadata = d.metadata;
+				wacData.EmpDataList2 = [];
+				temp.forEach(function(i, ind, arr){
+					wacData.EmpDataList2.push(i);
+				});
+			}
+		});
+	}	
 	
 	function toggleCheckbox(checkbox){	
 		var tree= $('#jstree').jstree(true);
@@ -357,20 +397,45 @@
 		});
 		var y = "";
 		if (racBool && wacBool){
-			y += '<th>Total Employment - RAC</em></th>'+
-					'<th>Total Employment - WAC</em></th>'+
-					'<th>Total Selected Employment - RAC</em></th>'+
-					'<th>Total Selected Employment - WAC</em></th>';			
+			if ($('#reportType').val() == 'Agencies'){
+				y += '<th>Total number of employees served by the agnecy(RAC)</th>'+
+				'<th>Total number of employees served by the agnecy (WAC)</th>';
+				/* '<th>Total Selected Employment (RAC)</em></th>'+
+				'<th>Total Selected Employment (WAC)</em></th>'; */
+			}else{
+				y += '<th>Total number of employees residing in the area (RAC)</th>'+
+				'<th>Total number of employees working in the area (WAC)</th>';
+				/* '<th>Total Selected Employment (RAC)</em></th>'+
+				'<th>Total Selected Employment (WAC)</em></th>'; */
+			}
+			 
 			nodesList.forEach (function (item, index, array){
-				y += '<th>'+ tree.get_text(item) +' - RAC</th>';
-				y += '<th>'+ tree.get_text(item) +' - WAC</th>';
+				y += '<th>'+ tree.get_text(item) +' (RAC)</th>';
+				y += '<th>'+ tree.get_text(item) +' (WAC)</th>';
 			});
-		}else{
-			y += '<th>Total Employment</em></th>'+
-			'<th>Total Selected Employment</em></th>';
+		}else if (racBool){
+			if ($('#reportType').val() == 'Agencies'){
+				y += '<th>Total number of employees served by the agnecy (RAC)</th>';
+				/* '<th>Total Selected Employment</em></th>'; */
+			}else{
+				y += '<th>Total number of employees residing in the area (RAC)</th>';
+				/* '<th>Total Selected Employment</em></th>'; */	
+			}
+			
 			nodesList.forEach (function (item, index, array){				
-				y += '<th>'+ tree.get_text(item) +'</th>'
+				y += '<th>'+ tree.get_text(item) +' (RAC)</th>';
 			});	
+		}else{
+			if ($('#reportType').val() == 'Agencies'){
+				y += '<th>Total number of employees served by the agnecy (WAC)</th>';
+				/* '<th>Total Selected Employment</em></th>'; */
+			}else{
+				y += '<th>Total number of employees working in the area (WAC)</th>';
+				/* '<th>Total Selected Employment</em></th>'; */	
+			}
+			nodesList.forEach (function (item, index, array){				
+				y += '<th>'+ tree.get_text(item) +' (WAC)</th>';
+			});
 		}
 		return y;
 	} 
@@ -384,14 +449,14 @@
 		$('#initialText').show();
 	}
 	
-	 function selectFunction(){
+	function selectFunction(){
 		$('#reportTitle').html($('#reportType').val());
-		/* if(document.getElementById('reportType').value == 'Agencies'){
+		if(document.getElementById('reportType').value == 'Agencies'){
 			document.getElementById('Sradius').disabled = false;
 		}else{
 			document.getElementById('Sradius').disabled = true;
-		} */
-	} 
+		}
+	}
 	
 	function datasetChange(e){
 		if (e.value == 'lodes_blocks_wac'){
@@ -420,13 +485,19 @@
 			location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
 		}
 	}
-
+	//go(key);
 	</script>
 
 	<!-- Beginning of the datatable -->
 	<script type="text/javascript">
 	
-	function openReport(){	
+	function openReport(){
+		clearReport();
+		if (exceedsMaxRadius($('#Sradius').val())){	// Checks if the entered search radius exceeds the maximum.
+			alert('Enter a number less than ' + maxRadius + ' miles for the population search radius.');
+			return 0;
+		}
+		
 		if ($('#jstree').jstree(true).get_selected()==""){
 			alert('At least select 1 category');
 			return 0;
@@ -439,41 +510,65 @@
 		$("#initialText").hide();
 		document.getElementById('displayReport').innerHTML = "";
 		html = '<table id="Emp" class="display" align="center">';
-		tmp = 	'<tr><th id="an">Area ID <em title="ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-					'<th>Area Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-					'<th>Population</em></th>'+
-					getTableHeaders()+
+		if ($('#reportType').val() == 'Agencies'){
+			tmp = 	'<tr><th id="tableid">Agency ID</em></th>'+
+				'<th id="tablename">Agency Name</em></th>';
+		}else{
+			tmp = 	'<tr><th id="tableid">Area ID</em></th>'+
+			'<th id="tablename">Area Name</em></th>';
+		}
+			tmp += 	//'<th>Population</em></th>'+
+					//'<th>Service data</th>'+
+					//'<th>Urban Population Served (Unduplicated) <em title="Summation of unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."><img src="images/tooltip.png"></em></th>'+
+					//'<th>Rural Population Served (Unduplicated) <em title="Summation of unduplicated rural population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."><img src="images/tooltip.png"></em></th>'+
+					//'<th>Percent of Population Served <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total population of the given geographic area."><img src="images/tooltip.png"></em></th>'+
+					//'<th>Percent of Population Served at Level of Service <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total population of the given geographic area."><img src="images/tooltip.png"></em></th>'+
+					//'<th>Urban Population Served at Level of Service <em title="Summation of unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service."><img src="images/tooltip.png"></em></th>'+
+					//'<th>Rural Population Served at Level of Service <em title="Summation of unduplicated rural population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service."><img src="images/tooltip.png"></em></th>'+
+					getTableHeaders() +
 					'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 		html += '<thead>'+tmp+'</thead><tbody>';
 		if (racBool){
-			$.ajax({
+			var sRadius = '';
+			if (document.getElementById("reportType").value == 'Agencies'){
+				sRadius = ',' + $('#Sradius').val() * 1609.34;
+			}
+			racAjax(sRadius);
+			/* $.ajax({
 				type: 'GET',
 				datatype: 'json',
-				url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + document.getElementById("reportType").value + '&dbindex='+dbindex+'&username='+getSession(),
+				url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + document.getElementById("reportType").value + sRadius + '&dbindex='+dbindex+'&username='+getSession(),
 				async: false,
 				success: function(d){
 					var temp = d.EmpDataList;
+					racData.metadata = d.metadata;
 					racData.EmpDataList2 = [];
 					temp.forEach(function(i, ind, arr){
 						racData.EmpDataList2.push(i);
 					});
 				}
-			});
+			}); */
 		}
 		if(wacBool){
-			$.ajax({
+			var sRadius = '';
+			if (document.getElementById("reportType").value == 'Agencies'){
+				sRadius = ',' + $('#Sradius').val() * 1609.34;
+			}
+			wacAjax(sRadius);
+			/* $.ajax({
 				type: 'GET',
 				datatype: 'json',
-				url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + document.getElementById("reportType").value + '&dbindex='+dbindex+'&username='+getSession(),
+				url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + document.getElementById("reportType").value + sRadius + '&dbindex='+dbindex+'&username='+getSession(),
 				async: false,
 				success: function(d){
 					var temp = d.EmpDataList;
+					wacData.metadata = d.metadata;
 					wacData.EmpDataList2 = [];
 					temp.forEach(function(i, ind, arr){
 						wacData.EmpDataList2.push(i);
 					});
 				}
-			});
+			}); */
 		}
 		openReport2();
 	}
@@ -495,10 +590,8 @@
 			var parentID = $(item).attr('id');
 			if (tree.is_parent(item)){						
 				var children = tree.get_children_dom(item);
-				//console.log('Children: ' + typeof children);
 				var childrenIDs = [];
 				$.each(children, function(ind,obj){
-					//console.log($(obj).attr('id'));
 					if (tree.is_selected(obj)){
 						childrenIDs.push($(obj).attr('id'));
 					}							
@@ -516,7 +609,7 @@
 			for (var i=0; i<racData.EmpDataList2.length;i++){
 				html += '<tr><td>'+ racData.EmpDataList2[i].id + '</a></td>'+
 				'<td>' + racData.EmpDataList2[i].name + '</td>'+
-				'<td>' + numWithCommas(racData.EmpDataList2[i].population) + '</td>'+
+				//'<td>' + numWithCommas(racData.EmpDataList2[i].population) + '</td>'+
 				'<td>' + numWithCommas(racData.EmpDataList2[i].c000) + '</td>'+
 				'<td>' + numWithCommas(wacData.EmpDataList2[i].c000) + '</td>';
 				
@@ -529,7 +622,7 @@
 					resultSetWac[$(this).attr('id')] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
 				});
 				
-				// RAC Total Employment
+				/* // RAC Total Employment
 				var totalSelectedEmp = 0;
 				$('.jstree-node').each(function(){
 					 if (tree.is_selected($(this)) && tree.is_leaf($(this))){
@@ -545,7 +638,8 @@
 						totalSelectedEmp += resultSetWac[$(this).attr('id')];
 					 }
 				});
-				html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>';
+				html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>'; */
+				
 				// filling in the other columns of the datatable
 				for (var index in tableContent){
 					var racSummation = 0;
@@ -572,17 +666,17 @@
 				
 				html += '<tr><td>'+ item.id + '</a></td>'+
 				'<td>' + item.name + '</td>'+
-				'<td>' + numWithCommas(item.population) + '</td>'+
+				//'<td>' + numWithCommas(item.population) + '</td>'+
 				'<td>' + numWithCommas(item.c000) + '</td>';				
 			
 			// calculating the total employment selected and push into the datatable
-			var totalSelectedEmp = 0;
+			/* var totalSelectedEmp = 0;
 			$('.jstree-node').each(function(){
 				 if (tree.is_selected($(this)) && tree.is_leaf($(this))){
 					totalSelectedEmp += resultSetRac[$(this).attr('id')];
 				 }
 			});
-			html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>';
+			html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>'; */
 			
 			// filling in the other columns of the datatable
 			for (var index in tableContent){
@@ -605,17 +699,18 @@
 				});
 				html += '<tr><td>'+ item.id + '</a></td>'+
 					'<td>' + item.name + '</td>'+
-					'<td>' + numWithCommas(item.population) + '</td>'+
+					//'<td>' + numWithCommas(item.population) + '</td>'+
 					'<td>' + numWithCommas(item.c000) + '</td>';
+					
 					// calculating the total employment selected and push into the datatable
-					var totalSelectedEmp = 0;
+					/* var totalSelectedEmp = 0;
 					$('.jstree-node').each(function(){
 						 if (tree.is_selected($(this)) && tree.is_leaf($(this))){
 							totalSelectedEmp += resultSetWac[$(this).attr('id')];
 						 }
 					});
 					
-					html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>';
+					html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>'; */
 					
 					// filling in the other columns of the datatable
 					for (var index in tableContent){
@@ -625,7 +720,6 @@
 							if (tree.is_selected(node)){
 								summation += resultSetWac[i];	
 							}		
-							console.log(summation);
 						});
 						html+='<td>' + numWithCommas(summation) + '</td>';
 					}
@@ -647,7 +741,7 @@
 			"scrollX": true,
 			"iDisplayLength": 25,
 			"aoColumnDefs": [{"visible": false, "targets": [$('#Emp thead th').length - 1]}],
-			"order": [[ 2, "des" ]],
+			"order": [[ 0, "asc" ]],
 			"dom": 'T<"clear">lfrtip',
 	        "tableTools": {
 	        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -674,9 +768,9 @@
 	 
 	    $('#Emp_wrapper').css("margin", "auto");
 		$("#Emp_length").remove();
-	    $("#Emp_filter").insertBefore("#Emp_info");
+	    $("#Emp_filter").insertBefore("#Emp_info");	    
 	    $( ".dataTables_filter" ).css( "float", "left");
-	    $( ".dataTables_filter" ).before( "<br>" ); 
+	    $( ".dataTables_filter" ).before( "<br>" );	    
 	}
 	</script>
 </head>
@@ -737,6 +831,24 @@
 		<br>
 		<br>
 		<div>
+			<div class="headerBC" id="accordion" >
+				<h3></h3>
+				<div>
+					<table style="width:100%;">
+						<tr>
+							<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+								<ul data-role="listview">
+						
+								</ul>
+							</td>
+							<td style="vertical-align:top;padding-top:15px">
+								<div id="datepicker" ></div>
+							</td>
+						</tr>
+					</table>
+					
+				</div>
+			</div>
 			<label for="dataSet"><b>Select Data Set:</b></label>
 		    	<select name="dataSet" id="dataSet" onchange=datasetChange(this) style="width: 12.4em;height: 25px;margin-top: 5px; margin-bottom:5px">
 					  <option value="lodes_blocks_wac" selected>WAC -  Workplace Area Characteristic data</option>
@@ -750,9 +862,9 @@
 						  <option value="Congressional Districts">Congressional Districts</option>
 						  <option value="Urban Areas">Urban Areas</option>
 						  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
-						  <!-- <option value="Agencies">Agencies</option> -->
+						  <option value="Agencies">Agencies</option>
 					 </select><br>
-			<!-- <b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;" value="0.1" onkeypress="return isNumber(event)"/><br> -->	
+			<b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;" value="0.1" onkeypress="return isNumber(event)"/><br>	
 			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>
 		<div id="jstree" class="demo" style="width:98%"></div>

@@ -18,6 +18,7 @@
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	 
 <script type="text/javascript">
+var maxRadius = 5;
 var qstring = '';
 var qstringx = '0.25';
 var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[4],"");
@@ -102,9 +103,9 @@ $(document).ready(function(){
 			html = html + '<tr><td>' + item.AreaId +'</td><td>' + item.AreaName +'</td><td class="details-control"></td><td class="details-control-cc"></td><td>' + numberconv(item.RouteMiles) +'</td><td>'+ numberconv(item.StopsPersqMile) 
 			+'</td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) +'</td><td class="serviceCol">'+ numberconv(item.ServiceHours) +'</td><td class="serviceCol">'+ numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'
 			+ numberconv(item.ServiceMilesPersqMile) +'</td><td  class="serviceCol">'+numberconv(item.MilesofServicePerCapita)+'</td><td class="serviceCol">' + numberconv(item.PopWithinX) 
-			+'</td><td class="serviceCol">' + numberconv(item.PopServed)+'</td><td class="serviceCol">' + numberconv(item.PopServedAtLoService)+'</td><td class="serviceCol">' + numberconv(item.PopUnServed)+'</td><td class="serviceCol">'+
+			+'</td><td class="serviceCol">' + addPercent(numberconv(item.PopServed))+'</td><td class="serviceCol">' + addPercent(numberconv(item.PopServedAtLoService))+'</td><td class="serviceCol">' + addPercent(numberconv(item.PopUnServed))+'</td><td class="serviceCol">'+
 			numberconv(item.ServiceStops)+'</td><td class="serviceCol">' + numberconv(item.PopServedByService)+'</td><td class="serviceCol">'+ item.ServiceDays+'</td><td class="serviceCol">'
-			+ item.HoursOfService+'</td><td>$'+item.AverageFare+'</td><td>$'+item.MedianFare+'</td><td>'+item.ConnectedCommunities+'</td><td>'+item.metadata+'</td>';
+			+ item.HoursOfService+'</td><td>'+fare(item.AverageFare)+'</td><td>'+fare(item.MedianFare)+'</td><td>'+item.ConnectedCommunities+'</td><td>'+item.metadata+'</td>';
 			fAverage.push(item.AverageFare);
 			fMedian.push(item.MedianFare);
 			connectedcommunities = item.ConnectedCommunities;

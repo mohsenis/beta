@@ -137,8 +137,8 @@ $(document).ready(function(){
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +'<a href="#" type="SR">'+item.Name+
 				'</a></td><td>' +numberconv(item.population) +
 				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td><td>'+ item.UrbansCount+'</td>'+
-		   '<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
-				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td><td>'+d.metadata+'</td></tr>';								   			
+		   '<td>' + item.RoutesCount + '</td>'+
+				'<td>' + item.StopsCount + '</td><td>'+d.metadata+'</td></tr>';								   			
 			});		
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));

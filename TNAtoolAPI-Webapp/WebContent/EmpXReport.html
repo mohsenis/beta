@@ -1,0 +1,334 @@
+
+
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Employment Report</title>
+	<script src="js/lib/jquery-1.9.1.min.js"></script>
+	<script src="js/lib/jquery-ui.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/date.js"></script>
+	<script src="js/jQueryContent.js"></script>
+	<script src="js/lib/sorttable.js"></script>
+	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>	
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
+	
+<script type="text/javascript">
+var id = "";
+var progVal = 0; 
+var reportType = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
+var criteria = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
+var popWithinX = parseFloat(document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1))/100;
+var popServedLos = parseFloat(document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1))/100;
+var popServed = parseFloat(document.URL.split("&")[5].substr(document.URL.split("&")[5].indexOf("=")+1));;
+var areaID = parseInt(document.URL.split("&")[6].substr(document.URL.split("&")[6].indexOf("=")+1));
+var gap = parseInt(document.URL.split("&")[7].substr(document.URL.split("&")[7].indexOf("=")+1));
+var dbindex = parseInt(document.URL.split("&")[8].substr(document.URL.split("&")[8].indexOf("=")+1));
+var username = document.URL.split("&")[9].substr(document.URL.split("&")[9].indexOf("=")+1);
+var areaName = document.URL.split("&")[10].substr(document.URL.split("&")[10].indexOf("=")+1).replace(/%20/g, " ");
+var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
+var tmp = '<tr><th>Metric</th><th>Value (RAC)</th><th>Value (WAC)</th></tr>';
+var wacData = {};
+var racData = {};
+
+html += '<thead>'+tmp+'</thead><tbody>';
+
+	
+var key = Math.random();
+
+function pad(s) { return (s < 10) ? '0' + s : s; }
+/* qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/'); */
+
+function EscFunc(){
+	jQuery.event.trigger({ type : 'keydown', which : 27 });
+}
+
+$(document).ready(function(){
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
+		async: false,
+		success: function(d){	
+			var select = document.getElementById("dbselect");
+			select.options.length = 0;
+		    var menusize = 0;
+		    $.each(d.DBelement, function(i,item){
+		    	var option = document.createElement('option');
+		        option.text = item;
+		        option.value = 'DB'+i;
+		        select.add(option, i);		    	
+		    	menusize++;
+		    });		    		    
+		    if (dbindex<0 || dbindex>menusize-1){
+		    	dbindex = 0;
+		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
+		    }
+		    select.options.size = menusize;
+		    select.selectedIndex = dbindex;		    				    
+		}			
+	});
+	
+	var sRadius = '';
+	if (document.getElementById("reportType").value == 'Agencies'){
+		sRadius = ',' + $('#Sradius').val() * 1609.34;
+	}
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + document.getElementById("reportType").value + sRadius + '&dbindex='+dbindex+'&username='+getSession(),
+		async: false,
+		success: function(d){
+			var temp = d.EmpDataList;
+			wacData.EmpDataList2 = [];
+			temp.forEach(function(i, ind, arr){
+				wacData.EmpDataList2.push(i);
+			});
+		}
+	});
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + document.getElementById("reportType").value + sRadius + '&dbindex='+dbindex+'&username='+getSession(),
+		async: false,
+		success: function(d){
+			var temp = d.EmpDataList;
+			racData.EmpDataList2 = [];
+			temp.forEach(function(i, ind, arr){
+				racData.EmpDataList2.push(i);
+			});
+		}
+	});
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/getXEmpData?&criteria='+criteria+'&areaID='+areaID+'&dbindex='+dbindex+'&username='+getSession(),
+		async: true,
+		success: function(x){
+			var item = x.EmpDataList[0];
+			$('h2').append(areaName+' Employment Report <br><hr>');	
+			html += '<tr><td>Geo ID<em title="Identification number associated with the geographic area."><img src="images/tooltip.png"></em></td><td>'+ areaID 
+			+'</td></tr><tr><td>Name<em title="Name of the geographic area."><img src="images/tooltip.png"></em></td><td>'+ areaName   
+			+'</td></tr><tr><td>Population served (%)<em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total population of the given geographic area."><img src="images/tooltip.png"></em></td><td>'+ numToPercent(popWithinX)
+			+'</td></tr><tr><td>Population served at level of serivce (%) <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service."><img src="images/tooltip.png"></em></td><td>'+ numToPercent(popServedLos)
+			+'</td></tr><tr><td>Population Served By Service(%) <em title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. Population served by service is calculated as service stops multiplied by the unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates."><img src="images/tooltip.png"></em></td><td>'+ popServed
+			+'</td></tr><tr><td>all_naics_sectors <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.all_naics_sectors)
+			+'</td></tr><tr><td>agriculture_forestry_fishing_hunting <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.agriculture_forestry_fishing_hunting) 
+			+'</td></tr><tr><td>mining_quarrying_oil_gas_extraction <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.mining_quarrying_oil_gas_extraction) 
+			+'</td></tr><tr><td>utilities <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.utilities) 
+			+'</td></tr><tr><td>construction <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.construction) 
+			+'</td></tr><tr><td>wholesale_trade <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.wholesale_trade) 
+			+'</td></tr><tr><td>information <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.information) 
+			+'</td></tr><tr><td>finance_insurance <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.finance_insurance) 
+			+'</td></tr><tr><td>real_estate_rental_leasing <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.real_estate_rental_leasing) 
+			+'</td></tr><tr><td>professional_scientific_technical_services <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.professional_scientific_technical_services) 
+			+'</td></tr><tr><td>management_of_companies_enterprises <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.management_of_companies_enterprises) 
+			+'</td></tr><tr><td>administrative_support_waste_management_remediation_services <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.administrative_support_waste_management_remediation_services) 
+			+'</td></tr><tr><td>educational_services <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.educational_services) 
+			+'</td></tr><tr><td>health_care_social_assistance <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.health_care_social_assistance) 
+			+'</td></tr><tr><td>arts_entertainment_recreation <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.arts_entertainment_recreation) 
+			+'</td></tr><tr><td>accommodation_food_services <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.accommodation_food_services) 
+			+'</td></tr><tr><td>other_services_except_public_administration <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.other_services_except_public_administration) 
+			+'</td></tr><tr><td>public_administration <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.public_administration) 
+			+'</td></tr><tr><td>manufacturing <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.manufacturing) 
+			+'</td></tr><tr><td>retail_trade <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.retail_trade) 
+			+'</td></tr><tr><td>transportation_warehousing <em title=""><img src="images/tooltip.png"></em></td><td>'+ numWithCommas(item.transportation_warehousing)
+			+'</td></tr><tr><td>MetaData <em title="Report Metadata."><img src="images/tooltip.png"></em></th></td><td>'+item.metadata+'</td>';
+			html +='</tr></tbody></table>';
+			$('#displayReport').append($(html));
+			progressbar.remove();
+			var table = $('#RT').DataTable({
+				"bSort" : false,
+				"paging": false,
+				"bAutoWidth": false,
+				"dom": 'T<"clear">lfrtip',
+		        "tableTools": {
+		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+		        	"sRowSelect": "os",
+		        	 "aButtons": [
+		 						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+		 							"sMessage": ""
+		 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
+		 		                
+		 		                {
+		 		                    "sExtends":    "collection",
+		 		                    "sButtonText": "Export Report",
+		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+		 		                    				  "mColumns": 'visible'},
+		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {order: "current"},
+		 		                    				  "mColumns": 'all'},
+		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {order: "current"},
+		 		                                      "mColumns": 'all'} ]
+		 		                }                  
+		 						] 
+		        },
+		        "fnDrawCallback": function( oSettings ) {
+		        	$.fn.dataTable.ext.search.push(
+		        		    function( settings, data, dataIndex ) {
+		        		        var metric = data[0]; // use data for the age column
+		        		        return (metric.indexOf("MetaData")<=-1)		        		        
+		        		    }
+		        		);		        	
+		        }
+			});
+			
+			
+			$('.ColVis').css("float", "left");
+			$('#RT tbody').on('click', 'td.details-control', function () {
+		        var tr = $(this).parents('tr');
+		        var row = table.row( tr );
+		        var pos = row.index();
+		        if ( row.child.isShown() ) {
+		            row.child.hide("slow");
+		            tr.removeClass('shown');
+		        }
+		        else {
+		            row.child(format(pos)).show();
+		            tr.addClass('shown');
+		        }
+		    } );	
+			
+			$('#RT_wrapper').css("width", $('#RT').css("width"));
+		    $('#RT_wrapper').css("margin", "auto");
+		    $("#RT_length").remove();
+			$("#RT_filter").remove();
+			$("#RT_info").remove();			
+        	table.draw();
+    }});
+	
+	$(document).tooltip({
+		position: {
+	        my: "left bottom",
+	        at: "right bottom",
+	    }
+	});
+	$( "#progressbar" ).progressbar({
+	    value: false,
+	}); 
+	var prog = false;
+	function progress() {
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/PorgVal?&key='+key,
+			async: true,
+			success: function(item){
+				progVal = parseInt(item.progVal);
+				if(progVal==0){
+					progVal=false;
+					if(prog){
+						clearTimeout(timeVar);
+					}
+				}else{
+					prog=true;
+				}
+				$( "#progressbar" ).progressbar( "value", progVal );	
+			}			
+		});	
+	    if ( progVal == 100 ) {
+			clearTimeout(timeVar);
+	  	}
+	} 
+	timeVar = setInterval(progress, 100);
+});
+	
+	//document.getElementById("Sradius").value = window.opener.qstringx;
+
+
+$(".export").on('click', function (event) {    
+	exportbutton.apply(this, ['export.csv']);
+});
+
+function exportbutton(){
+	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20ParknRide%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
+	window.open(uri, 'ParknRideSummaryReport.csv');
+}
+function dbchange(){
+	if (document.getElementById("dbselect").selectedIndex !=dbindex){
+		location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
+	}
+}
+
+function numWithCommas(x) {
+   	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function numToPercent(x){
+	x = x * 100;
+	x = parseFloat(Math.round(x * 100) / 100).toFixed(2);
+	return x + " %" ;
+}
+
+function reloadC(){	
+	alert ('Under Construction');
+	/* var tmpG = (parseFloat(document.getElementById("gap").value)).toString();	
+	history.pushState("", "", document.URL.replace('gap='+gap, 'gap='+tmpG));	
+	location.reload(); */	
+}
+
+</script>
+
+
+
+</head>
+<body>
+		<div class="container">
+			<div class="headerL">
+				<h1 style="width: 20em;">Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">
+				<!-- <select id='dbselect' onchange='dbchange()'></select> -->
+				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+			</div>
+		</div>	
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  <td id="td2"> 
+			  	<div class="headerBC" id="accordion" >
+					<h3></h3>
+					<div>
+						<table style="width:100%;">
+							<tr>
+								<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+									<ul data-role="listview">
+							
+									</ul>
+								</td>
+								<td style="vertical-align:top;padding-top:15px">
+									<div id="datepicker" ></div>
+								</td>
+							</tr>
+						</table>
+						
+					</div>
+				</div>
+			  </td> 
+			  <td id="td3">
+			  	<div class="headerBR" > 
+			    	<!-- Maximum Spatial Gap For Emp. Served (ft.) <input type="text" name="gap" id="gap" class="utbox" onkeypress="return isWholeNumber(event)" value="500"/>
+			    	<input id="submit" type="button" onclick="reloadC()" title="Click submit to refresh the report"  value="Submit" class="button" />		 -->	    			    	    	
+		    	</div>
+			  </td>
+			</tr>
+		</table>		
+		
+		
+		<p id="displayReport"><br></p>
+		<br>
+		<br>
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	
+</body>
+</html>
