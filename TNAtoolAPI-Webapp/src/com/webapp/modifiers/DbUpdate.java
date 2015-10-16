@@ -80,7 +80,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.examples.GtfsHibernateReaderExampleMain;
-import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+//import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -88,8 +88,8 @@ import org.xml.sax.SAXException;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
-	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
+	private final static String basePath = "C:/Users/PB/git/TNAtool";
+	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin";
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
 	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
@@ -130,7 +130,6 @@ public class DbUpdate {
     @Path("/getDefaultDbIndex")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object getDefaultDbIndex(){
-		
 		PDBerror b = new PDBerror();
 		b.DBError = DBINDEX+"";
 		return b;
@@ -139,7 +138,7 @@ public class DbUpdate {
 	@GET
     @Path("/getVersion")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getVersion(){
+    public static Object getVersion(){
 		
 		PDBerror b = new PDBerror();
 		b.DBError = VERSION;
@@ -1012,7 +1011,7 @@ public class DbUpdate {
 		args[2] = "--username=\""+dbInfo[5]+"\"";
 		args[3] = "--password=\""+dbInfo[6]+"\"";
 		args[4] = feedname;
-		GtfsDatabaseLoaderMain.main(args);	
+		//GtfsDatabaseLoaderMain.main(args);	
 		
 		String[] feedName = feedname.split("/");
 		String fName = feedName[feedName.length-1];

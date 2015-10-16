@@ -124,7 +124,7 @@ public class Queries {
 		response = PgisEventManager.getCountiesPnrs(dbindex);
 		
 		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 			    
 	    setprogVal(key, 100);
 	    
@@ -142,18 +142,16 @@ public class Queries {
 	@Path("/pnrsInCounty")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object pnrsInCounty(@QueryParam("key") double key, @QueryParam("countyId") String countyId, 
-			@QueryParam("radius") String radius, @QueryParam("dbindex") Integer dbindex,
+			@QueryParam("radius") double radius, @QueryParam("dbindex") Integer dbindex,
 			@QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
 		PnrInCountyList response = new PnrInCountyList();
-		
-		int tmpRadius = (int) (Integer.parseInt(radius) / 3.2804);
+		int tmpRadius = (int) (radius * 1609.34);
 		response = PgisEventManager.getPnrsInCounty(Integer.parseInt(countyId), tmpRadius, dbindex, username);
-		
-		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
+		response.metadata = "Report Type:Park&Ride Summary Report;Report Date:"+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 			    
 	    setprogVal(key, 100);
 	    
@@ -233,7 +231,7 @@ public class Queries {
         for (Census centroid: centroids){
         	sum+=centroid.getPopulation();
         }
-        return new TransitError("Sum of Population is: "+ response+" Som of centroids is: "+sum);
+        return new TransitError("Sum of Population is: "+ response+" Sum of centroids is: "+sum);
     }	
 	
 	/**
@@ -641,7 +639,7 @@ public class Queries {
     	AgencyXR response = new AgencyXR();
     	response.metadata = "Report Type:Transit Agency Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+"Population Search Radius(miles):"+String.valueOf(x)+
-    	    	";Selected Transit Agency:"+agency;
+    	    	";Selected Transit Agency:"+agency + ";" + DbUpdate.VERSION;
     	x = x * 1609.34;
     	response.AgencyId = agency;    	
     	response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
@@ -732,13 +730,13 @@ public class Queries {
     		setprogVal(key, (int) Math.round(index*100/totalLoad));
     		if (routeid==null){ //agency
     			response.metadata = "Report Type:Transit Stops Report for Agency;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Transit Agency:"+agency;
+    	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Transit Agency:"+agency + ";" + DbUpdate.VERSION;
     			report = PgisEventManager.stopGeosr(username, 0, null, agency, null, x * 1609.34, dbindex);
     			index++;
         		setprogVal(key, (int) Math.round(index*100/totalLoad));
     		}else{//agency and route
     			response.metadata = "Report Type:Transit Stops Report for Agency and Route;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Transit Agency:"+agency+";Selected Route:"+routeid;
+    	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Transit Agency:"+agency+";Selected Route:"+routeid + ";" + DbUpdate.VERSION;
     			report = PgisEventManager.stopGeosr(username, 0, null, agency, routeid, x * 1609.34, dbindex);
     			index++;
         		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -751,7 +749,7 @@ public class Queries {
     		if(routeid==null){
     			if (agency==null){//area   				
     				response.metadata = "Report Type:Transit Stops Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-        	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid;
+        	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid + ";" + DbUpdate.VERSION;
     				report = PgisEventManager.stopGeosr(username, type, areaid, null, null, x * 1609.34, dbindex);
     				index++;
     	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -760,7 +758,7 @@ public class Queries {
     				index++;
     	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
     				response.metadata = "Report Type:Transit Stops Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-        	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid+";Selected Transit Agency:"+agency;
+        	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid+";Selected Transit Agency:"+agency + ";" + DbUpdate.VERSION;
     				report = PgisEventManager.stopGeosr(username, type, areaid, agency, null, x * 1609.34, dbindex);
     				index++;
     	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -771,7 +769,7 @@ public class Queries {
         		setprogVal(key, (int) Math.round(index*100/totalLoad));
     			response.metadata = "Report Type:Transit Stops Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid+
-    	    	    	";Selected Transit Agency:"+agency+";Selected Route:"+routeid;
+    	    	    	";Selected Transit Agency:"+agency+";Selected Route:"+routeid + ";" + DbUpdate.VERSION;
     			report = PgisEventManager.stopGeosr(username, type, areaid, agency, routeid, x * 1609.34, dbindex);
     			index++;
         		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -848,14 +846,14 @@ public class Queries {
 			GeoArea instance = EventManager.QueryGeoAreabyId(areaId, type, dbindex);
 			agencies = PgisEventManager.agencyGeosr(username, type, areaId, dbindex);
 			response.metadata = "Report Type:Agency Allocation of Service (Transit Agency Summary Report) for "+instance.getName()+"("+Types.getAreaName(type)+")"
-			+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";Selected Database:" +Databases.dbnames[dbindex];
+			+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 			response.areaName = instance.getName();
 			//might need to add area type for census tracts and some other geo areas
 			response.areaType = instance.getTypeName();
 		} else {
 			agencies = PgisEventManager.agencysr(username, dbindex);
 			response.metadata = "Report Type:Transit Agency Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-	    	    	"Selected Database:" +Databases.dbnames[dbindex];
+	    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		}		
 		index++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));     
@@ -951,7 +949,7 @@ public class Queries {
     		setprogVal(key, (int) Math.round(index*100/totalLoad));
 			response.metadata = "Report Type:Transit Routes Report for Agency;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+
 					";Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Transit Agency:"+
-					agency;
+					agency + ";" + DbUpdate.VERSION;
 			report = PgisEventManager.RouteGeosr(username, 0, null, agency, sdates, days, x * 1609.34, dbindex);
 			index++;
     		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -966,13 +964,13 @@ public class Queries {
 	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
 				response.metadata = "Report Type:Transit Routes Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+
 						";Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid
-						+";Selected Transit Agency:"+agency;
+						+";Selected Transit Agency:"+agency + ";" + DbUpdate.VERSION;
 				report = PgisEventManager.RouteGeosr(username, type, areaid, agency, sdates, days, x * 1609.34, dbindex);
 				index++;
 	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
 			}else {//routes report by areaId				
 				response.metadata = "Report Type:Transit Routes Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+
-						";Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid;
+						";Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid + ";" + DbUpdate.VERSION;
 				report = PgisEventManager.RouteGeosr(username, type, areaid, null, sdates, days, x * 1609.34, dbindex);
 				index++;
 	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -1002,7 +1000,7 @@ public class Queries {
         }
     	ScheduleList response = new ScheduleList();
     	response.metadata = "Report Type:Route Schedule/Fare Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+";Selected Transit Agency:"+agency+";Selected Route:"+routeid;
+    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+";Selected Transit Agency:"+agency+";Selected Route:"+routeid + ";" + DbUpdate.VERSION;
     	String[] dates = date.split(",");
 		int[][] days = daysOfWeek(dates);
 		//System.out.println(days[0][0]);
@@ -1178,12 +1176,12 @@ Loop:  	for (Trip trip: routeTrips){
 			agency = (agency.equals("null"))? null:agency;
 		if (agency!=null){
 			response.metadata = "Report Type:"+Types.getAreaName(type)+" Summary Report for "+agency+" ;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-	    	    	"Selected Database:" +Databases.dbnames[dbindex];
+	    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 			response.agencyId = agency;
 			response.agencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
 		}else {
 			response.metadata = "Report Type:"+Types.getAreaName(type)+" Summary Report ;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-	    	    	"Selected Database:" +Databases.dbnames[dbindex];
+	    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		}		
 		List<GeoR> results = PgisEventManager.geoallocation(type, agency, dbindex, username);
 		index++;
@@ -1207,12 +1205,22 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
 	@Path("/emp")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getEmp2(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+	public Object getEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
     	EmpDataList results = new EmpDataList();
-    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
     	results = PgisEventManager.getEmpData(dataSet, reportType, dbindex, username);
+    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;  	
     	return results;
+    }
+    
+    /**
+     * Employment Summary Reports
+     */
+    @GET
+	@Path("/Xemp")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getXEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+    	
     }
 
     /**
@@ -1223,10 +1231,9 @@ Loop:  	for (Trip trip: routeTrips){
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object getTitleVIData(@QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
     	TitleVIDataList results = new TitleVIDataList();
-    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
-    	System.out.println(results.metadata);
     	results = PgisEventManager.getTitleVIData(reportType, dbindex, username);
+    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
     	return results;
     }
     
@@ -1254,7 +1261,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
 		GeoRList response = new GeoRList();
 		response.metadata = "Report Type:Counties Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		response.type = "County";
 	    int index =0;
 		int totalLoad = allcounties.size();
@@ -1340,7 +1347,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
 		GeoRList response = new GeoRList();
 		response.metadata = "Report Type:Census Tracts Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		response.type = "Tract";
 	    int index =0;
 		int totalLoad = alltracts.size();
@@ -1413,7 +1420,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
 		GeoRList response = new GeoRList();
 		response.metadata = "Report Type:Census Places Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		response.type = "Place";
 	    int index =0;
 		int totalLoad = allplaces.size();
@@ -1489,7 +1496,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
 		GeoRList response = new GeoRList();
 		response.metadata = "Report Type:Aggregated Urban Areas Transit Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Urban population Filter:"+String.valueOf(upop);
+    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Urban population Filter:"+String.valueOf(upop) + ";" + DbUpdate.VERSION;
 		response.type = "UrbanArea";	
 	    int index =0;
 		int totalLoad = allurbanareas.size();
@@ -1600,7 +1607,7 @@ Loop:  	for (Trip trip: routeTrips){
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
     	response.metadata = "Report Type:Aggregated Urban Areas Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+";Population Search Radius(miles):"+String.valueOf(x)+
-    	    	";Minimum Level of Service(times):"+String.valueOf(L)+";Urban Population Filter >=:"+String.valueOf(pop);
+    	    	";Minimum Level of Service(times):"+String.valueOf(L)+";Urban Population Filter >=:"+String.valueOf(pop) + ";" + DbUpdate.VERSION;
     	x = x * 1609.34;    	
 		response.AreaId = "01";		
 		response.AreaName = "Urban Areas with "+String.valueOf(pop)+"+ Population";		
@@ -1719,7 +1726,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
 		GeoRList response = new GeoRList();
 		response.metadata = "Report Type:Urban Areas Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		response.type = "UrbanArea";
 	    int index =0;
 		int totalLoad = allurbanareas.size();
@@ -1791,7 +1798,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
 		GeoRList response = new GeoRList();
 		response.metadata = "Report Type:Congressional Districts Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		response.type = "CongressionalDistrict";
 	    int index =0;
 		int totalLoad = allcongdists.size();
@@ -1864,7 +1871,7 @@ Loop:  	for (Trip trip: routeTrips){
 		GeoRList response = new GeoRList();
 		response.type = "ODOT Region";
 		response.metadata = "Report Type:ODOT Transit Regions Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 	    int index =0;
 		int totalLoad = allcounties.size();
 		String regionId = "";
@@ -1981,13 +1988,13 @@ Loop:  	for (Trip trip: routeTrips){
        	dbindex = default_dbindex;
        }
 		if (gap<=0){
-      		gap=500;
+      		gap=0.1;
       	}
 		//String username = "admin";
 		ClusterRList response = new ClusterRList();
 		response.metadata = "Report Type:Connected Transit Agencies Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Minimum Spatial Gap (ft.):"+String.valueOf(gap);
-		gap = gap / 3.28084;
+    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Minimum Spatial Gap (ft.):"+String.valueOf(gap) + ";" + DbUpdate.VERSION;
+		gap = gap * 1609.34;
 		response.type = "AgencyGapReport";
 		//PgisEventManager.makeConnection(dbindex);
 		List<agencyCluster> results= new ArrayList<agencyCluster>();
@@ -2029,7 +2036,7 @@ Loop:  	for (Trip trip: routeTrips){
       	}		
 		ClusterRList response = new ClusterRList();
 		response.metadata = "Report Type:Connected Transit Agencies Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Minimum Spatial Gap (ft.):"+String.valueOf(gap)+";Selected Agency:"+agencyId;
+    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Minimum Spatial Gap (ft.):"+String.valueOf(gap)+";Selected Agency:"+agencyId + ";" + DbUpdate.VERSION;
 		response.type = "ExtendedGapReport";
 		response.agency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agencyId, dbindex).getName();
 		gap = gap / 3.28084;		
@@ -2080,13 +2087,13 @@ Loop:  	for (Trip trip: routeTrips){
        	dbindex = default_dbindex;
        }
 		if (gap<=0){
-      		gap=500;
+      		gap=0.1;
       	}
 		//String username = "admin";
 		ClusterRList response = new ClusterRList();
 		response.metadata = "Report Type:Connected Transit Networks Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Minimum Spatial Gap (ft.):"+String.valueOf(gap);
-		gap = gap / 3.28084;
+    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Minimum Spatial Gap (ft.):"+String.valueOf(gap) + ";" + DbUpdate.VERSION;
+		gap = gap * 1609.34;
 		List<agencyCluster> agencies= new ArrayList<agencyCluster>();
 		agencies = PgisEventManager.agencyCluster(gap, username, dbindex);
 		int totalLoad = agencies.size();
@@ -2157,7 +2164,7 @@ Loop:  	for (Trip trip: routeTrips){
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		GeoRList response = new GeoRList();
 		response.metadata = "Report Type:Statewide Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex];
+    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		response.type = "StatewideReport";
 		HashMap<String, Long> geocounts = new HashMap<String, Long>();
 		try {
@@ -2228,7 +2235,7 @@ Loop:  	for (Trip trip: routeTrips){
     	GeoXR response = new GeoXR();
     	response.metadata = "Report Type:Statewide Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+";Population Search Radius(miles):"+String.valueOf(x)+
-    	    	";Minimum Level of Service(times):"+String.valueOf(L);
+    	    	";Minimum Level of Service(times):"+String.valueOf(L) + ";" + DbUpdate.VERSION;
     	x = x * 1609.34;
     	int totalLoad = 10;
 		int index = 0;
@@ -2339,7 +2346,7 @@ Loop:  	for (Trip trip: routeTrips){
     	GeoArea instance = EventManager.QueryGeoAreabyId(areaId, type, dbindex);
     	response.metadata = "Report Type:"+instance.getTypeName()+" Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+";Population Search Radius(miles):"+String.valueOf(x)+
-    	    	";Minimum Level of Service(times):"+String.valueOf(L);
+    	    	";Minimum Level of Service(times):"+String.valueOf(L) + ";" + DbUpdate.VERSION;
     	x = x * 1609.34;
     	int totalLoad = 6;
 		int index = 0;
@@ -2378,7 +2385,7 @@ Loop:  	for (Trip trip: routeTrips){
 		double ServiceMiles = Float.parseFloat(servicemetrics.get("svcmiles"));
 		long PopatLOS = (Long.parseLong(servicemetrics.get("upopatlos"))+Long.parseLong(servicemetrics.get("rpopatlos")));
 		float svcPop = (Float.parseFloat(servicemetrics.get("uspop"))+Float.parseFloat(servicemetrics.get("rspop")));
-		response.ServiceMiles = servicemetrics.get("svcmiles");
+		response.ServiceMiles = (stopspop[0] != 0) ? servicemetrics.get("svcmiles") :"0";
 		response.ServiceHours = servicemetrics.get("svchours");
 		response.ServiceStops = servicemetrics.get("svcstops");
 		response.PopServedAtLoService = String.valueOf(Math.round(10000.0*PopatLOS/instance.getPopulation())/100.0);
@@ -2393,9 +2400,9 @@ Loop:  	for (Trip trip: routeTrips){
 			serviceDays = StringUtils.join(Arrays.asList(svcdays), ";");
         }
 		response.ServiceDays = serviceDays;
-		response.MilesofServicePerCapita = (instance.getPopulation()>0) ? String.valueOf(Math.round((ServiceMiles*10000.00)/instance.getPopulation())/10000.00): "NA";
-		response.StopPerServiceMile = (ServiceMiles>0.01)? String.valueOf(Math.round((stopspop[0]*100)/Float.parseFloat(servicemetrics.get("svcmiles")))/100.0): "NA";
-		response.ServiceMilesPersqMile = (instance.getLandarea()>0.01) ? String.valueOf(Math.round((ServiceMiles*258999752.356)/instance.getLandarea())/10000.00):"NA";
+		response.MilesofServicePerCapita = (instance.getPopulation()>0 && stopspop[0] != 0) ? String.valueOf(Math.round((ServiceMiles*10000.00)/instance.getPopulation())/10000.00): "0";
+		response.StopPerServiceMile = (ServiceMiles>0.01)? String.valueOf(Math.round((stopspop[0]*100)/Float.parseFloat(servicemetrics.get("svcmiles")))/100.0): "0";
+		response.ServiceMilesPersqMile = (instance.getLandarea()>0.01 && stopspop[0] != 0) ? String.valueOf(Math.round((ServiceMiles*258999752.356)/instance.getLandarea())/10000.00):"0";
 		int HOSstart =Integer.parseInt(servicemetrics.get("fromtime"));
 		int HOSend = Integer.parseInt(servicemetrics.get("totime"));			
         response.HoursOfService = ((HOSstart==-1)?"NA":StringUtils.timefromint(HOSstart))+"-"+ ((HOSend==-1)?"NA":StringUtils.timefromint(HOSend));
@@ -2445,7 +2452,7 @@ Loop:  	for (Trip trip: routeTrips){
     	int progress = 0;
     	HubRList response = new HubRList();    	
     	response.metadata = "Report Type:Transit Hubs Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	"Selected Database:" +Databases.dbnames[dbindex]+";Stop Cluster Radius(miles):"+String.valueOf(x);
+    	"Selected Database:" +Databases.dbnames[dbindex]+";Stop Cluster Radius(miles):"+String.valueOf(x) + ";" + DbUpdate.VERSION;
     	x = x * 1609.34;
     	setprogVal(key, 5);
     	TreeSet<StopCluster> clusterList = new TreeSet<StopCluster>();  

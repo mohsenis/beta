@@ -1,3 +1,16 @@
+/**
+ * Checks if x is larger than the maximum search radius (maxRadius)
+ * @param x
+ * @returns {Boolean}
+ */
+function exceedsMaxRadius(x){
+	if (x>maxRadius){
+		return true;
+	}else{
+		return false;
+	}
+}
+
 function getURIParameter(param, asArray) {
     return document.location.search.substring(1).split('&').reduce(function(p,c) {
         var parts = c.split('=', 2).map(function(param) { return decodeURIComponent(param); });
@@ -5,6 +18,7 @@ function getURIParameter(param, asArray) {
         return asArray ? p.concat(parts.concat(true)[1]) : parts.concat(true)[1];
     }, []);
 }
+
 function getDefaultDbIndex(){
 	var dbindex = -1;
 	$.ajax({
@@ -15,8 +29,7 @@ function getDefaultDbIndex(){
         success: function(d) {
         	dbindex = d.DBError;
         }
-	});
-	
+	});	
 	return dbindex;
 }
 function getVersion(){
@@ -60,11 +73,8 @@ function numWithCommas(x) {
 
 function isNumber(evt) {
 	evt = (evt) ? evt : window.event;
-	//var havedot = (howManyDecimals(document.getElementById("Sradius").value));
 	var charCode = (evt.which) ? evt.which : evt.keyCode;
-	//alert(charCode);
 	if (charCode == 46) {
-	//alert ('test');
 	if (document.getElementById("Sradius").value.indexOf('.') !== -1) return false;
 	} else if (charCode > 31 && (charCode < 48 || charCode > 57)) {
 	return false;
@@ -94,13 +104,38 @@ function addDate(date){
 }
 
 function numberconv(x) {
+	console.log(x.indexOf('E'));
+	if (x.indexOf('E') > -1){
+		x = Number(x).toString();
+	}
     var parts = x.split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return parts.join(".");
+    if (parts[1]>0){
+    	return parts.join(".");
+    }else{
+    	return parts[0];
+    }    
 }
+
+function addPercent(x) {
+	return '% ' + x;
+}
+
+/**
+ */
+function fare(x) {
+	console.log(x);
+	if (x == 'null' || x == 'NA') return 'N/A';
+	else return '$ ' + x;
+}
+
 /*agency extended report*/
 function reload(){		
-	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();	
+	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
+	if (exceedsMaxRadius(tmpX)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
+		return;
+	}
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	var dates = $('#datepicker').multiDatesPicker('getDates');
 	if(dates.length==0){
@@ -123,6 +158,10 @@ function reloadU(){
 function reloadG(){		
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
 	var tmpLos = (parseFloat(document.getElementById("LoS").value)).toString();
+	if (exceedsMaxRadius(tmpX)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
+		return;
+	}
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	history.pushState("", "", document.URL.replace('l='+w_qstringl, 'l='+tmpLos));
 	var dates = $('#datepicker').multiDatesPicker('getDates');
@@ -141,6 +180,10 @@ function reloadUG(){
 	var tmpU = (parseFloat(document.getElementById("Upop").value)).toString();
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
 	var tmpLos = (parseFloat(document.getElementById("LoS").value)).toString();
+	if (exceedsMaxRadius(tmpX)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
+		return;
+	}
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	history.pushState("", "", document.URL.replace('l='+w_qstringl, 'l='+tmpLos));
 	history.pushState("", "", document.URL.replace('pop='+w_qstring, 'pop='+tmpU));
