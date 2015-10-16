@@ -18,6 +18,7 @@
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	 
 <script type="text/javascript">
+var maxRadius = 5;
 var startDate;
 var endDate;
 var qstring = '';
@@ -87,6 +88,7 @@ $(document).ready(function(){
 			+'</td></tr><tr><td>Hours of Service <em title="Earliest and latest arrival and departure times of all stops served by the transit agency."><img src="images/tooltip.png"></em></td><td class="serviceCol">'+ item.HoursOfService
 			+'</td></tr><tr><td>MetaData <em title="Report Metadata."><img src="images/tooltip.png"></em></th></td><td>'+item.metadata+'</td>';
 			html +='</tr></tbody></table>';
+			console.log(item.UPopServedByService);
 			$('#displayReport').append($(html));	
 			progressbar.remove();		
 			var table = $('#RT').DataTable({

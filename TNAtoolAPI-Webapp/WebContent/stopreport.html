@@ -18,6 +18,7 @@
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	
 <script type="text/javascript">
+var maxRadius = 5;
 var qstring = '';
 var qstringx = '0.25';
 var type = parseInt(getURIParameter("type"));
@@ -232,6 +233,10 @@ $(document).ready(function(){
 
 function reload(){	
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
+	if (exceedsMaxRadius(tmpX)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
+		return;
+	}
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	location.reload();
 }

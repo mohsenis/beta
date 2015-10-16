@@ -3,7 +3,6 @@
  * @param x
  * @returns {Boolean}
  */
-var maxRadius = 5;	// defines the maximum acceptable search radius defined by user
 function exceedsMaxRadius(x){
 	if (x>maxRadius){
 		return true;
@@ -74,11 +73,8 @@ function numWithCommas(x) {
 
 function isNumber(evt) {
 	evt = (evt) ? evt : window.event;
-	//var havedot = (howManyDecimals(document.getElementById("Sradius").value));
 	var charCode = (evt.which) ? evt.which : evt.keyCode;
-	//alert(charCode);
 	if (charCode == 46) {
-	//alert ('test');
 	if (document.getElementById("Sradius").value.indexOf('.') !== -1) return false;
 	} else if (charCode > 31 && (charCode < 48 || charCode > 57)) {
 	return false;
@@ -108,10 +104,31 @@ function addDate(date){
 }
 
 function numberconv(x) {
+	console.log(x.indexOf('E'));
+	if (x.indexOf('E') > -1){
+		x = Number(x).toString();
+	}
     var parts = x.split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return parts.join(".");
+    if (parts[1]>0){
+    	return parts.join(".");
+    }else{
+    	return parts[0];
+    }    
 }
+
+function addPercent(x) {
+	return '% ' + x;
+}
+
+/**
+ */
+function fare(x) {
+	console.log(x);
+	if (x == 'null' || x == 'NA') return 'N/A';
+	else return '$ ' + x;
+}
+
 /*agency extended report*/
 function reload(){		
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();

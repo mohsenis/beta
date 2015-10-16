@@ -3,6 +3,7 @@ var default_dbindex = getDefaultDbIndex();
 var dbindex = default_dbindex;
 var newdates = null;
 var URL = document.URL;
+var maxRadius = 5;
 if (URL.split("?").length >0){
 	URL = URL.split("?")[0];
 	if (document.URL.indexOf("n=")<1){
@@ -1217,10 +1218,10 @@ $mylist
 			    	var qstringx = '0.25';
 			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
-			    	var qstringx = '500';
+			    	var qstringx = '0.1';
 			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CNSR"){
-			    	var qstringx = '0.064';
+			    	var qstringx = '0.1';
 			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if(casestring=="CSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		

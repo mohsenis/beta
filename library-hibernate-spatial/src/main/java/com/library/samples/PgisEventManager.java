@@ -535,6 +535,7 @@ public class PgisEventManager {
 		    			+ "	COALESCE(SUM(cs01), 0)::int cs01,"
 		    			+ "	COALESCE(SUM(cs02), 0)::int cs02"
 		    			+ " FROM multipoints2 LEFT JOIN " + dataSet + " ON ST_within(" + dataSet + ".location, multipoints2.geom) GROUP BY multipoints2.agencyid, multipoints2.agencyname";
+		    	//System.out.println(query);
 		    	
 		    	try {
 					stmt = connection.createStatement();
@@ -597,7 +598,6 @@ public class PgisEventManager {
 	    }else{
 		    String criteria1 = "";
 		    String criteria2 = "";
-		    System.out.println(reportType);
 		    
 		    if (reportType.equals("Counties")){
 		    	criteria1 = "countyid";
@@ -625,7 +625,7 @@ public class PgisEventManager {
 		    	criteria1 = "congdistid";
 		    	criteria2 = " SELECT census_congdists.cname AS name, temp2.*"
 				    		+ " FROM temp2 INNER JOIN census_congdists"
-				    		+ " ON concat('410',temp2.id) = census_congdists.congdistid";
+				    		+ " ON temp2.id = census_congdists.congdistid";
 		    }
 		    
 		    query = "WITH temp1 AS (SELECT "
@@ -684,13 +684,14 @@ public class PgisEventManager {
 		    		+ "		  COALESCE(SUM(cs01), 0)::int cs01,"
 		    		+ "		  COALESCE(SUM(cs02), 0)::int cs02"
 		    		+ ""
-		    		+ "		FROM temp1 INNER JOIN " + dataSet 
+		    		+ "		FROM temp1 LEFT JOIN " + dataSet 
 		    		+ "		ON temp1.blockid = " + dataSet + ".blockid"
 		    		+ ""
 		    		+ "		GROUP BY " + criteria1
 		    		+ "		ORDER BY " + criteria1
 		    		+ "	) "
 		    		+ criteria2;
+		    //System.out.println(query);
 			    try {
 			    	stmt = connection.createStatement();
 					ResultSet rs = stmt.executeQuery(query); 
@@ -882,7 +883,7 @@ public class PgisEventManager {
 		    	criteria1 = "congdistid";
 		    	criteria2 = " SELECT census_congdists.cname AS name, temp2.*"
 				    		+ " FROM temp2 INNER JOIN census_congdists"
-				    		+ " ON concat('410',temp2.id) = census_congdists.congdistid";
+				    		+ " ON temp2.id = census_congdists.congdistid";
 		    }
 		    
 		    query = "WITH temp1 AS (SELECT census_counties.countyid,"
@@ -1063,7 +1064,7 @@ public class PgisEventManager {
       		+ "COALESCE(sum(population),0) as rspop from popserved where poptype='R'), svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) select"
       		+ " svcmiles,svchours,svcstops,upoplos,rpoplos,uspop,rspop,svdays,fromtime,totime,connections from service inner join upopatlos on true inner join rpopatlos on true "
       		+ "inner join upopserved on true inner join rpopserved on true inner join svcdays on true inner join svchrs on true inner join concomnames on true";
-      //System.out.println(query);    
+      System.out.println(query);    
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
@@ -1140,7 +1141,7 @@ public class PgisEventManager {
       }      
      query +="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid from gtfs_stops stop inner join "
     		+ "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), stoproutes as (select "
-    		+ "coalesce(count(distinct stops.stopid),0) as stops, coalesce(count(distinct routeid),0) as routes, coalesce(count(distinct aid),0) as agencies,"
+    		+ "coalesce(count(distinct(concat(aid,stops.stopid))),0) as stops, coalesce(count(distinct concat(aid,routeid)),0) as routes, coalesce(count(distinct aid),0) as agencies,"
     		+stoproutes+" as areaid from stops inner join gtfs_stop_route_map map on stops.aid_def = map.agencyid_def and stops.stopid = map.stopid group by "
     		+stoproutes+"),"+areaquery+ selectquery;
     System.out.println(query);
@@ -1435,7 +1436,7 @@ public class PgisEventManager {
 				+ "COALESCE(svcupop,0) as usvcpop, COALESCE(svcrpop,0) as rsvcpop from routes inner join agencies on routes.agencyid=agencies.agencyid left join service on "
 				+ "routes.agencyid=service.aid and routes.id=service.routeid left join upopr on routes.agencyid=upopr.aid and routes.id= upopr.routeid left join rpopr on "
 				+ "routes.agencyid=rpopr.aid and routes.id=rpopr.routeid";						
-		System.out.println(mainquery);
+		System.out.println("RouteGeosr routes query: " + mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();				
@@ -1566,7 +1567,6 @@ public class PgisEventManager {
 		dropConnection(connection);
 		return response;
 	}	
-	
 	
 /////AGGREGATED URBAN AREAS EXTENDED REPORTS QUERIES
 	

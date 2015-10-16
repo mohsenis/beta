@@ -161,8 +161,8 @@ $(document).ready(function(){
 				+ item.URL + '">'+ item.AgencyName + '</a></td>'+ '<td>' + item.Phone +'</td>'+ '<td><a href="#" type="RC" id="'
 				+ item.AgencyId+'">'+item.RoutesCount+'</a></td>'+ '<td><a href="#" type="SC" id="'+item.AgencyId+'">'+item.StopsCount
 				+'</a></td><td class="details-control" type="GA"></td><td>'+item.CountiesCount+'</td><td>'+item.PlacesCount+'</td><td>'+item.UrbansCount+'</td><td>'+item.CongDistsCount
-				+'</td><td>'+item.OdotRegionsCount+'</a></td><td class="details-control" type="FA"></td><td>'+item.MinFare+'</td><td>'+item.AverageFare+'</td><td>'+item.MedianFare
-				+'</td><td>'+item.MaxFare+'</td><td>'+item.FareURL+'</td><td>'+item.FeedStartDate+'</td><td>'+item.FeedEndDate+'</a></td><td class="details-control" type="FE"></td><td>'
+				+'</td><td>'+item.OdotRegionsCount+'</a></td><td class="details-control" type="FA"></td><td>'+fare(item.MinFare)+'</td><td>'+fare(item.AverageFare)+'</td><td>'+fare(item.MedianFare)
+				+'</td><td>'+fare(item.MaxFare)+'</td><td>'+item.FareURL+'</td><td>'+item.FeedStartDate+'</td><td>'+item.FeedEndDate+'</a></td><td class="details-control" type="FE"></td><td>'
 				+item.FeedName+'</td><td>'+item.FeedVersion+'</td><td>'+item.FeedPublisherName+'</td><td>'+item.FeedPublisherUrl+'</td><td>'+d.metadata+'</td></tr>';
 				counties.push(item.CountiesCount);
 				cplaces.push(item.PlacesCount);
@@ -305,9 +305,9 @@ $(document).ready(function(){
 			        }else{
 			        	html = '<td><a href="'+fURL[p]+'">'+fURL[p]+'</a></td>';
 			        }
-			    	html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Minimum Fare: </td><td>'+showDollarSign(fMin[p])+fMin[p]+'</td></tr>'
-			    	+'<tr><td>Average Fare: </td><td>'+showDollarSign(fAverage[p])+fAverage[p]+'</td></tr>'+'<tr><td>Median Fare: </td><td>'+showDollarSign(fMedian[p])+fMedian[p]+'</td></tr>'
-			    	+'<tr><td>Maximum Fare: </td><td>'+showDollarSign(fMax[p])+fMax[p]+'</td></tr>'+'<tr><td>Fare URL: </td>'+html+'</tr>'+'</table>';
+			    	html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Minimum Fare: </td><td>'+fare(fMin[p])+'</td></tr>'
+			    	+'<tr><td>Average Fare: </td><td>'+fare(fAverage[p])+'</td></tr>'+'<tr><td>Median Fare: </td><td>'+fare(fMedian[p])+'</td></tr>'
+			    	+'<tr><td>Maximum Fare: </td><td>'+fare(fMax[p])+'</td></tr>'+'<tr><td>Fare URL: </td>'+html+'</tr>'+'</table>';
 		    	break;
 		    	case "FE":
 		    		html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Feed Name: </td><td>'+feedName[p]+'</td></tr>'
@@ -356,7 +356,7 @@ function exportbutton(){
 
 function showDollarSign(v){
 	if(!isNaN(v)){
-		return '$';
+		return '$ ';
 	}else{
 		return '';
 	}

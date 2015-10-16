@@ -12,11 +12,9 @@ public class EmpData {
 	@JsonSerialize
 	public String id;
 	
-
 	@XmlAttribute
 	@JsonSerialize
 	public String name;
-	
 
 	@XmlAttribute
 	@JsonSerialize

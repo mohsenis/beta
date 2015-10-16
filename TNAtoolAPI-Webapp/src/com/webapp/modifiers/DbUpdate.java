@@ -138,7 +138,7 @@ public class DbUpdate {
 	@GET
     @Path("/getVersion")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getVersion(){
+    public static Object getVersion(){
 		
 		PDBerror b = new PDBerror();
 		b.DBError = VERSION;
