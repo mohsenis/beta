@@ -1194,8 +1194,8 @@ public class PgisEventManager {
 				+ "using(aid,routeid) group by aid, routeid) select agencies.agencyid, aname, routes.id, shortname, longname, type, url, description, rlength, stops, "
 				+ "coalesce(upop,0) as upop, coalesce(rpop,0) as rpop, COALESCE(svcstops,0) as svcstops, COALESCE(svchours,0) as svchours, COALESCE(svcmiles,0) as svcmiles, "
 				+ "COALESCE(svcupop,0) as usvcpop, COALESCE(svcrpop,0) as rsvcpop from routes inner join agencies on routes.agencyid=agencies.agencyid left join service on "
-				+ "routes.agencyid=service.aid and routes.id=service.routeid left join upopr on routes.agencyid=upopr.aid and routes.id= upopr.routeid left join rpopr on "
-				+ "routes.agencyid=rpopr.aid and routes.id=rpopr.routeid";						
+				+ "routes.agencyid=service.aid and routes.id=service.routeid left join upop on routes.agencyid=upop.aid and routes.id= upop.routeid left join rpop on "
+				+ "routes.agencyid=rpop.aid and routes.id=rpop.routeid";						
 		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
