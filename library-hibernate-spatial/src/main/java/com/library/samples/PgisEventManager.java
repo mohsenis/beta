@@ -1118,7 +1118,7 @@ public class PgisEventManager {
       if (type==0){//county: tracts are queries and summed up to reflect the true number of census tracts in the results
     	  criteria = "left(blockid,11)";      
     	  areaquery = "areas as (select countyid as areaid, cname as areaname, population, landarea, waterarea, odotregionid, regionname from census_counties), "
-    	  		+ "tracts as (select count(distinct areaid) as tracts, left(areaid,5) as areaid from stops group by left(areaid,5)) ";    	  
+    	  		+ "tracts as (select count(tractid) as tracts, left(tractid,5) as areaid from census_tracts group by left(tractid,5)) ";    	  
     	  selectquery = "select areaid, areaname, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, coalesce(stops,0) as stops,"
     	  		+ " odotregionid, regionname, tracts from areas "+join+" join stoproutes using(areaid) left join tracts using (areaid)";
     	  stoproutes = "left(areaid,5)";

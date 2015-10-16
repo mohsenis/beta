@@ -131,16 +131,19 @@ $(document).ready(function(){
 			$('h2').append('Census Tracts Summary Report ' + nameString+'<br><hr>');
 			//$('h2').append('Census Tracts Summary Report: '+window.opener.qstringd+'<br><hr>');
 			$.each(d.GeoR, function(i,item){
-				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ 
-				'<td>' + item.Name + '</td><td>' + numberconv(item.population) +
-				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>';
-				if (agencyId!=null){
-					html+='<td>1</td>';
-				} else {
-					html+='<td><a href="#" type="AC" id="'+item.id+'">'+item.AgenciesCount+'</a></td>';
-				}
-				html+='<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
-				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td><td>'+d.metadata+'</td></tr>';								   			
+				console.log(item.id.substring(0,5));
+				if (item.id.substring(0,5) == w_qstring){
+					html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ 
+					'<td>' + item.Name + '</td><td>' + numberconv(item.population) +
+					'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>';
+					if (agencyId!=null){
+						html+='<td>1</td>';
+					} else {
+						html+='<td><a href="#" type="AC" id="'+item.id+'">'+item.AgenciesCount+'</a></td>';
+					}
+					html+='<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
+					'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td><td>'+d.metadata+'</td></tr>';
+				}												   			
 			});		
 			html += '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
