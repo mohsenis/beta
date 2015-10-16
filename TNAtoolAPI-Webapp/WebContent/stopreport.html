@@ -142,7 +142,7 @@ $(document).ready(function(){
 				} else {
 					html = html + '<td>'+item.StopName+'</td>';
 					};
-			html += '<td>'+item.Routes+'</td><td>'+item.UPopWithinX+'</td><td>'+item.RPopWithinX+'</td><td>'+d.metadata+'</td></tr>';					   			
+			html += '<td>'+item.Routes+'</td><td>'+numberconv(item.UPopWithinX)+'</td><td>'+numberconv(item.RPopWithinX)+'</td><td>'+d.metadata+'</td></tr>';					   			
 			});					
 			html = html + '</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));	
