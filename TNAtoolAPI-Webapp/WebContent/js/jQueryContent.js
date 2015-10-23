@@ -104,7 +104,6 @@ function addDate(date){
 }
 
 function numberconv(x) {
-	console.log(x.indexOf('E'));
 	if (x.indexOf('E') > -1){
 		x = Number(x).toString();
 	}

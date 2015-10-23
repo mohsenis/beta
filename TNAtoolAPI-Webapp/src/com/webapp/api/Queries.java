@@ -2,6 +2,7 @@ package com.webapp.api;
 
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,11 +14,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.JOptionPane;
@@ -2497,6 +2500,49 @@ Loop:  	for (Trip trip: routeTrips){
 		return response;
 		
     }
+	
+	@GET
+	@Path("/hubsR2")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getHubs(@QueryParam("x") double x, @QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException {
+		HubsClusterList response = new HubsClusterList();
+		System.out.println("function ran");
+		String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = datedays[0];
+    	String[] days = datedays[1];
+		x = x * 1609.34;
+		HashMap<String, HashSet<String>> y = PgisEventManager.getClusters(x, dbindex, username);
+				
+		HashMap<String, HashSet<String>> counter = new HashMap<String, HashSet<String>>(y);
+		for (Entry<String, HashSet<String>> entry:counter.entrySet()){
+			if (y.containsKey(entry.getKey())){
+				HashSet<String> counter2 = new HashSet<String>(entry.getValue());
+				for (String stopID: counter2){
+					if (!entry.getKey().equals(stopID)){
+						y = recurse(y, entry, stopID);
+					}						
+				}
+			}			
+		}
+		response = PgisEventManager.getClusterData(y, dates, days, dbindex, x, username);
+		response.metadata = "Report Type:Transit Hubs Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+		    	"Selected Database:" +Databases.dbnames[dbindex]+";Stop Cluster Radius(miles):"+String.valueOf(x) + ";" + DbUpdate.VERSION;
+		return response;
+	}
+	
+	private HashMap<String, HashSet<String>> recurse(HashMap<String, HashSet<String>> y, Entry<String, HashSet<String>> entry, String stopID){
+		if (y.containsKey(stopID)){
+			HashSet<String> tmpStopsSet = y.get(stopID); 
+			y.get(entry.getKey()).addAll(tmpStopsSet);
+			y.remove(stopID);
+			for (String x: tmpStopsSet){
+				if(!entry.getKey().equals(x))
+					y = recurse(y, entry, x);
+			}
+		}
+		return y;
+	}
 	
 	/**
      * Get calendar range for a set of agencies
