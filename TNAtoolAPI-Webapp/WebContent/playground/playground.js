@@ -28,10 +28,10 @@ function checkTime(){
 }
 
 function PGlogin(){
-	if(checkTime()){
+	/*if(checkTime()){
 		alert("Playground interface is not available to users between 1:00am and 6:00am");
 		return false;
-	}
+	}*/
 	var password = $('#pass').val();
 	var username = $('#user').val();
 	$.ajax({

@@ -1,0 +1,21 @@
+package com.library.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+@XmlRootElement( name = "HubClusterList")
+public class HubsClusterList {
+	@XmlAttribute
+    @JsonSerialize
+    public String metadata;
+	
+	@XmlElement(name = "Clusters")
+	public List<HubCluster> Clusters = new ArrayList<HubCluster>();
+
+}
