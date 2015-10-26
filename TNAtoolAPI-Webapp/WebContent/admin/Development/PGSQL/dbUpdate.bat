@@ -1,7 +1,7 @@
 set PGPASSWORD=%1
 set p=%5
 %4 -U %2 -d %3 -a -f %p%Functions.sql  1> %p%FOut.txt 2> %p%FErr.txt
-%4 -U %2 -d %3 -a -f %p%Tripstableupdator_pgsql_new.sql  1> %p%cmdOut.txt 2> %p%cmdErr.txt
+%4 -U %2 -d %3 -a -f %p%Tripstableupdator_pgsql.sql  1> %p%cmdOut.txt 2> %p%cmdErr.txt
 %4 -U %2 -d %3 -a -f %p%Stops_AddGeolocation.sql  1>> %p%cmdOut.txt 2>> %p%cmdErr.txt
 %4 -U %2 -d %3 -a -f %p%StopsGeoCoder_PGSQL.sql  1>> %p%cmdOut.txt 2>> %p%cmdErr.txt
 %4 -U %2 -d %3 -a -f %p%Stops-For-Route-query_pgsql.sql  1>> %p%cmdOut.txt 2>> %p%cmdErr.txt
