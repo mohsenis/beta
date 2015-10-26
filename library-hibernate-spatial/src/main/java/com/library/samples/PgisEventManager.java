@@ -2288,6 +2288,7 @@ public class PgisEventManager {
 				+ "left(stop.blockid,5)=countyid left join census_urbans urban on stop.urbanid = urban.urbanid group by agencyid_def, stopid) select cluster.cid as cid, "
 				+ "cluster.sid as sid, cluster.aid as aid, cluster.name as name, map.lat, map.lon, map.agencies, map.anames, map.routes as routes, map.cname, map.rname, "
 				+ "map.region, map.uname, map.upop from cluster inner join map on map.sid = cluster.sid and map.aid = cluster.aid order by cluster.cid, cluster.sid";
+		System.out.println(mainquery);
 		Statement stmt = null;	
 		try{
 			//System.out.println(mainquery);
