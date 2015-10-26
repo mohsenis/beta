@@ -50,7 +50,7 @@ import com.vividsolutions.jts.geom.Polygon;
 public class PgisEventManager {
 	//public static Connection connection;
 	
-	private static Connection makeConnection(int dbindex){
+	public static Connection makeConnection(int dbindex){
 		String url = "";
 		switch (dbindex){
 		case 0:
@@ -73,7 +73,7 @@ public class PgisEventManager {
 		return response;
 	}
 	
-	private static void dropConnection(Connection connection){
+	public static void dropConnection(Connection connection){
 		try {
 			connection.close();
 		} catch (SQLException e) {
@@ -2254,7 +2254,7 @@ public class PgisEventManager {
 		mainquery +="), trips as (select agencyid as aid, id as tripid from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)) select "
 				+ "stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips.aid),0) as service from aids inner join gtfs_stop_times stime on "
 				+ "aids.aid=stime.stop_agencyid left join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id";
-		System.out.println(mainquery);
+//		System.out.println(mainquery);
 			try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
@@ -2394,7 +2394,7 @@ System.out.println(query);
 	 * @return HubCluster
 	 * @throws SQLException 
 	 */
-	public static HubsClusterList getClusterData(HashMap<String, HashSet<String>> x, String[] dates, String[] days, int dbindex, double radius, String username) throws SQLException{
+	/*public static HubsClusterList getClusterData(HashMap<String, HashSet<String>> x, String[] dates, String[] days, int dbindex, double popRadius, String username) throws SQLException{
 		HubsClusterList output = new HubsClusterList();
 		HashMap<String, Integer> serviceMap = stopFrequency(dates, days, username, dbindex);
 		String query = new String();
@@ -2433,16 +2433,18 @@ System.out.println(query);
 					+ "agenciescount AS (SELECT count(distinct stopsagenciesnames) AS agenciescount FROM stopsarray1), "
 					+ "tmproutes AS (SELECT map.* FROM gtfs_stop_route_map AS map INNER JOIN stops ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id), "
 					+ "routes AS (SELECT gtfs_routes.* FROM gtfs_routes INNER JOIN tmproutes ON tmproutes.routeid = gtfs_routes.id AND tmproutes.agencyid = gtfs_routes.agencyid), "
-					+ "routesarray  AS (SELECT COALESCE(array_agg(agencyid),'{N/A}') AS routesagencies, COALESCE(array_agg(id),'{N/A}') AS routesids, COALESCE(array_agg(shortname),'{N/A}') AS routesshortnames, COALESCE(array_agg(longname),'{N/A}') AS routeslongnames FROM routes), "
+					+ "routesarray0 AS (SELECT routes.*, gtfs_agencies.name AS agencyname FROM routes INNER JOIN gtfs_agencies ON routes.agencyid = gtfs_agencies.id), "
+					+ "routesarray  AS (SELECT COALESCE(array_agg(agencyid),'{N/A}') AS routesagencies, COALESCE(array_agg(agencyname),'{N/A}') AS routesagenciesnames, COALESCE(array_agg(id),'{N/A}') AS routesids, COALESCE(array_agg(shortname),'{N/A}') AS routesshortnames, COALESCE(array_agg(longname),'{N/A}') AS routeslongnames FROM routesarray0),  "
 					+ "routescount AS (SELECT count(distinct agencyid||id) AS routescount FROM routes), "
 					+ "counties AS (SELECT counties.countyid, counties.cname FROM census_counties AS counties INNER JOIN stops ON LEFT(stops.blockid,5) = counties.countyid), "
 					+ "countiesarray AS (SELECT COALESCE(array_agg(distinct countyid),'{N/A}') AS countiesids, COALESCE(array_agg(distinct cname),'{N/A}') AS countiesnames FROM counties), "
 					+ "countiescount AS (SELECT count(distinct counties.countyid) AS countiescount FROM counties), "
 					+ "urbanarray AS (SELECT COALESCE(array_agg(distinct stops.urbanid),'{N/A}') AS urbanids, COALESCE(array_agg(distinct uname),'{N/A}') AS urbannames FROM census_urbans INNER JOIN stops ON census_urbans.urbanid = stops.urbanid),"
 					+ "regionsarray  AS (SELECT  COALESCE(array_agg(distinct ' Region '||regionid),'{N/A}') AS regionids FROM stops),"
-					+ "pop AS (SELECT COALESCE(sum(population),0) AS pop FROM census_blocks INNER JOIN stops ON ST_Dwithin(census_blocks.location, stops.location, " + radius + ")) "
+					+ "pop0 AS (SELECT distinct census_blocks.blockid, population FROM census_blocks INNER JOIN stops ON ST_Dwithin(census_blocks.location, stops.location, " + popRadius + ")), "
+					+ "pop AS (SELECT COALESCE(sum(population),0) AS pop FROM pop0)"
 					+ "SELECT clustercoor.*, stopscount.*, agenciescount.*, pop.* AS pop, regionsarray.*, urbanarray.*, countiesarray.*, agenciesarray.*, countiescount.*, routescount.*, stopsarray.*, routesarray.* FROM stopsarray CROSS JOIN stopscount CROSS JOIN agenciesarray CROSS JOIN routesarray CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount";
-//			System.out.println(query);			
+			System.out.println(query);			
 			try {
 				
 				ResultSet rs = stmt.executeQuery(query);
@@ -2463,6 +2465,8 @@ System.out.println(query);
 					response.urbanNames = Arrays.asList(tempUrbanNames);
 					String[] tempRoutesAgencies = (String[]) rs.getArray("routesagencies").getArray();
 					response.routesAgencies = Arrays.asList(tempRoutesAgencies);
+					String[] tempRoutesAgenciesNames = (String[]) rs.getArray("routesagenciesnames").getArray();
+					response.routesAgenciesNames = Arrays.asList(tempRoutesAgenciesNames);
 					String[] tempRoutesIDs = (String[]) rs.getArray("routesids").getArray();
 					response.routesIDs = Arrays.asList(tempRoutesIDs);
 					String[] tempRoutesShortnames = (String[]) rs.getArray("routesshortnames").getArray();
@@ -2495,7 +2499,7 @@ System.out.println(query);
 		dropConnection(connection);
 		return output;
 	}
-	
+	*/
 	/**
 	 *Queries the transit part of the on map report	
 	 */

@@ -79,6 +79,9 @@ public class HubCluster {
 	@XmlElement(name = "routesAgencies")
 	public List<String> routesAgencies;
 	
+	@XmlElement(name = "routesAgenciesNames")
+	public List<String> routesAgenciesNames;
+	
 	@XmlElement(name = "routesIDs")
 	public List<String> routesIDs;
 	

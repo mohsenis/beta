@@ -1206,11 +1206,12 @@ $mylist
 				casestring = $(this).attr('id');
 				}
 				if (casestring=="THR"){var d = new Date();
-					var qstringx = '0.064';
+					var qstringx = '0.1';
+					var qstringx2 = '0.25';
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport2.html?&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport2.html?&x1='+qstringx+'&x2='+qstringx2+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){

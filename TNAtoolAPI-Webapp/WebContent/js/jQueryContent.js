@@ -75,12 +75,36 @@ function isNumber(evt) {
 	evt = (evt) ? evt : window.event;
 	var charCode = (evt.which) ? evt.which : evt.keyCode;
 	if (charCode == 46) {
-	if (document.getElementById("Sradius").value.indexOf('.') !== -1) return false;
+		if ($("#Sradius").val().indexOf('.') !== -1 ) return false;
 	} else if (charCode > 31 && (charCode < 48 || charCode > 57)) {
 	return false;
 	}
 	return true;
 	};
+
+function isNumber2(evt) {
+	evt = (evt) ? evt : window.event;
+	var charCode = (evt.which) ? evt.which : evt.keyCode;
+	if (charCode == 46) {
+		if ($("#PopSradius").val().indexOf('.') !== -1 ) return false;
+	} else if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+	return false;
+	}
+	return true;
+};
+	
+function trimLat(x){
+	if (x.length > 12) 
+		x = x.substring(0,11);
+	return x;
+}
+
+function trimLon(x){
+	if (x.length > 14) 
+		x = x.substring(0,13);
+	return x;
+}
+	
 	
 function isWholeNumber(evt) {
 	evt = (evt) ? evt : window.event;
@@ -123,7 +147,6 @@ function addPercent(x) {
 /**
  */
 function fare(x) {
-	console.log(x);
 	if (x == 'null' || x == 'NA') return 'N/A';
 	else return '$ ' + x;
 }
@@ -135,6 +158,7 @@ function reload(){
 		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
 		return;
 	}
+	
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	var dates = $('#datepicker').multiDatesPicker('getDates');
 	if(dates.length==0){
@@ -198,6 +222,28 @@ function reloadUG(){
 	location.reload();	
 }
 
+/* Hubs report*/
+function reloadHR(){		
+	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
+	var tmpX2 = (parseFloat(document.getElementById("PopSradius").value)).toString();
+	if (exceedsMaxRadius(tmpX) || exceedsMaxRadius(tmpX2)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
+		return;
+	}
+	
+	history.pushState("", "", document.URL.replace('x1='+w_qstringx, 'x1='+tmpX));
+	history.pushState("", "", document.URL.replace('x2='+w_qstringx2, 'x2='+tmpX2));
+	var dates = $('#datepicker').multiDatesPicker('getDates');
+	if(dates.length==0){
+		$( "#datepicker" ).multiDatesPicker({
+			addDates: [new Date()]
+		});
+	}
+	dates = $('#datepicker').multiDatesPicker('getDates');
+	w_qstringd = dates.join(",");
+	localStorage.setItem(keyName, w_qstringd);
+	location.reload();	
+}
 function closebutton(){
 	window.close();
 }
