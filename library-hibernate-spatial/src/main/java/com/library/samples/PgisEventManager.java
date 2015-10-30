@@ -1401,7 +1401,7 @@ public class PgisEventManager {
 		      }
 			routesfilter = "sroutes as (select agencyid as aid, routeid, COALESCE(max(length),0) as length, COALESCE(max(stopscount),0) as stops from "+Types.getTripMapTableName(type)+" map "
 					+ "inner join agencies using(agencyid) where "+Types.getIdColumnName(type)+"='"+areaId+"' group by agencyid,routeid), routes as (select route.agencyid, "
-					+ "route.id, shortname, longname, type, url, description, length as rlength, stops from gtfs_routes route inner join sroutes on route.defaultid=aid and "
+					+ "route.id, shortname, longname, type, url, description, length as rlength, stops from gtfs_routes route inner join sroutes on route.agencyid=aid and "
 					+ "route.id = routeid), ";
 			tripsfilter = "trips as (select trip.agencyid as aid, tripid, routeid, length, tlength, stopscount as stops from svcids inner join "+ Types.getTripMapTableName(type)+" trip on "
 					+ "trip.agencyid_def=serviceid_agencyid and trip.serviceid=serviceid_id where "+Types.getIdColumnName(type)+"='"+areaId+"'), ";
@@ -1437,6 +1437,7 @@ public class PgisEventManager {
 				+ "COALESCE(svcupop,0) as usvcpop, COALESCE(svcrpop,0) as rsvcpop from routes inner join agencies on routes.agencyid=agencies.agencyid left join service on "
 				+ "routes.agencyid=service.aid and routes.id=service.routeid left join upop on routes.agencyid=upop.aid and routes.id= upop.routeid left join rpop on "
 				+ "routes.agencyid=rpop.aid and routes.id=rpop.routeid";					
+		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();				

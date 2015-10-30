@@ -124,7 +124,7 @@ update gtfs_trips trip set shape = tss.shape, epshape=GoogleEncodeLine(tss.shape
 update gtfs_trips trip set shape = tes.shape, epshape=GoogleEncodeLine(tes.shape), estlength = (tes.estlength)/1609.34, length=0 FROM tempestshapes tes 
 	where tes.agencyid = trip.agencyid  and tes.tripid = trip.id;
 /*Update the stopscount column in trips table*/
-update gtfs_trips set stopscount = stpt.cnt from (select count(gid) as cnt, trip_id, trip_agencyid from gtfs_stop_times group by trip_id, trip_agencyid)as stpt where stpt.trip_agencyid = agencyid and stpt.trip_id=id ;
+update gtfs_trips set stopscount = stpt.cnt from (select count(distinct(stop_id)) as cnt, trip_id, trip_agencyid from gtfs_stop_times group by trip_id, trip_agencyid)as stpt where stpt.trip_agencyid = agencyid and stpt.trip_id=id ;
 
 CREATE OR REPLACE FUNCTION makeuid
 (
