@@ -523,7 +523,7 @@ function gos(key){
 			if(reportName=="Transit Hub Summary"){
 				$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected");
 			}else{
-				$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected"+"<span style='margin-left:3em;font-size:80%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>");
+				$("#accordion > h3").html($('#datepicker').multiDatesPicker('getDates').length + " day(s) selected"/*+"<span style='margin-left:3em;font-size:80%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>"*/);
 			}
 	    }
 	});
@@ -544,7 +544,7 @@ function gos(key){
 	if(reportName=="Transit Hub Summary"){
 		$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected");
 	}else{
-		$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected"+"<span style='margin-left:3em;font-size:80%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>");
+		$("#accordion > h3").html(w_qstringd.split(",").length + " day(s) selected"/*+"<span style='margin-left:3em;font-size:80%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>"*/);
 	}
 	
 	
