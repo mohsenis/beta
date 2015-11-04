@@ -1285,8 +1285,9 @@ public class PgisEventManager {
 	 *stops by geographic area
 	 *stops by geographic area and agency
 	 *stops by geographic are, agency, and route
+	 * @throws SQLException 
 	*/
-	public static ArrayList <StopR> stopGeosr(String username, int type, String areaId, String agency, String route, double x, int dbindex) {
+	public static ArrayList <StopR> stopGeosr(String username, int type, String[] dates, String[] days, String areaId, String agency, String route, double x, int dbindex) throws SQLException {
 		ArrayList <StopR> response = new ArrayList<StopR>();		
 		StopR instance;
 		Connection connection = makeConnection(dbindex);	
@@ -1295,8 +1296,15 @@ public class PgisEventManager {
 		String agenciesfilter = "";
 		String popsfilter = "";
 		String mainquery ="with ";
-		String criteria = "";		
-		
+		String criteria = "";
+		String agencyDefaultID = new String();
+		if (agency != null) {agencyDefaultID = getDefaultAgencyID(agency, dbindex);}
+		HashMap<String, Integer> stopsVisits = new HashMap<String, Integer>();
+		if (dates != null && days != null){
+			
+			stopsVisits = stopFrequency(agency, dates, days, username, dbindex);
+		}			
+				
 		if (areaId==null){//stops by agency or stops by agency and route
 			stopsfilter = "where map.agencyid='"+agency+"'";			
 			agenciesfilter = "where id='"+agency+"'";
@@ -1329,14 +1337,16 @@ public class PgisEventManager {
 				routesfilter = "where map.agencyid='"+agency+"' and map.routeid='"+route+"'";
 			}			
 		}
-		mainquery += "stops as (select map.agencyid as agencyid, stop.name as name, stop.id as id, url, location from gtfs_stops stop inner join gtfs_stop_service_map map on "
-				+ "map.agencyid_def=stop.agencyid and map.stopid=stop.id "+stopsfilter+"), agencies as (select agencies.id as agencyid, agencies.name as aname from gtfs_agencies "
+		mainquery += "stops0 as (select map.agencyid as agencyid,stop.lat, stop.lon, stop.name as name, stop.id as id, url, location, urbanid "
+				+ "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id " + stopsfilter + "), "
+				+ "stops AS (select stops0.*, urban.population AS urbanpop FROM stops0 LEFT JOIN census_urbans AS urban ON urban.urbanid = stops0.urbanid AND population >50000), "
+				+ "agencies as (select agencies.id as agencyid, agencies.name as aname from gtfs_agencies "
 				+ "agencies "+agenciesfilter+"), routes as (select map.agencyid, stops.id, coalesce(string_agg(map.routeid,'; '),'-') as routes from gtfs_stop_route_map map inner "
 				+ "join stops on stops.agencyid=map.agencyid and stops.id=map.stopid "+routesfilter+" group by map.agencyid, stops.id), upops as (select stops.agencyid, stops.id, "
 				+ "coalesce(sum(population),0) as upop from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "
 				+ popsfilter+" poptype='U' group by agencyid, id), rpops as (select stops.agencyid, stops.id, coalesce(sum(population),0) as rpop from census_blocks block inner "
-				+ "join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+popsfilter+" poptype='R' group by agencyid, id) select stops.agencyid, "
-				+ "aname, id, name, url, routes, coalesce(upop,0) as upop, coalesce(rpop,0) as rpop from stops inner join agencies using(agencyid) inner join routes "
+				+ "join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+popsfilter+" poptype='R' group by agencyid, id) select stops.agencyid, stops.lat, stops.lon, "
+				+ "aname, id, name, url, routes, coalesce(upop,0) as upop, coalesce(rpop,0) as rpop, COALESCE(urbanpop,0) AS overfiftypop from stops inner join agencies using(agencyid) inner join routes "
 				+ "using(agencyid,id) left join upops using(agencyid,id) left join rpops using(agencyid,id)";						
 		System.out.println(mainquery);
 		try{
@@ -1351,7 +1361,15 @@ public class PgisEventManager {
 				instance.RPopWithinX = String.valueOf(rs.getLong("rpop"));
 				instance.URL = rs.getString("url");
 				instance.StopId = rs.getString("id");
-				instance.StopName = rs.getString("name");				
+				instance.StopName = rs.getString("name");
+				instance.OverFiftyPop = String.valueOf(rs.getInt("overfiftypop"));
+				if (agency == null)
+					instance.visits = stopsVisits.get(instance.AgencyId + instance.StopId) + "";
+				else 
+					instance.visits = stopsVisits.get(agencyDefaultID + instance.StopId) + "";
+				instance.lat = String.valueOf(rs.getDouble("lat"));
+				instance.lon = String.valueOf(rs.getDouble("lon"));
+				
 				response.add(instance);
 	        }		
 			rs.close();
@@ -1362,6 +1380,25 @@ public class PgisEventManager {
 	      }					
 		dropConnection(connection);
 		return response;
+	}
+	
+	/**
+	 * Gets real ID of the agency and returns default ID.
+	 * @param agencyid
+	 * @param dbindex
+	 * @return
+	 * @throws SQLException
+	 */
+	public static String getDefaultAgencyID(String agencyid, int dbindex) throws SQLException{
+		String output = new String();
+		String query = "SELECT defaultid FROM gtfs_agencies WHERE id = '" + agencyid + "'";
+		Connection connection = makeConnection(dbindex);
+		PreparedStatement stmt = connection.prepareStatement(query);
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			output = rs.getString("defaultid");
+		}
+		return output;
 	}
 	
 	/**
@@ -2236,10 +2273,14 @@ public class PgisEventManager {
 	/**
 	 *Queries frequency of service for all stops in the database for a set of dates and days
 	 */
-	public static HashMap<String, Integer> stopFrequency(String[] date, String[] day, String username, int dbindex){				
+	public static HashMap<String, Integer> stopFrequency(String agency, String[] date, String[] day, String username, int dbindex){				
 		HashMap<String, Integer> response = new HashMap<String, Integer>();
 		Connection connection = makeConnection(dbindex);
-		String mainquery ="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+		String agencyFilter = "";
+		if (agency != null){
+			agencyFilter = " AND agency_id IN (SELECT defaultid FROM gtfs_agencies WHERE id='" + agency + "')";
+		}
+		String mainquery ="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'" + agencyFilter + "), svcids as (";
 		Statement stmt = null;
 		for (int i=0; i<date.length; i++){
 			mainquery+= "(select serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]
@@ -2252,7 +2293,7 @@ public class PgisEventManager {
 		mainquery +="), trips as (select agencyid as aid, id as tripid from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)) select "
 				+ "stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips.aid),0) as service from aids inner join gtfs_stop_times stime on "
 				+ "aids.aid=stime.stop_agencyid left join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id";
-//		System.out.println(mainquery);
+		System.out.println("visit frequency: " + mainquery);
 			try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
@@ -2273,7 +2314,7 @@ public class PgisEventManager {
 	/**
 	 *Queries stop clusters (hub reports) and returns a list of all transit agencies with their connected agencies
 	 */
-	public static TreeSet<StopCluster> stopClusters(String[] dates, String[] days, String username, double dist, int dbindex){	
+	/*public static TreeSet<StopCluster> stopClusters(String[] dates, String[] days, String username, double dist, int dbindex){	
 		HashMap<String, Integer> serviceMap = stopFrequency(dates, days, username, dbindex);
 		TreeSet<StopCluster> response = new ClusterPriorityQueue();
 		Connection connection = makeConnection(dbindex);
@@ -2346,7 +2387,7 @@ public class PgisEventManager {
 		//System.out.println("Processing Clusters");
 		return response;
 	}
-	
+	*/
 	/**
 	 * A hashmap of the clusters is generated (containing the AgencyIDs and IDs of the stops in the cluster)
 	 * @param radius
@@ -2362,8 +2403,8 @@ public class PgisEventManager {
 				+ " ON ST_Dwithin(stops1.location, stops2.location, " + radius + ")),"
 				+ " stops1 AS (SELECT stops0.* FROM stops0 INNER JOIN aids ON agencyid1 IN (aids.aid)),"
 				+ " stops2 AS (SELECT stops1.* FROM stops1 INNER JOIN aids ON agencyid2 IN (aids.aid)),"
-				+ " stops3 AS (SELECT stops2.* FROM stops2 INNER JOIN gtfs_stop_service_map AS map ON stop1=map.stopid AND stops2.agencyid1=map.agencyid),"
-				+ " stops4 AS (SELECT stops3.* FROM stops3 INNER JOIN gtfs_stop_service_map AS map ON stop2=map.stopid AND stops3.agencyid2=map.agencyid)"
+				+ " stops3 AS (SELECT stops2.* FROM stops2 INNER JOIN gtfs_stop_service_map AS map ON stop1=map.stopid AND stops2.agencyid1=map.agencyid_def),"
+				+ " stops4 AS (SELECT stops3.* FROM stops3 INNER JOIN gtfs_stop_service_map AS map ON stop2=map.stopid AND stops3.agencyid2=map.agencyid_def)"
 				+ " SELECT stops4.clusterid, array_agg(stop) AS stops FROM stops4 GROUP BY clusterid"; 
 System.out.println(query);
 		Statement stmt = null;
@@ -3083,3 +3124,4 @@ System.out.println(query);
 		}
 	}
 }
+

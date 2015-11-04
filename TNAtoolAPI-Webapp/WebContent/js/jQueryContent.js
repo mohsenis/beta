@@ -93,6 +93,17 @@ function isNumber2(evt) {
 	return true;
 };
 	
+function isNumber2(evt) {
+	evt = (evt) ? evt : window.event;
+	var charCode = (evt.which) ? evt.which : evt.keyCode;
+	if (charCode == 46) {
+		if ($("#PnrSradius").val().indexOf('.') !== -1 ) return false;
+	} else if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+	return false;
+	}
+	return true;
+};
+
 function trimLat(x){
 	if (x.length > 12) 
 		x = x.substring(0,11);
@@ -141,7 +152,7 @@ function numberconv(x) {
 }
 
 function addPercent(x) {
-	return '% ' + x;
+	return x+'%';
 }
 
 /**
@@ -226,6 +237,7 @@ function reloadUG(){
 function reloadHR(){		
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
 	var tmpX2 = (parseFloat(document.getElementById("PopSradius").value)).toString();
+	var tmpX3 = (parseFloat(document.getElementById("PnrSradius").value)).toString();
 	if (exceedsMaxRadius(tmpX) || exceedsMaxRadius(tmpX2)){	// Checks if the entered search radius exceeds the maximum.
 		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
 		return;
@@ -233,6 +245,7 @@ function reloadHR(){
 	
 	history.pushState("", "", document.URL.replace('x1='+w_qstringx, 'x1='+tmpX));
 	history.pushState("", "", document.URL.replace('x2='+w_qstringx2, 'x2='+tmpX2));
+	history.pushState("", "", document.URL.replace('x3='+w_qstringx3, 'x3='+tmpX3));
 	var dates = $('#datepicker').multiDatesPicker('getDates');
 	if(dates.length==0){
 		$( "#datepicker" ).multiDatesPicker({

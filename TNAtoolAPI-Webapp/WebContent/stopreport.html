@@ -18,9 +18,12 @@
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	
 <script type="text/javascript">
+var reportName = "Transit Agency Stops Report";
 var maxRadius = 5;
 var qstring = '';
 var qstringx = '0.25';
+var d = new Date();
+var w_qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 var type = parseInt(getURIParameter("type"));
 type = (isNaN(type))?0:type;
 var dbindex = parseInt(getURIParameter("dbindex"));
@@ -37,8 +40,13 @@ var tmp = '<tr><th id="aid">Agency ID <em title="Agency identification number re
 '<th>Stop ID <em title="Unique stop identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="sn">Stop Name <em title="Name of a stop reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Routes Stop Belongs To <em title="Unique route ID (or IDs) that the stop belongs to."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Visits<em title="Number of times the stops is visited during the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Population (2010)<em title="Population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Urban Population (2010)<em title="Urban population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Rural Population (2010)<em title="Rural population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban over 50k pop (2010)<em title="The population of the urban area with population over 50,000 in which the stop is located. If the value is 0, it means that the stop is either not located in an urban area, or the population of the area is less than 50,000."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Latitude</th>' +
+'<th>Longitude</th>' + 
 '<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
@@ -111,10 +119,11 @@ $(document).ready(function(){
 	  	}
 	} 
 	timeVar = setInterval(progress, 100);
+	gos(key);
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?agency='+agency+'&route='+route+'&x='+w_qstringx+'&areaid='+areaId+'&type='+type+'&key='+ key+'&dbindex='+dbindex+'&username=admin',
+		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?agency='+agency+'&day='+w_qstringd+'&route='+route+'&x='+w_qstringx+'&areaid='+areaId+'&type='+type+'&key='+ key+'&dbindex='+dbindex+'&username=admin',
 		async: true,
 		success: function(d){
 			var namestring = " Stops Report";
@@ -140,10 +149,20 @@ $(document).ready(function(){
 			html += '<tr class="tablerow"><td>' + item.AgencyId + '</td><td>' + item.AgencyName + '</td><td>' + item.StopId + '</td>'; 
 			if (item.URL !== null){
 				html = html + '<td> <a href="' + item.URL + '">'+item.StopName+'</a> </td>';
-				} else {
-					html = html + '<td>'+item.StopName+'</td>';
-					};
-			html += '<td>'+item.Routes+'</td><td>'+numberconv(item.UPopWithinX)+'</td><td>'+numberconv(item.RPopWithinX)+'</td><td>'+d.metadata+'</td></tr>';					   			
+			} else {
+			html = html + '<td>'+item.StopName+'</td>';
+			};
+			var totalPop = parseInt(item.UPopWithinX) + parseInt(item.RPopWithinX);
+			totalPop = totalPop.toString();
+			html += '<td>'+item.Routes
+			+ '</td><td>'+numberconv(item.visits)
+			+ '</td><td>'+numberconv(totalPop)
+			+ '</td><td>'+numberconv(item.UPopWithinX)
+			+ '</td><td>'+numberconv(item.RPopWithinX)
+			+ '</td><td>'+numberconv(item.OverFiftyPop.toString())
+			+ '</td><td>'+trimLat(item.lat)
+			+ '</td><td>'+trimLon(item.lon)
+			+ '</td><td>'+d.metadata+'</td></tr>';					   			
 			});					
 			html = html + '</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));	
@@ -152,7 +171,7 @@ $(document).ready(function(){
 				"paging": true,
 				"iDisplayLength": 14,
 				"aoColumnDefs": [                 
-				                {"visible": false, "targets": [7]}
+				                {"visible": false, "targets": [12]}
 				               ],
 				
 				"dom": 'T<"clear">lfrtip',
@@ -271,7 +290,7 @@ function dbchange(){
 				</div>
 			  </td>
 			  <td id="td2"> 
-			  	<!-- <div class="headerBC" id="accordion" >
+			  	<div class="headerBC" id="accordion" >
 					<h3></h3>
 					<div>
 						<table style="width:100%;">
@@ -288,7 +307,7 @@ function dbchange(){
 						</table>
 						
 					</div>
-				</div> -->
+				</div>
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 

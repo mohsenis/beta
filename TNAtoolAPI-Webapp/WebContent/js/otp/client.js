@@ -1229,12 +1229,13 @@ $mylist
 				casestring = $(this).attr('id');
 				}
 				if (casestring=="THR"){var d = new Date();
-					var qstringx = '0.1';
-					var qstringx2 = '0.25';
+					var qstringx = '0.08';	// clustering radius
+					var qstringx2 = '0.25'; // population search radius					
+					var qstringx3 = '2.0'  // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport2.html?&x1='+qstringx+'&x2='+qstringx2+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport2.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
