@@ -25,16 +25,16 @@ WITH (
 ALTER TABLE census_places_trip_map
   OWNER TO postgres;
 
-with groutes as(SELECT routeid, ST_multi(ST_Collect(ST_SetSRID(ST_MakePoint(stops.lon, stops.lat), 4326))) multi
+with groutes as(SELECT routeid, agencyid_def, ST_multi(ST_Collect(ST_SetSRID(ST_MakePoint(stops.lon, stops.lat), 4326))) multi
 		FROM gtfs_stop_route_map AS map INNER JOIN gtfs_stops AS stops
-		ON map.agencyid = stops.agencyid
+		ON map.agencyid_def = stops.agencyid
 		AND map.stopid = stops.id
-		GROUP BY routeid
+		GROUP BY routeid, agencyid_def
 )
 insert into census_places_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  placeid, shape, length, uid) 
 select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, place.placeid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,place.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,place.shape),2993))/1609.34), trip.uid
 from gtfs_trips trip
-inner join groutes on trip.route_id=groutes.routeid
+inner join groutes on trip.route_id=groutes.routeid AND trip.serviceid_agencyid=groutes.agencyid_def
 inner join census_places place on  st_intersects(place.shape,trip.shape)=true and st_intersects(place.shape,multi)=true group by trip.id, trip.agencyid, place.placeid;
 
 update census_places_trip_map set stopscount = res.cnt+0 from 
