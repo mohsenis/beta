@@ -39,12 +39,17 @@ var tmp = '<tr><th id="aid">Agency ID <em title="Agency identification number re
 '<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stop ID <em title="Unique stop identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="sn">Stop Name <em title="Name of a stop reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>County<em title = "The County in which the stop is located."><img src="images/tooltip.png" alt="tooltip"></em></th>' +
+'<th>Urban Area<em title = "The Urban Area in which the stop is located."><img src="images/tooltip.png" alt="tooltip"></em></th>' +
+'<th>ODOT Transit Region<em title = "The ODOT Transit Region in which the stop is located."><img src="images/tooltip.png" alt="tooltip"></em></th>' +
+'<th>Congressional District<em title = "The Congressional District in which the stop is located."><img src="images/tooltip.png" alt="tooltip"></em></th>' +
+'<th>Census Place<em title = "The Census Place in which the stop is located."><img src="images/tooltip.png" alt="tooltip"></em></th>' + 
 '<th>Routes Stop Belongs To <em title="Unique route ID (or IDs) that the stop belongs to."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Visits<em title="Number of times the stops is visited during the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Population (2010)<em title="Population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Urban Population (2010)<em title="Urban population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Rural Population (2010)<em title="Rural population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Urban over 50k pop (2010)<em title="The population of the urban area with population over 50,000 in which the stop is located. If the value is 0, it means that the stop is either not located in an urban area, or the population of the area is less than 50,000."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban area with over 50k population (2010)<em title="The population of the urban area with population over 50,000 in which the stop is located. If the value is 0, it means that the stop is either not located in an urban area, or the population of the area is less than 50,000."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Latitude</th>' +
 '<th>Longitude</th>' + 
 '<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
@@ -154,7 +159,13 @@ $(document).ready(function(){
 			};
 			var totalPop = parseInt(item.UPopWithinX) + parseInt(item.RPopWithinX);
 			totalPop = totalPop.toString();
-			html += '<td>'+item.Routes
+			html += 
+			'<td>'+item.CountyName
+			+ '</td><td>'+item.UrbanName
+			+ '</td><td>'+item.RegionName
+			+ '</td><td>'+item.CongDistName
+			+ '</td><td>'+item.PlaceName
+			+ '</td><td>'+item.Routes
 			+ '</td><td>'+numberconv(item.visits)
 			+ '</td><td>'+numberconv(totalPop)
 			+ '</td><td>'+numberconv(item.UPopWithinX)
@@ -171,7 +182,7 @@ $(document).ready(function(){
 				"paging": true,
 				"iDisplayLength": 14,
 				"aoColumnDefs": [                 
-				                {"visible": false, "targets": [12]}
+				                {"visible": false, "targets": [17]}
 				               ],
 				
 				"dom": 'T<"clear">lfrtip',

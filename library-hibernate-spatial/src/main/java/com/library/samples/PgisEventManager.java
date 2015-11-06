@@ -1315,13 +1315,16 @@ public class PgisEventManager {
 			}
 		}else {//stops by areaId and ...
 			if (type==0){//county
-		    	  criteria = "left(blockid,5)";    	  
+		    	  criteria = "left(blockid,5)";
+		    	  popsfilter = "left(block.blockid,5) ='"+areaId+"' and";
 		      }else if (type==1){//tract
 		    	  criteria = "left(blockid,11)"; 
+		    	  popsfilter = "left(block.blockid,11) ='"+areaId+"' and";
 		      }	else  { //census place, urban area, ODOT Regions or congressional district
 		    	  criteria = Types.getIdColumnName(type);
+		    	  popsfilter = "block." + criteria + "='" + areaId + "' and";
 		      }
-			popsfilter = criteria+"='"+areaId+"' and";
+//			popsfilter = criteria+"='"+areaId+"' and";
 			if (route==null){
 				if (agency==null){//stops by areaId
 					mainquery +="aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), ";
@@ -1337,7 +1340,7 @@ public class PgisEventManager {
 				routesfilter = "where map.agencyid='"+agency+"' and map.routeid='"+route+"'";
 			}			
 		}
-		mainquery += "stops0 as (select map.agencyid as agencyid,stop.lat, stop.lon, stop.name as name, stop.id as id, url, location, urbanid "
+		mainquery += "stops0 as (select map.agencyid as agencyid,stop.lat, stop.lon, stop.name as name, stop.id as id, url, location, urbanid, regionid, congdistid, placeid, blockid "
 				+ "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id " + stopsfilter + "), "
 				+ "stops AS (select stops0.*, urban.population AS urbanpop FROM stops0 LEFT JOIN census_urbans AS urban ON urban.urbanid = stops0.urbanid AND population >50000), "
 				+ "agencies as (select agencies.id as agencyid, agencies.name as aname from gtfs_agencies "
@@ -1345,9 +1348,17 @@ public class PgisEventManager {
 				+ "join stops on stops.agencyid=map.agencyid and stops.id=map.stopid "+routesfilter+" group by map.agencyid, stops.id), upops as (select stops.agencyid, stops.id, "
 				+ "coalesce(sum(population),0) as upop from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "
 				+ popsfilter+" poptype='U' group by agencyid, id), rpops as (select stops.agencyid, stops.id, coalesce(sum(population),0) as rpop from census_blocks block inner "
-				+ "join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+popsfilter+" poptype='R' group by agencyid, id) select stops.agencyid, stops.lat, stops.lon, "
-				+ "aname, id, name, url, routes, coalesce(upop,0) as upop, coalesce(rpop,0) as rpop, COALESCE(urbanpop,0) AS overfiftypop from stops inner join agencies using(agencyid) inner join routes "
-				+ "using(agencyid,id) left join upops using(agencyid,id) left join rpops using(agencyid,id)";						
+				+ "join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+popsfilter+" poptype='R' group by agencyid, id), "
+				+ "result AS (select stops.agencyid, stops.lat, stops.lon, aname, id, name, url, stops.urbanid, stops.regionid, stops.congdistid, stops.placeid, stops.blockid, "
+				+ "routes, coalesce(upop,0) as upop, coalesce(rpop,0) as rpop, COALESCE(urbanpop,0) AS overfiftypop "
+				+ "	from stops inner join agencies using(agencyid) inner join routes "
+				+ "	using(agencyid,id) left join upops using(agencyid,id) left join rpops using(agencyid,id)) "
+				+ "select result.agencyid, result.lat, result.lon, aname, id, name, url, routes, upop, rpop, overfiftypop, COALESCE(census_urbans.uname,'N/A') AS urbanname, COALESCE(census_places.pname,'N/A') AS placename, "
+				+ "COALESCE(result.regionid,'N/A') AS regionname, COALESCE(census_congdists.cname,'N/A') AS congdistname, COALESCE(census_counties.cname,'N/A') AS countyname "
+				+ "	FROM result LEFT JOIN census_urbans using(urbanid) "
+				+ "	LEFT JOIN census_places USING(placeid) "
+				+ "	LEFT JOIN census_congdists USING(congdistid) "
+				+ "	LEFT JOIN census_counties ON census_counties.countyid = LEFT(result.blockid,5)";
 		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
@@ -1363,6 +1374,13 @@ public class PgisEventManager {
 				instance.StopId = rs.getString("id");
 				instance.StopName = rs.getString("name");
 				instance.OverFiftyPop = String.valueOf(rs.getInt("overfiftypop"));
+				instance.PlaceName = rs.getString("placename");
+				instance.CountyName = rs.getString("countyname");
+				instance.UrbanName = rs.getString("urbanname");
+				if (rs.getString("regionname") != "N/A") instance.RegionName = "Region " + rs.getString("regionname");
+				else instance.RegionName = rs.getString("regionname");
+				instance.CongDistName = rs.getString("congdistname");
+				
 				if (agency == null)
 					instance.visits = stopsVisits.get(instance.AgencyId + instance.StopId) + "";
 				else 

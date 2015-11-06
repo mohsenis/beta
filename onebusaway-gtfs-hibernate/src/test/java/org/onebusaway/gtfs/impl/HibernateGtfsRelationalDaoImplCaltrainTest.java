@@ -81,7 +81,7 @@ public class HibernateGtfsRelationalDaoImplCaltrainTest {
 
   @Test
   public void testGetAllAgencies() {
-    List<Agency> agencies = _dao.getAllAgencies();
+    List<Agency> agencies = _dao.getAllAgencies(null);
     assertEquals(1, agencies.size());
   }
 
