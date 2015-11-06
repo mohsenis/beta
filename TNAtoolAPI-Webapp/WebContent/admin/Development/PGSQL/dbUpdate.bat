@@ -13,4 +13,5 @@ set p=%5
 %4 -U %2 -d %3 -a -f %p%Places_trip_pgsql.sql  1>> %p%cmdOut.txt 2>> %p%cmdErr.txt
 %4 -U %2 -d %3 -a -f %p%Congdists_trip_pgsql.sql  1>> %p%cmdOut.txt 2>> %p%cmdErr.txt
 %4 -U %2 -d %3 -a -f %p%calendar_range_finder.sql  1>> %p%cmdOut.txt 2>> %p%cmdErr.txt
+%4 -U %2 -d %3 -a -f %p%adminFeeds.sql  1>> %p%cmdOut.txt 2>> %p%cmdErr.txt
 exit

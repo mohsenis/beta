@@ -16,6 +16,8 @@
 
   ga('create', 'UA-64807119-1', 'auto');
   ga('send', 'pageview');
+  
+  //$('body').css('display','');
 </script>
 
 <head>
@@ -192,9 +194,15 @@
 </style><!-- END extlib/css/colorbox.css -->
 <script src="scripts/colorbox.js" type="text/javascript"></script>
 <script src="scripts/mdwiki.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	setTimeout(function () { $('body').css('display',''); },750);
 
+});
+	//document.getElementsByTagName("body")[0].style.display="";
+</script>
 </head>
-<body>
+<body style="display:none">
     <noscript>
         This website requires Javascript to be enabled. Please turn on Javascript
         and reload the page.

@@ -35,6 +35,7 @@
 	var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
 	var mySlidebar;
 	var maxRadius = 5;
+	var boo;
 	
 	(function($) {
 	    $(document).ready(function() {
@@ -262,9 +263,9 @@
 		return y;
 	} 
 	
-	function closebutton(){
+	/* function closebutton(){
 		$('slidebar').toggle('left');
-	}
+	} */
 	
 	function clearReport(){
 		document.getElementById('displayReport').innerHTML = "";

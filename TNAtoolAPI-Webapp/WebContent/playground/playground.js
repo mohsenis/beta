@@ -373,7 +373,7 @@ function listOfFeeds(){
 	        		if(d.sizes[i]!=null){
 		        		b=true;
 	        			html += "<tr id='row1-"+item+"' style='text-align:center;opacity:0.4'><td>";
-		        		html += "<p><span><b>"+item+"</b></span></p></td><td>size (Byte):<br>"+d.sizes[i]+"</td></tr>";
+		        		html += "<p><span><b>"+item+"</b></span></p></td><td>Size (MB):<br>"+d.sizes[i]/1000000+"</td></tr>";
 		        		html += "<tr id='row2-"+item+"' style='text-align:center'><td style='background-color:#D4A9A9'>Scheduled to be Added</td><td style='background-color:#D4A9A9'><a href=\"#\" onclick='undoAdd(\""+item+"\")'><u>Discard</u></a></td></tr>";
 		        		
 	        		}
