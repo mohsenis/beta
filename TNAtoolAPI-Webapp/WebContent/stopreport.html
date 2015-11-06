@@ -218,39 +218,7 @@ $(document).ready(function(){
 					$("#RT_length").remove();
 				    $("#RT_filter").insertBefore("#RT_info");
 				    $( ".dataTables_filter" ).css( "float", "left");
-				    
-		            /* //alert( 'DataTables has redrawn the table' );
-		        	var routeName = document.getElementsByClassName('routeName');
-				    var pop = document.getElementsByClassName('pop');
-				    var row = document.getElementsByClassName('tablerow');
-				    //var row;
-				    for(var ii=0; ii<routeName.length; ii++){
-				    	routeName[ii].innerHTML = '<img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px">';
-				    	pop[ii].innerHTML = '<img src="images/loadingGif.gif" alt="Page Loading" style="width:15px;height:15px">';
-				    }
-				    var stopIds = new Array();
-				    $( '#RT tbody tr td:first-child' ).each(function() {
-				    	stopIds.push($( this ).html());
-				    });
-				    stopIds = stopIds.join();
-				    if (xhr != '') {
-				    	xhr.abort();
-				    } */
-				    
-				    /* xhr = $.ajax({
-						type: 'GET',
-						datatype: 'json',
-						url: '/TNAtoolAPI-Webapp/queries/transit/StopsRX?'+ajaxURL+'&key='+ key+'&stopids='+ stopIds+'&dbindex='+dbindex,
-						async: boo,
-						success: function(d){
-							$.each(d.StopR, function(jj,item){
-								$('#RT').dataTable().fnUpdate(item.Routes,row[jj],2,false,false);
-								$('#RT').dataTable().fnUpdate(item.PopWithinX,row[jj],3,false,false); 								
-							});
-						}
-					}); */
 		        }
-				
 			} );
 			
 			$( ".dataTables_filter" ).before( "<br>" );

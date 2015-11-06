@@ -14,9 +14,11 @@
 package com.library.model;
 
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -97,5 +99,20 @@ public class RouteR {
 	
 	@XmlAttribute
 	@JsonSerialize
-    public String RPopWithinX;	    	
+    public String RPopWithinX;	  
+	
+	@XmlElement(name = "counties")
+	public List<String> counties;
+	
+	@XmlElement(name = "urbans")
+	public List<String> urbans;
+	
+	@XmlElement(name = "regions")
+	public List<String> regions;
+	
+	@XmlElement(name = "places")
+	public List<String> places;
+	
+	@XmlElement(name = "congdists")
+	public List<String> congdists;
 }
