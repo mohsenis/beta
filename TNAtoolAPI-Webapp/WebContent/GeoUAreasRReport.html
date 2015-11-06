@@ -154,7 +154,7 @@ $(document).ready(function(){
 			    		localStorage.setItem(keyName, qstringd);			    		
 			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex/* +'&username='+getSession() */);    		
 			    } else if ($(this).attr('type')=="SR"){
-			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&dbindex='+dbindex);
+			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop='+upop+'&dbindex='+dbindex);
 			    };
 			});
 			
