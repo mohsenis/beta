@@ -1096,7 +1096,7 @@ public class PgisEventManager {
 	 *Queries geographic allocation of service for transit agency reports
 	 *0:county 1:census tracts 2:census places 3:urban areas 4:ODOT region 5:congressional district
 	 */
-	public static List<GeoR> geoallocation(int type, String agencyId, int dbindex, String username) 
+	public static List<GeoR> geoallocation(int type, String agencyId, int dbindex, String username, int urbanPop) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
@@ -1128,13 +1128,18 @@ public class PgisEventManager {
     	  areaquery = "areas as (select tractid as areaid, tname as areaname, tract.population, tract.landarea, tract.waterarea from census_tracts tract)";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)";
+      } else if (type==3){//census urban
+    	  criteria = Types.getIdColumnName(type);
+    	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population, landarea, waterarea from " + Types.getTableName(type)+" where population>"+urbanPop+")";
+    	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
+    	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)";
       } else if (type==4) { //ODOT Regions
     	  criteria = Types.getIdColumnName(type);
     	  areaquery = "areas as (select odotregionid as areaid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties, "
     	  		+ "sum(population) as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname)";
     	  selectquery = " select areas.areaid, areaname, counties, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)";
-      } else {// census place, urban area, or congressional district    	  
+      } else {// census place, or congressional district    	  
     	  criteria = Types.getIdColumnName(type);
     	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population, landarea, waterarea from " + Types.getTableName(type)+")";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "

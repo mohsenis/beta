@@ -1169,7 +1169,7 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/GeoCSRA")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCSRA(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("type") Integer type, @QueryParam("agency") String agency, @QueryParam("username") String username ) throws JSONException {
+	public Object getGCSRA(@QueryParam("upop") int urbanPop, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("type") Integer type, @QueryParam("agency") String agency, @QueryParam("username") String username ) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
@@ -1188,7 +1188,7 @@ Loop:  	for (Trip trip: routeTrips){
 			response.metadata = "Report Type:"+Types.getAreaName(type)+" Summary Report ;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
 	    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		}		
-		List<GeoR> results = PgisEventManager.geoallocation(type, agency, dbindex, username);
+		List<GeoR> results = PgisEventManager.geoallocation(type, agency, dbindex, username, urbanPop);
 		index++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));		
 		response.type = Types.getAreaName(type);		
@@ -1714,14 +1714,20 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
 	@Path("/GeoUASR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGUASR(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
+	public Object getGUASR(@QueryParam("pop") Integer upop, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
+		
 		List<Urban> allurbanareas = new ArrayList<Urban> ();
 		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		try {
-			allurbanareas = EventManager.geturban(dbindex);
+			if (upop>-1){
+				allurbanareas = EventManager.geturbansbypop(upop,dbindex);
+	       	}else{
+	       		allurbanareas = EventManager.geturban(dbindex);
+	       	}
+			
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

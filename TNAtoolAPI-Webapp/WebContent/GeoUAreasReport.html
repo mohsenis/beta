@@ -23,6 +23,7 @@ var qstringx = '0.25';
 var progVal = 0; 
 var qstringd = '';
 var agencyId = getURIParameter("agency");
+var upop = getURIParameter("pop");
 var nameString = ''
 var dbindex = parseInt(getURIParameter("dbindex"));
 var d = new Date();
@@ -115,9 +116,9 @@ $(document).ready(function(){
 	timeVar = setInterval(progress, 100);
 	
 	//document.getElementById("Sradius").value = window.opener.qstringx;
-	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=3'+'&dbindex='+dbindex+'&username='+getSession();
+	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&type=3'+'&dbindex='+dbindex+'&username='+getSession();
 	if (agencyId!=null){
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?key='+ key+'&agency='+agencyId+'&type=3'+'&dbindex='+dbindex+'&username='+getSession();
+		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&agency='+agencyId+'&type=3'+'&dbindex='+dbindex+'&username='+getSession();
 	}
 	$.ajax({
 		type: 'GET',

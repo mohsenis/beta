@@ -1161,6 +1161,7 @@ $mylist
 		    		'<li role="presentation"><a id="CPSR" href="#"><b>Census Places Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="CDSR" href="#"><b>Congressional Districts Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="UASR" href="#"><b>Urban Areas Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="AUASR" href="#"><b>Aggregated Urban Areas Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="ORSR" href="#"><b>ODOT Transit Regions Reports</b></a></li>'+
 		    		'</ul></li>'+
 		    		'</ul></li>'+
@@ -1174,7 +1175,7 @@ $mylist
 		    		'<li role="presentation" onclick="return;"><a id="Emp" href="#" style="cursor:default"><b>Employment Reports</b></a>'+
 		    		'<li role="presentation" onclick="return;"><a id="T6" href="#" style="cursor:default"><b>Title VI Reports</b></a></ul>');
 		    		
-		    		
+		    	
 		 
 			div.appendTo(titlebar);
 			$( "#rmenu" ).menu();
@@ -1253,6 +1254,8 @@ $mylist
 			    }else if(casestring=="CDSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="UASR"){
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex);    		
+			    }else if(casestring=="AUASR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="ORSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex/*+'&username='+getSession()*/);	    		
