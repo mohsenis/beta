@@ -43,6 +43,10 @@ var tmp = '<tr><th id="an">State <em title="Name of the state"><img src="images/
 '<th>Service Miles Per Square Mile <em title="Service miles divided by the area of the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Miles of Service Per Capita <em title="Service miles divided by the population of the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Population Served (Unduplicated) <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>50K+ Urban Areas Population Served (Unduplicated) <em title="Summation of unduplicated population of urban areas with over 50,000 population within an X-mile radius (i.e., stop distance) of all stops within the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total population of 50K+ Urban Areas <em title="Total population of urban areas with over 50,000 population within the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>50K- Urban Areas Population Served (Unduplicated) <em title="Summation of unduplicated population of urban areas with less 50,000 population within an X-mile radius (i.e., stop distance) of all stops within the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Total population of 50K- Urban Areas <em title="Total population of urban areas with less than 50,000 population within the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Percent of Population Served <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given state divided by total population of the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Percent of Population Served at Level of Service <em title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given state that receives a specified minimum level of service divided by total population of the given geographic area. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Percent of Population Unserved <em title="100 minus percent of population served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -95,13 +99,32 @@ $(document).ready(function(){
 		async: true,
 		success: function(item){			
 			$('h2').append(item.AreaName+' Extended Report <br><hr>');	
-			html = html + '<tr><td>' + item.AreaName +'</td><td class="details-control"></td><td>' + numberconv(item.RouteMiles) +'</td><td>'+ numberconv(item.StopsPersqMile) 
-			+'</td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) + '</td><td class="serviceCol">'+ numberconv(item.ServiceHours)+ '</td><td class="serviceCol">'+ numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'
-			+ numberconv(item.ServiceMilesPersqMile) +'</td><td  class="serviceCol">'+numberconv(item.MilesofServicePerCapita)+'</td><td class="serviceCol">' + numberconv(item.PopWithinX) 
-			+'</td><td class="serviceCol">' + numberconv(item.PopServed)+'</td><td class="serviceCol">' + numberconv(item.PopServedAtLoService)+'</td><td class="serviceCol">'+ numberconv(item.PopUnServed)+'</td><td class="serviceCol">' +
-			numberconv(item.ServiceStops)+'</td><td class="serviceCol">' + numberconv(item.PopServedByService)+'</td><td class="serviceCol">'+ item.ServiceDays+
-			'</td><td class="serviceCol">'+ item.HoursOfService+'</td><td>$'+item.AverageFare+'</td><td>$'+item.MedianFare+'</td><td>$'+item.MinFare+
-			'</td><td>$'+item.MaxFare+'</td><td>'+item.metadata+'</td>';
+			html = html + '<tr><td>' + item.AreaName 
+			+'</td><td class="details-control"></td><td>' + numberconv(item.RouteMiles) 
+			+'</td><td>'+ numberconv(item.StopsPersqMile) 
+			+'</td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) 
+			+ '</td><td class="serviceCol">' + numberconv(item.ServiceHours)
+			+ '</td><td class="serviceCol">' + numberconv(item.ServiceMiles)
+			+ '</td><td class="serviceCol">' + numberconv(item.ServiceMilesPersqMile) 
+			+ '</td><td class="serviceCol">' + numberconv(item.MilesofServicePerCapita)
+			+ '</td><td class="serviceCol">' + numberconv(item.PopWithinX)
+			+ '</td><td class="serviceCol">' + numberconv(item.PopServedOver50k)
+			+ '</td><td>' + numberconv(item.TotalPopOver50k)
+			+ '</td><td class="serviceCol">' + numberconv(item.PopServedBelow50k)
+			+ '</td><td>' + numberconv(item.TotalPopBelow50k)
+			+ '</td><td class="serviceCol">' + numberconv(item.PopServed)
+			+ '</td><td class="serviceCol">' + numberconv(item.PopServedAtLoService)
+			+ '</td><td class="serviceCol">' + numberconv(item.PopUnServed)
+			+ '</td><td class="serviceCol">' + numberconv(item.ServiceStops)
+			+ '</td><td class="serviceCol">' + numberconv(item.PopServedByService)
+			+ '</td><td class="serviceCol">'+ item.ServiceDays
+			+ '</td><td class="serviceCol">'+ item.HoursOfService
+			+ '</td><td>$'+item.AverageFare 
+			+ '</td><td>$'+item.MedianFare
+			+ '</td><td>$'+item.MinFare
+			+ '</td><td>$'+item.MaxFare 
+			+ '</td><td>'+item.metadata+'</td>';
+			
 			fAverage.push(item.AverageFare);
 			fMedian.push(item.MedianFare);
 			fMin.push(item.MinFare);
@@ -119,7 +142,7 @@ $(document).ready(function(){
 				"bScrollCollapse": true,
 				"bAutoWidth": false,
 				//"iDisplayWidth": 10,
-				"aoColumnDefs": [{"targets": [17,18,19,20,21],"visible": false}],
+				"aoColumnDefs": [{"targets": [21, 22, 23, 24, 25],"visible": false}],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -132,11 +155,11 @@ $(document).ready(function(){
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
 		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
-		 		                    				  "mColumns": [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]},
+		 		                    				  "mColumns": [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]},
 		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                                      "mColumns": [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]},
+		 		                                      "mColumns": [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]},
 		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                                      "mColumns": [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]} ]
+		 		                                      "mColumns": [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]} ]
 		 		                } 
 		 		            ]
 		        },

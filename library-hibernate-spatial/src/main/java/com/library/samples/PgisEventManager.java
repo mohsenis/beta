@@ -536,7 +536,7 @@ public class PgisEventManager {
 		    			+ "	COALESCE(SUM(cs01), 0)::int cs01,"
 		    			+ "	COALESCE(SUM(cs02), 0)::int cs02"
 		    			+ " FROM multipoints2 LEFT JOIN " + dataSet + " ON ST_within(" + dataSet + ".location, multipoints2.geom) GROUP BY multipoints2.agencyid, multipoints2.agencyname";
-		    	//System.out.println(query);
+		    	System.out.println(query);
 		    	
 		    	try {
 					stmt = connection.createStatement();
@@ -692,7 +692,7 @@ public class PgisEventManager {
 		    		+ "		ORDER BY " + criteria1
 		    		+ "	) "
 		    		+ criteria2;
-		    //System.out.println(query);
+		    System.out.println(query);
 			    try {
 			    	stmt = connection.createStatement();
 					ResultSet rs = stmt.executeQuery(query); 
@@ -821,6 +821,7 @@ public class PgisEventManager {
 	    					+ "    				ON blocks2.countyid = oregon_titlevi.county_id"
 	    					+ "    				GROUP BY id, name";
 	    			
+	    				System.out.println(query);
 	    				ResultSet rs = stmt.executeQuery(query); 
 	    				
 	    				while (rs.next()){
@@ -929,6 +930,7 @@ public class PgisEventManager {
 		    		+ "		ORDER BY " + criteria1
 		    		+ "	)"
 		    		+  criteria2;
+		    System.out.println(query);
 
 		    try {
 		    	stmt = connection.createStatement();
@@ -994,11 +996,12 @@ public class PgisEventManager {
     	  criteria2 = "block."+Types.getIdColumnName(type);
       }
       String querytext = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), stops as (select id, agencyid, "+column+", location from "
-      		+ "gtfs_stops stop inner join aids on stop.agencyid = aids.aid where "+criteria1+"='"+areaId+"'), census as (select population, poptype from "
+      		+ "gtfs_stops stop inner join aids on stop.agencyid = aids.aid), census as (select population, poptype from "
       		+ "census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+criteria2 +"='"+areaId+"' group by block.blockid), urbanpop as "
       		+ "(select COALESCE(sum(population),0) upop from census where poptype = 'U'), ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'),"
       		+ " stopcount as (select count(stops.id) as stopscount from stops) select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop, COALESCE(rpop,0) as "
       		+ "ruralpop from stopcount inner join urbanpop on true inner join ruralpop on true";
+//      System.out.println(querytext);
       long[] results = new long[3];
       try {
         stmt = connection.createStatement();
@@ -1049,11 +1052,11 @@ public class PgisEventManager {
       		+"trip.id = map.tripid and trip.agencyid = map.agencyid where map."+Types.getIdColumnName(type)+"='"+areaId+"'),service as (select COALESCE(sum(length),0) as svcmiles,"
       		+ " COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips),stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, "
       		+ "stop.location as location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and "
-      		+ "stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where "+criteria+"='"+areaId+"' group by "
+      		+ "stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by "
       		+ "stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>="+LOS+"),stops as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location "
       		+ "as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times "
       		+ "stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where "
-      		+criteria+"='"+areaId+"' and stime.arrivaltime>0 and stime.departuretime>0 group by stime.stop_agencyid, stime.stop_id, stop.location), svchrs as (select "
+      		+ "stime.arrivaltime>0 and stime.departuretime>0 group by stime.stop_agencyid, stime.stop_id, stop.location), svchrs as (select "
       		+ "COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), concom as (select distinct map."+Types.getIdColumnName(type)+" from "
       		+Types.getTripMapTableName(type)+" map inner join trips on trips.aid=map.agencyid and trips.tripid=map.tripid),concomnames as (select coalesce(string_agg(distinct "
       		+Types.getNameColumn(type)+",'; ' order by "+Types.getNameColumn(type)+"),'-') as connections from concom inner join "+Types.getTableName(type)+" using("
@@ -1091,6 +1094,95 @@ public class PgisEventManager {
       dropConnection(connection);      
       return response;
     }
+	
+	public static PopServedMetricsList getPopServedMetrics(String reportType, String[] dates, String[] day, String[] fulldates, double radius, int L, int dbindex, String username) throws SQLException{
+		PopServedMetricsList response = new PopServedMetricsList();
+		Connection connection = makeConnection(dbindex);
+	    Statement stmt = connection.createStatement();
+	    String criteria1 = "";
+		String criteria2 = ""; 
+		String criteria3 = "";
+		String criteria4 = "";
+	    if (reportType.equals("Counties")){
+	    	criteria1 = "LEFT(blockid,5)";
+			criteria2 = "census_counties"; 
+			criteria3 = "census_counties"; 
+			criteria4 = "countyid";
+	    }else if(reportType.equals("Census Places")){
+	    	criteria1 = "placeid";
+			criteria2 = "census_places"; 
+			criteria3 = "census_places";
+			criteria4 = "placeid";
+	    }else if(reportType.equals("Congressional Districts")){
+	    	criteria1 = "congdistid";
+			criteria2 = "census_congdists"; 
+			criteria3 = "census_congdists";
+			criteria4 = "congdistid";
+	    }else if(reportType.equals("Urban Areas")){
+	    	criteria1 = "urbanid";
+			criteria2 = "census_urbans"; 
+			criteria3 = "census_urbans";
+			criteria4 = "urbanid";
+	    }else if(reportType.equals("ODOT Transit Regions")){
+	    	criteria1 = "regionid";
+	    	criteria2 = "regions";
+			criteria3 = "(SELECT odotregionid AS regionid, SUM(population) AS population FROM census_counties GROUP BY odotregionid) AS regions"; 
+			criteria4 = "regionid";
+	    }
+	    
+	    String query = "";
+	    query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
+	    		+ "svcids as (";
+	    		for (int i=0; i<dates.length; i++){
+	    	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
+	    	    	  		+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
+	    	    	  		+ "serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+dates[i]+"' and exceptiontype=2) union select serviceid_agencyid, serviceid_id, '"
+	    	    	  		+ fulldates[i] + "' from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+dates[i]+"' and exceptiontype=1)";
+	    	    	  if (i+1<dates.length)
+	    					query+=" union all ";
+	    			} 
+	    query += "), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, map.stopscount as stops "
+	    		+ "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+	    		+ "	inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid),"
+	    		+ " service as (select COALESCE(sum(length),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips),"
+	    		+ " stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, count(trips.aid) as service"
+	    		+ " from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id"
+	    		+ " inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid"
+	    		+ " group by stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>="+L+"),"
+	    		+ " stops as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service"
+	    		+ " from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id"
+	    		+ " inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid"
+	    		+ " where stime.arrivaltime>0 and stime.departuretime>0"
+	    		+ "	group by stime.stop_agencyid, stime.stop_id, stop.location),"
+	    		+ " popserved as (select (population*sum(stops.service)) as population, block.blockid, block.urbanid, block.regionid, block.congdistid, block.placeid"
+	    		+ " from census_blocks block inner join stops on st_dwithin(block.location, stops.location,"+radius+")"
+	    		+ "	group by blockid),"
+	    		+ " popatlos as (select population, poptype , block.blockid, block.urbanid, block.regionid, block.congdistid, block.placeid"
+	    		+ " from census_blocks block inner join stopsatlos on st_dwithin(block.location,stopsatlos.location,"+radius+")"
+	    		+ " group by blockid),"
+	    		+ " popatlos1 as (select COALESCE(sum(population),0) as poplos , "+criteria1+" AS "+criteria4+" from popatlos GROUP BY "+criteria1+"),"
+	    		+ " popserved1 as (select COALESCE(sum(population),0) as popserved, "+criteria1+" AS "+criteria4+"  from popserved GROUP BY "+criteria1+"),"
+	    		+ " tempstops as (select id, agencyid, blockid, location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid),"
+	    		+ " census as (select population, block.blockid, block.urbanid, block.regionid, block.congdistid, block.placeid"
+	    		+ " from census_blocks block inner join tempstops on st_dwithin(block.location, tempstops.location, "+radius+") group by block.blockid),"
+	    		+ " popwithinx as (select sum(population) AS popwithinx,  "+criteria1+" AS "+criteria4+" from census GROUP BY "+criteria4+")"
+	    		+ " select COALESCE(poplos::float/population*100,0) AS popatlos, COALESCE(popwithinx::float/population*100,0) AS popwithinx, COALESCE(popserved,0) AS popserved,"+criteria2+"."+criteria4+" AS areaid"
+	    		+ " from "+criteria3+" LEFT JOIN popserved1 USING("+criteria4+")"
+	    		+ " LEFT JOIN popatlos1 USING("+criteria4+")"
+	    		+ " LEFT JOIN popwithinx USING("+criteria4+") order by "+criteria4;	
+	    
+	    System.out.println(query);
+	    ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()){
+			PopServedMetrics instance = new PopServedMetrics();
+			instance.areaID = rs.getString("areaid");
+			instance.popAtLOS = rs.getDouble("popatlos");	// percentage
+			instance.popServed = rs.getInt("popserved");
+			instance.popWithinX = rs.getDouble("popwithinx");	// percentage
+			response.List.add(instance);
+		}		
+		return response; 
+	}
 
 	/**
 	 *Queries geographic allocation of service for transit agency reports
@@ -1157,7 +1249,7 @@ public class PgisEventManager {
     		+ "coalesce(count(distinct(concat(aid,stops.stopid))),0) as stops, coalesce(count(distinct aid),0) as agencies,"
     		+stoproutes+" as areaid from stops inner join gtfs_stop_route_map map on stops.aid_def = map.agencyid_def and stops.stopid = map.stopid group by "
     		+stoproutes+"),"+routesquery+areaquery+ selectquery;
-    System.out.println(query);
+//    System.out.println(query);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
@@ -2057,6 +2149,41 @@ public class PgisEventManager {
 		return response;
 	}
 	
+	/**
+	 * returns the population within x distance of all stops in the state that are located in urban areas
+	 * with over 50k population as well as the population of urban areas with less than 50k pop.
+	 * @param x
+	 * @param username
+	 * @param dbindex
+	 * @return
+	 */
+	public static long[] cutOff50(double x, String username, int dbindex){
+		long[] response = new long[4];
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		try{
+			stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery( "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
+					+ "pops as (select population, poptype, block.urbanid "
+					+ "from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location,stop.location," + String.valueOf(x) + ") inner join aids on "
+					+ "stop.agencyid=aids.aid group by block.blockid), "
+					+ "overfiftypop AS (select sum(pops.population) as overfiftypop from pops INNER JOIN census_urbans USING(urbanid) where census_urbans.population>50000), "
+					+ "belowfiftypop AS (select sum(pops.population) as belowfiftypop from pops INNER JOIN census_urbans USING(urbanid) where census_urbans.population<50000),"
+					+ "totaloverfifty AS (select sum(population) as totaloverfifty from census_urbans WHERE census_urbans.population>50000), "
+					+ "totalbelowfifty AS (select sum(population) as totalbelowfifty from census_urbans WHERE census_urbans.population<50000)"
+					+ "select * from belowfiftypop INNER JOIN overfiftypop ON TRUE INNER JOIN totaloverfifty ON TRUE INNER JOIN totalbelowfifty ON TRUE");	
+			while ( rs.next() ) {
+				response[0] = rs.getLong("overfiftypop");
+				response[1] = rs.getLong("totaloverfifty");
+				response[2] = rs.getLong("belowfiftypop");
+				response[3] = rs.getLong("totalbelowfifty");
+			}
+		} catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	      }
+		dropConnection(connection);
+		return response;
+	}
 	/**
 	 *returns route Miles for the whole state 
 	 */

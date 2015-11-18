@@ -2319,7 +2319,12 @@ Loop:  	for (Trip trip: routeTrips){
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.PopWithinX = String.valueOf(PopWithinX);
 		response.PopUnServed = String.valueOf(Math.round(1E4-((10000.00*PopWithinX/geocounts.get("pop"))))/100.0);
-		response.PopServed = String.valueOf(Math.round((10000.00*PopWithinX/geocounts.get("pop")))/100.00);		
+		response.PopServed = String.valueOf(Math.round((10000.00*PopWithinX/geocounts.get("pop")))/100.00);	
+		long[] pop50kCutOff = PgisEventManager.cutOff50(x, username, dbindex);
+		response.PopServedOver50k = String.valueOf(pop50kCutOff[0]);
+		response.TotalPopOver50k = String.valueOf(pop50kCutOff[1]);
+		response.PopServedBelow50k = String.valueOf(pop50kCutOff[2]);
+		response.TotalPopBelow50k = String.valueOf(pop50kCutOff[3]);
 	
 		try {
 			Thread.sleep(1000);
@@ -2356,8 +2361,6 @@ Loop:  	for (Trip trip: routeTrips){
     	String[] sdates = datedays[0];
     	String[] days = datedays[1];
     	
-    	
-    	//String username = "admin";
     	GeoXR response = new GeoXR();
     	GeoArea instance = EventManager.QueryGeoAreabyId(areaId, type, dbindex);
     	response.metadata = "Report Type:"+instance.getTypeName()+" Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
@@ -2443,6 +2446,35 @@ Loop:  	for (Trip trip: routeTrips){
 		return response;
 		
     }
+	
+	/**
+	 * Gets the population served and population served at level of service for geographic areas.
+	 * 
+	 * @param reportType
+	 * @param date
+	 * @param radius
+	 * @param L
+	 * @param dbindex
+	 * @param username
+	 * @return
+	 * @throws SQLException
+	 */
+	@GET
+	@Path("/popserved")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getPopServedMetrics(@QueryParam("report") String reportType, @QueryParam("day") String date, @QueryParam("radius") double radius, @QueryParam("L") int L,
+			@QueryParam("dbindex") int dbindex, @QueryParam("username") String username) throws SQLException{
+		String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = fulldate(dates);
+    	String[] sdates = datedays[0];
+    	String[] days = datedays[1];
+		PopServedMetricsList response = new PopServedMetricsList();
+		response = PgisEventManager.getPopServedMetrics(reportType, sdates, days, fulldates, radius, L, dbindex, username);
+		response.metadata = "Report Type: " + reportType + " Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+		    	"Selected Database:" +Databases.dbnames[dbindex]+";Populatiob Search Radius(miles):"+String.valueOf(radius) + ";"+";Minimum Level of Service:"+String.valueOf(L) + ";" + DbUpdate.VERSION;
+		return response;		
+	}
 	
 	/**
 	 * Generates The multimodal hubs report

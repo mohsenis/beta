@@ -164,7 +164,7 @@ $(document).ready(function(){
 			}});
 			
 			var table = $('#RT').DataTable( {
-				"scrollX": "98%",
+				"scrollX": true,
 				"paging": true,
 				"iDisplayLength": 14,
 				"sScrollX": "100%",				
@@ -221,7 +221,7 @@ $(document).ready(function(){
 		            
 		        '</table>';
 		    }
-		    $('#RT_wrapper').css("width", $('#RT').css("width"));
+		    //$('#RT_wrapper').css("width", $('#RT').css("width"));
 		    $('#RT_wrapper').css("margin", "auto");
 			$("#RT_length").remove();
 		    $("#RT_filter").insertBefore("#RT_info");

@@ -54,6 +54,22 @@ public class GeoXR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String PopServedOver50k;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String TotalPopOver50k;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String TotalPopBelow50k;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String PopServedBelow50k;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String PopServed;
 	
 	@XmlAttribute
