@@ -1215,9 +1215,15 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
 	@Path("/emp")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+	public Object getEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("day") String date, @QueryParam("radius") double radius, @QueryParam("L") int L,
+			@QueryParam("dbindex") int dbindex, @QueryParam("username") String username ) throws JSONException {
     	EmpDataList results = new EmpDataList();
-    	results = PgisEventManager.getEmpData(dataSet, reportType, dbindex, username);
+    	String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = fulldate(dates);
+    	String[] sdates = datedays[0];
+    	String[] days = datedays[1];
+    	results = PgisEventManager.getEmpData(dataSet, reportType, sdates, days, fulldates, radius, L, dbindex, username);
     	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;  	
     	return results;
@@ -2446,36 +2452,7 @@ Loop:  	for (Trip trip: routeTrips){
 		return response;
 		
     }
-	
-	/**
-	 * Gets the population served and population served at level of service for geographic areas.
-	 * 
-	 * @param reportType
-	 * @param date
-	 * @param radius
-	 * @param L
-	 * @param dbindex
-	 * @param username
-	 * @return
-	 * @throws SQLException
-	 */
-	@GET
-	@Path("/popserved")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getPopServedMetrics(@QueryParam("report") String reportType, @QueryParam("day") String date, @QueryParam("radius") double radius, @QueryParam("L") int L,
-			@QueryParam("dbindex") int dbindex, @QueryParam("username") String username) throws SQLException{
-		String[] dates = date.split(",");
-    	String[][] datedays = daysOfWeekString(dates);
-    	String[] fulldates = fulldate(dates);
-    	String[] sdates = datedays[0];
-    	String[] days = datedays[1];
-		PopServedMetricsList response = new PopServedMetricsList();
-		response = PgisEventManager.getPopServedMetrics(reportType, sdates, days, fulldates, radius, L, dbindex, username);
-		response.metadata = "Report Type: " + reportType + " Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-		    	"Selected Database:" +Databases.dbnames[dbindex]+";Populatiob Search Radius(miles):"+String.valueOf(radius) + ";"+";Minimum Level of Service:"+String.valueOf(L) + ";" + DbUpdate.VERSION;
-		return response;		
-	}
-	
+		
 	/**
 	 * Generates The multimodal hubs report
 	 */

@@ -351,27 +351,11 @@
 		});		
 	});
 	
-	function serviceMetricsAjax(){
-		alert(w_qstringd);
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/popserved?report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
-			async: false,
-			success: function(d){
-				var temp = d.List;
-				temp.forEach(function(i, ind, arr){
-					serviceMetrics[i.areaID] = i;
-				});				
-			}
-		});
-	}
-	
 	function racAjax(sRadius){
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + document.getElementById("reportType").value + sRadius + '&dbindex='+dbindex+'&username='+getSession(),
+			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
 			async: false,
 			success: function(d){
 				var temp = d.EmpDataList;
@@ -385,10 +369,11 @@
 	}
 	
 	function wacAjax(sRadius){
+		alert(w_qstringd);
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + document.getElementById("reportType").value + sRadius + '&dbindex='+dbindex+'&username='+getSession(),
+			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
 			async: false,
 			success: function(d){
 				var temp = d.EmpDataList;
@@ -396,6 +381,7 @@
 				wacData.EmpDataList2 = [];
 				temp.forEach(function(i, ind, arr){
 					wacData.EmpDataList2.push(i);
+					console.log(i);
 				});
 			}
 		});
@@ -430,8 +416,14 @@
 			}
 			 
 			nodesList.forEach (function (item, index, array){
-				y += '<th>'+ tree.get_text(item) +' (RAC)</th>';
-				y += '<th>'+ tree.get_text(item) +' (WAC)</th>';
+				y += '<th>'+ tree.get_text(item) +' (RAC)</th>'
+					+'<th>'+ tree.get_text(item) +' Pop. Served (RAC)</th>'
+					+'<th>'+ tree.get_text(item) +' Pop. SbS (RAC)</th>'
+					+'<th>'+ tree.get_text(item) +' Pop. LOS (RAC)</th>';
+				y += '<th>'+ tree.get_text(item) +' (WAC)</th>'
+					+'<th>'+ tree.get_text(item) +' Pop. Served (WAC)</th>'
+					+'<th>'+ tree.get_text(item) +' Pop. SbS (WAC)</th>'
+					+'<th>'+ tree.get_text(item) +' Pop. LOS (WAC)</th>';
 			});
 		}else if (racBool){
 			if ($('#reportType').val() == 'Agencies'){
@@ -441,7 +433,10 @@
 			}
 			
 			nodesList.forEach (function (item, index, array){				
-				y += '<th>'+ tree.get_text(item) +' (RAC)</th>';
+				y += '<th>'+ tree.get_text(item) +' (RAC)</th>'
+				+ '<th>'+ tree.get_text(item) +' Pop. Served (RAC)</th>'
+				+ '<th>'+ tree.get_text(item) +' Pop. Served by Service (RAC)</th>'
+				+ '<th>'+ tree.get_text(item) +' Pop. at LOS (RAC)</th>';
 			});	
 		}else{
 			if ($('#reportType').val() == 'Agencies'){
@@ -450,7 +445,10 @@
 				y += '<th>Total number of employees working in the area (WAC)</th>';
 			}
 			nodesList.forEach (function (item, index, array){				
-				y += '<th>'+ tree.get_text(item) +' (WAC)</th>';
+				y += '<th>'+ tree.get_text(item) +' (WAC)</th>'
+				+ '<th>'+ tree.get_text(item) +' Pop. Served (WAC)</th>'
+				+ '<th>'+ tree.get_text(item) +' Pop. Served by Service (WAC)</th>'
+				+ '<th>'+ tree.get_text(item) +' Pop. at LOS (WAC)</th>';
 			});
 		}
 		return y;
@@ -489,7 +487,7 @@
 
 	function exportbutton(){
 		var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
-		window.open(uri, 'AgencySummaryReport.csv');
+		window.open(uri, 'EmploymentReport.csv');
 	}
 	
 	function dbchange(){
@@ -521,10 +519,7 @@
 				addDates: [new Date()]
 			});
 		}
-		//dates = $('#datepicker').multiDatesPicker('getDates');
 		w_qstringd = dates.join(",");
-		alert(w_qstringd);
-		//localStorage.setItem(keyName, w_qstringd);
 		
 		// close slidebar
 		mySlidebar.slidebars.close();
@@ -538,12 +533,10 @@
 				'<th id="tablename">Agency Name</em></th>';
 		}else{
 			tmp = 	'<tr><th id="tableid">Area ID</em></th>'+
-			'<th id="tablename">Area Name</em></th>'+
-			'<th id="tablename">Percent of Population Served</em></th>'+
-			'<th id="tablename">Percent of Population Served at Level of Service</em></th>';
+			'<th id="tablename">Area Name</em></th>';
 		}
-			tmp += getTableHeaders() +
-					'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+		tmp += getTableHeaders() +
+				'<th>MetaData</th></tr>';
 		html += '<thead>'+tmp+'</thead><tbody>';
 		if (racBool){
 			var sRadius = '';
@@ -558,8 +551,7 @@
 				sRadius = ',' + $('#Sradius').val() * 1609.34;
 			}
 			wacAjax(sRadius);
-		}
-		if (document.getElementById("reportType").value != "Agencies") serviceMetricsAjax();
+		}		
 		openReport2();
 	}
 	
@@ -598,38 +590,57 @@
 			var resultSetRac = {};
 			for (var i=0; i<racData.EmpDataList2.length;i++){
 				html += '<tr><td>'+ racData.EmpDataList2[i].id + '</a></td>'+
-				'<td>' + racData.EmpDataList2[i].name + '</td>';
-				
-				if ($('#reportType').val() != 'Agencies'){
-					html += '<td>' + addPercent(serviceMetrics[item.id].popWithinX.toFixed(2)) + '</td>'+
-					'<td>' + addPercent(serviceMetrics[item.id].popAtLOS.toFixed(2)) + '</td>';
-				}
-				
-				html += '<td>' + numWithCommas(racData.EmpDataList2[i].c000) + '</td>'+
+				'<td>' + racData.EmpDataList2[i].name + '</td>'+
+				'<td>' + numWithCommas(racData.EmpDataList2[i].c000) + '</td>'+
 				'<td>' + numWithCommas(wacData.EmpDataList2[i].c000) + '</td>';
 				
 				var resultSetRac = {};
 				var resultSetWac = {};
 				$('.jstree-leaf').each(function(){
 					resultSetRac[$(this).attr('id')] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
+					resultSetRac[$(this).attr('id')+'los'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
+					resultSetRac[$(this).attr('id')+'within'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
+					resultSetRac[$(this).attr('id')+'served'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
 				});
 				$('.jstree-leaf').each(function(){
 					resultSetWac[$(this).attr('id')] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
+					resultSetWac[$(this).attr('id')+'los'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
+					resultSetWac[$(this).attr('id')+'within'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
+					resultSetWac[$(this).attr('id')+'served'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
 				});
-				
+				console.log(resultSetWac);
 				// filling in the other columns of the datatable
 				for (var index in tableContent){
 					var racSummation = 0;
+					var racPopServedSummation = 0;
+					var racPopAtLOSSummation = 0;
+					var racServedByServiceSummation = 0;
 					var wacSummation = 0;
-					tableContent[index][1].forEach(function(i, ind, arr){
-						var node = $('#jstree').find("[id='"+i+"']");
+					var wacPopServedSummation = 0;
+					var wacPopAtLOSSummation = 0;
+					var wacServedByServiceSummation = 0;
+					tableContent[index][1].forEach(function(j, ind, arr){
+						
+						var node = $('#jstree').find("[id='"+j+"']");
 						if (tree.is_selected(node)){
-							racSummation += resultSetRac[i];
-							wacSummation += resultSetWac[i];	
+							racSummation += resultSetRac[j];
+							racPopServedSummation += resultSetRac[j+'within'];
+							racPopAtLOSSummation += resultSetRac[j+'los'];
+							racServedByServiceSummation += resultSetRac[j+'served'];
+							wacSummation += resultSetWac[j];
+							wacPopServedSummation += resultSetWac[j+'within'];
+							wacPopAtLOSSummation += resultSetWac[j+'los'];
+							wacServedByServiceSummation += resultSetWac[j+'served'];
 						}							
 					});
-					html+='<td>' + numWithCommas(racSummation) + '</td>';
-					html+='<td>' + numWithCommas(wacSummation) + '</td>';
+					html+='<td>' + numWithCommas(racSummation) + '</td>'
+					+ '<td>' + numWithCommas(racPopServedSummation) + '</td>'
+					+ '<td>' + numWithCommas(racServedByServiceSummation) + '</td>'
+					+ '<td>' + numWithCommas(racPopAtLOSSummation) + '</td>';
+					html+='<td>' + numWithCommas(wacSummation) + '</td>'
+					+ '<td>' + numWithCommas(wacPopServedSummation) + '</td>'
+					+ '<td>' + numWithCommas(wacServedByServiceSummation) + '</td>'
+					+ '<td>' + numWithCommas(wacPopAtLOSSummation) + '</td>';;
 				}
 				html += '<td>' + racData.metadata + '</td></tr>';
 			};
@@ -638,28 +649,36 @@
 			
 			$.each(racData.EmpDataList2, function(i,item){
 				$('.jstree-leaf').each(function(){
-					resultSetRac[$(this).attr('id')] = item[($(this).attr('id')).toLowerCase()];
+					resultSetRac[$(this).attr('id')] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
+					resultSetRac[$(this).attr('id')+'los'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
+					resultSetRac[$(this).attr('id')+'within'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
+					resultSetRac[$(this).attr('id')+'served'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
 				});
 				
 				html += '<tr><td>'+ item.id + '</a></td>'+
-				'<td>' + item.name + '</td>';
-				if ($('#reportType').val() != 'Agencies'){
-					html += '<td>' + addPercent(serviceMetrics[item.id].popWithinX.toFixed(2)) + '</td>'+
-							'<td>' + addPercent(serviceMetrics[item.id].popAtLOS.toFixed(2)) + '</td>';
-				}
-				html+='<td>' + numWithCommas(item.c000) + '</td>';				
+				'<td>' + item.name + '</td>' +				
+				'<td>' + numWithCommas(item.c000) + '</td>';				
 			
 			
 			// filling in the other columns of the datatable
 			for (var index in tableContent){
-				var summation = 0;
-				tableContent[index][1].forEach(function(i, ind, arr){
-					var node = $('#jstree').find("[id='"+i+"']");
+				var racSummation = 0;
+				var racPopServedSummation = 0;
+				var racPopAtLOSSummation = 0;
+				var racServedByServiceSummation = 0;
+				tableContent[index][1].forEach(function(j, ind, arr){
+					var node = $('#jstree').find("[id='"+j+"']");
 					if (tree.is_selected(node)){
-						summation += resultSetRac[i];	
+						racSummation += resultSetRac[j];
+						racPopServedSummation += resultSetRac[j+'within'];
+						racPopAtLOSSummation += resultSetRac[j+'los'];
+						racServedByServiceSummation += resultSetRac[j+'served'];	
 					}							
 				});
-				html+='<td>' + numWithCommas(summation) + '</td>';
+				html+='<td>' + numWithCommas(racSummation) + '</td>'
+				+ '<td>' + numWithCommas(racPopServedSummation) + '</td>'
+				+ '<td>' + numWithCommas(racServedByServiceSummation) + '</td>'
+				+ '<td>' + numWithCommas(racPopAtLOSSummation) + '</td>';
 			}
 			html += '<td>' + racData.metadata + '</td></tr>';
 			});
@@ -667,31 +686,38 @@
 			var resultSetWac = {};
 			$.each(wacData.EmpDataList2, function(i,item){
 				$('.jstree-leaf').each(function(){
-					resultSetWac[$(this).attr('id')] = item[($(this).attr('id')).toLowerCase()];
+					resultSetWac[$(this).attr('id')] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
+					resultSetWac[$(this).attr('id')+'los'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
+					resultSetWac[$(this).attr('id')+'within'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
+					resultSetWac[$(this).attr('id')+'served'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
 				});
-				html += '<tr><td>'+ item.id + '</a></td>'+
-					'<td>' + item.name + '</td>';
-					if ($('#reportType').val() != 'Agencies'){
-						html += '<td>' + addPercent(serviceMetrics[item.id].popWithinX.toFixed(2)) + '</td>'+
-								'<td>' + addPercent(serviceMetrics[item.id].popAtLOS.toFixed(2)) + '</td>';
-					}
-					html+='<td>' + numWithCommas(item.c000) + '</td>';
+				html += '<tr><td>'+ item.id + '</td>'+
+						'<td>'+ item.name + '</td>'+
+						'<td>' + numWithCommas(item.c000) + '</td>';
 					
 					// filling in the other columns of the datatable
-					for (var index in tableContent){
-						var summation = 0;
-						tableContent[index][1].forEach(function(i, ind, arr){
-							var node = $('#jstree').find("[id='"+i+"']");
-							if (tree.is_selected(node)){
-								summation += resultSetWac[i];	
-							}		
-						});
-						html+='<td>' + numWithCommas(summation) + '</td>';
-					}
-					html += '<td>' + wacData.metadata + '</td></tr>';
+				for (var index in tableContent){
+					var wacSummation = 0;
+					var wacPopServedSummation = 0;
+					var wacPopAtLOSSummation = 0;
+					var wacServedByServiceSummation = 0;
+					tableContent[index][1].forEach(function(j, ind, arr){
+						var node = $('#jstree').find("[id='"+j+"']");
+						if (tree.is_selected(node)){
+							wacSummation += resultSetWac[j];
+							wacPopServedSummation += resultSetWac[j+'within'];
+							wacPopAtLOSSummation += resultSetWac[j+'los'];
+							wacServedByServiceSummation += resultSetWac[j+'served'];	
+						}							
+					});
+					html+='<td>' + numWithCommas(wacSummation) + '</td>'
+					+ '<td>' + numWithCommas(wacPopServedSummation) + '</td>'
+					+ '<td>' + numWithCommas(wacServedByServiceSummation) + '</td>'
+					+ '<td>' + numWithCommas(wacPopAtLOSSummation) + '</td>';
+				}
+				html += '<td>' + wacData.metadata + '</td></tr>';
 			});
-			
-		};
+		}
 		
 		
 		var html2 = '<tfoot>'+tmp+'</tfoot>';
@@ -704,7 +730,7 @@
 			"bSort" : true,
 			"paging": true,	
 			"scrollX": true,
-			"iDisplayLength": 25,
+			"iDisplayLength": 15,
 			"aoColumnDefs": [{"visible": false, "targets": [$('#Emp thead th').length - 1]}],
 			"order": [[ 0, "asc" ]],
 			"dom": 'T<"clear">lfrtip',
