@@ -369,7 +369,6 @@
 	}
 	
 	function wacAjax(sRadius){
-		alert(w_qstringd);
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
@@ -408,47 +407,47 @@
 		var y = "";
 		if (racBool && wacBool){
 			if ($('#reportType').val() == 'Agencies'){
-				y += '<th>Total number of employees served by the agnecy(RAC)</th>'+
-				'<th>Total number of employees served by the agnecy (WAC)</th>';
+				y += '<th>Number of employees served by agnecy (RAC)</th>'+
+				'<th>Number of employees served by agnecy (WAC)</th>';
 			}else{
-				y += '<th>Total number of employees residing in the area (RAC)</th>'+
-				'<th>Total number of employees working in the area (WAC)</th>';
+				y += '<th>Number of employees residing in the area (RAC)</th>'+
+				'<th>Number of employees working in the area (WAC)</th>';
 			}
 			 
 			nodesList.forEach (function (item, index, array){
-				y += '<th>'+ tree.get_text(item) +' (RAC)</th>'
-					+'<th>'+ tree.get_text(item) +' Pop. Served (RAC)</th>'
-					+'<th>'+ tree.get_text(item) +' Pop. SbS (RAC)</th>'
-					+'<th>'+ tree.get_text(item) +' Pop. LOS (RAC)</th>';
-				y += '<th>'+ tree.get_text(item) +' (WAC)</th>'
-					+'<th>'+ tree.get_text(item) +' Pop. Served (WAC)</th>'
-					+'<th>'+ tree.get_text(item) +' Pop. SbS (WAC)</th>'
-					+'<th>'+ tree.get_text(item) +' Pop. LOS (WAC)</th>';
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (RAC)<em title="Total '+tree.get_text(item)+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y +='<th>'+ tree.get_text(item) +' EMPS (RAC)<em title="Employees Served: '+tree.get_text(item)+' employees living within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: '+tree.get_text(item)+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSS (RAC)<em title="Employees Served by Service: '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (WAC)<em title="Total '+tree.get_text(item)+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y += '<th>'+ tree.get_text(item) +' EMPS (WAC)<em title="Employees Served: '+tree.get_text(item)+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: '+tree.get_text(item)+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSS (WAC)<em title="Employees Served by Service: '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});
 		}else if (racBool){
 			if ($('#reportType').val() == 'Agencies'){
-				y += '<th>Total number of employees served by the agnecy (RAC)</th>';
+				y += '<th>Number of employees served by agnecy (RAC)</th>';
 			}else{
-				y += '<th>Total number of employees residing in the area (RAC)</th>';
+				y += '<th>Number of employees residing in the area (RAC)</th>';
 			}
 			
 			nodesList.forEach (function (item, index, array){				
-				y += '<th>'+ tree.get_text(item) +' (RAC)</th>'
-				+ '<th>'+ tree.get_text(item) +' Pop. Served (RAC)</th>'
-				+ '<th>'+ tree.get_text(item) +' Pop. Served by Service (RAC)</th>'
-				+ '<th>'+ tree.get_text(item) +' Pop. at LOS (RAC)</th>';
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (RAC)<em title="Total '+tree.get_text(item)+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y +='<th>'+ tree.get_text(item) +' EMPS (RAC)<em title="Employees Served: '+tree.get_text(item)+' employees living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: '+tree.get_text(item)+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSS (RAC)<em title="Employees Served by Service: '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});	
 		}else{
 			if ($('#reportType').val() == 'Agencies'){
-				y += '<th>Total number of employees served by the agnecy (WAC)</th>';
+				y += '<th>Number of employees served by agnecy (WAC)</th>';
 			}else{
-				y += '<th>Total number of employees working in the area (WAC)</th>';
+				y += '<th>Number of employees working in the area (WAC)</th>';
 			}
 			nodesList.forEach (function (item, index, array){				
-				y += '<th>'+ tree.get_text(item) +' (WAC)</th>'
-				+ '<th>'+ tree.get_text(item) +' Pop. Served (WAC)</th>'
-				+ '<th>'+ tree.get_text(item) +' Pop. Served by Service (WAC)</th>'
-				+ '<th>'+ tree.get_text(item) +' Pop. at LOS (WAC)</th>';
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (WAC)<em title="Total '+tree.get_text(item)+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y += '<th>'+ tree.get_text(item) +' EMPS (WAC)<em title="Employees Served: '+tree.get_text(item)+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: '+tree.get_text(item)+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSS (WAC)<em title="Employees Served by Service: '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});
 		}
 		return y;
@@ -458,15 +457,6 @@
 		document.getElementById('displayReport').innerHTML = "";
 		$('#initialText').show();
 	}
-	
-	 function selectFunction(){
-		$('#reportTitle').html($('#reportType').val());
-		if(document.getElementById('reportType').value == 'Agencies'){
-			document.getElementById('LOS').disabled = true;
-		}else{
-			document.getElementById('LOS').disabled = false;
-		}
-	} 
 	
 	function datasetChange(e){
 		if (e.value == 'lodes_blocks_wac'){
@@ -585,30 +575,36 @@
 			}
 		});
 		
-		// making a hashmap of the query results and Filling in the first 3 columns of the datatable
+		// Filling in the first 3 columns of the datatable and making a hashmap of the query results 
 		if (racBool && wacBool){
 			var resultSetRac = {};
 			for (var i=0; i<racData.EmpDataList2.length;i++){
 				html += '<tr><td>'+ racData.EmpDataList2[i].id + '</a></td>'+
-				'<td>' + racData.EmpDataList2[i].name + '</td>'+
-				'<td>' + numWithCommas(racData.EmpDataList2[i].c000) + '</td>'+
-				'<td>' + numWithCommas(wacData.EmpDataList2[i].c000) + '</td>';
+				'<td>' + racData.EmpDataList2[i].name + '</td>';
+				if ($('#reportType').val() == "Agencies"){
+					html += '<td>' + numWithCommas(racData.EmpDataList2[i].c000served) + '</td>'+
+					'<td>' + numWithCommas(wacData.EmpDataList2[i].c000served) + '</td>';
+				}else{
+					html +='<td>' + numWithCommas(racData.EmpDataList2[i].c000) + '</td>'+
+					'<td>' + numWithCommas(wacData.EmpDataList2[i].c000) + '</td>'; 
+				}
+				
 				
 				var resultSetRac = {};
 				var resultSetWac = {};
 				$('.jstree-leaf').each(function(){
-					resultSetRac[$(this).attr('id')] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
+					if ($('#reportType').val() != 'Agencies') resultSetRac[$(this).attr('id')] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
 					resultSetRac[$(this).attr('id')+'los'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
 					resultSetRac[$(this).attr('id')+'within'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
 					resultSetRac[$(this).attr('id')+'served'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
 				});
 				$('.jstree-leaf').each(function(){
-					resultSetWac[$(this).attr('id')] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
+					if ($('#reportType').val() != 'Agencies') resultSetWac[$(this).attr('id')] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
 					resultSetWac[$(this).attr('id')+'los'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
 					resultSetWac[$(this).attr('id')+'within'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
 					resultSetWac[$(this).attr('id')+'served'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
 				});
-				console.log(resultSetWac);
+				
 				// filling in the other columns of the datatable
 				for (var index in tableContent){
 					var racSummation = 0;
@@ -623,24 +619,27 @@
 						
 						var node = $('#jstree').find("[id='"+j+"']");
 						if (tree.is_selected(node)){
-							racSummation += resultSetRac[j];
+							if ($('#reportType').val() != 'Agencies') {
+								racSummation += resultSetRac[j];
+								wacSummation += resultSetWac[j];
+								}
 							racPopServedSummation += resultSetRac[j+'within'];
 							racPopAtLOSSummation += resultSetRac[j+'los'];
 							racServedByServiceSummation += resultSetRac[j+'served'];
-							wacSummation += resultSetWac[j];
+							
 							wacPopServedSummation += resultSetWac[j+'within'];
 							wacPopAtLOSSummation += resultSetWac[j+'los'];
 							wacServedByServiceSummation += resultSetWac[j+'served'];
 						}							
 					});
-					html+='<td>' + numWithCommas(racSummation) + '</td>'
-					+ '<td>' + numWithCommas(racPopServedSummation) + '</td>'
-					+ '<td>' + numWithCommas(racServedByServiceSummation) + '</td>'
-					+ '<td>' + numWithCommas(racPopAtLOSSummation) + '</td>';
-					html+='<td>' + numWithCommas(wacSummation) + '</td>'
-					+ '<td>' + numWithCommas(wacPopServedSummation) + '</td>'
-					+ '<td>' + numWithCommas(wacServedByServiceSummation) + '</td>'
-					+ '<td>' + numWithCommas(wacPopAtLOSSummation) + '</td>';;
+					if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(racSummation) + '</td>';
+					html += '<td>' + numWithCommas(racPopServedSummation) + '</td>'
+					+ '<td>' + numWithCommas(racPopAtLOSSummation) + '</td>'
+					+ '<td>' + numWithCommas(racServedByServiceSummation) + '</td>';
+					if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(wacSummation) + '</td>';
+					html += '<td>' + numWithCommas(wacPopServedSummation) + '</td>'
+					+ '<td>' + numWithCommas(wacPopAtLOSSummation) + '</td>'
+					+ '<td>' + numWithCommas(wacServedByServiceSummation) + '</td>';
 				}
 				html += '<td>' + racData.metadata + '</td></tr>';
 			};
@@ -649,15 +648,16 @@
 			
 			$.each(racData.EmpDataList2, function(i,item){
 				$('.jstree-leaf').each(function(){
-					resultSetRac[$(this).attr('id')] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
+					if ($('#reportType').val() != 'Agencies') resultSetRac[$(this).attr('id')] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
 					resultSetRac[$(this).attr('id')+'los'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
 					resultSetRac[$(this).attr('id')+'within'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
 					resultSetRac[$(this).attr('id')+'served'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
 				});
 				
 				html += '<tr><td>'+ item.id + '</a></td>'+
-				'<td>' + item.name + '</td>' +				
-				'<td>' + numWithCommas(item.c000) + '</td>';				
+				'<td>' + item.name + '</td>' ;				
+				if ($('#reportType').val() == 'Agencies') html += '<td>' + numWithCommas(item.c000served) + '</td>';
+				else html += '<td>' + numWithCommas(item.c000) + '</td>';
 			
 			
 			// filling in the other columns of the datatable
@@ -669,16 +669,16 @@
 				tableContent[index][1].forEach(function(j, ind, arr){
 					var node = $('#jstree').find("[id='"+j+"']");
 					if (tree.is_selected(node)){
-						racSummation += resultSetRac[j];
+						if ($('#reportType').val() != 'Agencies') racSummation += resultSetRac[j];
 						racPopServedSummation += resultSetRac[j+'within'];
 						racPopAtLOSSummation += resultSetRac[j+'los'];
 						racServedByServiceSummation += resultSetRac[j+'served'];	
 					}							
 				});
-				html+='<td>' + numWithCommas(racSummation) + '</td>'
-				+ '<td>' + numWithCommas(racPopServedSummation) + '</td>'
-				+ '<td>' + numWithCommas(racServedByServiceSummation) + '</td>'
-				+ '<td>' + numWithCommas(racPopAtLOSSummation) + '</td>';
+				if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(racSummation) + '</td>'
+				html += '<td>' + numWithCommas(racPopServedSummation) + '</td>'
+				+ '<td>' + numWithCommas(racPopAtLOSSummation) + '</td>'
+				+ '<td>' + numWithCommas(racServedByServiceSummation) + '</td>';
 			}
 			html += '<td>' + racData.metadata + '</td></tr>';
 			});
@@ -686,14 +686,15 @@
 			var resultSetWac = {};
 			$.each(wacData.EmpDataList2, function(i,item){
 				$('.jstree-leaf').each(function(){
-					resultSetWac[$(this).attr('id')] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
+					if ($('#reportType').val() != 'Agencies') resultSetWac[$(this).attr('id')] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
 					resultSetWac[$(this).attr('id')+'los'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
 					resultSetWac[$(this).attr('id')+'within'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
 					resultSetWac[$(this).attr('id')+'served'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
 				});
 				html += '<tr><td>'+ item.id + '</td>'+
-						'<td>'+ item.name + '</td>'+
-						'<td>' + numWithCommas(item.c000) + '</td>';
+						'<td>'+ item.name + '</td>';
+						if ($('#reportType').val() == 'Agencies') html += '<td>' + numWithCommas(item.c000served) + '</td>';
+						else html += '<td>' + numWithCommas(item.c000) + '</td>';
 					
 					// filling in the other columns of the datatable
 				for (var index in tableContent){
@@ -704,16 +705,17 @@
 					tableContent[index][1].forEach(function(j, ind, arr){
 						var node = $('#jstree').find("[id='"+j+"']");
 						if (tree.is_selected(node)){
-							wacSummation += resultSetWac[j];
+							if ($('#reportType').val() != 'Agencies') wacSummation += resultSetWac[j];
 							wacPopServedSummation += resultSetWac[j+'within'];
 							wacPopAtLOSSummation += resultSetWac[j+'los'];
 							wacServedByServiceSummation += resultSetWac[j+'served'];	
 						}							
 					});
-					html+='<td>' + numWithCommas(wacSummation) + '</td>'
-					+ '<td>' + numWithCommas(wacPopServedSummation) + '</td>'
-					+ '<td>' + numWithCommas(wacServedByServiceSummation) + '</td>'
-					+ '<td>' + numWithCommas(wacPopAtLOSSummation) + '</td>';
+					if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(wacSummation) + '</td>';
+					html += '<td>' + numWithCommas(wacPopServedSummation) + '</td>'
+					+ '<td>' + numWithCommas(wacPopAtLOSSummation) + '</td>'
+					+ '<td>' + numWithCommas(wacServedByServiceSummation) + '</td>';
+					
 				}
 				html += '<td>' + wacData.metadata + '</td></tr>';
 			});
@@ -740,7 +742,7 @@
 	        	"aButtons": [
 	 						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
 	 							"sMessage": ""
-	 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
+	 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"Emp\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
 	 		                
 	 		                {
 	 		                    "sExtends":    "collection",
@@ -831,7 +833,7 @@
 					  <option value="lodes_blocks_rac">RAC - Residence Area Characteristic data</option>
 					  <option value="3">WAC & RAC</option>
 				 </select><br></td></tr>
-			<tr><td><label for="reportType"><b>Select report type:</b></label></td><td><select name="reportType" id="reportType" onchange="selectFunction()" style="height:25px;width:12em;">
+			<tr><td><label for="reportType"><b>Select report type:</b></label></td><td><select name="reportType" id="reportType" style="height:25px;width:12em;">
 						  <option value="Counties" selected>Counties</option>
 						  <option value="Census Places">Census Places</option>
 						  <option value="Congressional Districts">Congressional Districts</option>

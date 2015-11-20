@@ -478,121 +478,226 @@ public class PgisEventManager {
 	    String query = "";
 	    
 	    if (reportType.equals("Agencies")){ // returns employment data for a specific agency.
-	    	List<String> agencies = PgisEventManager.getAgencyList(username, dbindex);
-	    	
-    		for (String agencyID: agencies){
-	    	    	
-		    	query = "with aids AS (SELECT agency_id AS aid FROM gtfs_selected_feeds where username='" + username + "'), "
-		    			+ "agencies AS (SELECT id AS agencyid, name as agencyname FROM gtfs_agencies INNER JOIN aids ON gtfs_agencies.defaultid = aids.aid), "
-		    			+ "stopservice AS (SELECT agencyid_def, stopid, agencies.agencyid, agencies.agencyname FROM gtfs_stop_service_map INNER JOIN agencies ON agencies.agencyid = gtfs_stop_service_map.agencyid), "
-		    			+ "stops AS (select stopservice.agencyid, stopservice.agencyname, stopservice.stopid, gtfs_stops.name, lat, lon, location from gtfs_stops inner join stopservice ON gtfs_stops.id = stopservice.stopid AND stopservice.agencyid_def = gtfs_stops.agencyid "
-		    			+ "WHERE stopservice.agencyid = '" + agencyID + "'), "
-		    			+ "multipoints AS (SELECT agencyid, agencyname, ST_Multi(ST_Collect(stops.location)) geom FROM stops GROUP BY agencyid, stops.agencyname), "
-		    			+ "multipoints2 AS (SELECT agencyid, agencyname, ST_Buffer(geom," + radius + ") geom FROM multipoints) "
-		    			+ "SELECT "
-		    			+ "	multipoints2.agencyid AS id, "
-		    			+ "	multipoints2.agencyname AS name, "
-		    			+ "	COALESCE(SUM(c000), 0)::int c000,"
-		    			+ "	COALESCE(SUM(ca01), 0)::int ca01,"
-		    			+ "	COALESCE(SUM(ca02), 0)::int ca02,"
-		    			+ "	COALESCE(SUM(ca03), 0)::int ca03,"
-		    			+ "	COALESCE(SUM(ce01), 0)::int ce01,"
-		    			+ "	COALESCE(SUM(ce02), 0)::int ce02,"
-		    			+ "	COALESCE(SUM(ce03), 0)::int ce03,"
-		    			+ "	COALESCE(SUM(cns01), 0)::int cns01,"
-		    			+ "	COALESCE(SUM(cns02), 0)::int cns02,"
-		    			+ "	COALESCE(SUM(cns03), 0)::int cns03,"
-		    			+ "	COALESCE(SUM(cns04), 0)::int cns04,"
-		    			+ "	COALESCE(SUM(cns05), 0)::int cns05,"
-		    			+ "	COALESCE(SUM(cns06), 0)::int cns06,"
-		    			+ "	COALESCE(SUM(cns07), 0)::int cns07,"
-		    			+ "	COALESCE(SUM(cns08), 0)::int cns08,"
-		    			+ "	COALESCE(SUM(cns09), 0)::int cns09,"
-		    			+ "	COALESCE(SUM(cns10), 0)::int cns10,"
-		    			+ "	COALESCE(SUM(cns11), 0)::int cns11,"
-		    			+ "	COALESCE(SUM(cns12), 0)::int cns12,"
-		    			+ "	COALESCE(SUM(cns13), 0)::int cns13,"
-		    			+ "	COALESCE(SUM(cns14), 0)::int cns14,"
-		    			+ "	COALESCE(SUM(cns15), 0)::int cns15,"
-		    			+ "	COALESCE(SUM(cns16), 0)::int cns16,"
-		    			+ "	COALESCE(SUM(cns17), 0)::int cns17,"
-		    			+ "	COALESCE(SUM(cns18), 0)::int cns18,"
-		    			+ "	COALESCE(SUM(cns19), 0)::int cns19,"
-		    			+ "	COALESCE(SUM(cns20), 0)::int cns20,"
-		    			+ "	COALESCE(SUM(cr01), 0)::int cr01,"
-		    			+ "	COALESCE(SUM(cr02), 0)::int cr02,"
-		    			+ "	COALESCE(SUM(cr03), 0)::int cr03,"
-		    			+ "	COALESCE(SUM(cr04), 0)::int cr04,"
-		    			+ "	COALESCE(SUM(cr05), 0)::int cr05,"
-		    			+ "	COALESCE(SUM(cr07), 0)::int cr07,"
-		    			+ "	COALESCE(SUM(ct01), 0)::int ct01,"
-		    			+ "	COALESCE(SUM(ct02), 0)::int ct02,"
-		    			+ "	COALESCE(SUM(cd01), 0)::int cd01,"
-		    			+ "	COALESCE(SUM(cd02), 0)::int cd02,"
-		    			+ "	COALESCE(SUM(cd03), 0)::int cd03,"
-		    			+ "	COALESCE(SUM(cd04), 0)::int cd04,"
-		    			+ "	COALESCE(SUM(cs01), 0)::int cs01,"
-		    			+ "	COALESCE(SUM(cs02), 0)::int cs02"
-		    			+ " FROM multipoints2 LEFT JOIN " + dataSet + " ON ST_within(" + dataSet + ".location, multipoints2.geom) GROUP BY multipoints2.agencyid, multipoints2.agencyname";
-		    	System.out.println(query);
+    		query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+	    	for (int i=0; i<dates.length; i++){
+	  	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
+	  	    	  		+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
+	  	    	  		+ "serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+dates[i]+"' and exceptiontype=2) union select serviceid_agencyid, serviceid_id, '"
+	  	    	  		+ fulldates[i] + "' from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+dates[i]+"' and exceptiontype=1)";
+	  	    	  if (i+1<dates.length)
+	  					query+=" union all ";
+	  			} 
+	    	query += "), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, map.stopscount as stops "
+			+"from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+			+"inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid), "
+	    	+ "stops as (select stime.trip_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service "
+			+"from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+			+"inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0	"
+			+"group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location), "
+		
+		+"stopsatlostemp as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, count(trips.aid) as service "
+			+"from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+			+"inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid "
+			+"group by stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>="+L+"), "
+		
+		+"stopsatlos0 AS (select map.agencyid, stopsatlostemp.stopid, stopsatlostemp.location, stopsatlostemp.service "
+			+"FROM stopsatlostemp INNER JOIN gtfs_stop_service_map AS map ON stopsatlostemp.stopid = map.stopid AND stopsatlostemp.aid = map.agencyid_def),"
+		+"popatlos as (select "
+			+"c000,ca01,ca02,ca03,ce01,ce02,ce03,cns01,cns02,cns03,cns04,cns05,cns06,cns07,cns08,cns09,cns10,cns11,cns12,cns13,cns14,cns15,cns16,cns17,"
+			+"cns18,cns19,cns20,cr01,cr02,cr03,cr04,cr05,cr07,ct01,ct02,cd01,cd02,cd03,cd04,cs01,cs02,rac.blockid,stopsatlos0.agencyid "
+			+"from "+DS+" rac inner join stopsatlos0 on st_dwithin(rac.location,stopsatlos0.location,"+radius+")), "
+		
+		+"popatlos1 as (select sum(c000) AS c000los,sum(ca01) AS ca01los,sum(ca02) AS ca02los,sum(ca03) AS ca03los,sum(ce01) AS ce01los, "
+			+"sum(ce02) AS ce02los,sum(ce03) AS ce03los,sum(cns01) AS cns01los,sum(cns02) AS cns02los,sum(cns03) AS cns03los,sum(cns04) AS cns04los,"
+			+"sum(cns05) AS cns05los,sum(cns06) AS cns06los,sum(cns07) AS cns07los,sum(cns08) AS cns08los,sum(cns09) AS cns09los,sum(cns10) AS cns10los,"
+			+"sum(cns11) AS cns11los,sum(cns12) AS cns12los,sum(cns13) AS cns13los,sum(cns14) AS cns14los,sum(cns15) AS cns15los,sum(cns16) AS cns16los,"
+			+"sum(cns17) AS cns17los,sum(cns18) AS cns18los,sum(cns19) AS cns19los,sum(cns20) AS cns20los,sum(cr01) AS cr01los,sum(cr02) AS cr02los,"
+			+"sum(cr03) AS cr03los,sum(cr04) AS cr04los,sum(cr05) AS cr05los,sum(cr07) AS cr07los,sum(ct01) AS ct01los,sum(ct02) AS ct02los,sum(cd01) AS cd01los,"
+			+"sum(cd02) AS cd02los,sum(cd03) AS cd03los,sum(cd04) AS cd04los,sum(cs01) AS cs01los,sum(cs02) AS cs02los,	agencyid AS aid "
+			+"FROM popatlos GROUP BY agencyid), "
+		+"popserved as (select "
+			+"c000*(stops.service) as c000served,  ca01*(stops.service) as ca01served,  ca02*(stops.service) as ca02served,  ca03*(stops.service) as ca03served,"
+			+"ce01*(stops.service) as ce01served, ce02*(stops.service) as ce02served,ce03*(stops.service) as ce03served,cns01*(stops.service) as cns01served,"
+			+"cns02*(stops.service) as cns02served,cns03*(stops.service) as cns03served,cns04*(stops.service) as cns04served,cns05*(stops.service) as cns05served,"
+			+"cns06*(stops.service) as cns06served,cns07*(stops.service) as cns07served,cns08*(stops.service) as cns08served,cns09*(stops.service) as cns09served,"
+			+"cns10*(stops.service) as cns10served,cns11*(stops.service) as cns11served,cns12*(stops.service) as cns12served,cns13*(stops.service) as cns13served,"
+			+"cns14*(stops.service) as cns14served,cns15*(stops.service) as cns15served,cns16*(stops.service) as cns16served,cns17*(stops.service) as cns17served,"
+			+"cns18*(stops.service) as cns18served,cns19*(stops.service) as cns19served,cns20*(stops.service) as cns20served,cr01*(stops.service) as cr01served,"
+			+"cr02*(stops.service) as cr02served,cr03*(stops.service) as cr03served,cr04*(stops.service) as cr04served,cr05*(stops.service) as cr05served,"
+			+"cr07*(stops.service) as cr07served,ct01*(stops.service) as ct01served,ct02*(stops.service) as ct02served,cd01*(stops.service) as cd01served,"
+			+"cd02*(stops.service) as cd02served,cd03*(stops.service) as cd03served,cd04*(stops.service) as cd04served,cs01*(stops.service) as cs01served,"
+			+"cs02*(stops.service) as cs02served, blocks.blockid,stops.aid "
+			+"from "+DS+" blocks inner join stops on st_dwithin(blocks.location, stops.location,"+radius+") "
+			+"group by stops.service, blocks.blockid, stops.aid),"
+			+"popserved1 as (select sum(c000served) AS c000served,sum(ca01served) AS ca01served,sum(ca02served) AS ca02served,sum(ca03served) AS ca03served,"
+			+"sum(ce01served) AS ce01served,sum(ce02served) AS ce02served,sum(ce03served) AS ce03served,sum(cns01served) AS cns01served,sum(cns02served) AS cns02served,"
+			+"sum(cns03served) AS cns03served,sum(cns04served) AS cns04served,sum(cns05served) AS cns05served,sum(cns06served) AS cns06served,sum(cns07served) AS cns07served,"
+			+"sum(cns08served) AS cns08served,sum(cns09served) AS cns09served,sum(cns10served) AS cns10served,sum(cns11served) AS cns11served,sum(cns12served) AS cns12served,"
+			+"sum(cns13served) AS cns13served,sum(cns14served) AS cns14served,sum(cns15served) AS cns15served,sum(cns16served) AS cns16served,sum(cns17served) AS cns17served,"
+			+"sum(cns18served) AS cns18served,sum(cns19served) AS cns19served,sum(cns20served) AS cns20served,sum(cr01served) AS cr01served,sum(cr02served) AS cr02served,"
+			+"sum(cr03served) AS cr03served,sum(cr04served) AS cr04served,sum(cr05served) AS cr05served,sum(cr07served) AS cr07served,sum(ct01served) AS ct01served,"
+			+"sum(ct02served) AS ct02served,sum(cd01served) AS cd01served,sum(cd02served) AS cd02served,sum(cd03served) AS cd03served,sum(cd04served) AS cd04served,"
+			+"sum(cs01served) AS cs01served,sum(cs02served) AS cs02served,aid from popserved GROUP BY aid), "
+			+"tempstops0 as (select id, agencyid, blockid, location "
+			+"from gtfs_stops stop inner join aids on stop.agencyid = aids.aid), "
+			+"tempstops AS (SELECT tempstops0.id, map.agencyid, tempstops0.blockid, tempstops0.location "
+			+"FROM tempstops0 INNER JOIN  gtfs_stop_service_map AS map ON tempstops0.id = map.stopid AND tempstops0.agencyid = map.agencyid_def), "
+			+"census as (select block.blockid, block.urbanid, block.regionid, block.congdistid, block.placeid "
+			+"from census_blocks block inner join tempstops on st_dwithin(block.location, tempstops.location, "+radius+") "
+			+"group by block.blockid),"
+			+"popwithinx as (select sum(c000) AS c000withinx,sum(ca01) AS ca01withinx,sum(ca02) AS ca02withinx,sum(ca03) AS ca03withinx,sum(ce01) AS ce01withinx,"
+			+"sum(ce02) AS ce02withinx,sum(ce03) AS ce03withinx,sum(cns01) AS cns01withinx,sum(cns02) AS cns02withinx,sum(cns03) AS cns03withinx,sum(cns04) AS cns04withinx,"
+			+"sum(cns05) AS cns05withinx,sum(cns06) AS cns06withinx,sum(cns07) AS cns07withinx,sum(cns08) AS cns08withinx,sum(cns09) AS cns09withinx,sum(cns10) AS cns10withinx,"
+			+"sum(cns11) AS cns11withinx,sum(cns12) AS cns12withinx,sum(cns13) AS cns13withinx,sum(cns14) AS cns14withinx,sum(cns15) AS cns15withinx,sum(cns16) AS cns16withinx,"
+			+"sum(cns17) AS cns17withinx,sum(cns18) AS cns18withinx,sum(cns19) AS cns19withinx,sum(cns20) AS cns20withinx,sum(cr01) AS cr01withinx,sum(cr02) AS cr02withinx,"
+			+"sum(cr03) AS cr03withinx,sum(cr04) AS cr04withinx,sum(cr05) AS cr05withinx,sum(cr07) AS cr07withinx,sum(ct01) AS ct01withinx,sum(ct02) AS ct02withinx,"
+			+"sum(cd01) AS cd01withinx,sum(cd02) AS cd02withinx,sum(cd03) AS cd03withinx,sum(cd04) AS cd04withinx,sum(cs01) AS cs01withinx,sum(cs02) AS cs02withinx,"
+			+"agencyid AS aid,name AS agencyname "
+			+"from tempstops INNER JOIN "+DS+" ON ST_Dwithin("+DS+".location, tempstops.location, "+radius+") "
+			+"INNER JOIN gtfs_agencies ON agencyid = gtfs_agencies.id GROUP BY agencyid, agencyname) "
+			
+			+"select popserved1.*, popatlos1.*, popwithinx.* "
+			+"from gtfs_agencies AS agencies LEFT JOIN popserved1 ON agencies.id=aid "
+			+"LEFT JOIN popatlos1 USING(aid) "
+			+"LEFT JOIN popwithinx USING(aid)";
+//	    	System.out.println(query);
 		    	
-		    	try {
-					stmt = connection.createStatement();
-					ResultSet rs = stmt.executeQuery(query); 
-			    	while (rs.next()){
-			    		EmpData i = new EmpData();
-						i.id = rs.getString("id");
-						i.name = rs.getString("name");
-						//i.population = rs.getInt("population");
-						i.c000 = rs.getInt("c000");
-						i.ca01 = rs.getInt("ca01");
-						i.ca02 = rs.getInt("ca02");
-						i.ca03 = rs.getInt("ca03");
-						i.ce01 = rs.getInt("ce01");
-						i.ce02 = rs.getInt("ce02");
-						i.ce03 = rs.getInt("ce03");				
-						i.cns01 = rs.getInt("cns01");
-						i.cns02 = rs.getInt("cns02");
-						i.cns03 = rs.getInt("cns03");
-						i.cns04 = rs.getInt("cns04");
-						i.cns05 = rs.getInt("cns05");
-						i.cns06 = rs.getInt("cns06");
-						i.cns07 = rs.getInt("cns07");
-						i.cns08 = rs.getInt("cns08");
-						i.cns09 = rs.getInt("cns09");
-						i.cns10 = rs.getInt("cns10");
-						i.cns11 = rs.getInt("cns11");
-						i.cns12 = rs.getInt("cns12");
-						i.cns13 = rs.getInt("cns13");
-						i.cns14 = rs.getInt("cns14");
-						i.cns15 = rs.getInt("cns15");
-						i.cns16 = rs.getInt("cns16");
-						i.cns17 = rs.getInt("cns17");
-						i.cns18 = rs.getInt("cns18");
-						i.cns19 = rs.getInt("cns19");
-						i.cns20 = rs.getInt("cns20");
-						i.cr01 = rs.getInt("cr01");
-						i.cr02 = rs.getInt("cr02");
-						i.cr03 = rs.getInt("ce03");	
-						i.cr04 = rs.getInt("cr04");
-						i.cr05 = rs.getInt("cr05");
-						i.cr07 = rs.getInt("cr07");	
-						i.ct01 = rs.getInt("ct01");
-						i.ct02 = rs.getInt("ct02");
-						i.cd01 = rs.getInt("cd01");
-						i.cd02 = rs.getInt("cd02");
-						i.cd03 = rs.getInt("cd03");
-						i.cd04 = rs.getInt("cd04");
-						i.cs01 = rs.getInt("cs01");
-						i.cs02 = rs.getInt("cs02");					
-						results.EmpDataList.add(i);
-			    	}
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-    		}
+	    	try {
+				stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery(query); 
+		    	while (rs.next()){
+		    		EmpData i = new EmpData();
+		    		i.id = rs.getString("aid");
+		    		i.name = rs.getString("agencyname");
+		    		i.c000within = rs.getInt("c000withinx");
+					i.ca01within = rs.getInt("ca01withinx");
+					i.ca02within = rs.getInt("ca02withinx");
+					i.ca03within = rs.getInt("ca03withinx");
+					i.ce01within = rs.getInt("ce01withinx");
+					i.ce02within = rs.getInt("ce02withinx");
+					i.ce03within = rs.getInt("ce03withinx");				
+					i.cns01within = rs.getInt("cns01withinx");
+					i.cns02within = rs.getInt("cns02withinx");
+					i.cns03within = rs.getInt("cns03withinx");
+					i.cns04within = rs.getInt("cns04withinx");
+					i.cns05within = rs.getInt("cns05withinx");
+					i.cns06within = rs.getInt("cns06withinx");
+					i.cns07within = rs.getInt("cns07withinx");
+					i.cns08within = rs.getInt("cns08withinx");
+					i.cns09within = rs.getInt("cns09withinx");
+					i.cns10within = rs.getInt("cns10withinx");
+					i.cns11within = rs.getInt("cns11withinx");
+					i.cns12within = rs.getInt("cns12withinx");
+					i.cns13within = rs.getInt("cns13withinx");
+					i.cns14within = rs.getInt("cns14withinx");
+					i.cns15within = rs.getInt("cns15withinx");
+					i.cns16within = rs.getInt("cns16withinx");
+					i.cns17within = rs.getInt("cns17withinx");
+					i.cns18within = rs.getInt("cns18withinx");
+					i.cns19within = rs.getInt("cns19withinx");
+					i.cns20within = rs.getInt("cns20withinx");
+					i.cr01within = rs.getInt("cr01withinx");
+					i.cr02within = rs.getInt("cr02withinx");
+					i.cr03within = rs.getInt("ce03withinx");	
+					i.cr04within = rs.getInt("cr04withinx");
+					i.cr05within = rs.getInt("cr05withinx");
+					i.cr07within = rs.getInt("cr07withinx");	
+					i.ct01within = rs.getInt("ct01withinx");
+					i.ct02within = rs.getInt("ct02withinx");
+					i.cd01within = rs.getInt("cd01withinx");
+					i.cd02within = rs.getInt("cd02withinx");
+					i.cd03within = rs.getInt("cd03withinx");
+					i.cd04within = rs.getInt("cd04withinx");
+					i.cs01within = rs.getInt("cs01withinx");
+					i.cs02within = rs.getInt("cs02withinx");
+					i.c000served = rs.getInt("c000served");
+					i.ca01served = rs.getInt("ca01served");
+					i.ca02served = rs.getInt("ca02served");
+					i.ca03served = rs.getInt("ca03served");
+					i.ce01served = rs.getInt("ce01served");
+					i.ce02served = rs.getInt("ce02served");
+					i.ce03served = rs.getInt("ce03served");				
+					i.cns01served = rs.getInt("cns01served");
+					i.cns02served = rs.getInt("cns02served");
+					i.cns03served = rs.getInt("cns03served");
+					i.cns04served = rs.getInt("cns04served");
+					i.cns05served = rs.getInt("cns05served");
+					i.cns06served = rs.getInt("cns06served");
+					i.cns07served = rs.getInt("cns07served");
+					i.cns08served = rs.getInt("cns08served");
+					i.cns09served = rs.getInt("cns09served");
+					i.cns10served = rs.getInt("cns10served");
+					i.cns11served = rs.getInt("cns11served");
+					i.cns12served = rs.getInt("cns12served");
+					i.cns13served = rs.getInt("cns13served");
+					i.cns14served = rs.getInt("cns14served");
+					i.cns15served = rs.getInt("cns15served");
+					i.cns16served = rs.getInt("cns16served");
+					i.cns17served = rs.getInt("cns17served");
+					i.cns18served = rs.getInt("cns18served");
+					i.cns19served = rs.getInt("cns19served");
+					i.cns20served = rs.getInt("cns20served");
+					i.cr01served = rs.getInt("cr01served");
+					i.cr02served = rs.getInt("cr02served");
+					i.cr03served = rs.getInt("ce03served");	
+					i.cr04served = rs.getInt("cr04served");
+					i.cr05served = rs.getInt("cr05served");
+					i.cr07served = rs.getInt("cr07served");	
+					i.ct01served = rs.getInt("ct01served");
+					i.ct02served = rs.getInt("ct02served");
+					i.cd01served = rs.getInt("cd01served");
+					i.cd02served = rs.getInt("cd02served");
+					i.cd03served = rs.getInt("cd03served");
+					i.cd04served = rs.getInt("cd04served");
+					i.cs01served = rs.getInt("cs01served");
+					i.cs02served = rs.getInt("cs02served");
+					i.c000los = rs.getInt("c000los");
+					i.ca01los = rs.getInt("ca01los");
+					i.ca02los = rs.getInt("ca02los");
+					i.ca03los = rs.getInt("ca03los");
+					i.ce01los = rs.getInt("ce01los");
+					i.ce02los = rs.getInt("ce02los");
+					i.ce03los = rs.getInt("ce03los");				
+					i.cns01los = rs.getInt("cns01los");
+					i.cns02los = rs.getInt("cns02los");
+					i.cns03los = rs.getInt("cns03los");
+					i.cns04los = rs.getInt("cns04los");
+					i.cns05los = rs.getInt("cns05los");
+					i.cns06los = rs.getInt("cns06los");
+					i.cns07los = rs.getInt("cns07los");
+					i.cns08los = rs.getInt("cns08los");
+					i.cns09los = rs.getInt("cns09los");
+					i.cns10los = rs.getInt("cns10los");
+					i.cns11los = rs.getInt("cns11los");
+					i.cns12los = rs.getInt("cns12los");
+					i.cns13los = rs.getInt("cns13los");
+					i.cns14los = rs.getInt("cns14los");
+					i.cns15los = rs.getInt("cns15los");
+					i.cns16los = rs.getInt("cns16los");
+					i.cns17los = rs.getInt("cns17los");
+					i.cns18los = rs.getInt("cns18los");
+					i.cns19los = rs.getInt("cns19los");
+					i.cns20los = rs.getInt("cns20los");
+					i.cr01los = rs.getInt("cr01los");
+					i.cr02los = rs.getInt("cr02los");
+					i.cr03los = rs.getInt("ce03los");	
+					i.cr04los = rs.getInt("cr04los");
+					i.cr05los = rs.getInt("cr05los");
+					i.cr07los = rs.getInt("cr07los");	
+					i.ct01los = rs.getInt("ct01los");
+					i.ct02los = rs.getInt("ct02los");
+					i.cd01los = rs.getInt("cd01los");
+					i.cd02los = rs.getInt("cd02los");
+					i.cd03los = rs.getInt("cd03los");
+					i.cd04los = rs.getInt("cd04los");
+					i.cs01los = rs.getInt("cs01los");
+					i.cs02los = rs.getInt("cs02los");					
+					results.EmpDataList.add(i);
+		    	}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
     		dropConnection(connection);
 	    }else{
 	        String criteria1 = "";
@@ -928,8 +1033,7 @@ public class PgisEventManager {
 + "LEFT JOIN popatlos1 USING(" + criteria4 + ") "
 + "LEFT JOIN popwithinx USING(" + criteria4 + ") "
 + "LEFT JOIN totalpop1 USING(" + criteria4 + ") ";
-		    
-		    System.out.println(query);
+//		    System.out.println(query);
 			    try {
 			    	stmt = connection.createStatement();
 					ResultSet rs = stmt.executeQuery(query); 
