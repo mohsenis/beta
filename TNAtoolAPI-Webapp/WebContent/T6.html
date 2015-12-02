@@ -79,8 +79,6 @@
 	    	$('#ui-accordion-accordion-header-0').css({'width':'80%','font-size':'80%','margin':'auto','text-align':'center'});
 	    	$('.ui-widget').css('font-size', '100%');
 	    	$('.ui-datepicker-inline').css('margin','auto');
-	    	$('#accordionItems > ul:nth-child(1)').css('margin','auto');
-	    	
 	    	
 	    	$('#dialogPreLoader').hide();
 	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Title VI Report');
@@ -95,7 +93,7 @@
 				"check_callback" : true,
 				"themes" : { "stripes" : true },
 				"data" : [
-					{"text" : "Poverty Level", "type" : "poverty_default", "id" : "poverty", "state" : {"opened" : true},
+					{"text" : "Poverty", "type" : "poverty_default", "id" : "poverty", "state" : {"opened" : true},
 						"children" : [
 									{"text" : "Below Poverty Line", "type" : "poverty", "id" : "below_poverty"},
 									{"text" : "Above Poverty Line", "type" : "poverty", "id" : "above_poverty"}
@@ -353,6 +351,15 @@
 			return 0;
 		}
 		
+		// update dates
+		var dates = $('#datepicker').multiDatesPicker('getDates');
+		if(dates.length==0){
+			$( "#datepicker" ).multiDatesPicker({
+				addDates: [new Date()]
+			});
+		}
+		w_qstringd = dates.join(",")
+		
 		// close slidebar
 		mySlidebar.slidebars.close();
 		$('#dialogPreLoader').show();
@@ -525,7 +532,7 @@
 		<br>
 		<br>
 		<img id="dialogPreLoader" src="images/287.GIF" alt="Page Loading" style="width:100px; height:100px; position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;" >
-		<p id="bePatient" style="text-align: center; margin-top:150px; line-height: 70vh;"><b>Please be patient while the report is being put together...</b></p>
+		<p id="bePatient" style="text-align: center; margin-top:150px; line-height: 70vh;"><b>Please be patient while the report is being put together, this might take a few minutes.</b></p>
 	</div>
 </div> 
 	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="25%" style="height:100vh; overflow:auto; border-style:groove; background-color:white; border-width:5px;">

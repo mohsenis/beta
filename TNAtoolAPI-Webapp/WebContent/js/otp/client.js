@@ -1270,16 +1270,8 @@ $mylist
 			    		}
 			    		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+parseInt(casestring.substring(2)));			    		    		
 			    }else if(casestring=="Emp"){
-			    	var keyName = Math.random();
-			    	var d = new Date();
-			    	var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-		    		localStorage.setItem(keyName, qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/Emp.html?&n='+keyName+'&dbindex='+dbindex);
 			    }else if(casestring=="T6"){	
-			    	var keyName = Math.random();
-			    	var d = new Date();
-			    	var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-		    		localStorage.setItem(keyName, qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/T6.html?&n='+keyName+'&dbindex='+dbindex);
 			    }
 			});

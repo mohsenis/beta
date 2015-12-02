@@ -511,7 +511,7 @@ public class PgisEventManager {
 		+ "sum(cr04) AS cr04los,sum(cr05) AS cr05los,sum(cr07) AS cr07los,sum(ct01) AS ct01los,sum(ct02) AS ct02los,"
 		+ "sum(cd01) AS cd01los,sum(cd02) AS cd02los,sum(cd03) AS cd03los,sum(cd04) AS cd04los,sum(cs01) AS cs01los,sum(cs02) AS cs02los, agencyid AS aid "
 		+"FROM popatlos GROUP BY agencyid), "
-		+"	empstops0 as (select id, agencyid, blockid, location "
+		+"tempstops0 as (select id, agencyid, blockid, location "
 		+"	from gtfs_stops stop inner join aids on stop.agencyid = aids.aid), " 
 		+"tempstops AS (SELECT tempstops0.id, map.agencyid, tempstops0.blockid, tempstops0.location " 
 			+"FROM tempstops0 INNER JOIN  gtfs_stop_service_map AS map ON tempstops0.id = map.stopid AND tempstops0.agencyid = map.agencyid_def), " 
