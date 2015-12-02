@@ -561,7 +561,8 @@ function gos(key){
 	}
 	
 	
-	document.getElementById("Sradius").value = w_qstringx;
+	$('#Sradius').val(w_qstringx);
+//	document.getElementById("Sradius").value = w_qstringx;
 	//document.getElementById("LoS").value = w_qstringl;
 		
 	jQuery('#Sradius').on('input', function() {		

@@ -13,7 +13,6 @@
 	<script src="js/lib/slidebars.min.js"></script>
 	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
 	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
-	<script src="js/lib/jquery.qtip.min.js"></script>
 	<script src="js/jQueryContent.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="js/lib/date.js"></script>
@@ -40,10 +39,10 @@
 	</style>
 	<script>
 	var reportName = "kjh";
+	var boo;
 	var progVal = 0; 
 	var maxRadius = 5;
-	var boo;
-	var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
+	var dbindex = parseInt(getURIParameter("dbindex"));;
 	var key = Math.random();
 	var keyName = parseFloat(getURIParameter("n"));
 	var w_qstringd = localStorage.getItem(keyName);
@@ -54,12 +53,10 @@
 	var racBool = false;
 	var wacData = {};
 	var racData = {};
-	var serviceMetrics = {};
 	var html = "";
 	var tmp = "";
 	
 	(function($) {
-		
 	    $(document).ready(function() {
 	    	$.ajax({
 	    		type: 'GET',
@@ -351,12 +348,12 @@
 		});		
 	});
 	
-	function racAjax(sRadius){
+	function racWacAjax(){
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
-			async: false,
+			async: true,
 			success: function(d){
 				var temp = d.EmpDataList;
 				racData.metadata = d.metadata;
@@ -364,24 +361,57 @@
 				temp.forEach(function(i, ind, arr){
 					racData.EmpDataList2.push(i);
 				});
+				$.ajax({
+					type: 'GET',
+					datatype: 'json',
+					url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
+					async: true,
+					success: function(d){
+						var temp = d.EmpDataList;
+						wacData.metadata = d.metadata;
+						wacData.EmpDataList2 = [];
+						temp.forEach(function(i, ind, arr){
+							wacData.EmpDataList2.push(i);
+						});
+						openReport2();
+					}
+				});
 			}
 		});
 	}
 	
-	function wacAjax(sRadius){
+	function racAjax(){
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
+			async: true,
+			success: function(d){
+				var temp = d.EmpDataList;
+				racData.metadata = d.metadata;
+				racData.EmpDataList2 = [];
+				temp.forEach(function(i, ind, arr){
+					racData.EmpDataList2.push(i);
+				});
+				openReport2();
+			}
+		});
+	}
+	
+	function wacAjax(){
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
-			async: false,
+			async: true,
 			success: function(d){
 				var temp = d.EmpDataList;
 				wacData.metadata = d.metadata;
 				wacData.EmpDataList2 = [];
 				temp.forEach(function(i, ind, arr){
 					wacData.EmpDataList2.push(i);
-					console.log(i);
 				});
+				openReport2();
 			}
 		});
 	}
@@ -416,13 +446,13 @@
 			 
 			nodesList.forEach (function (item, index, array){
 				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (RAC)<em title="Total '+tree.get_text(item)+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y +='<th>'+ tree.get_text(item) +' EMPS (RAC)<em title="Employees Served: '+tree.get_text(item)+' employees living within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: '+tree.get_text(item)+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSS (RAC)<em title="Employees Served by Service: '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y +='<th>'+ tree.get_text(item) +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+tree.get_text(item)+' employees living within X distance of any stop. This metric is date independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+tree.get_text(item)+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (WAC)<em title="Total '+tree.get_text(item)+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y += '<th>'+ tree.get_text(item) +' EMPS (WAC)<em title="Employees Served: '+tree.get_text(item)+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: '+tree.get_text(item)+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSS (WAC)<em title="Employees Served by Service: '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y += '<th>'+ tree.get_text(item) +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+tree.get_text(item)+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+tree.get_text(item)+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});
 		}else if (racBool){
 			if ($('#reportType').val() == 'Agencies'){
@@ -433,9 +463,9 @@
 			
 			nodesList.forEach (function (item, index, array){				
 				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (RAC)<em title="Total '+tree.get_text(item)+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y +='<th>'+ tree.get_text(item) +' EMPS (RAC)<em title="Employees Served: '+tree.get_text(item)+' employees living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: '+tree.get_text(item)+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSS (RAC)<em title="Employees Served by Service: '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y +='<th>'+ tree.get_text(item) +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+tree.get_text(item)+' employees living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+tree.get_text(item)+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});	
 		}else{
 			if ($('#reportType').val() == 'Agencies'){
@@ -445,9 +475,9 @@
 			}
 			nodesList.forEach (function (item, index, array){				
 				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (WAC)<em title="Total '+tree.get_text(item)+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y += '<th>'+ tree.get_text(item) +' EMPS (WAC)<em title="Employees Served: '+tree.get_text(item)+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: '+tree.get_text(item)+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSS (WAC)<em title="Employees Served by Service: '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y += '<th>'+ tree.get_text(item) +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+tree.get_text(item)+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+tree.get_text(item)+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});
 		}
 		return y;
@@ -484,6 +514,10 @@
 		if (document.getElementById("dbselect").selectedIndex !=dbindex){
 			location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
 		}
+	}
+	
+	function selectFunction(){
+		$('#reportTitle').html($('#reportType').val());
 	}
 	</script>
 
@@ -528,21 +562,9 @@
 		tmp += getTableHeaders() +
 				'<th>MetaData</th></tr>';
 		html += '<thead>'+tmp+'</thead><tbody>';
-		if (racBool){
-			var sRadius = '';
-			if (document.getElementById("reportType").value == 'Agencies'){
-				sRadius = ',' + $('#Sradius').val() * 1609.34;
-			}
-			racAjax(sRadius);
-		}
-		if(wacBool){
-			var sRadius = '';
-			if (document.getElementById("reportType").value == 'Agencies'){
-				sRadius = ',' + $('#Sradius').val() * 1609.34;
-			}
-			wacAjax(sRadius);
-		}		
-		openReport2();
+		if(racBool && wacBool) racWacAjax();
+		else if (racBool) racAjax();
+		else wacAjax();
 	}
 	
 	function openReport2(){
@@ -577,7 +599,6 @@
 		
 		// Filling in the first 3 columns of the datatable and making a hashmap of the query results 
 		if (racBool && wacBool){
-			var resultSetRac = {};
 			for (var i=0; i<racData.EmpDataList2.length;i++){
 				html += '<tr><td>'+ racData.EmpDataList2[i].id + '</a></td>'+
 				'<td>' + racData.EmpDataList2[i].name + '</td>';
@@ -771,7 +792,7 @@
 <body>
 <div id="sb-site">	
 	 <div class="container">
-		<div class="headerL">
+		<div class="headerL" style="width:50%">
 			<div class="sb-toggle-left navbar-left" style="float:left">
 				<div class="navicon-line" style="background-color: #FF7373"></div>
 				<div class="navicon-line" style="background-color: #87F786"></div>
@@ -798,10 +819,10 @@
 		<br>
 		<br>
 		<img id="dialogPreLoader" src="images/287.GIF" alt="Page Loading" style="width:100px; height:100px; position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;" >
+		<p id="bePatient" style="text-align: center; margin-top:150px; line-height: 70vh;"><b>Please be patient while the report is being put together...</b></p>
 	</div>
 </div> 
 	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="25%" style="height:100vh; overflow:auto; border-style:groove; background-color:white; border-width:5px;">
-		<!-- <button type="button" class="Button" onclick="createNode();" style="width:35%; margin-top:3px; height:30px; background-color: #FF7373; border-color:#FF7373; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Create Category</button> -->
 		<button type="button" class="Button" onclick="openReport();" style="width:50%; height:30px;  background-color: #87F786; border-color:#4F964F; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Generate Report</button>
 		<button type="button" class="Button" onclick="clearReport();" style="; width:45%; height:30px; border-radius: 6px; background-color: #FF7373; border-color:#FB0303;"><i class="glyphicon glyphicon-asterisk"></i>Clear Report</button>
 		<br>
@@ -833,7 +854,7 @@
 					  <option value="lodes_blocks_rac">RAC - Residence Area Characteristic data</option>
 					  <option value="3">WAC & RAC</option>
 				 </select><br></td></tr>
-			<tr><td><label for="reportType"><b>Select report type:</b></label></td><td><select name="reportType" id="reportType" style="height:25px;width:12em;">
+			<tr><td><label for="reportType"><b>Select report type:</b></label></td><td><select name="reportType" id="reportType" style="height:25px;width:12em;" onchange="selectFunction()">
 						  <option value="Counties" selected>Counties</option>
 						  <option value="Census Places">Census Places</option>
 						  <option value="Congressional Districts">Congressional Districts</option>

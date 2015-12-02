@@ -1274,13 +1274,13 @@ $mylist
 			    	var d = new Date();
 			    	var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&dbindex='+dbindex+'&n='+keyName);
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html?&n='+keyName+'&dbindex='+dbindex);
 			    }else if(casestring=="T6"){	
 			    	var keyName = Math.random();
 			    	var d = new Date();
 			    	var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/T6.html'+'?&dbindex='+dbindex+'&n='+keyName);
+			    	window.open('/TNAtoolAPI-Webapp/T6.html?&n='+keyName+'&dbindex='+dbindex);
 			    }
 			});
     	

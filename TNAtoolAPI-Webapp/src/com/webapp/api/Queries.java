@@ -1230,25 +1230,21 @@ Loop:  	for (Trip trip: routeTrips){
     }
     
     /**
-     * Employment Summary Reports
-     */
-    @GET
-	@Path("/Xemp")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getXEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
-    	return null;
-    }
-
-    /**
      * Title VI Report
      */
     @GET
 	@Path("/titlevi")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getTitleVIData(@QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+	public Object getTitleVIData(@QueryParam("report") String reportType, @QueryParam("day") String date, @QueryParam("radius") double radius, @QueryParam("L") int L,
+			@QueryParam("dbindex") int dbindex, @QueryParam("username") String username ) throws JSONException {
     	TitleVIDataList results = new TitleVIDataList();
-    	results = PgisEventManager.getTitleVIData(reportType, dbindex, username);
-    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = fulldate(dates);
+    	String[] sdates = datedays[0];
+    	String[] days = datedays[1];
+    	results = PgisEventManager.getTitleVIData(reportType, sdates, days, fulldates, radius, L, dbindex, username);
+    	results.metadata = "Report Type: "+reportType+" Title VI Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
     	return results;
     }

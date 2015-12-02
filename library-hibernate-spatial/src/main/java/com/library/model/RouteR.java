@@ -99,20 +99,25 @@ public class RouteR {
 	
 	@XmlAttribute
 	@JsonSerialize
-    public String RPopWithinX;	  
+    public String RPopWithinX;
 	
-	@XmlElement(name = "counties")
-	public List<String> counties;
+	@XmlAttribute
+	@JsonSerialize
+    public String counties;
+
+	@XmlAttribute
+	@JsonSerialize
+    public String places;
 	
-	@XmlElement(name = "urbans")
-	public List<String> urbans;
+	@XmlAttribute
+	@JsonSerialize
+    public String regions;
 	
-	@XmlElement(name = "regions")
-	public List<String> regions;
+	@XmlAttribute
+	@JsonSerialize
+    public String urbans;
 	
-	@XmlElement(name = "places")
-	public List<String> places;
-	
-	@XmlElement(name = "congdists")
-	public List<String> congdists;
+	@XmlAttribute
+	@JsonSerialize
+    public String congdists;
 }
