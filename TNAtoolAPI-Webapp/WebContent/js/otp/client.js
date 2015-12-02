@@ -1241,7 +1241,7 @@ $mylist
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.25';
-			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/report.html?&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '0.1';
 			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);

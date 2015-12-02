@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>TNA Software Tool - Batch Reports </title>
+	
+	<script src="../js/lib/jquery-1.9.1.min.js"></script>
+	<script src="../js/lib/jquery-ui.js"></script>
+	<script src="../js/lib/jquery-ui.multidatespicker.js"></script>
+	<script src="../js/lib/date.js"></script>
+	<script src="batchReports.js"></script>
+	
+	<link rel="stylesheet" href="../js/lib/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="../js/lib/jquery-ui.multidatespicker.css">
+	<link rel="stylesheet" href="batchReports.css" />
+	
+	
+</head>
+
+<body onload="access()" style="display:none">
+	<header>
+		<h1 style="width:80%; margin:auto">TNA SOFTWARE TOOL - BATCH REPORT GENERATOR</h1><br/>
+		<h3 style="width:80%; margin:auto">Generating batch-reports from TNA Software Tool database</h3>
+	</header>
+	<div id="afterHour">
+		<br/><br/><br/>
+		<h2 style="width:80%; margin:auto; color:red">Batch-Reports Generator tool is not available between 1:00 am to 6:00 am.</h2>
+		<br/>
+	</div>
+	<div id="main">
+		<br/><br/><br/><br/>
+		<div id="reportsList">
+			
+			<div id="agencies" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Agencies</span><i>Includes all the metrics from <b>"Agencies Summary"</b> and <b>"Agencies Extended"</b> reports.</i></p>
+				<span id="agenciesReportsList"></span>
+				
+				<p><a onclick='addAgencyLikeReport("agenciesReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="routes" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Routes</span><i>Includes all the metrics from <b>"Routes"</b> report.</i></p>
+				<span id="routesReportsList"></span>
+				
+				<p><a onclick='addAgencyLikeReport("routesReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="stops" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Stops</span><i>Includes all the metrics from <b>"Stops"</b> report.</i></p>
+				<span id="stopsReportsList"></span>
+				
+				<p><a onclick='addAgencyLikeReport("stopsReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="couties" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Counties</span><i>Includes all the metrics from <b>"Census Counties Summary"</b> and <b>"Census Counties Extended"</b> reports.</i></p>
+				<span id="coutiesReportsList"></span>
+				
+				<p><a onclick='addCountyLikeReport("coutiesReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="tracts" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Tracts</span><i>Includes all the metrics from <b>"Census Tracts Summary"</b> and <b>"Census Tracts Extended"</b> reports.</i></p>
+				<span id="tractsReportsList"></span>
+				
+				<p><a onclick='addCountyLikeReport("tractsReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="urbans" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Urban Areas</span><i>Includes all the metrics from <b>"Urban Areas Summary"</b> and <b>"Urban Areas Extended"</b> reports.</i></p>
+				<span id="urbansReportsList"></span>
+				
+				<p><a onclick='addCountyLikeReport("urbansReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="places" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Places</span><i>Includes all the metrics from <b>"Census Places Summary"</b> and <b>"Census Places Extended"</b> reports.</i></p>
+				<span id="placesReportsList"></span>
+				
+				<p><a onclick='addCountyLikeReport("placesReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="congDists" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Congressional Districts</span><i>Includes all the metrics from <b>"Census Congressional Districts Summary"</b> and <b>"Census Congressional Districts Extended"</b> reports.</i></p>
+				<span id="congDistsReportsList"></span>
+				
+				<p><a onclick='addCountyLikeReport("congDistsReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="odotRegions" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">ODOT Transit Regions</span><i>Includes all the metrics from <b>"ODOT Transit Regions Summary"</b> and <b>"ODOT Transit Regions Extended"</b> reports.</i></p>
+				<span id="odotRegionsReportsList"></span>
+				
+				<p><a onclick='addCountyLikeReport("odotRegionsReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="parknRides" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Park & Ride</span><i>Includes all the metrics from <b>"Park & Ride Summary"</b> and <b>"Park & Ride Extended"</b> reports.</i></p>
+				<span id="parknRidesReportsList"></span>
+				
+				<p><a onclick='addParknRideLikeReport("parknRidesReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="connectedAgencies" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Connected Agencies</span><i>Includes all the metrics from <b>"Connected Agencies Summary"</b> and <b>"Connected Agencies Extended"</b> reports.</i></p>
+				<span id="connectedAgenciesReportsList"></span>
+				
+				<p><a onclick='addConnectedLikeReport("connectedAgenciesReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+			<br/><br/>
+			<div id="connectedCommunities" class="login-card" style="width:80%; padding:20px; margin-left:10%">
+				<p><span class="reportTile">Connected Communities</span><i>Includes all the metrics from <b>"Connected Communities Summary"</b> and <b>"Connected Communities Extended"</b> reports.</i></p>
+				<span id="connectedCommunitiesReportsList"></span>
+				
+				<p><a onclick='addConnectedLikeReport("connectedCommunitiesReportsList")' href="javascript:void(0)">Add+</a></p>
+			</div>
+		</div>
+		
+	</div>
+</body>
+
+</html>
