@@ -56,4 +56,18 @@ createdate character varying(8),
 PRIMARY KEY(blockid)
 );
 COPY lodes_blocks_wac 
-FROM 'C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/demographic/or_wac_S000_JT00_2010.csv' DELIMITER ',' CSV HEADER;
+FROM 'D:/or_wac_S000_JT00_2010.csv' DELIMITER ',' CSV HEADER;
+
+ALTER TABLE lodes_blocks_wac
+ADD location geometry(Point,2993);
+
+UPDATE lodes_blocks_wac
+SET location = (SELECT location FROM census_blocks WHERE lodes_blocks_wac.blockid = census_blocks.blockid);
+
+CREATE INDEX wac_location
+  ON lodes_blocks_wac
+  USING gist
+  (location);
+ALTER TABLE lodes_blocks_wac CLUSTER ON wac_location;
+
+VACUUM ANALYZE lodes_blocks_wac;
