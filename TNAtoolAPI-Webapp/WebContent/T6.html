@@ -35,10 +35,12 @@
 	</style>
 	<script>
 	var boo;
+	var progVal = 0;
 	var maxRadius = 5;
 	var dbindex = parseInt(getURIParameter("dbindex"));;
 	var key = Math.random();
 	var keyName = parseFloat(getURIParameter("n"));
+	var w_qstringd = localStorage.getItem(keyName);
 	var t6 = {};
 	var w_qstringd = localStorage.getItem(keyName);
 	var w_qstringx = $('#Sradius').val();
