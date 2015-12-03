@@ -35,6 +35,26 @@ public class StopR {
 		
 	@XmlAttribute
     @JsonSerialize
+	public String CountyName;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String UrbanName;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String CongDistName;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String RegionName;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String PlaceName;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String StopId;
 	
 	@XmlAttribute
@@ -56,4 +76,20 @@ public class StopR {
 	@XmlAttribute
     @JsonSerialize
     public String PopWithinX;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String OverFiftyPop;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String visits;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String lat;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String lon;
 }

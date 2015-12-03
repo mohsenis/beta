@@ -701,12 +701,13 @@ public class Queries {
      * geographic area 
      * geographic area and agency
      * geographic area and route and agency
+     * @throws SQLException 
      */
     @GET
     @Path("/StopsR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object getTAS(@QueryParam("agency") String agency,@QueryParam("x") double x,@QueryParam("route") String routeid,@QueryParam("areaid") String areaid, 
-    		@QueryParam("type") Integer type,@QueryParam("key") double key,@QueryParam("dbindex") Integer dbindex,@QueryParam("username") String username) throws JSONException {
+    		@QueryParam("type") Integer type,@QueryParam("key") double key, @QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex,@QueryParam("username") String username) throws JSONException, SQLException {
     	
     	if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
@@ -714,6 +715,10 @@ public class Queries {
     	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
+    	String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = datedays[0];
+    	String[] days = datedays[1];
     	StopListR response = new StopListR();  
     	response.AgencyName = "";
     	//x = x * 1609.34;
@@ -733,16 +738,16 @@ public class Queries {
     		response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
     		index++;
     		setprogVal(key, (int) Math.round(index*100/totalLoad));
-    		if (routeid==null){ //agency
+    		if (routeid==null){ //agency    			
     			response.metadata = "Report Type:Transit Stops Report for Agency;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Transit Agency:"+agency + ";" + DbUpdate.VERSION;
-    			report = PgisEventManager.stopGeosr(username, 0, null, agency, null, x * 1609.34, dbindex);
+    			report = PgisEventManager.stopGeosr(username, 0, fulldates, days, null, agency, null, x * 1609.34, dbindex);
     			index++;
         		setprogVal(key, (int) Math.round(index*100/totalLoad));
     		}else{//agency and route
     			response.metadata = "Report Type:Transit Stops Report for Agency and Route;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Transit Agency:"+agency+";Selected Route:"+routeid + ";" + DbUpdate.VERSION;
-    			report = PgisEventManager.stopGeosr(username, 0, null, agency, routeid, x * 1609.34, dbindex);
+    			report = PgisEventManager.stopGeosr(username, 0,  fulldates, days, null, agency, routeid, x * 1609.34, dbindex);
     			index++;
         		setprogVal(key, (int) Math.round(index*100/totalLoad));
     		}
@@ -755,7 +760,7 @@ public class Queries {
     			if (agency==null){//area   				
     				response.metadata = "Report Type:Transit Stops Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
         	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid + ";" + DbUpdate.VERSION;
-    				report = PgisEventManager.stopGeosr(username, type, areaid, null, null, x * 1609.34, dbindex);
+    				report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, null, null, x * 1609.34, dbindex);
     				index++;
     	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
     			}else{//area and agency
@@ -764,7 +769,7 @@ public class Queries {
     	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
     				response.metadata = "Report Type:Transit Stops Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
         	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid+";Selected Transit Agency:"+agency + ";" + DbUpdate.VERSION;
-    				report = PgisEventManager.stopGeosr(username, type, areaid, agency, null, x * 1609.34, dbindex);
+    				report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, agency, null, x * 1609.34, dbindex);
     				index++;
     	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
     			}
@@ -775,7 +780,7 @@ public class Queries {
     			response.metadata = "Report Type:Transit Stops Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid+
     	    	    	";Selected Transit Agency:"+agency+";Selected Route:"+routeid + ";" + DbUpdate.VERSION;
-    			report = PgisEventManager.stopGeosr(username, type, areaid, agency, routeid, x * 1609.34, dbindex);
+    			report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, agency, routeid, x * 1609.34, dbindex);
     			index++;
         		setprogVal(key, (int) Math.round(index*100/totalLoad));
     		}
@@ -1210,34 +1215,36 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
 	@Path("/emp")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+	public Object getEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("day") String date, @QueryParam("radius") double radius, @QueryParam("L") int L,
+			@QueryParam("dbindex") int dbindex, @QueryParam("username") String username ) throws JSONException {
     	EmpDataList results = new EmpDataList();
-    	results = PgisEventManager.getEmpData(dataSet, reportType, dbindex, username);
+    	String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = fulldate(dates);
+    	String[] sdates = datedays[0];
+    	String[] days = datedays[1];
+    	results = PgisEventManager.getEmpData(dataSet, reportType, sdates, days, fulldates, radius, L, dbindex, username);
     	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;  	
     	return results;
     }
     
     /**
-     * Employment Summary Reports
-     */
-    @GET
-	@Path("/Xemp")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getXEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
-    	return null;
-    }
-
-    /**
      * Title VI Report
      */
     @GET
 	@Path("/titlevi")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getTitleVIData(@QueryParam("report") String reportType, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username ) throws JSONException {
+	public Object getTitleVIData(@QueryParam("report") String reportType, @QueryParam("day") String date, @QueryParam("radius") double radius, @QueryParam("L") int L,
+			@QueryParam("dbindex") int dbindex, @QueryParam("username") String username ) throws JSONException {
     	TitleVIDataList results = new TitleVIDataList();
-    	results = PgisEventManager.getTitleVIData(reportType, dbindex, username);
-    	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
+    	String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = fulldate(dates);
+    	String[] sdates = datedays[0];
+    	String[] days = datedays[1];
+    	results = PgisEventManager.getTitleVIData(reportType, sdates, days, fulldates, radius, L, dbindex, username);
+    	results.metadata = "Report Type: "+reportType+" Title VI Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
     	return results;
     }
@@ -2314,7 +2321,12 @@ Loop:  	for (Trip trip: routeTrips){
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.PopWithinX = String.valueOf(PopWithinX);
 		response.PopUnServed = String.valueOf(Math.round(1E4-((10000.00*PopWithinX/geocounts.get("pop"))))/100.0);
-		response.PopServed = String.valueOf(Math.round((10000.00*PopWithinX/geocounts.get("pop")))/100.00);		
+		response.PopServed = String.valueOf(Math.round((10000.00*PopWithinX/geocounts.get("pop")))/100.00);	
+		long[] pop50kCutOff = PgisEventManager.cutOff50(x, username, dbindex);
+		response.PopServedOver50k = String.valueOf(pop50kCutOff[0]);
+		response.TotalPopOver50k = String.valueOf(pop50kCutOff[1]);
+		response.PopServedBelow50k = String.valueOf(pop50kCutOff[2]);
+		response.TotalPopBelow50k = String.valueOf(pop50kCutOff[3]);
 	
 		try {
 			Thread.sleep(1000);
@@ -2351,8 +2363,6 @@ Loop:  	for (Trip trip: routeTrips){
     	String[] sdates = datedays[0];
     	String[] days = datedays[1];
     	
-    	
-    	//String username = "admin";
     	GeoXR response = new GeoXR();
     	GeoArea instance = EventManager.QueryGeoAreabyId(areaId, type, dbindex);
     	response.metadata = "Report Type:"+instance.getTypeName()+" Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
@@ -2438,11 +2448,11 @@ Loop:  	for (Trip trip: routeTrips){
 		return response;
 		
     }
-	
+		
 	/**
 	 * Generates The multimodal hubs report
 	 */
-	    
+/*	    
 	@GET
 	@Path("/hubsR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -2455,8 +2465,6 @@ Loop:  	for (Trip trip: routeTrips){
         }		
 		String[] dates = date.split(",");
     	String[][] datedays = daysOfWeekString(dates);
-    	//String username = "admin";
-    	//String[] fulldates = fulldate(dates);
     	String[] fulldates = datedays[0];
     	String[] days = datedays[1];
     	int index = 0;
@@ -2508,11 +2516,12 @@ Loop:  	for (Trip trip: routeTrips){
 		return response;
 		
     }
-	
+	*/
+
 	@GET
 	@Path("/hubsR2")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getHubs(@QueryParam("x1") double x1, @QueryParam("x2") double x2, @QueryParam("key") double key, @QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException {
+	public Object getHubs(@QueryParam("x1") double x1, @QueryParam("x2") double x2, @QueryParam("x3") double x3, @QueryParam("key") double key, @QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException {
 		HubsClusterList response = new HubsClusterList();
 		String[] dates = date.split(",");
     	String[][] datedays = daysOfWeekString(dates);
@@ -2520,6 +2529,7 @@ Loop:  	for (Trip trip: routeTrips){
     	String[] days = datedays[1];
 		x1 *= 1609.34;
 		x2 *= 1609.34;
+		x3 *= 1609.34;
 		HashMap<String, HashSet<String>> y = PgisEventManager.getClusters(x1, dbindex, username);
 				
 		HashMap<String, HashSet<String>> counter = new HashMap<String, HashSet<String>>(y);
@@ -2534,17 +2544,17 @@ Loop:  	for (Trip trip: routeTrips){
 			}			
 		}
 		 
-		response = getClusterData(y, fulldates, days, dbindex, x2, username, key);
+		response = getClusterData(y, fulldates, days, dbindex, x2, x3, username, key);
 		response.metadata = "Report Type:Transit Hubs Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
 		    	"Selected Database:" +Databases.dbnames[dbindex]+";Stop Cluster Radius(miles):"+String.valueOf(x1) + ";"+";Pop. Search Radius(miles):"+String.valueOf(x2) + ";" + DbUpdate.VERSION;
 		return response;
 	}
 	
-	public HubsClusterList getClusterData(HashMap<String, HashSet<String>> x, String[] dates, String[] days, int dbindex, double popRadius, String username, double key) throws SQLException{
+	public HubsClusterList getClusterData(HashMap<String, HashSet<String>> x, String[] dates, String[] days, int dbindex, double popRadius, double pnrRadius, String username, double key) throws SQLException{
 		HubsClusterList output = new HubsClusterList();
     	int progress = 0;
     	setprogVal(key, 5);
-		HashMap<String, Integer> serviceMap = PgisEventManager.stopFrequency(dates, days, username, dbindex);
+		HashMap<String, Integer> serviceMap = PgisEventManager.stopFrequency(null, dates, days, username, dbindex);
 		String query = new String();
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = null;
@@ -2583,17 +2593,35 @@ Loop:  	for (Trip trip: routeTrips){
 					+ "agenciescount AS (SELECT count(distinct stopsagenciesnames) AS agenciescount FROM stopsarray1), "
 					+ "tmproutes AS (SELECT map.* FROM gtfs_stop_route_map AS map INNER JOIN stops ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id), "
 					+ "routes AS (SELECT gtfs_routes.* FROM gtfs_routes INNER JOIN tmproutes ON tmproutes.routeid = gtfs_routes.id AND tmproutes.agencyid = gtfs_routes.agencyid), "
-					+ "routesarray0 AS (SELECT routes.*, gtfs_agencies.name AS agencyname FROM routes INNER JOIN gtfs_agencies ON routes.agencyid = gtfs_agencies.id), "
+					+ "routesarray0 AS (SELECT routes.agencyid, routes.id, routes.shortname, routes.longname, gtfs_agencies.name AS agencyname "
+					+ "	FROM routes INNER JOIN gtfs_agencies "
+					+ "	ON routes.agencyid = gtfs_agencies.id "
+					+ "	GROUP BY routes.agencyid, routes.id, routes.shortname, routes.longname, agencyname), "
 					+ "routesarray  AS (SELECT COALESCE(array_agg(agencyid),'{N/A}') AS routesagencies, COALESCE(array_agg(agencyname),'{N/A}') AS routesagenciesnames, COALESCE(array_agg(id),'{N/A}') AS routesids, COALESCE(array_agg(shortname),'{N/A}') AS routesshortnames, COALESCE(array_agg(longname),'{N/A}') AS routeslongnames FROM routesarray0),  "
 					+ "routescount AS (SELECT count(distinct agencyid||id) AS routescount FROM routes), "
 					+ "counties AS (SELECT counties.countyid, counties.cname FROM census_counties AS counties INNER JOIN stops ON LEFT(stops.blockid,5) = counties.countyid), "
 					+ "countiesarray AS (SELECT COALESCE(array_agg(distinct countyid),'{N/A}') AS countiesids, COALESCE(array_agg(distinct cname),'{N/A}') AS countiesnames FROM counties), "
 					+ "countiescount AS (SELECT count(distinct counties.countyid) AS countiescount FROM counties), "
-					+ "urbanarray AS (SELECT COALESCE(array_agg(distinct stops.urbanid),'{N/A}') AS urbanids, COALESCE(array_agg(distinct uname),'{N/A}') AS urbannames FROM census_urbans INNER JOIN stops ON census_urbans.urbanid = stops.urbanid),"
+					+ "urbanarray AS (SELECT COALESCE(sum(population)::text, 'N/A') AS urbanareaspop, COALESCE(array_agg(distinct stops.urbanid),'{N/A}') AS urbanids, COALESCE(array_agg(distinct uname),'{N/A}') AS urbannames FROM census_urbans INNER JOIN stops ON census_urbans.urbanid = stops.urbanid),"
 					+ "regionsarray  AS (SELECT  COALESCE(array_agg(distinct ' Region '||regionid),'{N/A}') AS regionids FROM stops),"
 					+ "pop0 AS (SELECT distinct census_blocks.blockid, population FROM census_blocks INNER JOIN stops ON ST_Dwithin(census_blocks.location, stops.location, " + popRadius + ")), "
-					+ "pop AS (SELECT COALESCE(sum(population),0) AS pop FROM pop0)"
-					+ "SELECT clustercoor.*, stopscount.*, agenciescount.*, pop.* AS pop, regionsarray.*, urbanarray.*, countiesarray.*, agenciesarray.*, countiescount.*, routescount.*, stopsarray.*, routesarray.* FROM stopsarray CROSS JOIN stopscount CROSS JOIN agenciesarray CROSS JOIN routesarray CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount";
+					+ "pop AS (SELECT COALESCE(sum(population),0) AS pop FROM pop0),"
+					+ "pnr AS (SELECT pr.* FROM parknride AS pr INNER JOIN clustercoor ON ST_Dwithin(pr.geom,ST_transform(ST_setsrid(ST_MakePoint(clustercoor.lon, clustercoor.lat),4326), 2993)," + pnrRadius + ")), "
+					+ "pnrarray AS (SELECT COALESCE(count(pnr.pnrid),0) AS pnrcount,COALESCE(array_agg(pnr.pnrid),'{}') AS pnrids, COALESCE(array_agg(pnr.lat),'{}') AS pnrlats, "
+					+ "COALESCE(array_agg(pnr.lon),'{}') AS pnrlons, COALESCE(array_agg(pnr.lotname),'{N/A}') AS pnrnames, COALESCE(array_agg(pnr.city),'{N/A}') AS pnrcities, "
+					+ "	COALESCE(array_agg(pnr.spaces),'{0}') AS pnrspaces "
+					+ "	FROM pnr), "
+					+ "placesarray0 AS (SELECT distinct places.placeid FROM census_places AS places INNER JOIN stops ON stops.placeid = places.placeid), "
+					+ "placesarray AS (SELECT COALESCE(array_agg(places.placeid),'{N/A}') AS placesids, COALESCE(array_agg(pname),'{N/A}') AS placesnames, count(distinct places.placeid) AS placescount "
+					+ "FROM census_places AS places INNER JOIN placesarray0 ON placesarray0.placeid = places.placeid) "
+					+ ""
+					+ "SELECT clustercoor.*, stopscount.*, agenciescount.*, pop.* AS pop, regionsarray.*, "
+					+ "	urbanarray.*, countiesarray.*, agenciesarray.*, countiescount.*, routescount.*,"
+					+ " stopsarray.*, routesarray.*,pnrarray.*, placesarray.*"
+					+ "	FROM stopsarray CROSS JOIN stopscount CROSS JOIN agenciesarray CROSS JOIN routesarray"
+					+ "	CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop"
+					+ "	CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount"
+					+ "	CROSS JOIN pnrarray CROSS JOIN placesarray";
 //			System.out.println(query);			
 			try {
 				
@@ -2607,6 +2635,10 @@ Loop:  	for (Trip trip: routeTrips){
 					response.pop = rs.getString("pop");
 					response.stopscount = rs.getString("stopscount");
 					response.routescount = rs.getString("routescount");
+					response.pnrcount = rs.getInt("pnrcount");
+					response.placescount = rs.getInt("placescount");
+					response.urbanareaspop = rs.getString("urbanareaspop");
+					response.visits = visits + "";
 					String[] tempCountiesNames = (String[]) rs.getArray("countiesnames").getArray();
 					response.countiesNames =  Arrays.asList(tempCountiesNames);
 					String[] tempAgenciesNames = (String[]) rs.getArray("agenciesnames").getArray();
@@ -2637,8 +2669,22 @@ Loop:  	for (Trip trip: routeTrips){
 					response.stopsLats = Arrays.asList(tempStopsLats);
 					Double[] tempStopsLons = (Double[]) rs.getArray("stopslons").getArray();
 					response.stopsLons =  Arrays.asList(tempStopsLons);					
-					response.visits = visits + "";
-					
+					Integer[] tempPnrIDs = (Integer[]) rs.getArray("pnrids").getArray();
+					response.pnrIDs =  Arrays.asList(tempPnrIDs);
+					Double[] tempPnrLats = (Double[]) rs.getArray("pnrlats").getArray();
+					response.pnrLats =  Arrays.asList(tempPnrLats);
+					Double[] tempPnrLons = (Double[]) rs.getArray("pnrlons").getArray();
+					response.pnrLons =  Arrays.asList(tempPnrLons);
+					String[] tempPnrNames = (String[]) rs.getArray("pnrnames").getArray();
+					response.pnrNames = Arrays.asList(tempPnrNames);
+					String[] tempPnrCities = (String[]) rs.getArray("pnrnames").getArray();
+					response.pnrCities = Arrays.asList(tempPnrCities);
+					Integer[] tempPnrSpaces = (Integer[]) rs.getArray("pnrspaces").getArray();
+					response.pnrSpaces = Arrays.asList(tempPnrSpaces);
+					String[] tempPlacesIDs = (String[]) rs.getArray("placesids").getArray();
+					response.placesIDs = Arrays.asList(tempPlacesIDs);
+					String[] tempPlacesNames = (String[]) rs.getArray("placesnames").getArray();
+					response.placesNames = Arrays.asList(tempPlacesNames);
 					output.Clusters.add(response);
 				}				
 			} catch (SQLException e) {

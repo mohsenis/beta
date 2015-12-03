@@ -46,6 +46,11 @@ var tmp = '<tr><th>Agency ID <em title="Identification number reported in the tr
 '<th>Route Type <em title="Type of transportation used on a route: 0-Tram, Streetcar & Light rail 1-Subway & Metro 2-Rail 3-Bus 4-Ferry 5-Cable car 6-Gondola & Suspended cable car 7-Funicular"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route Length <em title="Length of the longest route variant for the given route."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops on the route."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Counties<em title="Counties in which the route operates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban Areas<em title="Urban Areas in which the route operates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Census Places<em title="Census Places in which the route operates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Congressional Districts<em title="Congressional Districts in which the route operates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>ODOT Transit Regions<em title="ODOT Transit Regions in which the route operates."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Unduplicated Urban Population (2010)<em title="Summation of the unduplicated urban population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Unduplicated Rural Population (2010)<em title="Summation of the unduplicated rural population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Stops <em title="Number of stops scheduled on all trips in a route. The service stops for a route is calculated as its stop count multiplied by the number of visits per stop."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -117,11 +122,24 @@ $(document).ready(function(){
 				}else{
 					html+='<td>'+((item.RouteSName!=null)?item.RouteSName:"-")+'</td><td>'+((item.RouteLName!=null)?item.RouteLName:"-")+'</td>';
 				}
-				html+='<td>'+ item.RouteType +'</td><td>'+item.RouteLength +'</td><td><a href="#" class="stopreport" aid="'+item.AgencyId+'" id="'+ item.RouteId+'">'+item.StopsCount
-				+'</a></td><td class="serviceCol">'+ numberconv(item.UPopWithinX)+'</td><td class="serviceCol">'+numberconv(item.RPopWithinX)+'</td><td class="serviceCol">'
-				+numberconv(item.ServiceStops)+'</td><td class="serviceCol">'+numberconv(item.UServicePop)+'</td><td class="serviceCol">'+numberconv(item.RServicePop)
-				+'</td><td class="serviceCol">'+numberconv(item.ServiceMiles)+'</td><td class="serviceCol">'+numberconv(item.ServiceHours)
-				+'</td><td class="details-control"></td><td>'+((item.RouteDesc!=null)?item.RouteDesc:"-")+'</td><td>'+d.metadata+'</td></tr>';
+				html+='<td>'+ item.RouteType 
+				+'</td><td>'+item.RouteLength 
+				+'</td><td><a href="#" class="stopreport" aid="'+item.AgencyId+'" id="'+ item.RouteId+'">'+item.StopsCount+'</a>'
+				+'</td><td>'+ item.counties
+				+'</td><td>'+ item.urbans
+				+'</td><td>'+ item.places
+				+'</td><td>'+ item.congdists
+				+'</td><td>'+ item.regions
+				+'</td><td class="serviceCol">'+ numberconv(item.UPopWithinX)
+				+'</td><td class="serviceCol">'+numberconv(item.RPopWithinX)
+				+'</td><td class="serviceCol">'+numberconv(item.ServiceStops)
+				+'</td><td class="serviceCol">'+numberconv(item.UServicePop)
+				+'</td><td class="serviceCol">'+numberconv(item.RServicePop)
+				+'</td><td class="serviceCol">'+numberconv(item.ServiceMiles)
+				+'</td><td class="serviceCol">'+numberconv(item.ServiceHours)
+				+'</td><td class="details-control">'
+				+'</td><td>'+((item.RouteDesc!=null)?item.RouteDesc:"-")
+				+'</td><td>'+d.metadata+'</td></tr>';
 				description.push(((item.RouteDesc!=null)?item.RouteDesc:"-"));					    
 			});		
 			html = html + '</tbody>'+html2+'</table>';
@@ -146,14 +164,14 @@ $(document).ready(function(){
 			}});
 			
 			var table = $('#RT').DataTable( {
-				//"scrollY": "76%",
+				"scrollX": true,
 				"paging": true,
 				"iDisplayLength": 14,
 				"sScrollX": "100%",				
 				"width": "auto",
 				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [ 15 ] },
-				                 {"visible": false, "targets": [16,17]}				                 
+				                 { "bSortable": false, "aTargets": [ 20 ] },
+				                 {"visible": false, "targets": [21,22]}				                 
 				               ],
 				"order": [[ 2, "asc" ]],
 				"dom": 'T<"clear">lfrtip',
@@ -203,7 +221,7 @@ $(document).ready(function(){
 		            
 		        '</table>';
 		    }
-		    $('#RT_wrapper').css("width", $('#RT').css("width"));
+		    //$('#RT_wrapper').css("width", $('#RT').css("width"));
 		    $('#RT_wrapper').css("margin", "auto");
 			$("#RT_length").remove();
 		    $("#RT_filter").insertBefore("#RT_info");

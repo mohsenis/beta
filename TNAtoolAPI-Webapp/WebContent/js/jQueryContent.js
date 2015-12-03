@@ -93,6 +93,17 @@ function isNumber2(evt) {
 	return true;
 };
 	
+function isNumber2(evt) {
+	evt = (evt) ? evt : window.event;
+	var charCode = (evt.which) ? evt.which : evt.keyCode;
+	if (charCode == 46) {
+		if ($("#PnrSradius").val().indexOf('.') !== -1 ) return false;
+	} else if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+	return false;
+	}
+	return true;
+};
+
 function trimLat(x){
 	if (x.length > 12) 
 		x = x.substring(0,11);
@@ -118,13 +129,14 @@ function isWholeNumber(evt) {
 	};
 
 function addDate(date){
-	$( "<li title='Click to remove.' id="+dateID+" onclick=\"dateRemove(this, '"+date+"')\">"+Date.parse(date).toString('dddd, MMMM d, yyyy')+"</li>" ).appendTo( "#accordionItems" );
+	$( "<li title='Click to remove.' id="+dateID+" class='selectedDate' onclick=\"dateRemove(this, '"+date+"')\">"+Date.parse(date).toString('dddd, MMMM d, yyyy')+"</li>" ).appendTo( "#accordionItems" );
 	$("#"+dateID).css({"border":"1px solid black","padding-left":"10px","font-size":"95%","display":"block","width":"80%","background-color":"grey","text-decoration":"none","color":"white","margin":"3px","border-radius":"5px"});
 	$("#"+dateID).hover(function(){
 		  $(this).css({"cursor":"pointer","-moz-transform":"scale(1.1,1.1)","-webkit-transform":"scale(1.1,1.1)","transform":"scale(1.1,1.1)"});
 	},function(){
 		  $(this).css({"cursor":"pointer","-moz-transform":"scale(1,1)","-webkit-transform":"scale(1,1)","transform":"scale(1,1)"});
 	});			
+	$('.selectedDate').css('margin','auto');
 }
 
 function numberconv(x) {
@@ -141,7 +153,7 @@ function numberconv(x) {
 }
 
 function addPercent(x) {
-	return '% ' + x;
+	return x+'%';
 }
 
 /**
@@ -226,6 +238,7 @@ function reloadUG(){
 function reloadHR(){		
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
 	var tmpX2 = (parseFloat(document.getElementById("PopSradius").value)).toString();
+	var tmpX3 = (parseFloat(document.getElementById("PnrSradius").value)).toString();
 	if (exceedsMaxRadius(tmpX) || exceedsMaxRadius(tmpX2)){	// Checks if the entered search radius exceeds the maximum.
 		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
 		return;
@@ -233,6 +246,7 @@ function reloadHR(){
 	
 	history.pushState("", "", document.URL.replace('x1='+w_qstringx, 'x1='+tmpX));
 	history.pushState("", "", document.URL.replace('x2='+w_qstringx2, 'x2='+tmpX2));
+	history.pushState("", "", document.URL.replace('x3='+w_qstringx3, 'x3='+tmpX3));
 	var dates = $('#datepicker').multiDatesPicker('getDates');
 	if(dates.length==0){
 		$( "#datepicker" ).multiDatesPicker({
@@ -548,7 +562,8 @@ function gos(key){
 	}
 	
 	
-	document.getElementById("Sradius").value = w_qstringx;
+	$('#Sradius').val(w_qstringx);
+//	document.getElementById("Sradius").value = w_qstringx;
 	//document.getElementById("LoS").value = w_qstringl;
 		
 	jQuery('#Sradius').on('input', function() {		

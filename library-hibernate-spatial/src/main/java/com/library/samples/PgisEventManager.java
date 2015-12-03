@@ -470,238 +470,601 @@ public class PgisEventManager {
 	/**
 	 * Queries employment data on a given area (based on the reportType)
 	 */
-	public static EmpDataList getEmpData(String DS, String reportType, int dbindex, String username){
-		String dataSet = DS;
+	public static EmpDataList getEmpData(String DS, String reportType, String[] dates, String[] day, String[] fulldates, double radius, int L, int dbindex, String username){
 		EmpDataList results = new EmpDataList();
 		Connection connection = makeConnection(dbindex);
 	    Statement stmt = null;
 	    String query = "";
 	    
-	    if (reportType.contains("Agencies")){ // returns employment data for a specific agency.
-	    	String[] temp = reportType.split(",");
-	    	String radius = temp[1];
-	    	List<String> agencies = PgisEventManager.getAgencyList(username, dbindex);
-	    	
-    		for (String agencyID: agencies){
-	    	    	
-		    	query = "with aids AS (SELECT agency_id AS aid FROM gtfs_selected_feeds where username='" + username + "'), "
-		    			+ "agencies AS (SELECT id AS agencyid, name as agencyname FROM gtfs_agencies INNER JOIN aids ON gtfs_agencies.defaultid = aids.aid), "
-		    			+ "stopservice AS (SELECT agencyid_def, stopid, agencies.agencyid, agencies.agencyname FROM gtfs_stop_service_map INNER JOIN agencies ON agencies.agencyid = gtfs_stop_service_map.agencyid), "
-		    			+ "stops AS (select stopservice.agencyid, stopservice.agencyname, stopservice.stopid, gtfs_stops.name, lat, lon, location from gtfs_stops inner join stopservice ON gtfs_stops.id = stopservice.stopid AND stopservice.agencyid_def = gtfs_stops.agencyid "
-		    			+ "WHERE stopservice.agencyid = '" + agencyID + "'), "
-		    			+ "multipoints AS (SELECT agencyid, agencyname, ST_Multi(ST_Collect(stops.location)) geom FROM stops GROUP BY agencyid, stops.agencyname), "
-		    			+ "multipoints2 AS (SELECT agencyid, agencyname, ST_Buffer(geom," + radius + ") geom FROM multipoints) "
-		    			+ "SELECT "
-		    			+ "	multipoints2.agencyid AS id, "
-		    			+ "	multipoints2.agencyname AS name, "
-		    			+ "	COALESCE(SUM(c000), 0)::int c000,"
-		    			+ "	COALESCE(SUM(ca01), 0)::int ca01,"
-		    			+ "	COALESCE(SUM(ca02), 0)::int ca02,"
-		    			+ "	COALESCE(SUM(ca03), 0)::int ca03,"
-		    			+ "	COALESCE(SUM(ce01), 0)::int ce01,"
-		    			+ "	COALESCE(SUM(ce02), 0)::int ce02,"
-		    			+ "	COALESCE(SUM(ce03), 0)::int ce03,"
-		    			+ "	COALESCE(SUM(cns01), 0)::int cns01,"
-		    			+ "	COALESCE(SUM(cns02), 0)::int cns02,"
-		    			+ "	COALESCE(SUM(cns03), 0)::int cns03,"
-		    			+ "	COALESCE(SUM(cns04), 0)::int cns04,"
-		    			+ "	COALESCE(SUM(cns05), 0)::int cns05,"
-		    			+ "	COALESCE(SUM(cns06), 0)::int cns06,"
-		    			+ "	COALESCE(SUM(cns07), 0)::int cns07,"
-		    			+ "	COALESCE(SUM(cns08), 0)::int cns08,"
-		    			+ "	COALESCE(SUM(cns09), 0)::int cns09,"
-		    			+ "	COALESCE(SUM(cns10), 0)::int cns10,"
-		    			+ "	COALESCE(SUM(cns11), 0)::int cns11,"
-		    			+ "	COALESCE(SUM(cns12), 0)::int cns12,"
-		    			+ "	COALESCE(SUM(cns13), 0)::int cns13,"
-		    			+ "	COALESCE(SUM(cns14), 0)::int cns14,"
-		    			+ "	COALESCE(SUM(cns15), 0)::int cns15,"
-		    			+ "	COALESCE(SUM(cns16), 0)::int cns16,"
-		    			+ "	COALESCE(SUM(cns17), 0)::int cns17,"
-		    			+ "	COALESCE(SUM(cns18), 0)::int cns18,"
-		    			+ "	COALESCE(SUM(cns19), 0)::int cns19,"
-		    			+ "	COALESCE(SUM(cns20), 0)::int cns20,"
-		    			+ "	COALESCE(SUM(cr01), 0)::int cr01,"
-		    			+ "	COALESCE(SUM(cr02), 0)::int cr02,"
-		    			+ "	COALESCE(SUM(cr03), 0)::int cr03,"
-		    			+ "	COALESCE(SUM(cr04), 0)::int cr04,"
-		    			+ "	COALESCE(SUM(cr05), 0)::int cr05,"
-		    			+ "	COALESCE(SUM(cr07), 0)::int cr07,"
-		    			+ "	COALESCE(SUM(ct01), 0)::int ct01,"
-		    			+ "	COALESCE(SUM(ct02), 0)::int ct02,"
-		    			+ "	COALESCE(SUM(cd01), 0)::int cd01,"
-		    			+ "	COALESCE(SUM(cd02), 0)::int cd02,"
-		    			+ "	COALESCE(SUM(cd03), 0)::int cd03,"
-		    			+ "	COALESCE(SUM(cd04), 0)::int cd04,"
-		    			+ "	COALESCE(SUM(cs01), 0)::int cs01,"
-		    			+ "	COALESCE(SUM(cs02), 0)::int cs02"
-		    			+ " FROM multipoints2 LEFT JOIN " + dataSet + " ON ST_within(" + dataSet + ".location, multipoints2.geom) GROUP BY multipoints2.agencyid, multipoints2.agencyname";
-		    	//System.out.println(query);
+	    if (reportType.equals("Agencies")){ // returns employment data for a specific agency.
+    		query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+	    	for (int i=0; i<dates.length; i++){
+	  	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
+	  	    	  		+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
+	  	    	  		+ "serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+dates[i]+"' and exceptiontype=2) union select serviceid_agencyid, serviceid_id, '"
+	  	    	  		+ fulldates[i] + "' from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+dates[i]+"' and exceptiontype=1)";
+	  	    	  if (i+1<dates.length)
+	  					query+=" union all ";
+	  			} 
+	    	query += "), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, map.stopscount as stops "
+			+"from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+			+"inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid), "
+	    	+ "stops as (select stime.trip_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service "
+			+"from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+			+"inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0	"
+			+"group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location), "
+		
+		+"stopsatlostemp as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, count(trips.aid) as service "
+		+"from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+		+"inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>="+L+"), "
+		+"stopsatlos0 AS (select map.agencyid, stopsatlostemp.stopid, stopsatlostemp.location, stopsatlostemp.service "
+		+"FROM stopsatlostemp INNER JOIN gtfs_stop_service_map AS map ON stopsatlostemp.stopid = map.stopid AND stopsatlostemp.aid = map.agencyid_def), "
+		+"popatlos as (select c000,ca01,ca02,ca03,ce01,ce02,ce03,cns01,cns02,cns03,cns04,cns05,cns06,cns07,cns08,cns09,cns10,cns11,cns12,cns13,cns14,cns15,cns16,cns17,cns18,cns19, "
+		+"cns20,cr01,cr02,cr03,cr04,cr05,cr07,ct01,ct02,cd01,cd02,cd03,cd04,cs01,cs02,rac.blockid,stopsatlos0.agencyid "
+		+"from "+DS+" rac inner join stopsatlos0 on st_dwithin(rac.location,stopsatlos0.location,"+radius+") GROUP BY rac.blockid,agencyid), "
+		+"popatlos1 as (select sum(c000) AS c000los,sum(ca01) AS ca01los,sum(ca02) AS ca02los,sum(ca03) AS ca03los,sum(ce01) AS ce01los,  "
+		+"sum(ce02) AS ce02los,sum(ce03) AS ce03los,sum(cns01) AS cns01los,sum(cns02) AS cns02los,sum(cns03) AS cns03los,"
+		+ "sum(cns04) AS cns04los,sum(cns05) AS cns05los,sum(cns06) AS cns06los,sum(cns07) AS cns07los,sum(cns08) AS cns08los,"
+		+ "sum(cns09) AS cns09los,sum(cns10) AS cns10los,sum(cns11) AS cns11los,sum(cns12) AS cns12los,sum(cns13) AS cns13los,"
+		+ "sum(cns14) AS cns14los,sum(cns15) AS cns15los,sum(cns16) AS cns16los,sum(cns17) AS cns17los,sum(cns18) AS cns18los,"
+		+ "sum(cns19) AS cns19los,sum(cns20) AS cns20los,sum(cr01) AS cr01los,sum(cr02) AS cr02los,sum(cr03) AS cr03los,"
+		+ "sum(cr04) AS cr04los,sum(cr05) AS cr05los,sum(cr07) AS cr07los,sum(ct01) AS ct01los,sum(ct02) AS ct02los,"
+		+ "sum(cd01) AS cd01los,sum(cd02) AS cd02los,sum(cd03) AS cd03los,sum(cd04) AS cd04los,sum(cs01) AS cs01los,sum(cs02) AS cs02los, agencyid AS aid "
+		+"FROM popatlos GROUP BY agencyid), "
+		+"tempstops0 as (select id, agencyid, blockid, location "
+		+"	from gtfs_stops stop inner join aids on stop.agencyid = aids.aid), " 
+		+"tempstops AS (SELECT tempstops0.id, map.agencyid, tempstops0.blockid, tempstops0.location " 
+			+"FROM tempstops0 INNER JOIN  gtfs_stop_service_map AS map ON tempstops0.id = map.stopid AND tempstops0.agencyid = map.agencyid_def), " 
+		+"census as (select block.blockid, block.urbanid, block.regionid, block.congdistid, block.placeid "
+		+ "from census_blocks block inner join tempstops on st_dwithin(block.location, tempstops.location, "+radius+") group by block.blockid), "
+		+"popwithinx0 as (select c000,ca01,ca02,ca03,ce01,ce02,ce03,cns01,cns02,cns03,cns04,cns05,cns06,cns07,cns08,cns09,cns10,cns11,cns12,"
+		+ "cns13,cns14,cns15,cns16,cns17,cns18,cns19,cns20,cr01,cr02,cr03,cr04,cr05,cr07,ct01,ct02,cd01,cd02,cd03,cd04,cs01,cs02, "+DS+".blockid, agencyid "
+		+"from tempstops INNER JOIN "+DS+" ON ST_Dwithin("+DS+".location, tempstops.location, "+radius+") GROUP BY agencyid, "+DS+".blockid), "
+		+"popwithinx as (select sum(c000) AS c000withinx,sum(ca01) AS ca01withinx,sum(ca02) AS ca02withinx,sum(ca03) AS ca03withinx,sum(ce01) AS ce01withinx,"
+		+ "sum(ce02) AS ce02withinx,sum(ce03) AS ce03withinx,sum(cns01) AS cns01withinx,sum(cns02) AS cns02withinx,sum(cns03) AS cns03withinx,"
+		+ "sum(cns04) AS cns04withinx,sum(cns05) AS cns05withinx,sum(cns06) AS cns06withinx,sum(cns07) AS cns07withinx,sum(cns08) AS cns08withinx,"
+		+ "sum(cns09) AS cns09withinx,sum(cns10) AS cns10withinx,sum(cns11) AS cns11withinx,sum(cns12) AS cns12withinx,sum(cns13) AS cns13withinx,"
+		+ "sum(cns14) AS cns14withinx,sum(cns15) AS cns15withinx,sum(cns16) AS cns16withinx,sum(cns17) AS cns17withinx,sum(cns18) AS cns18withinx,"
+		+ "sum(cns19) AS cns19withinx,sum(cns20) AS cns20withinx,sum(cr01) AS cr01withinx,sum(cr02) AS cr02withinx,sum(cr03) AS cr03withinx,"
+		+ "sum(cr04) AS cr04withinx,sum(cr05) AS cr05withinx,sum(cr07) AS cr07withinx,sum(ct01) AS ct01withinx,sum(ct02) AS ct02withinx,"
+		+ "sum(cd01) AS cd01withinx,sum(cd02) AS cd02withinx,sum(cd03) AS cd03withinx,sum(cd04) AS cd04withinx,sum(cs01) AS cs01withinx,"
+		+ "sum(cs02) AS cs02withinx,agencyid AS aid "
+			+"FROM popwithinx0 GROUP BY agencyid), "
+		+"popserved0 AS(select aid, "
+		 		+"MAX(service) AS maxservice, rac.blockid "
+				+"from stops inner join "+DS+" AS rac ON st_dwithin(rac.location, stops.location,"+radius+") "
+				+"GROUP BY aid, blockid), "
+		+"popserved AS (SELECT  "
+			+"  aid,  "
+			+"SUM(maxservice*c000) c000served,"
+			  +"SUM(maxservice*ca01) ca01served,"
+			  +"SUM(maxservice*ca02) ca02served,"
+			  +"SUM(maxservice*ca03) ca03served,"
+			  +"SUM(maxservice*ce01) ce01served,"
+			  +"SUM(maxservice*ce02) ce02served,"
+			  +"SUM(maxservice*ce03) ce03served,"
+			  +"SUM(maxservice*cns01) cns01served,"
+			  +"SUM(maxservice*cns02) cns02served,"
+			  +"SUM(maxservice*cns03) cns03served,"
+			  +"SUM(maxservice*cns04) cns04served,"
+			  +"SUM(maxservice*cns05) cns05served,"
+			  +"SUM(maxservice*cns06) cns06served,"
+			  +"SUM(maxservice*cns07) cns07served,"
+			  +"SUM(maxservice*cns08) cns08served,"
+			  +"SUM(maxservice*cns09) cns09served,"
+			  +"SUM(maxservice*cns10) cns10served,"
+			  +"SUM(maxservice*cns11) cns11served,"
+			  +"SUM(maxservice*cns12) cns12served,"
+			  +"SUM(maxservice*cns13) cns13served,"
+			  +"SUM(maxservice*cns14) cns14served,"
+			  +"SUM(maxservice*cns15) cns15served,"
+			  +"SUM(maxservice*cns16) cns16served,"
+			  +"SUM(maxservice*cns17) cns17served,"
+			  +"SUM(maxservice*cns18) cns18served,"
+			  +"SUM(maxservice*cns19) cns19served,"
+			  +"SUM(maxservice*cns20) cns20served,"
+			  +"SUM(maxservice*cr01) cr01served,"
+			  +"SUM(maxservice*cr02) cr02served,"
+			  +"SUM(maxservice*cr03) cr03served,"
+			  +"SUM(maxservice*cr04) cr04served,"
+			  +"SUM(maxservice*cr05) cr05served,"
+			  +"SUM(maxservice*cr07) cr07served,"
+			  +"SUM(maxservice*ct01) ct01served,"
+			  +"SUM(maxservice*ct02) ct02served,"
+			  +"SUM(maxservice*cd01) cd01served,"
+			  +"SUM(maxservice*cd02) cd02served,"
+			  +"SUM(maxservice*cd03) cd03served,"
+			  +"SUM(maxservice*cd04) cd04served,"
+			  +"SUM(maxservice*cs01) cs01served,"
+			  +"SUM(maxservice*cs02) cs02served "
+			+"FROM popserved0 INNER JOIN "+DS+" USING(blockid) GROUP BY aid) " 
+		+"SELECT agencies.name AS agency_name, agencies.id AS agency_id, popserved.*, popatlos1.*, popwithinx.* " 
+		+"from gtfs_agencies AS agencies LEFT JOIN popwithinx ON agencies.id=aid "
+		+"LEFT JOIN popatlos1 USING(aid) "
+		+"LEFT JOIN popserved USING(aid) "
+		+"ORDER BY agencies.id ";
+	    System.out.println(query);
 		    	
-		    	try {
-					stmt = connection.createStatement();
-					ResultSet rs = stmt.executeQuery(query); 
-			    	while (rs.next()){
-			    		EmpData i = new EmpData();
-						i.id = rs.getString("id");
-						i.name = rs.getString("name");
-						//i.population = rs.getInt("population");
-						i.c000 = rs.getInt("c000");
-						i.ca01 = rs.getInt("ca01");
-						i.ca02 = rs.getInt("ca02");
-						i.ca03 = rs.getInt("ca03");
-						i.ce01 = rs.getInt("ce01");
-						i.ce02 = rs.getInt("ce02");
-						i.ce03 = rs.getInt("ce03");				
-						i.cns01 = rs.getInt("cns01");
-						i.cns02 = rs.getInt("cns02");
-						i.cns03 = rs.getInt("cns03");
-						i.cns04 = rs.getInt("cns04");
-						i.cns05 = rs.getInt("cns05");
-						i.cns06 = rs.getInt("cns06");
-						i.cns07 = rs.getInt("cns07");
-						i.cns08 = rs.getInt("cns08");
-						i.cns09 = rs.getInt("cns09");
-						i.cns10 = rs.getInt("cns10");
-						i.cns11 = rs.getInt("cns11");
-						i.cns12 = rs.getInt("cns12");
-						i.cns13 = rs.getInt("cns13");
-						i.cns14 = rs.getInt("cns14");
-						i.cns15 = rs.getInt("cns15");
-						i.cns16 = rs.getInt("cns16");
-						i.cns17 = rs.getInt("cns17");
-						i.cns18 = rs.getInt("cns18");
-						i.cns19 = rs.getInt("cns19");
-						i.cns20 = rs.getInt("cns20");
-						i.cr01 = rs.getInt("cr01");
-						i.cr02 = rs.getInt("cr02");
-						i.cr03 = rs.getInt("ce03");	
-						i.cr04 = rs.getInt("cr04");
-						i.cr05 = rs.getInt("cr05");
-						i.cr07 = rs.getInt("cr07");	
-						i.ct01 = rs.getInt("ct01");
-						i.ct02 = rs.getInt("ct02");
-						i.cd01 = rs.getInt("cd01");
-						i.cd02 = rs.getInt("cd02");
-						i.cd03 = rs.getInt("cd03");
-						i.cd04 = rs.getInt("cd04");
-						i.cs01 = rs.getInt("cs01");
-						i.cs02 = rs.getInt("cs02");					
-						results.EmpDataList.add(i);
-			    	}
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-    		}
+	    	try {
+				stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery(query); 
+		    	while (rs.next()){
+		    		EmpData i = new EmpData();
+		    		i.id = rs.getString("agency_id");
+		    		i.name = rs.getString("agency_name");
+		    		i.c000within = rs.getInt("c000withinx");
+					i.ca01within = rs.getInt("ca01withinx");
+					i.ca02within = rs.getInt("ca02withinx");
+					i.ca03within = rs.getInt("ca03withinx");
+					i.ce01within = rs.getInt("ce01withinx");
+					i.ce02within = rs.getInt("ce02withinx");
+					i.ce03within = rs.getInt("ce03withinx");				
+					i.cns01within = rs.getInt("cns01withinx");
+					i.cns02within = rs.getInt("cns02withinx");
+					i.cns03within = rs.getInt("cns03withinx");
+					i.cns04within = rs.getInt("cns04withinx");
+					i.cns05within = rs.getInt("cns05withinx");
+					i.cns06within = rs.getInt("cns06withinx");
+					i.cns07within = rs.getInt("cns07withinx");
+					i.cns08within = rs.getInt("cns08withinx");
+					i.cns09within = rs.getInt("cns09withinx");
+					i.cns10within = rs.getInt("cns10withinx");
+					i.cns11within = rs.getInt("cns11withinx");
+					i.cns12within = rs.getInt("cns12withinx");
+					i.cns13within = rs.getInt("cns13withinx");
+					i.cns14within = rs.getInt("cns14withinx");
+					i.cns15within = rs.getInt("cns15withinx");
+					i.cns16within = rs.getInt("cns16withinx");
+					i.cns17within = rs.getInt("cns17withinx");
+					i.cns18within = rs.getInt("cns18withinx");
+					i.cns19within = rs.getInt("cns19withinx");
+					i.cns20within = rs.getInt("cns20withinx");
+					i.cr01within = rs.getInt("cr01withinx");
+					i.cr02within = rs.getInt("cr02withinx");
+					i.cr03within = rs.getInt("ce03withinx");	
+					i.cr04within = rs.getInt("cr04withinx");
+					i.cr05within = rs.getInt("cr05withinx");
+					i.cr07within = rs.getInt("cr07withinx");	
+					i.ct01within = rs.getInt("ct01withinx");
+					i.ct02within = rs.getInt("ct02withinx");
+					i.cd01within = rs.getInt("cd01withinx");
+					i.cd02within = rs.getInt("cd02withinx");
+					i.cd03within = rs.getInt("cd03withinx");
+					i.cd04within = rs.getInt("cd04withinx");
+					i.cs01within = rs.getInt("cs01withinx");
+					i.cs02within = rs.getInt("cs02withinx");
+					i.c000served = rs.getInt("c000served");
+					i.ca01served = rs.getInt("ca01served");
+					i.ca02served = rs.getInt("ca02served");
+					i.ca03served = rs.getInt("ca03served");
+					i.ce01served = rs.getInt("ce01served");
+					i.ce02served = rs.getInt("ce02served");
+					i.ce03served = rs.getInt("ce03served");				
+					i.cns01served = rs.getInt("cns01served");
+					i.cns02served = rs.getInt("cns02served");
+					i.cns03served = rs.getInt("cns03served");
+					i.cns04served = rs.getInt("cns04served");
+					i.cns05served = rs.getInt("cns05served");
+					i.cns06served = rs.getInt("cns06served");
+					i.cns07served = rs.getInt("cns07served");
+					i.cns08served = rs.getInt("cns08served");
+					i.cns09served = rs.getInt("cns09served");
+					i.cns10served = rs.getInt("cns10served");
+					i.cns11served = rs.getInt("cns11served");
+					i.cns12served = rs.getInt("cns12served");
+					i.cns13served = rs.getInt("cns13served");
+					i.cns14served = rs.getInt("cns14served");
+					i.cns15served = rs.getInt("cns15served");
+					i.cns16served = rs.getInt("cns16served");
+					i.cns17served = rs.getInt("cns17served");
+					i.cns18served = rs.getInt("cns18served");
+					i.cns19served = rs.getInt("cns19served");
+					i.cns20served = rs.getInt("cns20served");
+					i.cr01served = rs.getInt("cr01served");
+					i.cr02served = rs.getInt("cr02served");
+					i.cr03served = rs.getInt("ce03served");	
+					i.cr04served = rs.getInt("cr04served");
+					i.cr05served = rs.getInt("cr05served");
+					i.cr07served = rs.getInt("cr07served");	
+					i.ct01served = rs.getInt("ct01served");
+					i.ct02served = rs.getInt("ct02served");
+					i.cd01served = rs.getInt("cd01served");
+					i.cd02served = rs.getInt("cd02served");
+					i.cd03served = rs.getInt("cd03served");
+					i.cd04served = rs.getInt("cd04served");
+					i.cs01served = rs.getInt("cs01served");
+					i.cs02served = rs.getInt("cs02served");
+					i.c000los = rs.getInt("c000los");
+					i.ca01los = rs.getInt("ca01los");
+					i.ca02los = rs.getInt("ca02los");
+					i.ca03los = rs.getInt("ca03los");
+					i.ce01los = rs.getInt("ce01los");
+					i.ce02los = rs.getInt("ce02los");
+					i.ce03los = rs.getInt("ce03los");				
+					i.cns01los = rs.getInt("cns01los");
+					i.cns02los = rs.getInt("cns02los");
+					i.cns03los = rs.getInt("cns03los");
+					i.cns04los = rs.getInt("cns04los");
+					i.cns05los = rs.getInt("cns05los");
+					i.cns06los = rs.getInt("cns06los");
+					i.cns07los = rs.getInt("cns07los");
+					i.cns08los = rs.getInt("cns08los");
+					i.cns09los = rs.getInt("cns09los");
+					i.cns10los = rs.getInt("cns10los");
+					i.cns11los = rs.getInt("cns11los");
+					i.cns12los = rs.getInt("cns12los");
+					i.cns13los = rs.getInt("cns13los");
+					i.cns14los = rs.getInt("cns14los");
+					i.cns15los = rs.getInt("cns15los");
+					i.cns16los = rs.getInt("cns16los");
+					i.cns17los = rs.getInt("cns17los");
+					i.cns18los = rs.getInt("cns18los");
+					i.cns19los = rs.getInt("cns19los");
+					i.cns20los = rs.getInt("cns20los");
+					i.cr01los = rs.getInt("cr01los");
+					i.cr02los = rs.getInt("cr02los");
+					i.cr03los = rs.getInt("ce03los");	
+					i.cr04los = rs.getInt("cr04los");
+					i.cr05los = rs.getInt("cr05los");
+					i.cr07los = rs.getInt("cr07los");	
+					i.ct01los = rs.getInt("ct01los");
+					i.ct02los = rs.getInt("ct02los");
+					i.cd01los = rs.getInt("cd01los");
+					i.cd02los = rs.getInt("cd02los");
+					i.cd03los = rs.getInt("cd03los");
+					i.cd04los = rs.getInt("cd04los");
+					i.cs01los = rs.getInt("cs01los");
+					i.cs02los = rs.getInt("cs02los");					
+					results.EmpDataList.add(i);
+		    	}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
     		dropConnection(connection);
 	    }else{
-		    String criteria1 = "";
-		    String criteria2 = "";
-		    
+	        String criteria1 = "";
+			String criteria2 = ""; 
+			String criteria3 = "";
+			String criteria4 = "";
+			String criteria5 = "";
 		    if (reportType.equals("Counties")){
-		    	criteria1 = "countyid";
-		    	criteria2 = "SELECT  census_counties.cname  AS name, temp2.*"
-				    		+ " FROM temp2 INNER JOIN census_counties"
-				    		+ " ON temp2.id = census_counties.countyid" ;
-		    }else if (reportType.equals("Census Places")){
+		    	criteria1 = "LEFT(blockid,5)";
+				criteria2 = "census_counties"; 
+				criteria3 = "census_counties"; 
+				criteria4 = "countyid";
+				criteria5 = "census_counties.cname";
+		    }else if(reportType.equals("Census Places")){
 		    	criteria1 = "placeid";
-		    	criteria2 = "SELECT  census_places.pname  AS name, temp2.*"
-				    		+ " FROM temp2 INNER JOIN census_places"
-				    		+ " ON temp2.id = census_places.placeid" ;
-		    }
-		    else if (reportType.equals("ODOT Transit Regions")){
-		    	criteria1 = "regionid";
-		    	criteria2 = "SELECT  concat('Region ',temp2.id) AS name, temp2.*"
-		    				+ " FROM temp2 ";
-		    }
-		    else if (reportType.equals("Urban Areas")){
-		    	criteria1 = "urbanid";
-		    	criteria2 = " SELECT census_urbans.uname AS name, temp2.*"
-				    		+ " FROM temp2 INNER JOIN census_urbans"
-				    		+ " ON temp2.id = census_urbans.urbanid";
-		    }
-		    else if (reportType.equals("Congressional Districts")){
+				criteria2 = "census_places"; 
+				criteria3 = "census_places";
+				criteria4 = "placeid";
+				criteria5 = "census_places.pname";
+		    }else if(reportType.equals("Congressional Districts")){
 		    	criteria1 = "congdistid";
-		    	criteria2 = " SELECT census_congdists.cname AS name, temp2.*"
-				    		+ " FROM temp2 INNER JOIN census_congdists"
-				    		+ " ON temp2.id = census_congdists.congdistid";
+				criteria2 = "census_congdists"; 
+				criteria3 = "census_congdists";
+				criteria4 = "congdistid";
+				criteria5 = "census_congdists.cname";
+		    }else if(reportType.equals("Urban Areas")){
+		    	criteria1 = "urbanid";
+				criteria2 = "census_urbans"; 
+				criteria3 = "census_urbans";
+				criteria4 = "urbanid";
+				criteria5 = "census_urbans.uname";
+		    }else if(reportType.equals("ODOT Transit Regions")){
+		    	criteria1 = "regionid";
+		    	criteria2 = "regions";
+				criteria3 = "(SELECT odotregionid AS regionid, SUM(population) AS population FROM census_counties GROUP BY odotregionid) AS regions"; 
+				criteria4 = "regionid";
+				criteria5 = "'Region ' || regions.regionid";
 		    }
 		    
-		    query = "WITH temp1 AS (SELECT "
-		    		+ "		LEFT(census_blocks.blockid,5) countyid,"
-		    		+ "		census_blocks.blockid,"
-		    		+ "		census_blocks.placeid,"
-		    		+ "		census_blocks.congdistid,"
-		    		+ "		census_blocks.regionid,"
-		    		+ "		census_blocks.urbanid,"
-		    		+ "		census_blocks.population"
-		    		+ "	FROM census_blocks"
-		    		+ "		),"
-		    		+ "temp2 AS ("
-		    		+ "		SELECT"
-		    		+ "		  temp1." + criteria1 + " id,"
-		    		+ "		  COALESCE(SUM(population),0)::int population,"
-		    		+ "		  COALESCE(SUM(c000), 0)::int c000,"
-		    		+ "		  COALESCE(SUM(ca01), 0)::int ca01,"
-		    		+ "		  COALESCE(SUM(ca02), 0)::int ca02,"
-		    		+ "		  COALESCE(SUM(ca03), 0)::int ca03,"
-		    		+ "		  COALESCE(SUM(ce01), 0)::int ce01,"
-		    		+ "		  COALESCE(SUM(ce02), 0)::int ce02,"
-		    		+ "		  COALESCE(SUM(ce03), 0)::int ce03,"
-		    		+ "		  COALESCE(SUM(cns01), 0)::int cns01,"
-		    		+ "		  COALESCE(SUM(cns02), 0)::int cns02,"
-		    		+ "		  COALESCE(SUM(cns03), 0)::int cns03,"
-		    		+ "		  COALESCE(SUM(cns04), 0)::int cns04,"
-		    		+ "		  COALESCE(SUM(cns05), 0)::int cns05,"
-		    		+ "		  COALESCE(SUM(cns06), 0)::int cns06,"
-		    		+ "		  COALESCE(SUM(cns07), 0)::int cns07,"
-		    		+ "		  COALESCE(SUM(cns08), 0)::int cns08,"
-		    		+ "		  COALESCE(SUM(cns09), 0)::int cns09,"
-		    		+ "		  COALESCE(SUM(cns10), 0)::int cns10,"
-		    		+ "		  COALESCE(SUM(cns11), 0)::int cns11,"
-		    		+ "		  COALESCE(SUM(cns12), 0)::int cns12,"
-		    		+ "		  COALESCE(SUM(cns13), 0)::int cns13,"
-		    		+ "		  COALESCE(SUM(cns14), 0)::int cns14,"
-		    		+ "		  COALESCE(SUM(cns15), 0)::int cns15,"
-		    		+ "		  COALESCE(SUM(cns16), 0)::int cns16,"
-		    		+ "		  COALESCE(SUM(cns17), 0)::int cns17,"
-		    		+ "		  COALESCE(SUM(cns18), 0)::int cns18,"
-		    		+ "		  COALESCE(SUM(cns19), 0)::int cns19,"
-		    		+ "		  COALESCE(SUM(cns20), 0)::int cns20,"
-		    		+ "		  COALESCE(SUM(cr01), 0)::int cr01,"
-		    		+ "		  COALESCE(SUM(cr02), 0)::int cr02,"
-		    		+ "		  COALESCE(SUM(cr03), 0)::int cr03,"
-		    		+ "		  COALESCE(SUM(cr04), 0)::int cr04,"
-		    		+ "		  COALESCE(SUM(cr05), 0)::int cr05,"
-		    		+ "		  COALESCE(SUM(cr07), 0)::int cr07,"
-		    		+ "		  COALESCE(SUM(ct01), 0)::int ct01,"
-		    		+ "		  COALESCE(SUM(ct02), 0)::int ct02,"
-		    		+ "		  COALESCE(SUM(cd01), 0)::int cd01,"
-		    		+ "		  COALESCE(SUM(cd02), 0)::int cd02,"
-		    		+ "		  COALESCE(SUM(cd03), 0)::int cd03,"
-		    		+ "		  COALESCE(SUM(cd04), 0)::int cd04,"
-		    		+ "		  COALESCE(SUM(cs01), 0)::int cs01,"
-		    		+ "		  COALESCE(SUM(cs02), 0)::int cs02"
-		    		+ ""
-		    		+ "		FROM temp1 LEFT JOIN " + dataSet 
-		    		+ "		ON temp1.blockid = " + dataSet + ".blockid"
-		    		+ ""
-		    		+ "		GROUP BY " + criteria1
-		    		+ "		ORDER BY " + criteria1
-		    		+ "	) "
-		    		+ criteria2;
-		    //System.out.println(query);
+		    query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='admin'), svcids AS (";
+		    for (int i=0; i<dates.length; i++){
+  	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
+  	    	  		+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
+  	    	  		+ "serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+dates[i]+"' and exceptiontype=2) union select serviceid_agencyid, serviceid_id, '"
+  	    	  		+ fulldates[i] + "' from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+dates[i]+"' and exceptiontype=1)";
+  	    	  if (i+1<dates.length)
+  					query+=" union all ";
+  			} 
+		    query+="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, map.stopscount as stops "
+				+"	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+				+"	inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid), "
+				
+				+"service as (select COALESCE(+ sum(length),0) as svcmiles, COALESCE(+ sum(tlength),0) as svchours, COALESCE(+ sum(stops),0) as svcstops from trips), "
+				+"stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, count(trips.aid) as service "
+				+"	from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+				+"	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>=" + L + "), "
+				+"stops as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service "
+				+"	from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+				+"	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0 "
+				+"	group by stime.stop_agencyid, stime.stop_id, stop.location), "
+				+"popatlos as (select "
+				+"	c000,"
+				+"	ca01,"
+				+"	ca02,"
+				+"	ca03,"
+				+"	ce01,"
+				+"	ce02,"
+				+"	ce03,"
+				+"	cns01,"
+				+"	cns02,"
+				+"	cns03,"
+				+"	cns04,"
+				+"	cns05,"
+				+"	cns06,"
+				+"	cns07,"
+				+"	cns08,"
+				+"	cns09,"
+				+"	cns10,"
+				+"	cns11,"
+				+"	cns12,"
+				+"	cns13,"
+				+"	cns14,"
+				+"	cns15,"
+				+"	cns16,"
+				+"	cns17,"
+				+"	cns18,"
+				+"	cns19,"
+				+"	cns20,"
+				+"	cr01,"
+				+"	cr02,"
+				+"	cr03,"
+				+"	cr04,"
+				+"	cr05,"
+				+"	cr07,"
+				+"	ct01,"
+				+"	ct02,"
+				+"	cd01,"
+				+"	cd02,"
+				+"	cd03,"
+				+"	cd04,"
+				+"	cs01,"
+				+"	cs02,"
+				+ DS + ".blockid, blocks.urbanid, blocks.regionid, blocks.congdistid, blocks.placeid "
+				+"	from "+ DS + " inner join stopsatlos on st_dwithin(" + DS + ".location,stopsatlos.location,"+radius+")"
+				+"	inner join census_blocks blocks ON " + DS + ".blockid = blocks.blockid GROUP BY " + DS + ".blockid, blocks.urbanid, blocks.regionid, blocks.congdistid, blocks.placeid), "
+				+"popatlos1 as (select "
+				+ "sum(c000) AS c000los, "
+				+ "sum(ca01) AS ca01los, "
+				+ "sum(ca02) AS ca02los, "
+				+ "sum(ca03) AS ca03los, "
+				+ "sum(ce01) AS ce01los, "
+				+ "sum(ce02) AS ce02los, "
+				+ "sum(ce03) AS ce03los, "
+				+ "sum(cns01) AS cns01los, "
+				+ "sum(cns02) AS cns02los, "
+				+ "sum(cns03) AS cns03los, "
+				+ "sum(cns04) AS cns04los, "
+				+ "sum(cns05) AS cns05los, "
+				+ "sum(cns06) AS cns06los, "
+				+ "sum(cns07) AS cns07los, "
+				+ "sum(cns08) AS cns08los, "
+				+ "sum(cns09) AS cns09los, "
+				+ "sum(cns10) AS cns10los, "
+				+ "sum(cns11) AS cns11los, "
+				+ "sum(cns12) AS cns12los, "
+				+ "sum(cns13) AS cns13los, "
+				+ "sum(cns14) AS cns14los, "
+				+ "sum(cns15) AS cns15los, "
+				+ "sum(cns16) AS cns16los, "
+				+ "sum(cns17) AS cns17los, "
+				+ "sum(cns18) AS cns18los, "
+				+ "sum(cns19) AS cns19los, "
+				+ "sum(cns20) AS cns20los, "
+				+ "sum(cr01) AS cr01los, "
+				+ "sum(cr02) AS cr02los, "
+				+ "sum(cr03) AS cr03los, "
+				+ "sum(cr04) AS cr04los, "
+				+ "sum(cr05) AS cr05los, "
+				+ "sum(cr07) AS cr07los, "
+				+ "sum(ct01) AS ct01los, "
+				+ "sum(ct02) AS ct02los, "
+				+ "sum(cd01) AS cd01los, "
+				+ "sum(cd02) AS cd02los, "
+				+ "sum(cd03) AS cd03los, "
+				+ "sum(cd04) AS cd04los, "
+				+ "sum(cs01) AS cs01los, "
+				+ "sum(cs02) AS cs02los, "
+				+ criteria1 + " AS " + criteria4 + " FROM popatlos GROUP BY " + criteria1 + "), "
+				+ "popserved as (select "
+				 + " c000*(stops.service) as c000served, "
+				 + " ca01*(stops.service) as ca01served, "
+				 + " ca02*(stops.service) as ca02served, "
+				 + " ca03*(stops.service) as ca03served, "
+				 + " ce01*(stops.service) as ce01served, "
+				 + " ce02*(stops.service) as ce02served, "
+				 + " ce03*(stops.service) as ce03served, "
+				 + " cns01*(stops.service) as cns01served, "
+				 + " cns02*(stops.service) as cns02served, "
+				 + " cns03*(stops.service) as cns03served, "
+				 + " cns04*(stops.service) as cns04served, "
+				 + " cns05*(stops.service) as cns05served, "
+				 + " cns06*(stops.service) as cns06served, "
+				 + " cns07*(stops.service) as cns07served, "
+				 + " cns08*(stops.service) as cns08served, "
+				 + " cns09*(stops.service) as cns09served, "
+				 + " cns10*(stops.service) as cns10served, "
+				 + " cns11*(stops.service) as cns11served, "
+				 + " cns12*(stops.service) as cns12served, "
+				 + " cns13*(stops.service) as cns13served, "
+				 + " cns14*(stops.service) as cns14served, "
+				 + " cns15*(stops.service) as cns15served, "
+				 + " cns16*(stops.service) as cns16served, "
+				 + " cns17*(stops.service) as cns17served, "
+				 + " cns18*(stops.service) as cns18served, "
+				 + " cns19*(stops.service) as cns19served, "
+				 + " cns20*(stops.service) as cns20served, "
+				 + " cr01*(stops.service) as cr01served, "
+				 + " cr02*(stops.service) as cr02served, "
+				 + " cr03*(stops.service) as cr03served, "
+				 + " cr04*(stops.service) as cr04served, "
+				 + " cr05*(stops.service) as cr05served, "
+				 + " cr07*(stops.service) as cr07served, "
+				 + " ct01*(stops.service) as ct01served, "
+				 + " ct02*(stops.service) as ct02served, "
+				 + " cd01*(stops.service) as cd01served, "
+				 + " cd02*(stops.service) as cd02served, "
+				 + " cd03*(stops.service) as cd03served, "
+				 + " cd04*(stops.service) as cd04served, "
+				 + " cs01*(stops.service) as cs01served, "
+				 + " cs02*(stops.service) as cs02served, "
+				+ "	blocks.blockid, census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid  "
+				+ "	from " + DS + " blocks inner join stops on st_dwithin(blocks.location, stops.location,"+radius+") "
+				+ "	inner join census_blocks ON blocks.blockid=census_blocks.blockid "
+				+ "	group by stops.service, blocks.blockid,census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid), "
+				+ " popserved1 as (select "
+				+ "sum(c000served) AS c000served, "
+				+ "sum(ca01served) AS ca01served, "
+				+ "sum(ca02served) AS ca02served, "
+				+ "sum(ca03served) AS ca03served, "
+				+ "sum(ce01served) AS ce01served, "
+				+ "sum(ce02served) AS ce02served, "
+				+ "sum(ce03served) AS ce03served, "
+				+ "sum(cns01served) AS cns01served, "
+				+ "sum(cns02served) AS cns02served, "
+				+ "sum(cns03served) AS cns03served, "
+				+ "sum(cns04served) AS cns04served, "
+				+ "sum(cns05served) AS cns05served, "
+				+ "sum(cns06served) AS cns06served, "
+				+ "sum(cns07served) AS cns07served, "
+				+ "sum(cns08served) AS cns08served, "
+				+ "sum(cns09served) AS cns09served, "
+				+ "sum(cns10served) AS cns10served, "
+				+ "sum(cns11served) AS cns11served, "
+				+ "sum(cns12served) AS cns12served, "
+				+ "sum(cns13served) AS cns13served, "
+				+ "sum(cns14served) AS cns14served, "
+				+ "sum(cns15served) AS cns15served, "
+				+ "sum(cns16served) AS cns16served, "
+				+ "sum(cns17served) AS cns17served, "
+				+ "sum(cns18served) AS cns18served, "
+				+ "sum(cns19served) AS cns19served, "
+				+ "sum(cns20served) AS cns20served, "
+				+ "sum(cr01served) AS cr01served, "
+				+ "sum(cr02served) AS cr02served, "
+				+ "sum(cr03served) AS cr03served, "
+				+ "sum(cr04served) AS cr04served, "
+				+ "sum(cr05served) AS cr05served, "
+				+ "sum(cr07served) AS cr07served, "
+				+ "sum(ct01served) AS ct01served, "
+				+ "sum(ct02served) AS ct02served, "
+				+ "sum(cd01served) AS cd01served, "
+				+ "sum(cd02served) AS cd02served, "
+				+ "sum(cd03served) AS cd03served, "
+				+ "sum(cd04served) AS cd04served, "
+				+ "sum(cs01served) AS cs01served, "
+				+ "sum(cs02served) AS cs02served, "
+				+ criteria1 + " AS " + criteria4 + " from popserved GROUP BY " + criteria1 + "), "
+				+ "tempstops as (select id, agencyid, blockid, location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid),  "
+				+ "census as (select block.blockid, block.urbanid, block.regionid, block.congdistid, block.placeid  "
+				+ "from census_blocks block inner join tempstops on st_dwithin(block.location, tempstops.location, "+radius+")  "
+				+ "group by block.blockid),  "
+				+ "popwithinx as (select  "
+				+ "sum(c000) AS c000withinx, "
+				+ "sum(ca01) AS ca01withinx, "
+				+ "sum(ca02) AS ca02withinx, "
+				+ "sum(ca03) AS ca03withinx, "
+				+ "sum(ce01) AS ce01withinx, "
+				+ "sum(ce02) AS ce02withinx, "
+				+ "sum(ce03) AS ce03withinx, "
+				+ "sum(cns01) AS cns01withinx, "
+				+ "sum(cns02) AS cns02withinx, "
+				+ "sum(cns03) AS cns03withinx, "
+				+ "sum(cns04) AS cns04withinx, "
+				+ "sum(cns05) AS cns05withinx, "
+				+ "sum(cns06) AS cns06withinx, "
+				+ "sum(cns07) AS cns07withinx, "
+				+ "sum(cns08) AS cns08withinx, "
+				+ "sum(cns09) AS cns09withinx, "
+				+ "sum(cns10) AS cns10withinx, "
+				+ "sum(cns11) AS cns11withinx, "
+				+ "sum(cns12) AS cns12withinx, "
+				+ "sum(cns13) AS cns13withinx, "
+				+ "sum(cns14) AS cns14withinx, "
+				+ "sum(cns15) AS cns15withinx, "
+				+ "sum(cns16) AS cns16withinx, "
+				+ "sum(cns17) AS cns17withinx, "
+				+ "sum(cns18) AS cns18withinx, "
+				+ "sum(cns19) AS cns19withinx, "
+				+ "sum(cns20) AS cns20withinx, "
+				+ "sum(cr01) AS cr01withinx, "
+				+ "sum(cr02) AS cr02withinx, "
+				+ "sum(cr03) AS cr03withinx, "
+				+ "sum(cr04) AS cr04withinx, "
+				+ "sum(cr05) AS cr05withinx, "
+				+ "sum(cr07) AS cr07withinx, "
+				+ "sum(ct01) AS ct01withinx, "
+				+ "sum(ct02) AS ct02withinx, "
+				+ "sum(cd01) AS cd01withinx, "
+				+ "sum(cd02) AS cd02withinx, "
+				+ "sum(cd03) AS cd03withinx, "
+				+ "sum(cd04) AS cd04withinx, "
+				+ "sum(cs01) AS cs01withinx, "
+				+ "sum(cs02) AS cs02withinx, "
+				+ criteria1 + " AS " + criteria4 + " FROM census INNER JOIN " + DS + " USING(blockid) GROUP BY " + criteria4 + "), "
+			
+				+ "totalpop AS (SELECT " + DS + ".*, LEFT(" + DS + ".blockid,5) AS countyid, census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid "
+				+ "	FROM " + DS + " INNER JOIN census_blocks USING(blockid)), "
+				+ "totalpop1 AS (SELECT sum(c000) AS c000, "
+				+ "sum(ca01) AS ca01,"
+				+ "sum(ca02) AS ca02,"
+				+ "sum(ca03) AS ca03,"
+				+ "sum(ce01) AS ce01,"
+				+ "sum(ce02) AS ce02,"
+				+ "sum(ce03) AS ce03,"
+				+ "sum(cns01) AS cns01,"
+				+ "sum(cns02) AS cns02,"
+				+ "sum(cns03) AS cns03,"
+				+ "sum(cns04) AS cns04,"
+				+ "sum(cns05) AS cns05,"
+				+ "sum(cns06) AS cns06,"
+				+ "sum(cns07) AS cns07,"
+				+ "sum(cns08) AS cns08,"
+				+ "sum(cns09) AS cns09,"
+				+ "sum(cns10) AS cns10,"
+				+ "sum(cns11) AS cns11,"
+				+ "sum(cns12) AS cns12,"
+				+ "sum(cns13) AS cns13,"
+				+ "sum(cns14) AS cns14,"
+				+ "sum(cns15) AS cns15,"
+				+ "sum(cns16) AS cns16,"
+				+ "sum(cns17) AS cns17,"
+				+ "sum(cns18) AS cns18,"
+				+ "sum(cns19) AS cns19,"
+				+ "sum(cns20) AS cns20,"
+				+ "sum(cr01) AS cr01,"
+				+ "sum(cr02) AS cr02,"
+				+ "sum(cr03) AS cr03,"
+				+ "sum(cr04) AS cr04,"
+				+ "sum(cr05) AS cr05,"
+				+ "sum(cr07) AS cr07,"
+				+ "sum(ct01) AS ct01,"
+				+ "sum(ct02) AS ct02,"
+				+ "sum(cd01) AS cd01,"
+				+ "sum(cd02) AS cd02,"
+				+ "sum(cd03) AS cd03,"
+				+ "sum(cd04) AS cd04,"
+				+ "sum(cs01) AS cs01,"
+				+ "sum(cs02) AS cs02,"
+				+ criteria4
+				+ " FROM totalpop GROUP BY " + criteria4 + ") "
+				+ "select popserved1.*, popatlos1.*, popwithinx.*, totalpop1.*, " + criteria2 + "." + criteria4 + " AS areaid, " + criteria5 + " AS areaname "
+				+ "FROM " + criteria3 + " LEFT JOIN popserved1 USING(" + criteria4 + ") "
+				+ "LEFT JOIN popatlos1 USING(" + criteria4 + ") "
+				+ "LEFT JOIN popwithinx USING(" + criteria4 + ") "
+				+ "LEFT JOIN totalpop1 USING(" + criteria4 + ") ";
+				//		    System.out.println(query);
 			    try {
 			    	stmt = connection.createStatement();
 					ResultSet rs = stmt.executeQuery(query); 
 					
 					while (rs.next()){
 						EmpData i = new EmpData();
-						i.id = rs.getString("id");
-						i.name = rs.getString("name");
-						//i.population = rs.getInt("population");
+						i.id = rs.getString("areaid");
+						i.name = rs.getString("areaname");
 						i.c000 = rs.getInt("c000");
 						i.ca01 = rs.getInt("ca01");
 						i.ca02 = rs.getInt("ca02");
@@ -743,7 +1106,129 @@ public class PgisEventManager {
 						i.cd04 = rs.getInt("cd04");
 						i.cs01 = rs.getInt("cs01");
 						i.cs02 = rs.getInt("cs02");
-						
+						i.c000within = rs.getInt("c000withinx");
+						i.ca01within = rs.getInt("ca01withinx");
+						i.ca02within = rs.getInt("ca02withinx");
+						i.ca03within = rs.getInt("ca03withinx");
+						i.ce01within = rs.getInt("ce01withinx");
+						i.ce02within = rs.getInt("ce02withinx");
+						i.ce03within = rs.getInt("ce03withinx");				
+						i.cns01within = rs.getInt("cns01withinx");
+						i.cns02within = rs.getInt("cns02withinx");
+						i.cns03within = rs.getInt("cns03withinx");
+						i.cns04within = rs.getInt("cns04withinx");
+						i.cns05within = rs.getInt("cns05withinx");
+						i.cns06within = rs.getInt("cns06withinx");
+						i.cns07within = rs.getInt("cns07withinx");
+						i.cns08within = rs.getInt("cns08withinx");
+						i.cns09within = rs.getInt("cns09withinx");
+						i.cns10within = rs.getInt("cns10withinx");
+						i.cns11within = rs.getInt("cns11withinx");
+						i.cns12within = rs.getInt("cns12withinx");
+						i.cns13within = rs.getInt("cns13withinx");
+						i.cns14within = rs.getInt("cns14withinx");
+						i.cns15within = rs.getInt("cns15withinx");
+						i.cns16within = rs.getInt("cns16withinx");
+						i.cns17within = rs.getInt("cns17withinx");
+						i.cns18within = rs.getInt("cns18withinx");
+						i.cns19within = rs.getInt("cns19withinx");
+						i.cns20within = rs.getInt("cns20withinx");
+						i.cr01within = rs.getInt("cr01withinx");
+						i.cr02within = rs.getInt("cr02withinx");
+						i.cr03within = rs.getInt("ce03withinx");	
+						i.cr04within = rs.getInt("cr04withinx");
+						i.cr05within = rs.getInt("cr05withinx");
+						i.cr07within = rs.getInt("cr07withinx");	
+						i.ct01within = rs.getInt("ct01withinx");
+						i.ct02within = rs.getInt("ct02withinx");
+						i.cd01within = rs.getInt("cd01withinx");
+						i.cd02within = rs.getInt("cd02withinx");
+						i.cd03within = rs.getInt("cd03withinx");
+						i.cd04within = rs.getInt("cd04withinx");
+						i.cs01within = rs.getInt("cs01withinx");
+						i.cs02within = rs.getInt("cs02withinx");
+						i.c000served = rs.getInt("c000served");
+						i.ca01served = rs.getInt("ca01served");
+						i.ca02served = rs.getInt("ca02served");
+						i.ca03served = rs.getInt("ca03served");
+						i.ce01served = rs.getInt("ce01served");
+						i.ce02served = rs.getInt("ce02served");
+						i.ce03served = rs.getInt("ce03served");				
+						i.cns01served = rs.getInt("cns01served");
+						i.cns02served = rs.getInt("cns02served");
+						i.cns03served = rs.getInt("cns03served");
+						i.cns04served = rs.getInt("cns04served");
+						i.cns05served = rs.getInt("cns05served");
+						i.cns06served = rs.getInt("cns06served");
+						i.cns07served = rs.getInt("cns07served");
+						i.cns08served = rs.getInt("cns08served");
+						i.cns09served = rs.getInt("cns09served");
+						i.cns10served = rs.getInt("cns10served");
+						i.cns11served = rs.getInt("cns11served");
+						i.cns12served = rs.getInt("cns12served");
+						i.cns13served = rs.getInt("cns13served");
+						i.cns14served = rs.getInt("cns14served");
+						i.cns15served = rs.getInt("cns15served");
+						i.cns16served = rs.getInt("cns16served");
+						i.cns17served = rs.getInt("cns17served");
+						i.cns18served = rs.getInt("cns18served");
+						i.cns19served = rs.getInt("cns19served");
+						i.cns20served = rs.getInt("cns20served");
+						i.cr01served = rs.getInt("cr01served");
+						i.cr02served = rs.getInt("cr02served");
+						i.cr03served = rs.getInt("ce03served");	
+						i.cr04served = rs.getInt("cr04served");
+						i.cr05served = rs.getInt("cr05served");
+						i.cr07served = rs.getInt("cr07served");	
+						i.ct01served = rs.getInt("ct01served");
+						i.ct02served = rs.getInt("ct02served");
+						i.cd01served = rs.getInt("cd01served");
+						i.cd02served = rs.getInt("cd02served");
+						i.cd03served = rs.getInt("cd03served");
+						i.cd04served = rs.getInt("cd04served");
+						i.cs01served = rs.getInt("cs01served");
+						i.cs02served = rs.getInt("cs02served");
+						i.c000los = rs.getInt("c000los");
+						i.ca01los = rs.getInt("ca01los");
+						i.ca02los = rs.getInt("ca02los");
+						i.ca03los = rs.getInt("ca03los");
+						i.ce01los = rs.getInt("ce01los");
+						i.ce02los = rs.getInt("ce02los");
+						i.ce03los = rs.getInt("ce03los");				
+						i.cns01los = rs.getInt("cns01los");
+						i.cns02los = rs.getInt("cns02los");
+						i.cns03los = rs.getInt("cns03los");
+						i.cns04los = rs.getInt("cns04los");
+						i.cns05los = rs.getInt("cns05los");
+						i.cns06los = rs.getInt("cns06los");
+						i.cns07los = rs.getInt("cns07los");
+						i.cns08los = rs.getInt("cns08los");
+						i.cns09los = rs.getInt("cns09los");
+						i.cns10los = rs.getInt("cns10los");
+						i.cns11los = rs.getInt("cns11los");
+						i.cns12los = rs.getInt("cns12los");
+						i.cns13los = rs.getInt("cns13los");
+						i.cns14los = rs.getInt("cns14los");
+						i.cns15los = rs.getInt("cns15los");
+						i.cns16los = rs.getInt("cns16los");
+						i.cns17los = rs.getInt("cns17los");
+						i.cns18los = rs.getInt("cns18los");
+						i.cns19los = rs.getInt("cns19los");
+						i.cns20los = rs.getInt("cns20los");
+						i.cr01los = rs.getInt("cr01los");
+						i.cr02los = rs.getInt("cr02los");
+						i.cr03los = rs.getInt("ce03los");	
+						i.cr04los = rs.getInt("cr04los");
+						i.cr05los = rs.getInt("cr05los");
+						i.cr07los = rs.getInt("cr07los");	
+						i.ct01los = rs.getInt("ct01los");
+						i.ct02los = rs.getInt("ct02los");
+						i.cd01los = rs.getInt("cd01los");
+						i.cd02los = rs.getInt("cd02los");
+						i.cd03los = rs.getInt("cd03los");
+						i.cd04los = rs.getInt("cd04los");
+						i.cs01los = rs.getInt("cs01los");
+						i.cs02los = rs.getInt("cs02los");						
 						results.EmpDataList.add(i);
 				}
 			} catch (SQLException e) {
@@ -758,216 +1243,479 @@ public class PgisEventManager {
 	/**
 	 * Queries Title VI data on a given area (based on the reportType)
 	 */
-	public static TitleVIDataList getTitleVIData(String reportType, int dbindex, String username){
+	public static TitleVIDataList getTitleVIData(String reportType, String[] dates, String[] day, String[] fulldates, double radius, int L, int dbindex, String username){
 		TitleVIDataList results = new TitleVIDataList();
 		Connection connection = makeConnection(dbindex);
 	    Statement stmt = null;
 	    String query = "";
 	    
-	    if (reportType.contains("Agencies")){ // returns employment data for a specific agency.
-	    	String[] temp = reportType.split(",");
-	    	String radius = temp[1];
-	    	List<String> agencies = PgisEventManager.getAgencyList(username, dbindex);
-	    	try {
-		    	stmt = connection.createStatement();
-		    	for (String agencyID: agencies){
-	    			query = "with aids AS (SELECT agency_id AS aid FROM gtfs_selected_feeds where username='" + username + "'), "
-	    					+ "    			agencies AS (SELECT id AS agencyid, name as agencyname FROM gtfs_agencies INNER JOIN aids ON gtfs_agencies.defaultid = aids.aid),"
-	    					+ "    			stopservice AS (SELECT agencyid_def, stopid, agencies.agencyid, agencies.agencyname FROM gtfs_stop_service_map INNER JOIN agencies ON agencies.agencyid = gtfs_stop_service_map.agencyid),"
-	    					+ "    			stops AS (select stopservice.agencyid, stopservice.agencyname, stopservice.stopid, gtfs_stops.name, lat, lon, location from gtfs_stops inner join stopservice ON gtfs_stops.id = stopservice.stopid AND stopservice.agencyid_def = gtfs_stops.agencyid"
-	    					+ "    			WHERE stopservice.agencyid = '" + agencyID + "'),"
-	    					+ "    			multipoints AS (SELECT agencyid, agencyname, ST_Multi(ST_Collect(stops.location)) geom FROM stops GROUP BY agencyid, stops.agencyname),"
-	    					+ "    			multipoints2 AS (SELECT agencyid, agencyname, ST_Buffer(geom," + radius + ") geom FROM multipoints),"
-	    					+ "    			blocks AS (SELECT"
-	    					+ "    				multipoints2.agencyid,"
-	    					+ "    				multipoints2.agencyname,"
-	    					+ "    				LEFT(census_blocks.blockid,5) countyid,"
-	    					+ "    				SUM(census_blocks.population) population"
-	    					+ "    				FROM multipoints2 LEFT JOIN census_blocks"
-	    					+ "    				ON ST_Within(census_blocks.location, multipoints2.geom)"
-	    					+ "   				GROUP BY agencyid, agencyname, LEFT(blockid,5)),"
-	    					+ "    			blocks2 AS (SELECT"
-	    					+ "    				blocks.agencyid,"
-	    					+ "    				blocks.agencyname,"
-	    					+ "    				blocks.countyid,"
-	    					+ "    				sum(blocks.population/census_counties.population::FLOAT) AS poppercent"
-	    					+ "    				FROM blocks LEFT JOIN census_counties"
-	    					+ "    				ON blocks.countyid = census_counties.countyid"
-	    					+ "    				GROUP BY agencyid, agencyname, blocks.countyid)"
-	    					+ "    			SELECT"
-	    					+ "    				blocks2.agencyid AS id,"
-	    					+ "    				blocks2.agencyname AS name,"
-	    					+ "    				COALESCE(SUM(Pop*poppercent),0)::bigint population,"
-	    					+ "    				COALESCE(SUM(Pop_Disabled*poppercent),0)::bigint Pop_Disabled,"
-	    					+ "    				COALESCE(SUM(Tot_Pop_BP*poppercent),0)::bigint Tot_Pop_BP,"
-	    					+ "    				COALESCE(SUM(Tot_Pop_AP*poppercent),0)::bigint Tot_Pop_AP,"
-	    					+ "    				COALESCE(SUM(ENG_SPK*poppercent),0)::bigint ENG_SPK,"
-	    					+ "    				COALESCE(SUM(ESP_SPK*poppercent),0)::bigint ESP_SPK,"
-	    					+ "    				COALESCE(SUM(OTHER_INDO_SPK*poppercent),0)::bigint OTHER_INDO_SPK,"
-	    					+ "   				COALESCE(SUM(ASIAN_SPK*poppercent),0)::bigint ASIAN_SPK,"
-	    					+ "    				COALESCE(SUM(OTHER_LNG_SPK*poppercent),0)::bigint OTHER_LNG_SPK,"
-	    					+ "    				COALESCE(SUM(HH_Tot*poppercent),0)::bigint HH_Tot,"
-	    					+ "    				COALESCE(SUM(HH_White*poppercent),0)::bigint HH_White,"
-	    					+ "    				COALESCE(SUM(HH_Hispanic*poppercent),0)::bigint HH_Hispanic,"
-	    					+ "    				COALESCE(SUM(HH_Black*poppercent),0)::bigint HH_Black,"
-	    					+ "    				COALESCE(SUM(HH_American_Indian*poppercent),0)::bigint HH_American_Indian,"
-	    					+ "    				COALESCE(SUM(HH_Asian*poppercent),0)::bigint HH_Asian,"
-	    					+ "    				COALESCE(SUM(HH_Pacific_Islander*poppercent),0)::bigint HH_Pacific_Islander,"
-	    					+ "    				COALESCE(SUM(HH_Pacific_Other*poppercent),0)::bigint HH_Pacific_Other,"
-	    					+ "    				COALESCE(SUM(HH_White_Not_Hisp*poppercent),0)::bigint HH_White_Not_Hisp,"
-	    					+ "    				COALESCE(SUM(HH_Over_65*poppercent),0)::bigint HH_Over_65,"
-	    					+ "    				COALESCE(SUM(HH_Under_65*poppercent),0)::bigint HH_Under_65"
-	    					+ "    				FROM blocks2 LEFT JOIN oregon_titlevi"
-	    					+ "    				ON blocks2.countyid = oregon_titlevi.county_id"
-	    					+ "    				GROUP BY id, name";
-	    			
-	    				ResultSet rs = stmt.executeQuery(query); 
-	    				
-	    				while (rs.next()){
-	    					TitleVIData i = new TitleVIData();
-	    					i.id = rs.getString("id");
-	    					i.name = rs.getString("name");
-	    					i.population = rs.getInt("population");
-	    					i.popDisabled = rs.getInt("pop_disabled");
-	    					i.popAP = rs.getInt("tot_pop_ap");
-	    					i.popBP = rs.getInt("tot_pop_bp");
-	    					i.engSpk = rs.getInt("eng_spk");
-	    					i.espSpk = rs.getInt("esp_spk");
-	    					i.otherIndoSpk= rs.getInt("other_indo_spk");
-	    					i.asianSpk = rs.getInt("asian_spk");
-	    					i.otherLngSpk = rs.getInt("other_lng_spk");
-	    					i.hhTotal = rs.getInt("hh_tot");
-	    					i.hhWhite= rs.getInt("hh_white");
-	    					i.hhHispanic= rs.getInt("hh_hispanic");
-	    					i.hhBlack= rs.getInt("hh_black");
-	    					i.hhAmericanIndian= rs.getInt("hh_american_indian");
-	    					i.hhAsian= rs.getInt("hh_asian");
-	    					i.hhPacificIslander= rs.getInt("hh_pacific_islander");
-	    					i.hhPacificOther= rs.getInt("hh_pacific_other");
-	    					i.hhWhiteNotHisp= rs.getInt("hh_white_not_hisp");
-	    					i.hhOver65= rs.getInt("hh_over_65");
-	    					i.hhUnder65= rs.getInt("hh_under_65");
-	    					results.TitleVIDataList.add(i);
-	    				}
-		    	}
-    		}catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+	    if (reportType.contains("Agencies")){ // returns title data for a agencies.
+    		query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+    		for (int i=0; i<dates.length; i++){
+  	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
+  	    	  		+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
+  	    	  		+ "serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+dates[i]+"' and exceptiontype=2) union select serviceid_agencyid, serviceid_id, '"
+  	    	  		+ fulldates[i] + "' from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+dates[i]+"' and exceptiontype=1)";
+  	    	  if (i+1<dates.length)
+  					query+=" union all ";
+  			} 
+	    	query += "), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, map.stopscount as stops "
+			+ " from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+			+ " inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid), "
+	    	+ " stops as (select stime.trip_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service "
+			+ " from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+			+ " inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0	"
+			+ " group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location), "
+			+ " stopsatlostemp as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, count(trips.aid) as service "
+			+ " from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+			+ "	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>="+L+"), "
+			+ " stopsatlos0 AS (select map.agencyid, stopsatlostemp.stopid, stopsatlostemp.location, stopsatlostemp.service "
+			+ " FROM stopsatlostemp INNER JOIN gtfs_stop_service_map AS map ON stopsatlostemp.stopid = map.stopid AND stopsatlostemp.aid = map.agencyid_def), "
+			+ " popatlos as (select   "
+			+ "	  english ,"
+			+ "	  spanish ,"
+			+ "	  indo_european ,"
+			+ "	  asian_and_pacific_island ,"
+			+ "	  other_languages ,"
+			+ "	  below_poverty ,"
+			+ "	  above_poverty ,"
+			+ "	  with_disability ,"
+			+ "	  without_disability ,"
+			+ "	  from5to17 ,"
+			+ "	  from18to64 ,"
+			+ "	  above65 ,"
+			+ "	  black_or_african_american ,"
+			+ "	  american_indian_and_alaska_native ,"
+			+ "	  asian ,"
+			+ "	  native_hawaiian_and_other_pacific_islander ,"
+			+ "	  other_races ,"
+			+ "	  two_or_more ,"
+			+ "	  white ,"
+			+ "	  hispanic_or_latino ,"
+			+ "	  t6.blockid,"
+			+ "	  stopsatlos0.agencyid "
+			+ " from title_vi_blocks_float AS t6 inner join stopsatlos0 on st_dwithin(t6.location,stopsatlos0.location,"+radius+") GROUP BY t6.blockid,agencyid), "
+			+ " popatlos1 as (select  SUM(english) AS english_atlos,"
+			+ "   SUM(spanish) AS spanish_atlos,"
+			+ "	  SUM(indo_european) AS indo_european_atlos,"
+			+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island_atlos,"
+			+ "	  SUM(other_languages) AS other_languages_atlos,"
+			+ "	  SUM(below_poverty) AS below_poverty_atlos,"
+			+ "	  SUM(above_poverty) AS above_poverty_atlos,"
+			+ "	  SUM(with_disability) AS with_disability_atlos,"
+			+ "	  SUM(without_disability) AS without_disability_atlos,"
+			+ "	  SUM(from5to17) AS from5to17_atlos,"
+			+ "	  SUM(from18to64) AS from18to64_atlos,"
+			+ "	  SUM(above65) AS above65_atlos,"
+			+ "	  SUM(black_or_african_american) AS black_or_african_american_atlos,"
+			+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native_atlos,"
+			+ "	  SUM(asian) AS asian_atlos,"
+			+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_atlos,"
+			+ "	  SUM(other_races) AS other_races_atlos,"
+			+ "	  SUM(two_or_more) AS two_or_more_atlos,"
+			+ "	  SUM(white) AS white_atlos,"
+			+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino_atlos,"
+			+ "	  agencyid AS aid "
+			+ "	FROM popatlos GROUP BY agencyid),"
+			+ " tempstops0 as (select id, agencyid, blockid, location "
+			+ " from gtfs_stops stop inner join aids on stop.agencyid = aids.aid),"
+			+ " tempstops AS (SELECT tempstops0.id, map.agencyid, tempstops0.blockid, tempstops0.location "
+			+ "	FROM tempstops0 INNER JOIN  gtfs_stop_service_map AS map ON tempstops0.id = map.stopid AND tempstops0.agencyid = map.agencyid_def), "
+			+ " census as (select block.blockid, block.urbanid, block.regionid, block.congdistid, block.placeid "
+			+ "	from census_blocks block inner join tempstops on st_dwithin(block.location, tempstops.location, "+radius+")"
+			+ "	group by block.blockid),"
+			+ " popwithinx0 as (select english ,"
+			+ "	  spanish ,"
+			+ "	  indo_european ,"
+			+ "	  asian_and_pacific_island ,"
+			+ "	  other_languages ,"
+			+ "  below_poverty ,"
+			+ "	  above_poverty ,"
+			+ "	  with_disability ,"
+			+ "	  without_disability ,"
+			+ "	  from5to17 ,"
+			+ "	  from18to64 ,"
+			+ "	  above65 ,"
+			+ "	  black_or_african_american ,"
+			+ "	  american_indian_and_alaska_native ,"
+			+ "	  asian ,"
+			+ "	  native_hawaiian_and_other_pacific_islander ,"
+			+ "	  other_races ,"
+			+ "	  two_or_more ,"
+			+ "	  white ,"
+			+ "	  hispanic_or_latino ,"
+			+ "	  t6.blockid,"
+			+ ""
+			+ "	  agencyid "
+			+ "from tempstops INNER JOIN title_vi_blocks_float AS t6 ON ST_Dwithin(t6.location, tempstops.location, "+radius+") GROUP BY agencyid, t6.blockid),"
+			+ "popwithinx as (select SUM(english) AS english_withinx,"
+			+ "	  SUM(spanish) AS spanish_withinx,"
+			+ "	  SUM(indo_european) AS indo_european_withinx,"
+			+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island_withinx,"
+			+ "	  SUM(other_languages) AS other_languages_withinx,"
+			+ "	  SUM(below_poverty) AS below_poverty_withinx,"
+			+ "	  SUM(above_poverty) AS above_poverty_withinx,"
+			+ "	  SUM(with_disability) AS with_disability_withinx,"
+			+ "	  SUM(without_disability) AS without_disability_withinx,"
+			+ "	  SUM(from5to17) AS from5to17_withinx,"
+			+ "	  SUM(from18to64) AS from18to64_withinx,"
+			+ "	  SUM(above65) AS above65_withinx,"
+			+ "	  SUM(black_or_african_american) AS black_or_african_american_withinx,"
+			+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native_withinx,"
+			+ "	  SUM(asian) AS asian_withinx,"
+			+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_withinx,"
+			+ "	  SUM(other_races) AS other_races_withinx,"
+			+ "	  SUM(two_or_more) AS two_or_more_withinx,"
+			+ "	  SUM(white) AS white_withinx,"
+			+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino_withinx,"
+			+ "	  agencyid AS aid"
+			+ "	  FROM popwithinx0 GROUP BY agencyid),"
+			+ "popserved0 AS(select aid,"
+			+ " 		MAX(service) AS maxservice,"
+			+ "		t6.blockid"
+			+ "		from stops inner join title_vi_blocks_float AS t6 ON st_dwithin(t6.location, stops.location,"+radius+")"
+			+ "		GROUP BY aid, blockid),"
+			+ "popserved AS (SELECT "
+			+ "	  aid,"
+			+ "	  SUM(maxservice*english) AS english_served,"
+			+ "	  SUM(maxservice*spanish) AS spanish_served,"
+			+ "	  SUM(maxservice*indo_european) AS indo_european_served,"
+			+ "	  SUM(maxservice*asian_and_pacific_island) AS asian_and_pacific_island_served,"
+			+ "	  SUM(maxservice*other_languages) AS other_languages_served,"
+			+ "	  SUM(maxservice*below_poverty) AS below_poverty_served,"
+			+ "	  SUM(maxservice*above_poverty) AS above_poverty_served,"
+			+ "	  SUM(maxservice*with_disability) AS with_disability_served,"
+			+ "	  SUM(maxservice*without_disability) AS without_disability_served,"
+			+ "	  SUM(maxservice*from5to17) AS from5to17_served,"
+			+ "	  SUM(maxservice*from18to64) AS from18to64_served,"
+			+ "	  SUM(maxservice*above65) AS above65_served,"
+			+ "	  SUM(maxservice*black_or_african_american) AS black_or_african_american_served,"
+			+ "	  SUM(maxservice*american_indian_and_alaska_native) AS american_indian_and_alaska_native_served,"
+			+ "	  SUM(maxservice*asian) AS asian_served,"
+			+ "	  SUM(maxservice*native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_served,"
+			+ "	  SUM(maxservice*other_races) AS other_races_served,"
+			+ "	  SUM(maxservice*two_or_more) AS two_or_more_served,"
+			+ "	  SUM(maxservice*white) AS white_served,"
+			+ "	  SUM(maxservice*hispanic_or_latino) AS hispanic_or_latino_served "
+			+ "	FROM popserved0 INNER JOIN title_vi_blocks_float USING(blockid) GROUP BY aid) "
+			+ "SELECT agencies.name AS agency_name, agencies.id AS agency_id, popserved.*, popatlos1.*, popwithinx.* "
+			+ "from gtfs_agencies AS agencies LEFT JOIN popwithinx ON agencies.id=aid "
+			+ "LEFT JOIN popatlos1 USING(aid)"			
+			+ "LEFT JOIN popserved USING(aid)"
+			+ "ORDER BY agencies.id ";
+//	    	System.out.println(query);
+	    	}else{
+		    	String criteria1 = "";
+				String criteria2 = ""; 
+				String criteria3 = "";
+				String criteria4 = "";
+				String criteria5 = "";
+			    if (reportType.equals("Counties")){
+			    	criteria1 = "LEFT(blockid,5)";
+					criteria2 = "census_counties"; 
+					criteria3 = "census_counties"; 
+					criteria4 = "countyid";
+					criteria5 = "census_counties.cname";
+			    }else if(reportType.equals("Census Places")){
+			    	criteria1 = "placeid";
+					criteria2 = "census_places"; 
+					criteria3 = "census_places";
+					criteria4 = "placeid";
+					criteria5 = "census_places.pname";
+			    }else if(reportType.equals("Congressional Districts")){
+			    	criteria1 = "congdistid";
+					criteria2 = "census_congdists"; 
+					criteria3 = "census_congdists";
+					criteria4 = "congdistid";
+					criteria5 = "census_congdists.cname";
+			    }else if(reportType.equals("Urban Areas")){
+			    	criteria1 = "urbanid";
+					criteria2 = "census_urbans"; 
+					criteria3 = "census_urbans";
+					criteria4 = "urbanid";
+					criteria5 = "census_urbans.uname";
+			    }else if(reportType.equals("ODOT Transit Regions")){
+			    	criteria1 = "regionid";
+			    	criteria2 = "regions";
+					criteria3 = "(SELECT odotregionid AS regionid, SUM(population) AS population FROM census_counties GROUP BY odotregionid) AS regions"; 
+					criteria4 = "regionid";
+					criteria5 = "'Region ' || regions.regionid";
+			    }
+			    
+			    query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='admin'), svcids AS (";
+			    for (int i=0; i<dates.length; i++){
+	  	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
+	  	    	  		+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
+	  	    	  		+ "serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+dates[i]+"' and exceptiontype=2) union select serviceid_agencyid, serviceid_id, '"
+	  	    	  		+ fulldates[i] + "' from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+dates[i]+"' and exceptiontype=1)";
+	  	    	  if (i+1<dates.length)
+	  					query+=" union all ";
+	  			} 
+			    query+="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, map.stopscount as stops "
+					+"	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+					+"	inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid), "
+					
+					+"service as (select COALESCE(+ sum(length),0) as svcmiles, COALESCE(+ sum(tlength),0) as svchours, COALESCE(+ sum(stops),0) as svcstops from trips), "
+					+"stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, count(trips.aid) as service "
+					+"	from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+					+"	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>=" + L + "), "
+					+"stops as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service "
+					+"	from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+					+"	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0 "
+					+"	group by stime.stop_agencyid, stime.stop_id, stop.location), "
+					+"popatlos as (select "
+					+ "	  english ,"
+					+ "	  spanish ,"
+					+ "	  indo_european ,"
+					+ "	  asian_and_pacific_island ,"
+					+ "	  other_languages ,"
+					+ "   below_poverty ,"
+					+ "	  above_poverty ,"
+					+ "	  with_disability ,"
+					+ "	  without_disability ,"
+					+ "	  from5to17 ,"
+					+ "	  from18to64 ,"
+					+ "	  above65 ,"
+					+ "	  black_or_african_american ,"
+					+ "	  american_indian_and_alaska_native ,"
+					+ "	  asian ,"
+					+ "	  native_hawaiian_and_other_pacific_islander ,"
+					+ "	  other_races ,"
+					+ "	  two_or_more ,"
+					+ "	  white ,"
+					+ "	  hispanic_or_latino ,"
+					+ " title_vi_blocks_float.blockid, blocks.urbanid, blocks.regionid, blocks.congdistid, blocks.placeid "
+					+"	from title_vi_blocks_float inner join stopsatlos on st_dwithin(title_vi_blocks_float.location,stopsatlos.location,"+radius+")"
+					+"	inner join census_blocks blocks ON title_vi_blocks_float.blockid = blocks.blockid GROUP BY title_vi_blocks_float.blockid, blocks.urbanid, blocks.regionid, blocks.congdistid, blocks.placeid), "
+					+" popatlos1 as (select "
+					+ "   SUM(english) AS english_atlos,"
+					+ "   SUM(spanish) AS spanish_atlos,"
+					+ "	  SUM(indo_european) AS indo_european_atlos,"
+					+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island_atlos,"
+					+ "	  SUM(other_languages) AS other_languages_atlos,"
+					+ "	  SUM(below_poverty) AS below_poverty_atlos,"
+					+ "	  SUM(above_poverty) AS above_poverty_atlos,"
+					+ "	  SUM(with_disability) AS with_disability_atlos,"
+					+ "	  SUM(without_disability) AS without_disability_atlos,"
+					+ "	  SUM(from5to17) AS from5to17_atlos,"
+					+ "	  SUM(from18to64) AS from18to64_atlos,"
+					+ "	  SUM(above65) AS above65_atlos,"
+					+ "	  SUM(black_or_african_american) AS black_or_african_american_atlos,"
+					+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native_atlos,"
+					+ "	  SUM(asian) AS asian_atlos,"
+					+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_atlos,"
+					+ "	  SUM(other_races) AS other_races_atlos,"
+					+ "	  SUM(two_or_more) AS two_or_more_atlos,"
+					+ "	  SUM(white) AS white_atlos,"
+					+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino_atlos,"
+					+ criteria1 + " AS " + criteria4 + " FROM popatlos GROUP BY " + criteria1 + "), "
+					+ "popserved as (select "
+					+ "	  english*(stops.service) AS english,"
+					+ "	  spanish*(stops.service) AS spanish,"
+					+ "	  indo_european*(stops.service) AS indo_european,"
+					+ "	  asian_and_pacific_island*(stops.service) AS asian_and_pacific_island,"
+					+ "	  other_languages*(stops.service) AS other_languages,"
+					+ "	  below_poverty*(stops.service) AS below_poverty,"
+					+ "	  above_poverty*(stops.service) AS above_poverty,"
+					+ "	  with_disability*(stops.service) AS with_disability,"
+					+ "	  without_disability*(stops.service) AS without_disability,"
+					+ "	  from5to17*(stops.service) AS from5to17,"
+					+ "	  from18to64*(stops.service) AS from18to64,"
+					+ "	  above65*(stops.service) AS above65,"
+					+ "	  black_or_african_american*(stops.service) AS black_or_african_american,"
+					+ "	  american_indian_and_alaska_native*(stops.service) AS american_indian_and_alaska_native,"
+					+ "	  asian*(stops.service) AS asian,"
+					+ "	  native_hawaiian_and_other_pacific_islander*(stops.service) AS native_hawaiian_and_other_pacific_islander,"
+					+ "	  other_races*(stops.service) AS other_races,"
+					+ "	  two_or_more*(stops.service) AS two_or_more,"
+					+ "	  white*(stops.service) AS white,"
+					+ "	  hispanic_or_latino*(stops.service) AS hispanic_or_latino, "
+					+ "	blocks.blockid, census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid  "
+					+ "	from title_vi_blocks_float blocks inner join stops on st_dwithin(blocks.location, stops.location,"+radius+") "
+					+ "	inner join census_blocks ON blocks.blockid=census_blocks.blockid "
+					+ "	group by stops.service, blocks.blockid,census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid), "
+					+ " popserved1 as (select "
+					+ "SUM(english) AS english_served,"
+					+ "	  SUM(spanish) AS spanish_served,"
+					+ "	  SUM(indo_european) AS indo_european_served,"
+					+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island_served,"
+					+ "	  SUM(other_languages) AS other_languages_served,"
+					+ "	  SUM(below_poverty) AS below_poverty_served,"
+					+ "	  SUM(above_poverty) AS above_poverty_served,"
+					+ "	  SUM(with_disability) AS with_disability_served,"
+					+ "	  SUM(without_disability) AS without_disability_served,"
+					+ "	  SUM(from5to17) AS from5to17_served,"
+					+ "	  SUM(from18to64) AS from18to64_served,"
+					+ "	  SUM(above65) AS above65_served,"
+					+ "	  SUM(black_or_african_american) AS black_or_african_american_served,"
+					+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native_served,"
+					+ "	  SUM(asian) AS asian_served,"
+					+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_served,"
+					+ "	  SUM(other_races) AS other_races_served,"
+					+ "	  SUM(two_or_more) AS two_or_more_served,"
+					+ "	  SUM(white) AS white_served,"
+					+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino_served,"
+					+ criteria1 + " AS " + criteria4 + " from popserved GROUP BY " + criteria1 + "), "
+					+ "tempstops as (select id, agencyid, blockid, location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid),  "
+					+ "census as (select block.blockid, block.urbanid, block.regionid, block.congdistid, block.placeid  "
+					+ "from census_blocks block inner join tempstops on st_dwithin(block.location, tempstops.location, "+radius+")  "
+					+ "group by block.blockid),  "
+					+ "popwithinx as (select  "
+					+ "	  SUM(english) AS english_withinx,"
+					+ "	  SUM(spanish) AS spanish_withinx,"
+					+ "	  SUM(indo_european) AS indo_european_withinx,"
+					+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island_withinx,"
+					+ "	  SUM(other_languages) AS other_languages_withinx,"
+					+ "	  SUM(below_poverty) AS below_poverty_withinx,"
+					+ "	  SUM(above_poverty) AS above_poverty_withinx,"
+					+ "	  SUM(with_disability) AS with_disability_withinx,"
+					+ "	  SUM(without_disability) AS without_disability_withinx,"
+					+ "	  SUM(from5to17) AS from5to17_withinx,"
+					+ "	  SUM(from18to64) AS from18to64_withinx,"
+					+ "	  SUM(above65) AS above65_withinx,"
+					+ "	  SUM(black_or_african_american) AS black_or_african_american_withinx,"
+					+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native_withinx,"
+					+ "	  SUM(asian) AS asian_withinx,"
+					+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_withinx,"
+					+ "	  SUM(other_races) AS other_races_withinx,"
+					+ "	  SUM(two_or_more) AS two_or_more_withinx,"
+					+ "	  SUM(white) AS white_withinx,"
+					+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino_withinx,"
+					+ criteria1 + " AS " + criteria4 + " FROM census INNER JOIN title_vi_blocks_float USING(blockid) GROUP BY " + criteria4 + "), "
+					
+					+ "totalpop AS (SELECT title_vi_blocks_float.*, LEFT(title_vi_blocks_float.blockid,5) AS countyid, census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid "
+					+ "	FROM title_vi_blocks_float INNER JOIN census_blocks USING(blockid)), "
+					+ "totalpop1 AS (SELECT "
+					+ "	  SUM(english) AS english,"
+					+ "   SUM(spanish) AS spanish,"
+					+ "	  SUM(indo_european) AS indo_european,"
+					+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island,"
+					+ "	  SUM(other_languages) AS other_languages,"
+					+ "	  SUM(below_poverty) AS below_poverty,"
+					+ "	  SUM(above_poverty) AS above_poverty,"
+					+ "	  SUM(with_disability) AS with_disability,"
+					+ "	  SUM(without_disability) AS without_disability,"
+					+ "	  SUM(from5to17) AS from5to17,"
+					+ "	  SUM(from18to64) AS from18to64,"
+					+ "	  SUM(above65) AS above65,"
+					+ "	  SUM(black_or_african_american) AS black_or_african_american,"
+					+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native,"
+					+ "	  SUM(asian) AS asian,"
+					+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander,"
+					+ "	  SUM(other_races) AS other_races,"
+					+ "	  SUM(two_or_more) AS two_or_more,"
+					+ "	  SUM(white) AS white,"
+					+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino,"
+					+ 	  criteria4
+					+ " FROM totalpop GROUP BY " + criteria4 + ") "
+					+ "select popserved1.*, popatlos1.*, popwithinx.*, totalpop1.*, " + criteria2 + "." + criteria4 + " AS areaid, " + criteria5 + " AS areaname "
+					+ "FROM " + criteria3 + " LEFT JOIN popserved1 USING(" + criteria4 + ") "
+					+ "LEFT JOIN popatlos1 USING(" + criteria4 + ") "
+					+ "LEFT JOIN popwithinx USING(" + criteria4 + ") "
+					+ "LEFT JOIN totalpop1 USING(" + criteria4 + ")";
+//			    System.out.println(query);
 			}
-		}else{
-	    	String criteria1 = "";
-		    String criteria2 = "";
-		    
-		    if (reportType.equals("Counties")){
-		    	criteria1 = "countyid";
-		    	criteria2 = "SELECT  census_counties.cname  AS name, temp2.*"
-				    		+ " FROM temp2 INNER JOIN census_counties"
-				    		+ " ON temp2.id = census_counties.countyid" ;
-		    }else if (reportType.equals("Census Places")){
-		    	criteria1 = "placeid";
-		    	criteria2 = "SELECT  census_places.pname  AS name, temp2.*"
-				    		+ " FROM temp2 INNER JOIN census_places"
-				    		+ " ON temp2.id = census_places.placeid" ;
-		    }
-		    else if (reportType.equals("ODOT Transit Regions")){
-		    	criteria1 = "regionid";
-		    	criteria2 = "SELECT  concat('Region ',temp2.id) AS name, temp2.*"
-		    				+ " FROM temp2 ";
-		    }
-		    else if (reportType.equals("Urban Areas")){
-		    	criteria1 = "urbanid";
-		    	criteria2 = " SELECT census_urbans.uname AS name, temp2.*"
-				    		+ " FROM temp2 INNER JOIN census_urbans"
-				    		+ " ON temp2.id = census_urbans.urbanid";
-		    }
-		    else if (reportType.equals("Congressional Districts")){
-		    	criteria1 = "congdistid";
-		    	criteria2 = " SELECT census_congdists.cname AS name, temp2.*"
-				    		+ " FROM temp2 INNER JOIN census_congdists"
-				    		+ " ON temp2.id = census_congdists.congdistid";
-		    }
-		    
-		    query = "WITH temp1 AS (SELECT census_counties.countyid,"
-		    		+ "		census_blocks.blockid,"
-		    		+ "		census_blocks.placeid,"
-		    		+ "		census_blocks.congdistid,"
-		    		+ "		census_blocks.regionid,"
-		    		+ "		census_blocks.urbanid,"
-		    		+ "		census_blocks.population,"
-		    		+ "		census_blocks.population/census_counties.population::FLOAT AS poppercent"
-		    		+ "		FROM census_blocks INNER JOIN census_counties"
-		    		+ "		ON LEFT(blockid,5) = census_counties.countyid"
-		    		+ "		),"
-		    		+ "temp2 AS ("
-		    		+ "		SELECT"
-		    		+ "		   " + criteria1 + " id,"
-		    		+ "		   COALESCE(SUM(Population),0)::bigint population,"
-		    		+ "		   COALESCE(SUM(Pop_Disabled*poppercent),0)::bigint Pop_Disabled,"
-		    		+ "		   COALESCE(SUM(Tot_Pop_BP*poppercent),0)::bigint Tot_Pop_BP,"
-		    		+ "		   COALESCE(SUM(Tot_Pop_AP*poppercent),0)::bigint Tot_Pop_AP,"
-		    		+ "		   COALESCE(SUM(ENG_SPK*poppercent),0)::bigint ENG_SPK,"
-		    		+ "		   COALESCE(SUM(ESP_SPK*poppercent),0)::bigint ESP_SPK,"
-		    		+ "		   COALESCE(SUM(OTHER_INDO_SPK*poppercent),0)::bigint OTHER_INDO_SPK,"
-		    		+ "		   COALESCE(SUM(ASIAN_SPK*poppercent),0)::bigint ASIAN_SPK,"
-		    		+ "		   COALESCE(SUM(OTHER_LNG_SPK*poppercent),0)::bigint OTHER_LNG_SPK,"
-		    		+ "		   COALESCE(SUM(HH_Tot*poppercent),0)::bigint HH_Tot,"
-		    		+ "		   COALESCE(SUM(HH_White*poppercent),0)::bigint HH_White,"
-		    		+ "		   COALESCE(SUM(HH_Hispanic*poppercent),0)::bigint HH_Hispanic,"
-		    		+ "		   COALESCE(SUM(HH_Black*poppercent),0)::bigint HH_Black,"
-		    		+ "		   COALESCE(SUM(HH_American_Indian*poppercent),0)::bigint HH_American_Indian,"
-		    		+ "		   COALESCE(SUM(HH_Asian*poppercent),0)::bigint HH_Asian,"
-		    		+ "		   COALESCE(SUM(HH_Pacific_Islander*poppercent),0)::bigint HH_Pacific_Islander,"
-		    		+ "		   COALESCE(SUM(HH_Pacific_Other*poppercent),0)::bigint HH_Pacific_Other,"
-		    		+ "		   COALESCE(SUM(HH_White_Not_Hisp*poppercent),0)::bigint HH_White_Not_Hisp,"
-		    		+ "		   COALESCE(SUM(HH_Over_65*poppercent),0)::bigint HH_Over_65,"
-		    		+ "		   COALESCE(SUM(HH_Under_65*poppercent),0)::bigint HH_Under_65"
-		    		+ "		   "
-		    		+ "		FROM temp1 INNER JOIN oregon_titlevi"
-		    		+ "		ON temp1.countyid = oregon_titlevi.county_id"
-		    		+ ""
-		    		+ "		GROUP BY " + criteria1
-		    		+ "		ORDER BY " + criteria1
-		    		+ "	)"
-		    		+  criteria2;
-
-		    try {
-		    	stmt = connection.createStatement();
-				ResultSet rs = stmt.executeQuery(query); 
-				
-				while (rs.next()){
-					TitleVIData i = new TitleVIData();
-					i.id = rs.getString("id");
-					i.name = rs.getString("name");
-					i.population = rs.getInt("population");
-					i.popDisabled = rs.getInt("pop_disabled");
-					i.popAP = rs.getInt("tot_pop_ap");
-					i.popBP = rs.getInt("tot_pop_bp");
-					i.engSpk = rs.getInt("eng_spk");
-					i.espSpk = rs.getInt("esp_spk");
-					i.otherIndoSpk= rs.getInt("other_indo_spk");
-					i.asianSpk = rs.getInt("asian_spk");
-					i.otherLngSpk = rs.getInt("other_lng_spk");
-					i.hhTotal = rs.getInt("hh_tot");
-					i.hhWhite= rs.getInt("hh_white");
-					i.hhHispanic= rs.getInt("hh_hispanic");
-					i.hhBlack= rs.getInt("hh_black");
-					i.hhAmericanIndian= rs.getInt("hh_american_indian");
-					i.hhAsian= rs.getInt("hh_asian");
-					i.hhPacificIslander= rs.getInt("hh_pacific_islander");
-					i.hhPacificOther= rs.getInt("hh_pacific_other");
-					i.hhWhiteNotHisp= rs.getInt("hh_white_not_hisp");
-					i.hhOver65= rs.getInt("hh_over_65");
-					i.hhUnder65= rs.getInt("hh_under_65");
-					results.TitleVIDataList.add(i);
+	
+	    try {
+	    	stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query); 		
+			while (rs.next()){
+				TitleVIData i = new TitleVIData();				
+				if (!reportType.equals("Agencies")){
+					i.id = rs.getString("areaid");
+					i.name = rs.getString("areaname");
+					i.english = rs.getInt("english");
+					  i.spanish = rs.getInt("spanish");
+					  i.indo_european = rs.getInt("indo_european");
+					  i.asian_and_pacific_island = rs.getInt("asian_and_pacific_island");
+					  i.other_languages = rs.getInt("other_languages");
+					  i.below_poverty = rs.getInt("below_poverty");
+					  i.above_poverty = rs.getInt("above_poverty");
+					  i.with_disability = rs.getInt("with_disability");
+					  i.without_disability = rs.getInt("without_disability");
+					  i.from5to17 = rs.getInt("from5to17");
+					  i.from18to64 = rs.getInt("from18to64");
+					  i.above65 = rs.getInt("above65");
+					  i.black_or_african_american = rs.getInt("black_or_african_american");
+					  i.american_indian_and_alaska_native = rs.getInt("american_indian_and_alaska_native");
+					  i.asian = rs.getInt("asian");
+					  i.native_hawaiian_and_other_pacific_islander = rs.getInt("native_hawaiian_and_other_pacific_islander");
+					  i.other_races = rs.getInt("other_races");
+					  i.two_or_more = rs.getInt("two_or_more");
+					  i.white = rs.getInt("white");
+					  i.hispanic_or_latino = rs.getInt("hispanic_or_latino");
+				}else{
+					i.id = rs.getString("agency_id");
+					i.name = rs.getString("agency_name");
 				}
-			} catch (SQLException e) {
+			  i.english_served = rs.getInt("english_served");
+			  i.spanish_served = rs.getInt("spanish_served");
+			  i.indo_european_served = rs.getInt("indo_european_served");
+			  i.asian_and_pacific_island_served = rs.getInt("asian_and_pacific_island_served");
+			  i.other_languages_served = rs.getInt("other_languages_served");
+			  i.below_poverty_served = rs.getInt("below_poverty_served");
+			  i.above_poverty_served = rs.getInt("above_poverty_served");
+			  i.with_disability_served = rs.getInt("with_disability_served");
+			  i.without_disability_served = rs.getInt("without_disability_served");
+			  i.from5to17_served = rs.getInt("from5to17_served");
+			  i.from18to64_served = rs.getInt("from18to64_served");
+			  i.above65_served = rs.getInt("above65_served");
+			  i.black_or_african_american_served = rs.getInt("black_or_african_american_served");
+			  i.american_indian_and_alaska_native_served = rs.getInt("american_indian_and_alaska_native_served");
+			  i.asian_served = rs.getInt("asian_served");
+			  i.native_hawaiian_and_other_pacific_islander_served = rs.getInt("native_hawaiian_and_other_pacific_islander_served");
+			  i.other_races_served = rs.getInt("other_races_served");
+			  i.two_or_more_served = rs.getInt("two_or_more_served");
+			  i.white_served = rs.getInt("white_served");
+			  i.hispanic_or_latino_served = rs.getInt("hispanic_or_latino_served");
+			  i.english_withinx = rs.getInt("english_withinx");
+			  i.spanish_withinx = rs.getInt("spanish_withinx");
+			  i.indo_european_withinx = rs.getInt("indo_european_withinx");
+			  i.asian_and_pacific_island_withinx = rs.getInt("asian_and_pacific_island_withinx");
+			  i.other_languages_withinx = rs.getInt("other_languages_withinx");
+			  i.below_poverty_withinx = rs.getInt("below_poverty_withinx");
+			  i.above_poverty_withinx = rs.getInt("above_poverty_withinx");
+			  i.with_disability_withinx = rs.getInt("with_disability_withinx");
+			  i.without_disability_withinx = rs.getInt("without_disability_withinx");
+			  i.from5to17_withinx = rs.getInt("from5to17_withinx");
+			  i.from18to64_withinx = rs.getInt("from18to64_withinx");
+			  i.above65_withinx = rs.getInt("above65_withinx");
+			  i.black_or_african_american_withinx = rs.getInt("black_or_african_american_withinx");
+			  i.american_indian_and_alaska_native_withinx = rs.getInt("american_indian_and_alaska_native_withinx");
+			  i.asian_withinx = rs.getInt("asian_withinx");
+			  i.native_hawaiian_and_other_pacific_islander_withinx = rs.getInt("native_hawaiian_and_other_pacific_islander_withinx");
+			  i.other_races_withinx = rs.getInt("other_races_withinx");
+			  i.two_or_more_withinx = rs.getInt("two_or_more_withinx");
+			  i.white_withinx = rs.getInt("white_withinx");
+			  i.hispanic_or_latino_withinx = rs.getInt("hispanic_or_latino_withinx");
+			  i.english_atlos = rs.getInt("english_atlos");
+			  i.spanish_atlos = rs.getInt("spanish_atlos");
+			  i.indo_european_atlos = rs.getInt("indo_european_atlos");
+			  i.asian_and_pacific_island_atlos = rs.getInt("asian_and_pacific_island_atlos");
+			  i.other_languages_atlos = rs.getInt("other_languages_atlos");
+			  i.below_poverty_atlos = rs.getInt("below_poverty_atlos");
+			  i.above_poverty_atlos = rs.getInt("above_poverty_atlos");
+			  i.with_disability_atlos = rs.getInt("with_disability_atlos");
+			  i.without_disability_atlos = rs.getInt("without_disability_atlos");
+			  i.from5to17_atlos = rs.getInt("from5to17_atlos");
+			  i.from18to64_atlos = rs.getInt("from18to64_atlos");
+			  i.above65_atlos = rs.getInt("above65_atlos");
+			  i.black_or_african_american_atlos = rs.getInt("black_or_african_american_atlos");
+			  i.american_indian_and_alaska_native_atlos = rs.getInt("american_indian_and_alaska_native_atlos");
+			  i.asian_atlos = rs.getInt("asian_atlos");
+			  i.native_hawaiian_and_other_pacific_islander_atlos = rs.getInt("native_hawaiian_and_other_pacific_islander_atlos");
+			  i.other_races_atlos = rs.getInt("other_races_atlos");
+			  i.two_or_more_atlos = rs.getInt("two_or_more_atlos");
+			  i.white_atlos = rs.getInt("white_atlos");
+			  i.hispanic_or_latino_atlos = rs.getInt("hispanic_or_latino_atlos");
+			  results.TitleVIDataList.add(i);
+			}
+		    dropConnection(connection);    	
+			}catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-	    }
-	    
-	    dropConnection(connection);
-		return results;
+	    return results;
 	}
 	
 	/**
@@ -994,11 +1742,12 @@ public class PgisEventManager {
     	  criteria2 = "block."+Types.getIdColumnName(type);
       }
       String querytext = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), stops as (select id, agencyid, "+column+", location from "
-      		+ "gtfs_stops stop inner join aids on stop.agencyid = aids.aid where "+criteria1+"='"+areaId+"'), census as (select population, poptype from "
+      		+ "gtfs_stops stop inner join aids on stop.agencyid = aids.aid), census as (select population, poptype from "
       		+ "census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+criteria2 +"='"+areaId+"' group by block.blockid), urbanpop as "
       		+ "(select COALESCE(sum(population),0) upop from census where poptype = 'U'), ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'),"
       		+ " stopcount as (select count(stops.id) as stopscount from stops) select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop, COALESCE(rpop,0) as "
       		+ "ruralpop from stopcount inner join urbanpop on true inner join ruralpop on true";
+//      System.out.println(querytext);
       long[] results = new long[3];
       try {
         stmt = connection.createStatement();
@@ -1049,11 +1798,11 @@ public class PgisEventManager {
       		+"trip.id = map.tripid and trip.agencyid = map.agencyid where map."+Types.getIdColumnName(type)+"='"+areaId+"'),service as (select COALESCE(sum(length),0) as svcmiles,"
       		+ " COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips),stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, "
       		+ "stop.location as location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and "
-      		+ "stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where "+criteria+"='"+areaId+"' group by "
+      		+ "stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by "
       		+ "stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>="+LOS+"),stops as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location "
       		+ "as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times "
       		+ "stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where "
-      		+criteria+"='"+areaId+"' and stime.arrivaltime>0 and stime.departuretime>0 group by stime.stop_agencyid, stime.stop_id, stop.location), svchrs as (select "
+      		+ "stime.arrivaltime>0 and stime.departuretime>0 group by stime.stop_agencyid, stime.stop_id, stop.location), svchrs as (select "
       		+ "COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), concom as (select distinct map."+Types.getIdColumnName(type)+" from "
       		+Types.getTripMapTableName(type)+" map inner join trips on trips.aid=map.agencyid and trips.tripid=map.tripid),concomnames as (select coalesce(string_agg(distinct "
       		+Types.getNameColumn(type)+",'; ' order by "+Types.getNameColumn(type)+"),'-') as connections from concom inner join "+Types.getTableName(type)+" using("
@@ -1091,7 +1840,7 @@ public class PgisEventManager {
       dropConnection(connection);      
       return response;
     }
-
+	
 	/**
 	 *Queries geographic allocation of service for transit agency reports
 	 *0:county 1:census tracts 2:census places 3:urban areas 4:ODOT region 5:congressional district
@@ -1108,6 +1857,7 @@ public class PgisEventManager {
       String query = "with ";
       String join = "";
       String aidsjoin = "";
+      String routesquery = "";
       if (agencyId==null){
     	  query += "aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'),";
     	  join = "left";
@@ -1121,36 +1871,42 @@ public class PgisEventManager {
     	  areaquery = "areas as (select countyid as areaid, cname as areaname, population, landarea, waterarea, odotregionid, regionname from census_counties), "
     	  		+ "tracts as (select count(tractid) as tracts, left(tractid,5) as areaid from census_tracts group by left(tractid,5)) ";    	  
     	  selectquery = "select areaid, areaname, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, coalesce(stops,0) as stops,"
-    	  		+ " odotregionid, regionname, tracts from areas "+join+" join stoproutes using(areaid) left join tracts using (areaid)";
+    	  		+ " odotregionid, regionname, tracts from areas "+join+" join stoproutes using(areaid) left join tracts using (areaid) left join routes using(areaid)";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, countyid AS areaid FROM census_counties_trip_map GROUP BY areaid),";
     	  stoproutes = "left(areaid,5)";
       } else if (type==1){//census tract
     	  criteria = "left(blockid,11)";      
     	  areaquery = "areas as (select tractid as areaid, tname as areaname, tract.population, tract.landarea, tract.waterarea from census_tracts tract)";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, tractid AS areaid FROM census_tracts_trip_map GROUP BY areaid),";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
-    	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)";
+    	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)";
       } else if (type==3){//census urban
     	  criteria = Types.getIdColumnName(type);
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, urbanid AS areaid FROM census_urbans_trip_map GROUP BY areaid),";
     	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population, landarea, waterarea from " + Types.getTableName(type)+" where population>"+urbanPop+")";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
-    	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)";
+      	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)";
       } else if (type==4) { //ODOT Regions
     	  criteria = Types.getIdColumnName(type);
     	  areaquery = "areas as (select odotregionid as areaid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties, "
     	  		+ "sum(population) as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname)";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, regionid AS areaid FROM census_counties_trip_map GROUP BY areaid),";
     	  selectquery = " select areas.areaid, areaname, counties, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
-    	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)";
-      } else {// census place, or congressional district    	  
+    	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)  left join routes USING(areaid)";
+      } else {// census place, urban area, or congressional district    	  
     	  criteria = Types.getIdColumnName(type);
+    	  if (type == 2) routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, placeid AS areaid FROM census_places_trip_map GROUP BY areaid),";
+    	  else if (type == 5) routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, congdistid AS areaid FROM census_congdists_trip_map GROUP BY areaid),";
     	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population, landarea, waterarea from " + Types.getTableName(type)+")";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
-    	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)";
+    	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)";
       }      
      query +="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid from gtfs_stops stop inner join "
     		+ "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), stoproutes as (select "
-    		+ "coalesce(count(distinct(concat(aid,stops.stopid))),0) as stops, coalesce(count(distinct concat(aid,routeid)),0) as routes, coalesce(count(distinct aid),0) as agencies,"
+    		+ "coalesce(count(distinct(concat(aid,stops.stopid))),0) as stops, coalesce(count(distinct aid),0) as agencies,"
     		+stoproutes+" as areaid from stops inner join gtfs_stop_route_map map on stops.aid_def = map.agencyid_def and stops.stopid = map.stopid group by "
-    		+stoproutes+"),"+areaquery+ selectquery;
-    System.out.println(query);
+    		+stoproutes+"),"+routesquery+areaquery+ selectquery;
+//    System.out.println(query);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
@@ -1195,12 +1951,22 @@ public class PgisEventManager {
 		Connection connection = makeConnection(dbindex);		
 		String mainquery ="";
 		String criteria = "";
+		String tripFilter1 = "";
+		String tripFilter2 = "";
 		if (type==0){//county
-	    	  criteria = "left(blockid,5)";    	  
+	    	  criteria = "left(blockid,5)";
+	    	  tripFilter1 = "countyid";
+	    	  tripFilter2 = "census_counties_trip_map";
 	      }else if(type==1){
+	    	  tripFilter2 = "census_tracts_trip_map";
+	    	  tripFilter1 = "tractid";
 	    	  criteria = "left(blockid,11)";
 	      }	else  { //census place, urban area, ODOT Regions or congressional district	      
 	    	  criteria = Types.getIdColumnName(type);
+	    	  if (type == 2) {tripFilter1 = "placeid"; tripFilter2 = "census_places_trip_map";}	    	  
+	    	  else if (type == 3) {tripFilter1 = "urbanid"; tripFilter2 = "census_urbans_trip_map";}
+	    	  else if (type == 4) {tripFilter1 = "regionid"; tripFilter2 = "census_counties_trip_map";}
+	    	  else  {tripFilter1 = "congdistid"; tripFilter2 = "census_congdists_trip_map";}
 	      }
 		mainquery += "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), stops as (select map.agencyid as agencyid, count(id) "
 			+ "as stops from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on stop.agencyid=aid "
@@ -1208,10 +1974,21 @@ public class PgisEventManager {
 			+ "publishername, publisherurl from gtfs_agencies agencies inner join stops on agencies.id = stops.agencyid inner join gtfs_feed_info info on "
 			+ "agencies.defaultid=info.defaultid ), fare as (select frule.route_agencyid as aid, frule.route_id as routeid, (round(avg(ftrb.price)*100))::integer as price "
 			+ "from gtfs_fare_rules frule inner join gtfs_fare_attributes ftrb on ftrb.agencyid= frule.fare_agencyid and ftrb.id=frule.fare_id group by "
-			+ "frule.route_agencyid,frule.route_id), froutes as (select routes.agencyid as aid, coalesce((count(routes.id))::int,-1) as routes, array_agg(coalesce(price, -1) "
-			+ "order by price) as fprices from gtfs_routes routes left join fare on routes.agencyid = fare.aid and routes.id = fare.routeid inner join stops on "
-			+ "stops.agencyid=routes.agencyid group by routes.agencyid) select id, name, fareurl, phone, url, feedname, version, startdate, enddate, publishername, publisherurl, "
-			+ "fprices, routes, stops from agencies inner join stops on agencies.id=stops.agencyid inner join froutes on stops.agencyid = froutes.aid";		
+			+ "frule.route_agencyid,frule.route_id), "
+			+ "froutes as (select routes.agencyid as aid, array_agg(coalesce(price, -1) order by price) as fprices "
+			+ "	from gtfs_routes routes left join fare on routes.agencyid = fare.aid and routes.id = fare.routeid "
+			+ "	inner join stops on stops.agencyid=routes.agencyid group by routes.agencyid), "
+			+ " sroutes as (select agencyid as aid, routeid from " + tripFilter2 + " map inner join agencies on agencies.id = map.agencyid where " + tripFilter1 + "='" + areaId + "' group by agencyid,routeid),"
+			+ " routes as (select count(distinct route.id) AS routes, route.agencyid "
+			+ "	from gtfs_routes route inner join sroutes "
+			+ "	on route.agencyid=aid and route.id = routeid  group by route.agencyid) "
+			+ "	select id, name, fareurl, phone, url, feedname, version, startdate, enddate, publishername, publisherurl, fprices, routes, stops"
+			+ " 	from agencies inner join stops "
+			+ "		on agencies.id=stops.agencyid "
+			+ "		inner join froutes"
+			+ " 	on stops.agencyid = froutes.aid "
+			+ "		left join routes"
+			+ " 	on agencies.id = routes.agencyid";		
 		//System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
@@ -1290,8 +2067,9 @@ public class PgisEventManager {
 	 *stops by geographic area
 	 *stops by geographic area and agency
 	 *stops by geographic are, agency, and route
+	 * @throws SQLException 
 	*/
-	public static ArrayList <StopR> stopGeosr(String username, int type, String areaId, String agency, String route, double x, int dbindex) {
+	public static ArrayList <StopR> stopGeosr(String username, int type, String[] dates, String[] days, String areaId, String agency, String route, double x, int dbindex) throws SQLException {
 		ArrayList <StopR> response = new ArrayList<StopR>();		
 		StopR instance;
 		Connection connection = makeConnection(dbindex);	
@@ -1300,8 +2078,15 @@ public class PgisEventManager {
 		String agenciesfilter = "";
 		String popsfilter = "";
 		String mainquery ="with ";
-		String criteria = "";		
-		
+		String criteria = "";
+		String agencyDefaultID = new String();
+		if (agency != null) {agencyDefaultID = getDefaultAgencyID(agency, dbindex);}
+		HashMap<String, Integer> stopsVisits = new HashMap<String, Integer>();
+		if (dates != null && days != null){
+			
+			stopsVisits = stopFrequency(agency, dates, days, username, dbindex);
+		}			
+				
 		if (areaId==null){//stops by agency or stops by agency and route
 			stopsfilter = "where map.agencyid='"+agency+"'";			
 			agenciesfilter = "where id='"+agency+"'";
@@ -1312,13 +2097,15 @@ public class PgisEventManager {
 			}
 		}else {//stops by areaId and ...
 			if (type==0){//county
-		    	  criteria = "left(blockid,5)";    	  
+		    	  criteria = "left(blockid,5)";
+		    	  popsfilter = "left(block.blockid,5) ='"+areaId+"' and";
 		      }else if (type==1){//tract
 		    	  criteria = "left(blockid,11)"; 
+		    	  popsfilter = "left(block.blockid,11) ='"+areaId+"' and";
 		      }	else  { //census place, urban area, ODOT Regions or congressional district
 		    	  criteria = Types.getIdColumnName(type);
+		    	  popsfilter = "block." + criteria + "='" + areaId + "' and";
 		      }
-			popsfilter = criteria+"='"+areaId+"' and";
 			if (route==null){
 				if (agency==null){//stops by areaId
 					mainquery +="aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), ";
@@ -1334,15 +2121,25 @@ public class PgisEventManager {
 				routesfilter = "where map.agencyid='"+agency+"' and map.routeid='"+route+"'";
 			}			
 		}
-		mainquery += "stops as (select map.agencyid as agencyid, stop.name as name, stop.id as id, url, location from gtfs_stops stop inner join gtfs_stop_service_map map on "
-				+ "map.agencyid_def=stop.agencyid and map.stopid=stop.id "+stopsfilter+"), agencies as (select agencies.id as agencyid, agencies.name as aname from gtfs_agencies "
+		mainquery += "stops0 as (select map.agencyid as agencyid,stop.lat, stop.lon, stop.name as name, stop.id as id, url, location, urbanid, regionid, congdistid, placeid, blockid "
+				+ "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id " + stopsfilter + "), "
+				+ "stops AS (select stops0.*, urban.population AS urbanpop FROM stops0 LEFT JOIN census_urbans AS urban ON urban.urbanid = stops0.urbanid AND population >50000), "
+				+ "agencies as (select agencies.id as agencyid, agencies.name as aname from gtfs_agencies "
 				+ "agencies "+agenciesfilter+"), routes as (select map.agencyid, stops.id, coalesce(string_agg(map.routeid,'; '),'-') as routes from gtfs_stop_route_map map inner "
 				+ "join stops on stops.agencyid=map.agencyid and stops.id=map.stopid "+routesfilter+" group by map.agencyid, stops.id), upops as (select stops.agencyid, stops.id, "
 				+ "coalesce(sum(population),0) as upop from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "
 				+ popsfilter+" poptype='U' group by agencyid, id), rpops as (select stops.agencyid, stops.id, coalesce(sum(population),0) as rpop from census_blocks block inner "
-				+ "join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+popsfilter+" poptype='R' group by agencyid, id) select stops.agencyid, "
-				+ "aname, id, name, url, routes, coalesce(upop,0) as upop, coalesce(rpop,0) as rpop from stops inner join agencies using(agencyid) inner join routes "
-				+ "using(agencyid,id) left join upops using(agencyid,id) left join rpops using(agencyid,id)";						
+				+ "join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+popsfilter+" poptype='R' group by agencyid, id), "
+				+ "result AS (select stops.agencyid, stops.lat, stops.lon, aname, id, name, url, stops.urbanid, stops.regionid, stops.congdistid, stops.placeid, stops.blockid, "
+				+ "routes, coalesce(upop,0) as upop, coalesce(rpop,0) as rpop, COALESCE(urbanpop,0) AS overfiftypop "
+				+ "	from stops inner join agencies using(agencyid) inner join routes "
+				+ "	using(agencyid,id) left join upops using(agencyid,id) left join rpops using(agencyid,id)) "
+				+ "select result.agencyid, result.lat, result.lon, aname, id, name, url, routes, upop, rpop, overfiftypop, COALESCE(census_urbans.uname,'N/A') AS urbanname, COALESCE(census_places.pname,'N/A') AS placename, "
+				+ "COALESCE(result.regionid,'N/A') AS regionname, COALESCE(census_congdists.cname,'N/A') AS congdistname, COALESCE(census_counties.cname,'N/A') AS countyname "
+				+ "	FROM result LEFT JOIN census_urbans using(urbanid) "
+				+ "	LEFT JOIN census_places USING(placeid) "
+				+ "	LEFT JOIN census_congdists USING(congdistid) "
+				+ "	LEFT JOIN census_counties ON census_counties.countyid = LEFT(result.blockid,5)";
 		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
@@ -1356,7 +2153,22 @@ public class PgisEventManager {
 				instance.RPopWithinX = String.valueOf(rs.getLong("rpop"));
 				instance.URL = rs.getString("url");
 				instance.StopId = rs.getString("id");
-				instance.StopName = rs.getString("name");				
+				instance.StopName = rs.getString("name");
+				instance.OverFiftyPop = String.valueOf(rs.getInt("overfiftypop"));
+				instance.PlaceName = rs.getString("placename");
+				instance.CountyName = rs.getString("countyname");
+				instance.UrbanName = rs.getString("urbanname");
+				if (rs.getString("regionname") != "N/A") instance.RegionName = "Region " + rs.getString("regionname");
+				else instance.RegionName = rs.getString("regionname");
+				instance.CongDistName = rs.getString("congdistname");
+				
+				if (agency == null)
+					instance.visits = stopsVisits.get(instance.AgencyId + instance.StopId) + "";
+				else 
+					instance.visits = stopsVisits.get(agencyDefaultID + instance.StopId) + "";
+				instance.lat = String.valueOf(rs.getDouble("lat"));
+				instance.lon = String.valueOf(rs.getDouble("lon"));
+				
 				response.add(instance);
 	        }		
 			rs.close();
@@ -1367,6 +2179,25 @@ public class PgisEventManager {
 	      }					
 		dropConnection(connection);
 		return response;
+	}
+	
+	/**
+	 * Gets real ID of the agency and returns default ID.
+	 * @param agencyid
+	 * @param dbindex
+	 * @return
+	 * @throws SQLException
+	 */
+	public static String getDefaultAgencyID(String agencyid, int dbindex) throws SQLException{
+		String output = new String();
+		String query = "SELECT defaultid FROM gtfs_agencies WHERE id = '" + agencyid + "'";
+		Connection connection = makeConnection(dbindex);
+		PreparedStatement stmt = connection.prepareStatement(query);
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			output = rs.getString("defaultid");
+		}
+		return output;
 	}
 	
 	/**
@@ -1383,6 +2214,7 @@ public class PgisEventManager {
 		String routesfilter = "";
 		String tripsfilter = "";
 		String blocksfilter = "";
+		String stopscountfilter = "";
 		String scriteria = "";
 		String bcriteria = "";
 		String mainquery ="with ";		
@@ -1392,7 +2224,8 @@ public class PgisEventManager {
 					+ " from gtfs_routes route inner join agencies using(agencyid) left join gtfs_trips trip on "
 					+ "route.agencyid=trip.route_agencyid and route.id = trip.route_id group by route.agencyid, route.id), ";
 			tripsfilter = "trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((length+estlength)::numeric,2) as length, tlength, "
-					+ "stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)), ";			
+					+ "stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)), ";
+			stopscountfilter = "stopscount AS (SELECT count(distinct (stopid||agencyid)) AS stops, routeid FROM gtfs_stop_route_map WHERE agencyid = '" + agency + "' GROUP BY routeid),";
 		}else {//routes by areaId or agency & areaId
 			if (type==0){//county
 		    	  bcriteria = "left(block.blockid,5)";
@@ -1405,8 +2238,8 @@ public class PgisEventManager {
 		    	  scriteria = "stop."+Types.getIdColumnName(type);
 		      }
 			routesfilter = "sroutes as (select agencyid as aid, routeid, COALESCE(max(length),0) as length from "+Types.getTripMapTableName(type)+" map "
-					+ "inner join agencies using(agencyid) where "+Types.getIdColumnName(type)+"='"+areaId+"' group by agencyid,routeid), routes as (select route.agencyid, "
-					+ "route.id, shortname, longname, type, url, description, length as rlength from gtfs_routes route inner join sroutes on route.agencyid=aid and "
+					+ "inner join agencies using(agencyid) where "+Types.getIdColumnName(type)+"='"+areaId+"' group by agencyid,routeid), "
+					+ "routes as (select route.agencyid, route.id, shortname, longname, type, url, description, length as rlength from gtfs_routes route inner join sroutes on route.agencyid=aid and "
 					+ "route.id = routeid), ";
 			tripsfilter = "trips as (select trip.agencyid as aid, tripid, routeid, length, tlength, stopscount as stops from svcids inner join "+ Types.getTripMapTableName(type)+" trip on "
 					+ "trip.agencyid_def=serviceid_agencyid and trip.serviceid=serviceid_id where "+Types.getIdColumnName(type)+"='"+areaId+"'), ";
@@ -1414,8 +2247,12 @@ public class PgisEventManager {
 			if (agency==null){//routes by areaId
 				agenciesfilter = "aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), agencies as (select agencies.id as "
 						+ "agencyid, agencies.name as aname, defaultid from gtfs_agencies agencies inner join aids on aids.aid=agencies.defaultid), ";
-			}else {//routes by areId and agency
+				stopscountfilter = "stopscount AS (SELECT count(distinct (map.stopid||map.agencyid)) AS stops, map.routeid "
+						+ "	FROM gtfs_stop_route_map AS map INNER JOIN gtfs_stops AS stop ON stop.id=map.stopid AND stop.agencyid=map.agencyid_def WHERE " + scriteria + "='" + areaId + "' GROUP BY routeid),";
+			}else {//routes by areaId and agency
 				agenciesfilter ="agencies as (select id as agencyid, name as aname, defaultid from gtfs_agencies agencies where id='"+agency+"'), ";
+				stopscountfilter = "stopscount AS (SELECT count(distinct (map.stopid||map.agencyid)) AS stops, map.routeid "
+						+ "	FROM gtfs_stop_route_map AS map INNER JOIN gtfs_stops AS stop ON stop.id=map.stopid AND stop.agencyid=map.agencyid_def WHERE map.agencyid = '" + agency + "' AND " + scriteria + "='" + areaId + "' GROUP BY routeid),";
 			}
 		}
 		mainquery += agenciesfilter+"svcids as (";
@@ -1427,23 +2264,45 @@ public class PgisEventManager {
 	    	  if (i+1<date.length)
 					mainquery+=" union all ";
 			}
-		mainquery+= "), "+ routesfilter + tripsfilter			
-				+ "stopscount AS (SELECT count(distinct (stopid||agencyid)) AS stops, routeid FROM gtfs_stop_route_map WHERE agencyid = '" + agency + "' GROUP BY routeid),"
+		mainquery+= "), "+ routesfilter + tripsfilter + stopscountfilter 
 				+ "freq as (select aid, routeid, coalesce(count(concat(routeid)),0) as frequency from trips group by aid, routeid), service as (select aid, routeid, COALESCE(sum(length),0) "
-				+ "as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips group by aid,routeid), blocks as (select trips.aid, "
-				+ "trips.routeid, population, poptype from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+				+ "as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips group by aid,routeid), "
+				+ "blocks as (select trips.aid, trips.routeid, population, poptype, block.blockid, block.regionid, block.urbanid, block.placeid, block.congdistid "
+				+ " from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
 				+ "inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid inner join census_blocks block on "
-				+ "st_dwithin(block.location, stop.location, "+String.valueOf(x)+") "+blocksfilter+" group by aid,routeid,block.blockid), upop as (select aid, routeid, "
+				+ "st_dwithin(block.location, stop.location, "+String.valueOf(x)+") "+blocksfilter+" group by aid,routeid,block.blockid),"
+				+ " upop as (select aid, routeid, "
 				+ "coalesce(sum(population),0) as upop, coalesce(sum(population*frequency),0) as svcupop from blocks inner join freq using(aid,routeid) where poptype ='U' "
 				+ "group by aid, routeid), upopr as (select aid, routeid, sum(upop) as upop, sum(svcupop) as svcupop from upop inner join trips using(aid,routeid) group by aid, "
 				+ "routeid), rpop as (select aid, routeid, coalesce(sum(population),0) as rpop, coalesce(sum(population*frequency),0) as svcrpop from blocks inner join freq "
 				+ "using(aid,routeid) where poptype ='R' group by aid, routeid), rpopr as (select aid, routeid, sum(rpop) as rpop, sum(svcrpop) as svcrpop from rpop inner join trips "
-				+ "using(aid,routeid) group by aid, routeid) select agencies.agencyid, aname, routes.id, shortname, longname, type, url, description, rlength, stops, "
+				+ "using(aid,routeid) group by aid, routeid), "
+				+ "routesblocks AS (select routes.agencyid AS aid, routes.id AS routeid, gtfs_stops.blockid, gtfs_stops.urbanid, gtfs_stops.placeid, gtfs_stops.congdistid, gtfs_stops.regionid "
+				+ "	from routes INNER JOIN gtfs_stop_route_map AS map ON routes.agencyid = map.agencyid AND routes.id=map.routeid "
+				+ "	INNER JOIN gtfs_stops ON map.stopid=gtfs_stops.id AND map.agencyid_def=gtfs_stops.agencyid),"
+				+ " areas as (SELECT aid,routeid, string_agg(distinct census_urbans.uname,',') AS urbans, string_agg(distinct census_counties.cname,',') AS counties, "
+				+ "	string_agg(distinct census_places.pname,',') AS places, string_agg(distinct census_congdists.cname,',') AS congdists, "
+				+ "	string_agg(distinct 'Region '||routesblocks.regionid,',') AS regions "
+				+ "	FROM routesblocks LEFT JOIN census_urbans USING(urbanid) "
+				+ "	LEFT JOIN census_counties ON census_counties.countyid=LEFT(routesblocks.blockid,5) "
+				+ "	LEFT JOIN census_places USING(placeid) "
+				+ "	LEFT JOIN census_congdists USING(congdistid) "
+				+ "	WHERE census_urbans.uname IS NOT NULL "
+				+ "	AND census_places.pname IS NOT NULL "
+				+ "	AND census_counties.cname IS NOT NULL "
+				+ "	AND census_congdists.cname IS NOT NULL "
+				+ "	AND routesblocks.regionid IS NOT NULL "
+				+ "	GROUP BY aid,routeid) "
+				+ "select agencies.agencyid, aname, routes.id, shortname, longname, type, url, description, rlength, stops, "
 				+ "coalesce(upop,0) as upop, coalesce(rpop,0) as rpop, COALESCE(svcstops,0) as svcstops, COALESCE(svchours,0) as svchours, COALESCE(svcmiles,0) as svcmiles, "
-				+ "COALESCE(svcupop,0) as usvcpop, COALESCE(svcrpop,0) as rsvcpop from routes inner join agencies on routes.agencyid=agencies.agencyid left join service on "
-				+ "routes.agencyid=service.aid and routes.id=service.routeid left join upop on routes.agencyid=upop.aid and routes.id= upop.routeid left join rpop on "
-				+ "routes.agencyid=rpop.aid and routes.id=rpop.routeid"
-				+ "	left join stopscount on routes.id = stopscount.routeid";					
+				+ "COALESCE(svcupop,0) as usvcpop, COALESCE(svcrpop,0) as rsvcpop, COALESCE(urbans,'N/A') AS urbans, COALESCE(counties,'N/A') AS counties, "
+				+ "COALESCE(places,'N/A') AS places, COALESCE(congdists,'N/A') AS congdists, COALESCE(regions,'N/A') AS regions "
+				+ "from routes inner join agencies on routes.agencyid=agencies.agencyid "
+				+ "left join service on routes.agencyid=service.aid and routes.id=service.routeid "
+				+ "left join upop on routes.agencyid=upop.aid and routes.id= upop.routeid "
+				+ "left join rpop on routes.agencyid=rpop.aid and routes.id=rpop.routeid "
+				+ "left join stopscount on routes.id = stopscount.routeid "
+				+ "left join areas on routes.id = areas.routeid and routes.agencyid = areas.aid";					
 		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
@@ -1466,19 +2325,23 @@ public class PgisEventManager {
 				instance.ServiceHours = String.valueOf(Math.round(rs.getLong("svchours")/36.0)/100.0);
 				instance.ServiceMiles = String.valueOf(Math.round(rs.getDouble("svcmiles")*100.0)/100.0);
 				instance.UServicePop = String.valueOf(rs.getLong("usvcpop"));
-				instance.RServicePop = String.valueOf(rs.getLong("rsvcpop"));								
+				instance.RServicePop = String.valueOf(rs.getLong("rsvcpop"));
+				instance.counties = rs.getString("counties");
+				instance.congdists = rs.getString("congdists");
+				instance.places = rs.getString("places");
+				instance.urbans = rs.getString("urbans");
+				instance.regions = rs.getString("regions");
 				response.add(instance);
 	        }		
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+//	        System.exit(0);
 	      }					
 		dropConnection(connection);
 		return response;
 	}
-	
 	
 	/**
 	 *Queries the transit agency summary report	  
@@ -1500,7 +2363,7 @@ public class PgisEventManager {
 				+ "gtfs_routes routes left join fare on routes.agencyid = fare.aid and routes.id = fare.routeid group by routes.agencyid) select id, name, fareurl, phone, url, "
 				+ "feedname, version, startdate, enddate, publishername, publisherurl, fprices, routes, stops, places, counties, odotregions, urbans, congdists from agencies "
 				+ "inner join stops on agencies.id=stops.aid inner join froutes on stops.aid = froutes.aid";		
-		//System.out.println(mainquery);
+		System.out.println("agency sr: " + mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();			
@@ -1942,6 +2805,41 @@ public class PgisEventManager {
 	}
 	
 	/**
+	 * returns the population within x distance of all stops in the state that are located in urban areas
+	 * with over 50k population as well as the population of urban areas with less than 50k pop.
+	 * @param x
+	 * @param username
+	 * @param dbindex
+	 * @return
+	 */
+	public static long[] cutOff50(double x, String username, int dbindex){
+		long[] response = new long[4];
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		try{
+			stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery( "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
+					+ "pops as (select population, poptype, block.urbanid "
+					+ "from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location,stop.location," + String.valueOf(x) + ") inner join aids on "
+					+ "stop.agencyid=aids.aid group by block.blockid), "
+					+ "overfiftypop AS (select sum(pops.population) as overfiftypop from pops INNER JOIN census_urbans USING(urbanid) where census_urbans.population>50000), "
+					+ "belowfiftypop AS (select sum(pops.population) as belowfiftypop from pops INNER JOIN census_urbans USING(urbanid) where census_urbans.population<50000),"
+					+ "totaloverfifty AS (select sum(population) as totaloverfifty from census_urbans WHERE census_urbans.population>50000), "
+					+ "totalbelowfifty AS (select sum(population) as totalbelowfifty from census_urbans WHERE census_urbans.population<50000)"
+					+ "select * from belowfiftypop INNER JOIN overfiftypop ON TRUE INNER JOIN totaloverfifty ON TRUE INNER JOIN totalbelowfifty ON TRUE");	
+			while ( rs.next() ) {
+				response[0] = rs.getLong("overfiftypop");
+				response[1] = rs.getLong("totaloverfifty");
+				response[2] = rs.getLong("belowfiftypop");
+				response[3] = rs.getLong("totalbelowfifty");
+			}
+		} catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	      }
+		dropConnection(connection);
+		return response;
+	}
+	/**
 	 *returns route Miles for the whole state 
 	 */
 	public static double StateRouteMiles(String username, int dbindex){
@@ -2244,10 +3142,14 @@ public class PgisEventManager {
 	/**
 	 *Queries frequency of service for all stops in the database for a set of dates and days
 	 */
-	public static HashMap<String, Integer> stopFrequency(String[] date, String[] day, String username, int dbindex){				
+	public static HashMap<String, Integer> stopFrequency(String agency, String[] date, String[] day, String username, int dbindex){				
 		HashMap<String, Integer> response = new HashMap<String, Integer>();
 		Connection connection = makeConnection(dbindex);
-		String mainquery ="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+		String agencyFilter = "";
+		if (agency != null){
+			agencyFilter = " AND agency_id IN (SELECT defaultid FROM gtfs_agencies WHERE id='" + agency + "')";
+		}
+		String mainquery ="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'" + agencyFilter + "), svcids as (";
 		Statement stmt = null;
 		for (int i=0; i<date.length; i++){
 			mainquery+= "(select serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]
@@ -2260,7 +3162,7 @@ public class PgisEventManager {
 		mainquery +="), trips as (select agencyid as aid, id as tripid from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)) select "
 				+ "stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips.aid),0) as service from aids inner join gtfs_stop_times stime on "
 				+ "aids.aid=stime.stop_agencyid left join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id";
-//		System.out.println(mainquery);
+		System.out.println("visit frequency: " + mainquery);
 			try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
@@ -2281,7 +3183,7 @@ public class PgisEventManager {
 	/**
 	 *Queries stop clusters (hub reports) and returns a list of all transit agencies with their connected agencies
 	 */
-	public static TreeSet<StopCluster> stopClusters(String[] dates, String[] days, String username, double dist, int dbindex){	
+	/*public static TreeSet<StopCluster> stopClusters(String[] dates, String[] days, String username, double dist, int dbindex){	
 		HashMap<String, Integer> serviceMap = stopFrequency(dates, days, username, dbindex);
 		TreeSet<StopCluster> response = new ClusterPriorityQueue();
 		Connection connection = makeConnection(dbindex);
@@ -2354,7 +3256,7 @@ public class PgisEventManager {
 		//System.out.println("Processing Clusters");
 		return response;
 	}
-	
+	*/
 	/**
 	 * A hashmap of the clusters is generated (containing the AgencyIDs and IDs of the stops in the cluster)
 	 * @param radius
@@ -3091,3 +3993,4 @@ System.out.println(query);
 		}
 	}
 }
+

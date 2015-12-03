@@ -205,6 +205,7 @@ $(document).ready(function(){
 				    };
 				});
 			}			
+			SetEvents();
 			var table = $('#RT').DataTable( {
 				//"scrollY": "76%",
 				"paging": true,
@@ -238,7 +239,7 @@ $(document).ready(function(){
 		        }
 				
 			} );
-			SetEvents();
+			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
 		    	//var cobj = $('td', this).eq(0);
 		    	var tr = $(this).parents('tr');	

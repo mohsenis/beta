@@ -1230,17 +1230,18 @@ $mylist
 				casestring = $(this).attr('id');
 				}
 				if (casestring=="THR"){var d = new Date();
-					var qstringx = '0.1';
-					var qstringx2 = '0.25';
+					var qstringx = '0.08';	// clustering radius
+					var qstringx2 = '0.25'; // population search radius					
+					var qstringx3 = '2.0'  // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 		    		var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport2.html?&x1='+qstringx+'&x2='+qstringx2+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport2.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&username='+getSession());
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.25';
-			    	window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/report.html?&dbindex='+dbindex/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '0.1';
 			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex/*+'&username='+getSession()*/);
@@ -1269,13 +1270,9 @@ $mylist
 			    		}
 			    		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+parseInt(casestring.substring(2)));			    		    		
 			    }else if(casestring=="Emp"){
-			    	var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/Emp.html'+'?&dbindex='+dbindex+'&n='+keyName);
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html?&n='+keyName+'&dbindex='+dbindex);
 			    }else if(casestring=="T6"){	
-			    	var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/T6.html'+'?&dbindex='+dbindex+'&n='+keyName);
+			    	window.open('/TNAtoolAPI-Webapp/T6.html?&n='+keyName+'&dbindex='+dbindex);
 			    }
 			});
     	
@@ -1451,7 +1448,7 @@ function updateListDialog(agenciesIds){
 	              "Burns Paiute Tribal Transit Service",
 	              "Corvallis Transit System", 
 	              "Linn-Benton Loop",
-	              "Malheur Council on Aging & Community Services",
+	              //"Malheur Council on Aging & Community Services",
 	              "Shawn's Rideshare",
 	              "South Clackamas Transportation District",
 	              "Warm Springs Transit"];

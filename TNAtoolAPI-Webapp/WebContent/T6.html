@@ -3,7 +3,7 @@
 <head>
 	<!-- <meta charset="utf-8"> -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<title>Aggregated Title VI Report</title>
+	<title>Title VI Report</title>
 	<link rel="stylesheet" href="js/lib/jstree-themes/default/style.min.css" />
 	<script src="js/lib/jquery-1.11.1.min.js"></script>
 	<script src="js/lib/jstree.min.js"></script>
@@ -13,10 +13,12 @@
 	<script src="js/lib/slidebars.min.js"></script>
 	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
 	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
-	<script src="js/lib/jquery.qtip.min.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/date.js"></script>
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />	
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/slidebars.min.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery.qtip.min.css" />
@@ -32,18 +34,22 @@
 	
 	</style>
 	<script>
-	var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-	var mySlidebar;
-	var maxRadius = 5;
+	var reportName = "kjh";
+	var progVal = 0; 
 	var boo;
+	var maxRadius = 5;
+	var dbindex = parseInt(getURIParameter("dbindex"));;
+	var key = Math.random();
+	var keyName = parseFloat(getURIParameter("n"));
+	var t6 = {};
+	var w_qstringd = localStorage.getItem(keyName);
+	var w_qstringx = $('#Sradius').val();
+	if (w_qstringx == null) {w_qstringx = 0.25};
+	var mySlidebar;
 	
 	(function($) {
 	    $(document).ready(function() {
-	    	$('#dialogPreLoader').hide();
-	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Title VI Report');
-	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
-	    	mySlidebar.slidebars.open('left'); // Open the Slidebar
-	    	
+	    	$('.sb-slidebar').css('width', '28%');
 	    	$.ajax({
 	    		type: 'GET',
 	    		datatype: 'json',
@@ -68,7 +74,16 @@
 	    		    select.selectedIndex = dbindex;		    				    
 	    		}			
 	    	});
+	    	gos(key);
+	    	$('.ui-accordion-content').css('padding', '0px 0px');
+	    	$('#ui-accordion-accordion-header-0').css({'width':'80%','font-size':'80%','margin':'auto','text-align':'center'});
+	    	$('.ui-widget').css('font-size', '100%');
+	    	$('.ui-datepicker-inline').css('margin','auto');
 	    	
+	    	$('#dialogPreLoader').hide();
+	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Title VI Report');
+	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
+	    	mySlidebar.slidebars.open('left'); // Open the Slidebar
 	    });
 	  }) (jQuery);
 	
@@ -78,33 +93,44 @@
 				"check_callback" : true,
 				"themes" : { "stripes" : true },
 				"data" : [
-					{"text" : "Povery Level", "type" : "poverty_default", "id" : "Povery", "state" : {"opened" : true},
+					{"text" : "Poverty", "type" : "poverty_default", "id" : "poverty", "state" : {"opened" : true},
 						"children" : [
-									{"text" : "Below Poverty Line", "type" : "poverty", "id" : "belowpoverty"},
-									{"text" : "Above Poverty Line", "type" : "poverty", "id" : "abovepoverty"}
+									{"text" : "Below Poverty Line", "type" : "poverty", "id" : "below_poverty"},
+									{"text" : "Above Poverty Line", "type" : "poverty", "id" : "above_poverty"}
 						              ]
+					},
+					{"text" : "Disability", "type" : "disability_default", "id" : "disability", "state" : {"opened" : true},
+						"children" : [
+									{"text" : "With Disability", "type" : "disability", "id" : "with_disability"},
+									{"text" : "Without Disability", "type" : "disability", "id" : "without_disability"}
+						              ]
+					},
+					{"text" : "Age", "type" : "age_default", "id" : "age", "state" : {"opened" : true},
+						"children" : [
+										{"text" : "5 to 17 years", "type" : "age", "id" : "from5to17"},
+										{"text" : "18 to 64 years", "type" : "age", "id" : "from18to64"},
+										{"text" : "65 and older", "type" : "age", "id" : "above65"}
+							              ]            	  
 					},
 					{"text" : "Language", "type" : "language_default", "id" : "Language", "state" : {"opened" : true},
 						"children" : [
-										{"text" : "English Speaking", "type" : "language", "id" : "english"},
-										{"text" : "Spanish Speaking", "type" : "language", "id" : "spanish"},
-										{"text" : "Asian Speaking", "type" : "language", "id" : "asian"},
-										{"text" : "Other Indo Speaking", "type" : "language", "id" : "indo"},
-										{"text" : "Other Languages", "type" : "language", "id" : "other"}
+										{"text" : "English", "type" : "language", "id" : "english"},
+										{"text" : "Spanish", "type" : "language", "id" : "spanish"},
+										{"text" : "Indo European", "type" : "language", "id" : "indo_european"},
+										{"text" : "Asian & Pacific Islander", "type" : "language", "id" : "indasian_and_pacific_island"},
+										{"text" : "Other Languages", "type" : "language", "id" : "other_languages"}
 							              ]            	  
 					},
-					{"text" : "House Hold", "type" : "hh_default", "id" : "hh",  "state" : {"opened" : true},
+					{"text" : "Ethnicity", "type" : "ehtnicity_default", "id" : "ethnicity",  "state" : {"opened" : true},
 						"children" : [
-										{"text" : "HouseHold - White", "type" : "hh", "id" : "hhwhite"},
-										{"text" : "HouseHold - Hispanic", "type" : "hh", "id" : "hhhispanic"},
-										{"text" : "HouseHold - Black", "type" : "hh", "id" : "hhblack"},
-										{"text" : "HouseHold - American Indian", "type" : "hh", "id" : "hhamericanindian"},
-										{"text" : "HouseHold - Asian", "type" : "hh", "id" : "hhasian"},
-										{"text" : "HouseHold - Pacific Islander", "type" : "hh", "id" : "hhpacificislander"},
-										{"text" : "HouseHold - Pacific Other", "type" : "hh", "id" : "hhpacificother"},
-										{"text" : "HouseHold - White Not Hispanic", "type" : "hh", "id" : "hhwhitenothisp"},
-										{"text" : "HouseHold - Over 65 Years Old", "type" : "hh", "id" : "hhover65"},
-										{"text" : "HouseHold - Under 65 Years Old", "type" : "hh", "id" : "hhunder65"}
+										{"text" : "Black or African American", "type" : "ethnicity", "id" : "black_or_african_american"},
+										{"text" : "American Indian or Alaska Native", "type" : "ethnicity", "id" : "american_indian_and_alaska_native"},
+										{"text" : "Asian", "type" : "ethnicity", "id" : "asian"},
+										{"text" : "Native Hawaiian and Other Pacific Islander", "type" : "ethnicity", "id" : "native_hawaiian_and_other_pacific_islander"},
+										{"text" : "Other Races", "type" : "ethnicity", "id" : "other_races"},
+										{"text" : "Two or More Races", "type" : "ethnicity", "id" : "two_or_more"},
+										{"text" : "White", "type" : "ethnicity", "id" : "white"},
+										{"text" : "Hispanic or Latino", "type" : "ethnicity", "id" : "hispanic_or_latino"}
 					]}
 			]},
 			"types" : {
@@ -116,6 +142,22 @@
 					"icon" : "js/lib/images/arrow-right.ico",
 					"valid_children" : []
 				},
+				"disability_default" : {
+					"icon" : "js/lib/images/folder_closed-go.ico",
+					"valid_children" : ["disability", "disability_default"]					
+				},
+				"disability" : {
+					"icon" : "js/lib/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				"age_default" : {
+					"icon" : "js/lib/images/folder_closed-go.ico",
+					"valid_children" : ["age", "age_default"]					
+				},
+				"age" : {
+					"icon" : "js/lib/images/arrow-right.ico",
+					"valid_children" : []
+				},
 				"language_default" : {
 					"icon" : "js/lib/images/folder_closed-go.ico",
 					"valid_children" : ["language", "language_default"]					
@@ -124,11 +166,11 @@
 					"icon" : "js/lib/images/arrow-right.ico",
 					"valid_children" : []
 				},
-				"hh_default" : {
+				"ehtnicity_default" : {
 					"icon" : "js/lib/images/folder_closed-go.ico",
-					"valid_children" : ["hh", "hh_default"]					
+					"valid_children" : ["ethnicity", "ehtnicity_default"]					
 				},
-				"hh" : {
+				"ethnicity" : {
 					"icon" : "js/lib/images/arrow-right.ico",
 					"valid_children" : []
 				}	
@@ -158,8 +200,6 @@
 									
 									if ($.inArray(newName, nodesList) < 0){
 										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate", "state" : {"opened" : true} },'first',null,null);
-										console.log(tree.get_type($node));
-										console.log(newName);
 									}else{			
 										while ($.inArray(newName, nodesList) >= 0) {
 											newName = "Aggregated " + tree.get_text($node) + " " + counter++;
@@ -223,7 +263,6 @@
 						"dnd",
 						"contextmenu",
 						"sort",
-						/* "state", */
 						"types",
 						"unique",
 						"checkbox"
@@ -234,7 +273,6 @@
 			$('#jstree').jstree(true).deselect_all();
 		});
 	});
-	
 	
 	function toggleCheckbox(checkbox){	
 		var tree= $('#jstree').jstree(true);
@@ -252,20 +290,26 @@
 			if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#')
 					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) ) {
 				nodesList.push($(this));
-				tree.get_
 			}
 		});
 		
 		var y = "";
-		nodesList.forEach (function (item, index, array){
-			y += '<th>'+ tree.get_text(item) +'</th>'
-		});
+		if ($('#reportType').val() == 'Agencies'){
+			nodesList.forEach (function (item, index, array){
+				 y += '<th>'+ tree.get_text(item) +'-S<em title="Total number of individuals of that belong to the selected category and are living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+					+'<th>'+ tree.get_text(item) +'-SLOS<em title="Number of Individuals Served at Level of Service: Unduplicated summation of individuals of the selected category who receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+					+'<th>'+ tree.get_text(item) +'-SS<em title="Number of Individuals Served by Service: Unduplicated summation of individuals of the selected category who are served by service is calculated as service stops multiplied by the unduplicated individuals living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				});
+		}else{
+			nodesList.forEach (function (item, index, array){
+			 y += '<th>'+ tree.get_text(item) +'<em title="Total number of individuals of that belong to the selected category and are living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +'-S<em title="Number of Individuals Served: Unduplicated summation of individuals of the selected category who are living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +'-SLOS<em title="Number of Individuals Served at Level of Service: Unduplicated summation of individuals of the selected category who receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ tree.get_text(item) +'-SS<em title="Number of Individuals Served by Service: Unduplicated summation of individuals of the selected category who are served by service is calculated as service stops multiplied by the unduplicated individuals living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+			});
+		}
 		return y;
 	} 
-	
-	/* function closebutton(){
-		$('slidebar').toggle('left');
-	} */
 	
 	function clearReport(){
 		document.getElementById('displayReport').innerHTML = "";
@@ -280,10 +324,15 @@
 		var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
 		window.open(uri, 'AgencySummaryReport.csv');
 	}
+	
 	function dbchange(){
 		if (document.getElementById("dbselect").selectedIndex !=dbindex){
 			location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
 		}
+	}
+	
+	function selectFunction(){
+		$('#reportTitle').html($('#reportType').val());
 	}
 	</script>
 
@@ -302,183 +351,165 @@
 			return 0;
 		}
 		
+		// update dates
+		var dates = $('#datepicker').multiDatesPicker('getDates');
+		if(dates.length==0){
+			$( "#datepicker" ).multiDatesPicker({
+				addDates: [new Date()]
+			});
+		}
+		w_qstringd = dates.join(",")
+		
 		// close slidebar
 		mySlidebar.slidebars.close();
 		$('#dialogPreLoader').show();
-		
-		
 		$("#initialText").hide();
 		document.getElementById('displayReport').innerHTML = "";
-		var html = '<table id="Emp" class="display" align="center">';
-		var tmp = '';
+		
+		// making a 2D array based on the selected categories and aggregated categories
+		var tableContent = [];
+		var rootList = [];
+		var tree = $('#jstree').jstree(true);
+		$('.jstree-node').each(function(){
+		  if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#')
+					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) ){
+			 	rootList.push(this);
+			 }
+		});
+		
+		tree.open_all();
+		rootList.forEach (function (item, index, array){
+			var parentID = $(item).attr('id');
+			if (tree.is_parent(item)){						
+				var children = tree.get_children_dom(item);
+				var childrenIDs = [];
+				$.each(children, function(ind,obj){
+					if (tree.is_selected(obj)){
+						childrenIDs.push($(obj).attr('id'));
+					}							
+				});
+				tableContent.push([parentID,childrenIDs]);
+			}else{
+				var childrenIDs = [parentID];
+				tableContent.push([parentID,childrenIDs]);
+			}
+		});
+		
+		// Building header row of the table 
+		var html = '<table id="T6" class="display" align="center">';
 		if ($('#reportType').val() == 'Agencies'){
-			tmp = '<tr><th id="an">Agency ID <em title="ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>Agency Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>Total population served by the agency</th>';
+			tmp = 	'<tr><th>Agency ID</em></th>'+
+				'<th>Agency Name</em></th>';
 		}else{
-			tmp = '<tr><th id="an">Area ID</th>'+
-			'<th>Area Name</th>'+
-			'<th>Total population of the area</em></th>';
-		}			
-		tmp += getTableHeaders()+
-			'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
-		html += '<thead>'+tmp+'</thead><tbody>';
-		var sRadius = '';
-		if (document.getElementById("reportType").value == 'Agencies'){
-			sRadius = ',' + $('#Sradius').val() * 1609.34;
+			tmp = 	'<tr><th>Area ID</em></th>'+
+			'<th>Area Name</em></th>';
 		}
+		tmp += getTableHeaders() +
+				'<th>MetaData</th></tr>';
+		html += '<thead>'+tmp+'</thead><tbody>';
+		
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?&report='+document.getElementById('reportType').value+sRadius+'&dbindex='+dbindex+'&username='+getSession(),
+			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?emp?&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
 			async: true,
-			success: function(d){			
-				// making a 2D array based on the selected categories and aggregated categories
-				var tableContent = [];
-				var rootList = [];
-				var tree = $('#jstree').jstree(true);
-				$('.jstree-node').each(function(){
-				  if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#')
-							|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) ){
-					 	rootList.push(this);
-					 }
+			success: function(d){// making a hashmap of the query results.\
+				var temp = d.TitleVIDataList;
+				t6.metadata = d.metadata;
+				t6.TitleVIDataList = [];
+				temp.forEach(function(i, ind, arr){
+					t6.TitleVIDataList.push(i);
 				});
-				
-				tree.open_all();
-				rootList.forEach (function (item, index, array){
-					var parentID = $(item).attr('id');
-					if (tree.is_parent(item)){						
-						var children = tree.get_children_dom(item);
-						var childrenIDs = [];
-						$.each(children, function(ind,obj){
-							if (tree.is_selected(obj)){
-								childrenIDs.push($(obj).attr('id'));
-							}							
-						});
-						tableContent.push([parentID,childrenIDs]);
-					}else{
-						var childrenIDs = [parentID];
-						tableContent.push([parentID,childrenIDs]);
-					}
-				});
-				
-				// making a hashmap of the query results.
-				$.each(d.TitleVIDataList, function(i,item){
-					var queryOutput = {};
-					queryOutput['population'] = item.population;
-					queryOutput['popdisabled'] = item.popDisabled;
-					queryOutput['abovepoverty'] = item.popAP;
-					queryOutput['belowpoverty'] = item.popBP;
-					queryOutput['english'] = item.engSpk;
-					queryOutput['spanish'] = item.espSpk;
-					queryOutput['indo'] = item.otherIndoSpk;
-					queryOutput['asian'] = item.asianSpk;
-					queryOutput['other'] = item.otherLngSpk;
-					queryOutput['hhtotal'] = item.hhTotal;
-					queryOutput['hhwhite'] = item.hhWhite;
-					queryOutput['hhhispanic'] = item.hhHispanic;
-					queryOutput['hhblack'] = item.hhBlack;
-					queryOutput['hhamericanindian'] = item.hhAmericanIndian;
-					queryOutput['hhasian'] = item.hhAsian;
-					queryOutput['hhpacificislander'] = item.hhPacificIslander;
-					queryOutput['hhpacificother'] = item.hhPacificOther;
-					queryOutput['hhwhitenothisp'] = item.hhWhiteNotHisp;
-					queryOutput['hhover65'] = item.hhOver65;
-					queryOutput['hhunder65'] = item.hhUnder65;
-					
-					// Filling in the first 4 columns of the datatable
-					html += '<tr><td>'+ item.id + '</a></td>'+
-								'<td>' + item.name + '</td>'+
-								'<td>' + numWithCommas(item.population) + '</td>';
-					
-					// calculating the total employment selected and push into the datatable
-					/* var totalSelectedEmp = 0;
-					$('.jstree-node').each(function(){
-						 if (tree.is_selected($(this)) && tree.is_leaf($(this))){
-							totalSelectedEmp += queryOutput[$(this).attr('id')];
-						 }
-					});
-					html += '<td>' + numWithCommas(totalSelectedEmp) + '</td>'; */
-					// filling in the other columns of the datatable
+				for (var i=0; i<t6.TitleVIDataList.length;i++){
+					html += '<tr><td>'+ t6.TitleVIDataList[i].id + '</td>'+
+						'<td>' + t6.TitleVIDataList[i].name + '</td>';
+					var resultSet= {};
+					$('.jstree-leaf').each(function(){
+						if ($('#reportType').val() != 'Agencies') resultSet[$(this).attr('id')] = t6.TitleVIDataList[i][$(this).attr('id')];//console.log($(this).attr('id'));
+						resultSet[$(this).attr('id')+'_atlos'] = t6.TitleVIDataList[i][($(this).attr('id')).toLowerCase()+'_atlos'];
+						resultSet[$(this).attr('id')+'_withinx'] = t6.TitleVIDataList[i][($(this).attr('id')).toLowerCase()+'_withinx'];
+						resultSet[$(this).attr('id')+'_served'] = t6.TitleVIDataList[i][($(this).attr('id')).toLowerCase()+'_served'];
+					});	
+							
+					// Filling in other columns of the table
 					for (var index in tableContent){
-						var summation = 0;
-						tableContent[index][1].forEach(function(i, ind, arr){
-							var node = $('#jstree').find("[id='"+i+"']");
+						var Summation = 0;
+						var PopServedSummation = 0;
+						var PopAtLOSSummation = 0;
+						var ServedByServiceSummation = 0;
+						tableContent[index][1].forEach(function(j, ind, arr){
+							var node = $('#jstree').find("[id='"+j+"']");
 							if (tree.is_selected(node)){
-								summation += queryOutput[i];	
+								if ($('#reportType').val() != 'Agencies') Summation += resultSet[j];
+								PopServedSummation += resultSet[j+'_withinx'];
+								PopAtLOSSummation += resultSet[j+'_atlos'];
+								ServedByServiceSummation += resultSet[j+'_served'];	
 							}							
 						});
-						html+='<td>' + numWithCommas(summation) + '</td>';
+						if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(Summation) + '</td>';
+						html += '<td>' + numWithCommas(PopServedSummation) + '</td>'
+						+ '<td>' + numWithCommas(PopAtLOSSummation) + '</td>'
+						+ '<td>' + numWithCommas(ServedByServiceSummation) + '</td>';
 					}
-					html += '<td>' + d.metadata + '</td></tr>'		
-			});
-		
-		var html2 = '<tfoot>'+tmp+'</tfoot>';
-		html +='</tbody>'+html2+'</table>';
-		$('#displayReport').append($(html));
-		$('#dialogPreLoader').hide();
-		
-		var table = $('#Emp').DataTable({
-			
-			"bSort" : true,
-			"paging": true,	
-			"scrollX": true,
-			"iDisplayLength": 20,
-			"aoColumnDefs": [{"visible": false, "targets": [$('#Emp thead th').length - 1]}],
-			"order": [[ 0, "asc" ]],
-			"dom": 'T<"clear">lfrtip',
-	        "tableTools": {
-	        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
-	        	"sRowSelect": "os",
-	        	"aButtons": [
-	 						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-	 							"sMessage": ""
-	 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
-	 		                
-	 		                {
-	 		                    "sExtends":    "collection",
-	 		                    "sButtonText": "Export Report",
-	 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
-	 		                    				  "mColumns": 'visible'},
-	 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-	 		                                      "mColumns": 'all'},
-	 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-	 		                                      "mColumns": 'all'} ]
-	 		                } 
-	 		            ]
-	        }
-			
-		});
-	 
-	    //$('#CEmp_wrapper').css("width", "inherit");
-	    $('#Emp_wrapper').css("margin", "auto");
-		$("#Emp_length").remove();
-	    $("#Emp_filter").insertBefore("#Emp_info");
-	    $( ".dataTables_filter" ).css( "float", "left");
-	    $( ".dataTables_filter" ).before( "<br>" );
-		    }
-		});
-	}
+					html += '<td>' + t6.metadata + '</td></tr>';
+				}
+				var html2 = '<tfoot>'+tmp+'</tfoot>';
+				html +='</tbody>'+html2+'</table>';
+				$('#displayReport').append($(html));
+				$('#dialogPreLoader').hide();
+				
+				var table = $('#T6').DataTable({
+					
+					"bSort" : true,
+					"paging": true,	
+					"scrollX": true,
+					"iDisplayLength": 20,
+					"aoColumnDefs": [{"visible": false, "targets": [$('#T6 thead th').length - 1]}],
+					"order": [[ 0, "asc" ]],
+					"dom": 'T<"clear">lfrtip',
+			        "tableTools": {
+			        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
+			        	"sRowSelect": "os",
+			        	"aButtons": [
+			 						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+			 							"sMessage": ""
+			 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"T6\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
+			 		                
+			 		                {
+			 		                    "sExtends":    "collection",
+			 		                    "sButtonText": "Export Report",
+			 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
+			 		                    				  "mColumns": 'visible'},
+			 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+			 		                                      "mColumns": 'all'},
+			 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+			 		                                      "mColumns": 'all'} ]
+			 		                } 
+			 		            ]
+			        }
+					
+				});
+			    //$('#CEmp_wrapper').css("width", "inherit");
+			    $('#T6_wrapper').css("margin", "auto");
+				$("#T6_length").remove();
+			    $("#T6_filter").insertBefore("#T6_info");
+			    $( ".dataTables_filter" ).css( "float", "left");
+			    $( ".dataTables_filter" ).before( "<br>" );
+			}
+		});		
+	}		
 	
-	function selectFunction(){
-		$('#reportTitle').html($('#reportType').val());
-		if(document.getElementById('reportType').value == 'Agencies'){
-			document.getElementById('Sradius').disabled = false;
-		}else{
-			document.getElementById('Sradius').disabled = true;
-		}
-	}
 	</script>
 </head>
 
 <body>
 <div id="sb-site">	
 	 <div class="container">
-		<div class="headerL">
+		<div class="headerL" style="width:50%">
 			<div class="sb-toggle-left navbar-left" style="float:left">
-				<div class="navicon-line"> <!-- style="background-color: #87F786" --></div>
-				<div class="navicon-line"> <!-- style="background-color: #FFED28"> --></div>
-				<div class="navicon-line"> <!-- style="background-color: #FF7373"> --></div>
+				<div class="navicon-line" style="background-color: #FF7373"></div>
+				<div class="navicon-line" style="background-color: #87F786"></div>
+				<div class="navicon-line" style="background-color: #FFFF00"></div>
 			</div>
 			<h1 >Transit Network Analysis Tool Reports</h1>
 		</div>	
@@ -497,50 +528,54 @@
 	 <div style="width:100%; height: 93.7vh; overflow:auto; float:left; border-style:groove; border-width:5px; backgroun-color: #E8E8E8">
 		<p id="initialText" style="text-align: center; margin-top:150px; line-height: 70vh;" > <b>Choose categories and click "Generate Report".</b></p>
 		
-		<!-- <table id="controls">
-			<tr>
-			  <td id="td1">
-			  	<div class="headerBL"  >
-				<h2 style="margin:0px;"></h2>
-				</div>
-			  </td>
-			  
-			  <td id="td3">
-			  	<div class="headerBR" > 
-			    			    			    	    	
-		    	</div>
-			  </td>
-			</tr>
-		</table> -->		
-		
-		
 		<p id="displayReport" style="margin:5px; "><br></p>
 		<br>
 		<br>
 		<img id="dialogPreLoader" src="images/287.GIF" alt="Page Loading" style="width:100px; height:100px; position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;" >
+		<p id="bePatient" style="text-align: center; margin-top:150px; line-height: 70vh;"><b>Please be patient while the report is being put together, this might take a few minutes.</b></p>
 	</div>
 </div> 
-	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="20%" style="height:100vh; overflow:auto; border-style:groove; background-color:white; border-width:5px;">
-		<!-- <button type="button" class="Button" onclick="createNode();" style="width:35%; margin-top:3px; height:30px; background-color: #FF7373; border-color:#FF7373; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Create Category</button> -->
-		<button type="button" class="Button" onclick="openReport();" style="width:50%; height:30px;  background-color: #87F786; border-color:#4F964F; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Generate Report</button>
+	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="25%" style="height:100vh; overflow:auto; border-style:groove; background-color:white; border-width:5px;">
+		<button type="button" class="Button" onclick="openReport();" style="width:53%; height:30px;  background-color: #87F786; border-color:#4F964F; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Generate Report</button>
 		<button type="button" class="Button" onclick="clearReport();" style="; width:45%; height:30px; border-radius: 6px; background-color: #FF7373; border-color:#FB0303;"><i class="glyphicon glyphicon-asterisk"></i>Clear Report</button>
 		<br>
 		<br>
 		<div>
-			<label for="reportType"><b>Select report type:</b></label>
-		    	<select name="reportType" id="reportType" onchange="selectFunction()" style="width: 12.4em;height: 25px;margin-top: 5px; margin-bottom:5px">
-					  <option value="Counties" selected>Counties</option>
-					  <option value="Census Places">Census Places</option>
-					  <option value="Congressional Districts">Congressional Districts</option>
-					  <option value="Urban Areas">Urban Areas</option>
-					  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
-					  <option value="Agencies">Agencies</option>
-				 </select><br>
-			<b>Population Search Radius (miles)</b> <input disabled type="text" name="Sradius" id="Sradius" style="height:23px; width:10em;margin-bottom:5px" value="0.1" onkeypress="return isNumber(event)"/><br>
+			<div class="headerBC" id="accordion" >
+				<h3></h3>
+				<div>
+					<table style="width:100%;">
+						<tr>
+							<td style="vertical-align:top;padding-top:15px">
+								<div id="datepicker" ></div>
+							</td>
+						</tr>
+						<tr>
+							<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+								<ul data-role="listview">
+						
+								</ul>
+							</td>
+						</tr>
+					</table>
+					
+				</div>
+			</div>
+			<table style="width:100%">		
+			<tr><td><label for="reportType">Select report type:</label></td><td><select name="reportType" id="reportType" style="height:25px;width:98%;" onchange="selectFunction()">
+						  <option value="Counties" selected>Counties</option>
+						  <option value="Census Places">Census Places</option>
+						  <option value="Congressional Districts">Congressional Districts</option>
+						  <option value="Urban Areas">Urban Areas</option>
+						  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
+						  <option value="Agencies">Agencies</option>
+					 </select><br></td></tr>
+			<tr><td>Population Search Radius (miles)</td><td><input type="text" name="Sradius" id="Sradius" style="text-indent: 2px; height:21px;width:95%;" value="0.25" onkeypress="return isNumber(event)"/></td></tr>
+			<tr><td>Minimum Level of Service</td><td><input type="text" name="LOS" id="LOS" style="text-indent: 2px; height:22px; width:95%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
+			</table>
 			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>
 		<div id="jstree" class="demo" style="width:98%"></div>
 		<br>
 	</div>
-		
 </body>

@@ -43,6 +43,18 @@ public class HubCluster {
 	@JsonSerialize
 	public String visits;
 	
+	@XmlAttribute
+	@JsonSerialize
+	public Integer pnrcount;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public Integer placescount;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String urbanareaspop;
+	
 	@XmlElement(name = "countiesNames")
 	public List<String> countiesNames;
 	
@@ -90,5 +102,29 @@ public class HubCluster {
 	
 	@XmlElement(name = "routesLongnames")
 	public List<String> routesLongnames;
+	
+	@XmlElement(name = "pnrIDs")
+	public List<Integer> pnrIDs;
+	
+	@XmlElement(name = "pnrNames")
+	public List<String> pnrNames;
+	
+	@XmlElement(name = "pnrCities")
+	public List<String> pnrCities;
+	
+	@XmlElement(name = "pnrLats")
+	public List<Double> pnrLats;
+	
+	@XmlElement(name = "pnrLons")
+	public List<Double> pnrLons;
+	
+	@XmlElement(name = "pnrSpaces")
+	public List<Integer> pnrSpaces;
+	
+	@XmlElement(name = "placesIDs")
+	public List<String> placesIDs;
+	
+	@XmlElement(name = "placesNames")
+	public List<String> placesNames;
 	
 }

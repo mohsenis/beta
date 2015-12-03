@@ -80,7 +80,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.examples.GtfsHibernateReaderExampleMain;
-import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+//import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -97,7 +97,7 @@ public class DbUpdate {
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
 	private static final int DBINDEX = Databases.dbsize-1;
-	public final static String VERSION = "V3.15.10";
+	public final static String VERSION = "V3.15.12";
 	
 	public static List<String> getSelectedAgencies(String username){
 		List<String> selectedAgencies = new ArrayList<String>();
@@ -1012,7 +1012,7 @@ public class DbUpdate {
 		args[2] = "--username=\""+dbInfo[5]+"\"";
 		args[3] = "--password=\""+dbInfo[6]+"\"";
 		args[4] = feedname;
-		GtfsDatabaseLoaderMain.main(args);	
+//		GtfsDatabaseLoaderMain.main(args);	
 		
 		String[] feedName = feedname.split("/");
 		String fName = feedName[feedName.length-1];
