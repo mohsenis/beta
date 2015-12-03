@@ -1270,9 +1270,9 @@ $mylist
 			    		}
 			    		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+parseInt(casestring.substring(2)));			    		    		
 			    }else if(casestring=="Emp"){
-			    	window.open('/TNAtoolAPI-Webapp/Emp.html?&n='+keyName+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html?&dbindex='+dbindex);
 			    }else if(casestring=="T6"){	
-			    	window.open('/TNAtoolAPI-Webapp/T6.html?&n='+keyName+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/T6.html?&dbindex='+dbindex);
 			    }
 			});
     	
