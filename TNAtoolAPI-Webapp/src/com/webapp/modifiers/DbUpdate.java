@@ -96,7 +96,7 @@ public class DbUpdate {
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
 	private static final int DBINDEX = Databases.dbsize-1;
-	public final static String VERSION = "V3.15.10";
+	public final static String VERSION = "V3.15.12";
 	
 	public static List<String> getSelectedAgencies(String username){
 		List<String> selectedAgencies = new ArrayList<String>();

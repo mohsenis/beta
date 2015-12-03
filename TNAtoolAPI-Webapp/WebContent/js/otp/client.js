@@ -1448,7 +1448,7 @@ function updateListDialog(agenciesIds){
 	              "Burns Paiute Tribal Transit Service",
 	              "Corvallis Transit System", 
 	              "Linn-Benton Loop",
-	              "Malheur Council on Aging & Community Services",
+	              //"Malheur Council on Aging & Community Services",
 	              "Shawn's Rideshare",
 	              "South Clackamas Transportation District",
 	              "Warm Springs Transit"];
