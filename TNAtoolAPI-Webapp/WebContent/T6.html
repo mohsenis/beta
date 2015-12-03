@@ -34,13 +34,13 @@
 	
 	</style>
 	<script>
-	var progVal = 0; 
 	var boo;
 	var maxRadius = 5;
 	var dbindex = parseInt(getURIParameter("dbindex"));;
 	var key = Math.random();
+	var keyName = parseFloat(getURIParameter("n"));
 	var t6 = {};
-	var w_qstringd;
+	var w_qstringd = localStorage.getItem(keyName);
 	var w_qstringx = $('#Sradius').val();
 	if (w_qstringx == null) {w_qstringx = 0.25};
 	var mySlidebar;
