@@ -146,8 +146,11 @@ $(document).ready(function(){
 			$('#displayReport').append($(html));	
 			progressbar.remove();			
 			$('.stopreport').click(function(e){
-				if ($(this).attr('id')!=undefined){					
-					url = '/TNAtoolAPI-Webapp/stopreport.html?agency='+$(this).attr('aid')+'&x='+qstringx+ '&route=' + $(this).attr('id');
+				if ($(this).attr('id')!=undefined){	
+					qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+				    var keyName = Math.random();
+		    		localStorage.setItem(keyName, qstringd);
+					url = '/TNAtoolAPI-Webapp/stopreport.html?agency='+$(this).attr('aid')+'&x='+qstringx+ '&route=' + $(this).attr('id')+'&n='+keyName;
 					if (areaId!=null){
 						url+='&areaid='+areaId+'&type='+type;
 					}
