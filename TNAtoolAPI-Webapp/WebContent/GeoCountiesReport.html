@@ -182,11 +182,14 @@ $(document).ready(function(){
 			    }else if($(this).attr('type')=="SC"){
 			    	qstring = $(this).attr('id');
 		    		qstringx = '0.25';
+		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');			    		
+		    		var keyName = Math.random();
+		    		localStorage.setItem(keyName, qstringd);
 		    		url = '/TNAtoolAPI-Webapp/stopreport.html?';
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=0'+'&x='+qstringx+'&dbindex='+dbindex;
+		    		url +='&areaid='+qstring+'&type=0'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex;
 		    		window.open(url);			    	
 			    };
 			});
@@ -294,7 +297,18 @@ function dbchange(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
-				<select id='dbselect' onchange='dbchange()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='popselect' style="margin-right:2em;height:81%">
+				<option selected>2010</option>
+				<option>2015</option>
+				<option>2020</option>
+				<option>2025</option>
+				<option>2030</option>
+				<option>2035</option>
+				<option>2040</option>
+				<option>2045</option>
+				<option>2050</option>
+				</select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	
