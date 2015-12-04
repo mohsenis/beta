@@ -230,7 +230,7 @@ $(document).ready(function(){
 	
 });	
 
-function reload(){	
+/* function reload(){	
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
 	if (exceedsMaxRadius(tmpX)){	// Checks if the entered search radius exceeds the maximum.
 		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
@@ -238,7 +238,7 @@ function reload(){
 	}
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	location.reload();
-}
+} */
 
 function dbchange(){
 	if (document.getElementById("dbselect").selectedIndex !=dbindex){
