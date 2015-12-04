@@ -34,7 +34,7 @@ var type = parseInt(getURIParameter("type"));
 var dateID;
 var gg = 1.0/1.1;
 var progVal = 0; 
-var d = new Date();
+var dd = new Date();
 var boo;
 var w_qstringd = localStorage.getItem(keyName);
 var html = '<table id="RT" class="display" align="center">';
@@ -147,7 +147,7 @@ $(document).ready(function(){
 			progressbar.remove();			
 			$('.stopreport').click(function(e){
 				if ($(this).attr('id')!=undefined){	
-					qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+					qstringd = [pad(dd.getMonth()+1), pad(dd.getDate()), dd.getFullYear()].join('/');
 				    var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
 					url = '/TNAtoolAPI-Webapp/stopreport.html?agency='+$(this).attr('aid')+'&x='+qstringx+ '&route=' + $(this).attr('id')+'&n='+keyName;
