@@ -172,11 +172,14 @@ $(document).ready(function(){
 			    }else if($(this).attr('type')=="SC"){
 			    	qstring = $(this).attr('id');
 		    		qstringx = '0.25';
+		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+		    		var keyName = Math.random();
+		    		localStorage.setItem(keyName, qstringd);
 		    		url = '/TNAtoolAPI-Webapp/stopreport.html?';
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=4'+'&x='+qstringx+'&dbindex='+dbindex;
+		    		url +='&areaid='+qstring+'&type=4'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex;
 		    		window.open(url);
 			    };
 			});
