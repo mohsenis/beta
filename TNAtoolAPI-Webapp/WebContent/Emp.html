@@ -58,6 +58,7 @@
 	
 	(function($) {
 	    $(document).ready(function() {
+	    	$('.sb-slidebar').css('width', '28%');
 	    	$.ajax({
 	    		type: 'GET',
 	    		datatype: 'json',
@@ -86,6 +87,7 @@
 	    	$('.ui-accordion-content').css('padding', '0px 0px');
 	    	$('#ui-accordion-accordion-header-0').css({'width':'80%','font-size':'80%','margin':'auto','text-align':'center'});
 	    	$('.ui-widget').css('font-size', '100%');
+	    	$('.ui-datepicker-inline').css('margin','auto');
 	    	
 	    	$('#dialogPreLoader').hide();
 	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Employment Report <span style="font-size:small;margin-left:1em">(For description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf">here</a></span>.)');
@@ -823,7 +825,7 @@
 	</div>
 </div> 
 	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="25%" style="height:100vh; overflow:auto; border-style:groove; background-color:white; border-width:5px;">
-		<button type="button" class="Button" onclick="openReport();" style="width:50%; height:30px;  background-color: #87F786; border-color:#4F964F; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Generate Report</button>
+		<button type="button" class="Button" onclick="openReport();" style="width:53%; height:30px;  background-color: #87F786; border-color:#4F964F; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Generate Report</button>
 		<button type="button" class="Button" onclick="clearReport();" style="; width:45%; height:30px; border-radius: 6px; background-color: #FF7373; border-color:#FB0303;"><i class="glyphicon glyphicon-asterisk"></i>Clear Report</button>
 		<br>
 		<br>
@@ -848,13 +850,13 @@
 					
 				</div>
 			</div>
-			<table>
-			<tr><td><label for="dataSet"><b>Select Data Set:</b></label></td><td><select name="dataSet" id="dataSet" onchange=datasetChange(this) style="height:25px;width:12em;">
+			<table style="width:100%">
+			<tr><td><label for="dataSet">Select Data Set:</label></td><td style="width: 45%;"><select name="dataSet" id="dataSet" onchange=datasetChange(this) style="height:25px;width:95%;">
 					  <option value="lodes_blocks_wac" selected>WAC -  Workplace Area Characteristic data</option>
 					  <option value="lodes_blocks_rac">RAC - Residence Area Characteristic data</option>
 					  <option value="3">WAC & RAC</option>
 				 </select><br></td></tr>
-			<tr><td><label for="reportType"><b>Select report type:</b></label></td><td><select name="reportType" id="reportType" style="height:25px;width:12em;" onchange="selectFunction()">
+			<tr><td><label for="reportType">Select report type:</label></td><td><select name="reportType" id="reportType" style="height:25px;width:95%;" onchange="selectFunction()">
 						  <option value="Counties" selected>Counties</option>
 						  <option value="Census Places">Census Places</option>
 						  <option value="Congressional Districts">Congressional Districts</option>
@@ -862,8 +864,8 @@
 						  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
 						  <option value="Agencies">Agencies</option>
 					 </select><br></td></tr>
-			<tr><td><b>Population Search Radius (miles)</b></td><td><input type="text" name="Sradius" id="Sradius" style="text-indent: 2px; height:21px;width:inherit;" value="0.25" onkeypress="return isNumber(event)"/></td></tr>
-			<tr><td><b>Minimum Level of Service </b></td><td><input type="text" name="LOS" id="LOS" style="text-indent: 2px; height:22px; width:inherit;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
+			<tr><td>Population Search Radius (miles)</td><td><input type="text" name="Sradius" id="Sradius" style="text-indent: 2px; height:21px;width:92%;" value="0.25" onkeypress="return isNumber(event)"/></td></tr>
+			<tr><td>Minimum Level of Service </td><td><input type="text" name="LOS" id="LOS" style="text-indent: 2px; height:21px; width:92%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
 			</table>
 			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>
