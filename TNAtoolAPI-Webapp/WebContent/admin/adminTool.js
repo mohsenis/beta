@@ -227,7 +227,8 @@ function listOfAgencies(index){
 		        		+"<br><span style='margin-left:3.5em'>Start Date: "+stringToDate(d.startdates[i])+"</span>"+"<br><span style='margin-left:3.5em'>End Date: "+stringToDate(d.enddates[i])+"</span>"+html1+"</p>";
 	        		}
 	        	});
-	        	html += "<br><input type='button' value='Delete feeds from database' onclick='deleteFeed("+index+")'>";
+	        	html += "<br><input type='button' value='Delete selected feeds' onclick='deleteFeed("+index+")'>";
+	        	html += "<br><input type='button' value='Update selected feeds' onclick='updateFeed("+index+")'>";
 	        	aList = html;
         	}
         }
@@ -262,6 +263,32 @@ function listOfFeeds(index){
         }
 	});
 	return html;
+}
+
+function updateFeed(index){
+	var indexx = 1001+index;
+	var dbindex = index-1;
+	
+	var feeds = new Array();
+	$('.selectFeed'+indexx).each(function(){
+		if($(this).is(':checked')){
+			feeds.push($(this).attr('id'));
+		}
+	});
+	
+	for(var i=0; i<feeds.length; i++){
+		//alert(feeds[i]);
+		$.ajax({
+	        type: "GET",
+	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateSingleFeed?&feedname="+feeds[i]+"&dbindex="+dbindex,
+	        dataType: "json",
+	        async: false,
+	        success: function(d) {
+	        }
+		});
+	}
+	
+	location.reload(true);
 }
 
 function deleteFeed(index){

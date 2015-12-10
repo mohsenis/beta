@@ -80,7 +80,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.examples.GtfsHibernateReaderExampleMain;
-//import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -1011,7 +1011,7 @@ public class DbUpdate {
 		args[2] = "--username=\""+dbInfo[5]+"\"";
 		args[3] = "--password=\""+dbInfo[6]+"\"";
 		args[4] = feedname;
-//		GtfsDatabaseLoaderMain.main(args);	
+		GtfsDatabaseLoaderMain.main(args);	
 		
 		String[] feedName = feedname.split("/");
 		String fName = feedName[feedName.length-1];
@@ -1092,6 +1092,33 @@ public class DbUpdate {
         }
         return str;
     }
+	
+	@GET
+    @Path("/updateSingleFeed")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object updateSingleFeed(@QueryParam("dbindex") int dbindex, @QueryParam("feedname") String feedname){
+		String defaultId="";
+		
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(Databases.connectionURLs[dbindex], Databases.usernames[dbindex], Databases.passwords[dbindex]);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_feed_info WHERE feedname = '"+feedname+"';");
+			if(rs.next()){
+				defaultId = rs.getString("defaultId");
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		System.out.println(defaultId);
+		UpdateEventManager.updateTables(dbindex, defaultId);
+		return "done";
+	}
 	
 	@GET
     @Path("/updateFeeds")
