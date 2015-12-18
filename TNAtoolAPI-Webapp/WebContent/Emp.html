@@ -17,6 +17,7 @@
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="js/lib/date.js"></script>
 	<script src="js/EmpDescription.js"></script>
+	<script src="js/EmpJstree.js"></script>
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
@@ -50,14 +51,14 @@
 	if (w_qstringx == null) {w_qstringx = 0.25};
 	var mySlidebar;
 	var wacBool = true;
-	var racBool = false;
+	var racBool = false;	
 	var wacData = {};
 	var racData = {};
 	var html = "";
 	var tmp = "";
 	
 	(function($) {
-	    $(document).ready(function() {
+	    $(document).ready(function() {	    	
 	    	$('.sb-slidebar').css('width', '28%');
 	    	$.ajax({
 	    		type: 'GET',
@@ -89,6 +90,7 @@
 	    	$('.ui-widget').css('font-size', '100%');
 	    	$('.ui-datepicker-inline').css('margin','auto');
 	    	
+	    	$('#bePatient').hide();
 	    	$('#dialogPreLoader').hide();
 	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Employment Report <span style="font-size:small;margin-left:1em">(For description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf">here</a></span>.)');
 	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
@@ -98,241 +100,12 @@
 	  }) (jQuery);
 	
 	$(function () {
-		$('#jstree').jstree({	
-			"core":{
-				"check_callback" : true,
-				"themes" : { "stripes" : true },
-				"data" : [
-					{"text" : "CA", "type" : "CA_default", "id" : "CA", "state" : {"opened" : true},
-						"children" : [
-									{"text" : "CA01", "type" : "CA", "id" : "CA01"},
-									{"text" : "CA02", "type" : "CA", "id" : "CA02"},
-									{"text" : "CA03", "type" : "CA", "id" : "CA03"}
-						              ]
-					},
-					{"text" : "CE", "type" : "CE_default", "id" : "CE", "state" : {"opened" : true},
-						"children" : [
-										{"text" : "CE01", "type" : "CE", "id" : "CE01"},
-										{"text" : "CE02", "type" : "CE", "id" : "CE02"},
-										{"text" : "CE03", "type" : "CE", "id" : "CE03"}
-							              ]            	  
-					},
-					{"text" : "CNS", "type" : "CNS_default", "id" : "CNS",  "state" : {"opened" : true},
-						"children" : [
-										{"text" : "CNS01", "type" : "CNS", "id" : "CNS01"},
-										{"text" : "CNS02", "type" : "CNS", "id" : "CNS02"},
-										{"text" : "CNS03", "type" : "CNS", "id" : "CNS03"},
-										{"text" : "CNS04", "type" : "CNS", "id" : "CNS04"},
-										{"text" : "CNS05", "type" : "CNS", "id" : "CNS05"},
-										{"text" : "CNS06", "type" : "CNS", "id" : "CNS06"},
-										{"text" : "CNS07", "type" : "CNS", "id" : "CNS07"},
-										{"text" : "CNS08", "type" : "CNS", "id" : "CNS08"},
-										{"text" : "CNS09", "type" : "CNS", "id" : "CNS09"},
-										{"text" : "CNS10", "type" : "CNS", "id" : "CNS10"},
-										{"text" : "CNS11", "type" : "CNS", "id" : "CNS11"},
-										{"text" : "CNS12", "type" : "CNS", "id" : "CNS12"},
-										{"text" : "CNS13", "type" : "CNS", "id" : "CNS13"},
-										{"text" : "CNS14", "type" : "CNS", "id" : "CNS14"},
-										{"text" : "CNS15", "type" : "CNS", "id" : "CNS15"},
-										{"text" : "CNS16", "type" : "CNS", "id" : "CNS16"},
-										{"text" : "CNS17", "type" : "CNS", "id" : "CNS17"},
-										{"text" : "CNS18", "type" : "CNS", "id" : "CNS18"},
-										{"text" : "CNS19", "type" : "CNS", "id" : "CNS19"},
-										{"text" : "CNS20", "type" : "CNS", "id" : "CNS20"}
-							              ]
-					},
-					{"text" : "CR", "type" : "CR_default", "id" : "CR", "state" : {"opened" : true},
-						"children" : [
-										{"text" : "CR01", "type" : "CR", "id" : "CR01"},
-										{"text" : "CR02", "type" : "CR", "id" : "CR02"},
-										{"text" : "CR03", "type" : "CR", "id" : "CR03"},
-										{"text" : "CR04", "type" : "CR", "id" : "CR04"},
-										{"text" : "CR05", "type" : "CR", "id" : "CR05"},
-										{"text" : "CR07", "type" : "CR", "id" : "CR07"},
-							              ]            	  
-					},
-					{"text" : "CT", "type" : "CT_default", "id" : "CT", "state" : {"opened" : true},
-						"children" : [
-										{"text" : "CT01", "type" : "CT", "id" : "CT01"},
-										{"text" : "CT02", "type" : "CT", "id" : "CT02"}
-							              ]            	  
-					},
-					{"text" : "CD", "type" : "CD_default", "id" : "CD", "state" : {"opened" : true},
-						"children" : [
-										{"text" : "CD01", "type" : "CD", "id" : "CD01"},
-										{"text" : "CD02", "type" : "CD", "id" : "CD02"},
-										{"text" : "CD03", "type" : "CD", "id" : "CD03"},
-										{"text" : "CD04", "type" : "CD", "id" : "CD04"}
-							              ]            	  
-					},
-					{"text" : "CS", "type" : "CS_default", "id" : "CS", "state" : {"opened" : true},
-						"children" : [
-										{"text" : "CS01", "type" : "CS", "id" : "CS01"},
-										{"text" : "CS02", "type" : "CS", "id" : "CS02"}
-							              ]            	  
-					}
-			]},
-			
-			"types" : {
-				"CA_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
-					"valid_children" : ["CA", "CA_default"]					
-				},
-				"CA" : {
-					"icon" : "js/lib/images/arrow-right.ico",
-					"valid_children" : []
-				},
-				"CE_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
-					"valid_children" : ["CE", "CE_default"]					
-				},
-				"CE" : {
-					"icon" : "js/lib/images/arrow-right.ico",
-					"valid_children" : []
-				},
-				"CNS_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
-					"valid_children" : ["CNS", "CNS_default"]					
-				},
-				"CNS" : {
-					"icon" : "js/lib/images/arrow-right.ico",
-					"valid_children" : []
-				},
-				"CR_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
-					"valid_children" : ["CR", "CR-default"]					
-				},
-				"CR" : {
-					"icon" : "js/lib/images/arrow-right.ico",
-					"valid_children" : []
-				},
-				"CT_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
-					"valid_children" : ["CT", "CT_default"]					
-				},
-				"CT" : {
-					"icon" : "js/lib/images/arrow-right.ico",
-					"valid_children" : []
-				},
+		$('#jstree').jstree(default_jstree);
 				
-				"CD_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
-					"valid_children" : ["CD", "CD_default"]					
-				},
-				"CD" : {
-					"icon" : "js/lib/images/arrow-right.ico",
-					"valid_children" : []
-				},
-				"CS_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
-					"valid_children" : ["CS", "CS_default"]					
-				},
-				"CS" : {
-					"icon" : "js/lib/images/arrow-right.ico",
-					"valid_children" : []
-				}					
-			},
-			"contextmenu":{         
-				"items": function($node) {
-					var tree = $("#jstree").jstree(true);
-					if (tree.get_type($node).indexOf('default') > -1 && tree.get_parent($node) == '#'){
-						return {
-							"Add group":{
-								"separator_before": false,
-								"separator_after": false,
-								"label": "Add group",
-								"icon" : "js/lib/images/folder_closed-add.ico",
-								"action": function (obj){
-									var nodesList = [];
-									$('.jstree-node').each(function(){
-									  if (tree.get_type($(this)) == tree.get_type($node)){
-										  var id   = $(this).attr('id');
-										  var text = $(this).children('a').text();
-										  nodesList.push(text);
-										 }
-									});
-
-									var counter = 1;
-									var newName = "Aggregated " + tree.get_text($node) + " " + counter;
-									
-									if ($.inArray(newName, nodesList) < 0){
-										var d = new Date();
-										var uniqeNo = d.getTime();
-										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate", "state" : {"opened" : true} },'first',null,null);
-									}else{			
-										while ($.inArray(newName, nodesList) >= 0) {
-											newName = "Aggregated " + tree.get_text($node) + " " + counter++;
-										}
-										var d = new Date();
-										var uniqeNo = d.getTime();
-										tree.create_node($($node).attr('id'),{ "text" : newName, "type" : tree.get_type($node), "id":  uniqeNo + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
-									}
-									tree.deselect_node($node);
-								}
-							},
-							"Rename": {
-								"separator_before": false,
-								"separator_after": false,
-								"label": "Rename",
-								"icon" : "js/lib/images/Rename.ico",
-								"action": function (obj) { 
-									tree.edit($node);
-								}
-							}
-						};	
-					}else if (tree.get_type($node).indexOf('default') > -1 && tree.get_parent($node) != '#'){
-						return {
-							"Rename": {
-								"separator_before": false,
-								"separator_after": false,
-								"label": "Rename",
-								"icon" : "js/lib/images/Rename.ico",
-								"action": function (obj) { 
-									tree.edit($node);
-								}
-							},                         
-							"Remove": {
-								"separator_before": false,
-								"separator_after": false,
-								"label": "Remove",
-								"icon" : "js/lib/images/folder_open-delete.ico",
-								"action": function (obj) { 
-									var children = tree.get_children_dom($node);
-									$.each(children, function(ind,obj){
-										tree.move_node($(this).attr('id'), tree.get_type($(this)));
-									});
-									tree.delete_node($node);
-								}
-							}
-						};	
-					}else{
-						return {
-							"Rename": {
-								"separator_before": false,
-								"separator_after": false,
-								"label": "Rename",
-								"icon" : "js/lib/images/Rename.ico",
-								"action": function (obj) { 
-									tree.edit($node);
-								}
-							}
-						};	
-					}					
-				}
-			},
-			"plugins" : [
-						"dnd",
-						"contextmenu",
-						"sort",
-						"types",
-						"unique",
-						"checkbox"
-						]
-		});
-				
-		$(document).on("dnd_stop.vakata", function (e, data) {
-			$('#jstree').jstree(true).deselect_all();
-			
+		$(document).on("dnd_stop.vakata", function (e, data) { 
+			$('.jstree-node').each(function(){
+				if (!$('#jstree').jstree(true).is_disabled(this)) $('#jstree').jstree(true).deselect_node(this);
+			})	
 		});
 		
 		$("#jstree").bind("changed.jstree", function (e, data) {
@@ -354,7 +127,7 @@
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
+			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&projection=' + $('#projectionYear').val() + '&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
 			async: true,
 			success: function(d){
 				var temp = d.EmpDataList;
@@ -366,7 +139,7 @@
 				$.ajax({
 					type: 'GET',
 					datatype: 'json',
-					url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
+					url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&projection=' + $('#projectionYear').val() + '&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
 					async: true,
 					success: function(d){
 						var temp = d.EmpDataList;
@@ -386,7 +159,7 @@
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
+			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&projection=' + $('#projectionYear').val() + '&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
 			async: true,
 			success: function(d){
 				var temp = d.EmpDataList;
@@ -404,7 +177,7 @@
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
+			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&projection=' + $('#projectionYear').val() + '&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
 			async: true,
 			success: function(d){
 				var temp = d.EmpDataList;
@@ -431,8 +204,8 @@
 		var nodesList = [];
 		var tree = $('#jstree').jstree(true);
 		$('.jstree-node').each(function(){
-			if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#')
-					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) ) {
+			if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#' && tree.get_parent($(this)).indexOf('Category') == -1)
+					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) && tree.get_parent($(this)).indexOf('Category') == -1) {
 				nodesList.push($(this));
 			}
 		});
@@ -447,14 +220,14 @@
 			}
 			 
 			nodesList.forEach (function (item, index, array){
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (RAC)<em title="Total '+tree.get_text(item)+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y +='<th>'+ tree.get_text(item) +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+tree.get_text(item)+' employees living within X distance of any stop. This metric is date independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+tree.get_text(item)+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (WAC)<em title="Total '+tree.get_text(item)+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y += '<th>'+ tree.get_text(item) +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+tree.get_text(item)+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+tree.get_text(item)+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ item.attr('id') +' (RAC)<em title="Total '+item.attr('id')+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y +='<th>'+ item.attr('id') +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+item.attr('id')+' employees living within X distance of any stop. This metric is date independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ item.attr('id') +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+item.attr('id')+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ item.attr('id') +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+item.attr('id')+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ item.attr('id') +' (WAC)<em title="Total '+item.attr('id')+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y += '<th>'+ item.attr('id') +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+item.attr('id')+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ item.attr('id') +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+item.attr('id')+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ item.attr('id') +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+item.attr('id')+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});
 		}else if (racBool){
 			if ($('#reportType').val() == 'Agencies'){
@@ -464,10 +237,10 @@
 			}
 			
 			nodesList.forEach (function (item, index, array){				
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (RAC)<em title="Total '+tree.get_text(item)+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y +='<th>'+ tree.get_text(item) +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+tree.get_text(item)+' employees living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+tree.get_text(item)+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ item.attr('id') +' (RAC)<em title="Total '+item.attr('id')+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y +='<th>'+ item.attr('id') +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+item.attr('id')+' employees living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ item.attr('id') +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+item.attr('id')+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ item.attr('id') +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+item.attr('id')+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});	
 		}else{
 			if ($('#reportType').val() == 'Agencies'){
@@ -476,10 +249,10 @@
 				y += '<th>Number of employees working in the area (WAC)</th>';
 			}
 			nodesList.forEach (function (item, index, array){				
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ tree.get_text(item) +' (WAC)<em title="Total '+tree.get_text(item)+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y += '<th>'+ tree.get_text(item) +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+tree.get_text(item)+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+tree.get_text(item)+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+tree.get_text(item)+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ item.attr('id') +' (WAC)<em title="Total '+item.attr('id')+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y += '<th>'+ item.attr('id') +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+item.attr('id')+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ item.attr('id') +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+item.attr('id')+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ item.attr('id') +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+item.attr('id')+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});
 		}
 		return y;
@@ -521,12 +294,30 @@
 	function selectFunction(){
 		$('#reportTitle').html($('#reportType').val());
 	}
+	
+	function updateProjection(){
+		$('#jstree').jstree(true).destroy();
+		if ($('#projectionYear').val() == 'current'){
+			$('#jstree').jstree(default_jstree);
+			$('#dataSet').removeAttr('disabled');						
+		}			
+			
+		else{
+			$('#jstree').jstree(new_jstree);
+			$('#dataSet').attr('disabled', 'disabled');;
+			$('#dataSet').val('lodes_blocks_rac');
+			racBool = true;
+			wacBool = false;
+		}
+			
+	}
 	</script>
 
 	<!-- Beginning of the datatable -->
 	<script type="text/javascript">
 	
 	function openReport(){
+		alert($('#dataSet').val());
 		clearReport();
 		if (exceedsMaxRadius($('#Sradius').val())){	// Checks if the entered search radius exceeds the maximum.
 			alert('Enter a number less than ' + maxRadius + ' miles for the population search radius.');
@@ -550,6 +341,7 @@
 		// close slidebar
 		mySlidebar.slidebars.close();
 		$('#dialogPreLoader').show();
+		$('#bePatient').show();
 		
 		$("#initialText").hide();
 		document.getElementById('displayReport').innerHTML = "";
@@ -567,6 +359,7 @@
 		if(racBool && wacBool) racWacAjax();
 		else if (racBool) racAjax();
 		else wacAjax();
+		$('#bePatient').hide();
 	}
 	
 	function openReport2(){
@@ -575,8 +368,8 @@
 		var rootList = [];
 		var tree = $('#jstree').jstree(true);
 		$('.jstree-node').each(function(){
-		  if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#')
-					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) ){
+		  if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#' && tree.get_parent($(this)).indexOf('Category') == -1)
+					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null && tree.get_parent($(this)).indexOf('Category') == -1) ){
 			 	rootList.push(this);
 			 }
 		});
@@ -755,7 +548,7 @@
 			"bSort" : true,
 			"paging": true,	
 			"scrollX": true,
-			"iDisplayLength": 15,
+			"iDisplayLength": 10,
 			"aoColumnDefs": [{"visible": false, "targets": [$('#Emp thead th').length - 1]}],
 			"order": [[ 0, "asc" ]],
 			"dom": 'T<"clear">lfrtip',
@@ -814,7 +607,7 @@
 		
 	</div>
 	<br>	
-	 <div style="width:100%; height: 93.7vh; overflow:auto; float:left; border-style:groove; border-width:5px; backgroun-color: #E8E8E8">
+	 <div style="width:99%; height: 91.5vh; overflow:auto; float:left; border-style:groove; border-width:5px; backgroun-color: #E8E8E8">
 		<p id="initialText" style="text-align: center; margin-top:150px; line-height: 70vh;" > <b>Choose categories and click "Generate Report".</b></p>
 		
 		<p id="displayReport" style="margin:5px; "><br></p>
@@ -856,14 +649,25 @@
 					  <option value="lodes_blocks_rac">RAC - Residence Area Characteristic data</option>
 					  <option value="3">WAC & RAC</option>
 				 </select><br></td></tr>
-			<tr><td><label for="reportType">Select report type:</label></td><td><select name="reportType" id="reportType" style="height:25px;width:95%;" onchange="selectFunction()">
-						  <option value="Counties" selected>Counties</option>
-						  <option value="Census Places">Census Places</option>
-						  <option value="Congressional Districts">Congressional Districts</option>
-						  <option value="Urban Areas">Urban Areas</option>
-						  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
-						  <option value="Agencies">Agencies</option>
-					 </select><br></td></tr>
+			 <tr><td><label for="reportType">Select report type:</label></td><td><select name="reportType" id="reportType" style="height:25px;width:95%;" onchange="selectFunction()">
+				  <option value="Counties" selected>Counties</option>
+				  <option value="Census Places">Census Places</option>
+				  <option value="Congressional Districts">Congressional Districts</option>
+				  <option value="Urban Areas">Urban Areas</option>
+				  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
+				  <option value="Agencies">Agencies</option>
+			 </select><br></td></tr>
+			 <tr><td><label for="projectionYear">Select year:</label></td><td><select name="projectionYear" id="projectionYear" style="height:25px;width:95%;" onchange="updateProjection()">
+				  <option value="current" selected>2013</option>
+				  <option value="2015">2015 (Projection)</option>
+				  <option value="2020">2020 (Projection)</option>
+				  <option value="2025">2025 (Projection)</option>
+				  <option value="2030">2030 (Projection)</option>
+				  <option value="2035">2035 (Projection)</option>
+				  <option value="2040">2040 (Projection)</option>
+				  <option value="2045">2045 (Projection)</option>
+				  <option value="2050">2050 (Projection)</option>
+			 </select><br></td></tr>
 			<tr><td>Population Search Radius (miles)</td><td><input type="text" name="Sradius" id="Sradius" style="text-indent: 2px; height:21px;width:92%;" value="0.25" onkeypress="return isNumber(event)"/></td></tr>
 			<tr><td>Minimum Level of Service </td><td><input type="text" name="LOS" id="LOS" style="text-indent: 2px; height:21px; width:92%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
 			</table>

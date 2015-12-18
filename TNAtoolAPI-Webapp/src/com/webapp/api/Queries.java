@@ -1215,7 +1215,7 @@ Loop:  	for (Trip trip: routeTrips){
     @GET
 	@Path("/emp")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getEmp(@QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("day") String date, @QueryParam("radius") double radius, @QueryParam("L") int L,
+	public Object getEmp(@QueryParam("projection") String projection, @QueryParam("dataSet") String dataSet, @QueryParam("report") String reportType, @QueryParam("day") String date, @QueryParam("radius") double radius, @QueryParam("L") int L,
 			@QueryParam("dbindex") int dbindex, @QueryParam("username") String username ) throws JSONException {
     	EmpDataList results = new EmpDataList();
     	String[] dates = date.split(",");
@@ -1223,7 +1223,7 @@ Loop:  	for (Trip trip: routeTrips){
     	String[] fulldates = fulldate(dates);
     	String[] sdates = datedays[0];
     	String[] days = datedays[1];
-    	results = PgisEventManager.getEmpData(dataSet, reportType, sdates, days, fulldates, radius, L, dbindex, username);
+    	results = PgisEventManager.getEmpData(projection, dataSet, reportType, sdates, days, fulldates, radius, L, dbindex, username);
     	results.metadata = "Report Type: "+reportType+" Employment Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;  	
     	return results;
