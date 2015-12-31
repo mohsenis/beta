@@ -24,11 +24,12 @@ var progVal = 0;
 var qstringd = '';
 var upop = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
 var dbindex = parseInt(document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1));
+var popYear = getURIParameter("popYear");
 var d = new Date();
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Name of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population (2010)<em title="Total population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Population  <em title="Total population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Land Area <em title="Total land area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Urban Areas <em title="Total number of urbanized areas aggregated to generate this report."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -50,6 +51,8 @@ function EscFunc(){
 }
 
 $(document).ready(function(){
+	setPopOptions();
+
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -130,7 +133,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&pop='+upop+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&pop='+upop+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
 		async: true,
 		success: function(d){			
 			$('h2').append('Aggregated Urban Areas Summary Report <br><hr>');
@@ -152,9 +155,9 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);			    		
-			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex/* +'&username='+getSession() */);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);    		
 			    } else if ($(this).attr('type')=="SR"){
-			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop='+upop+'&dbindex='+dbindex);
+			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop='+upop+'&dbindex='+dbindex+'&popYear='+popYear);
 			    };
 			});
 			
@@ -236,15 +239,6 @@ $(document).ready(function(){
 });
 
 
-
-$(".export").on('click', function (event) {    
-	exportbutton.apply(this, ['export.csv']);
-});
-
-function exportbutton(){
-	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
-	window.open(uri, 'AgencySummaryReport.csv');
-}
 function dbchange(){
 	if (document.getElementById("dbselect").selectedIndex !=dbindex){
 		location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
@@ -265,7 +259,8 @@ function dbchange(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
-				<select id='dbselect' onchange='dbchange()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='popselect(this)' style="margin-right:2em;height:81%"></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

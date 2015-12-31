@@ -1072,7 +1072,7 @@ public class DbUpdate {
 					+ "VALUES ('"+fName+"','admin',TRUE);");
 			statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname,agency_id) "
 					+ "VALUES ('admin','"+fName+"','"+defaultId+"');");
-			UpdateEventManager.updateTables(DBINDEX, defaultId);
+			//UpdateEventManager.updateTables(DBINDEX, defaultId);
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			

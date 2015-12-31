@@ -20,7 +20,8 @@
 <script type="text/javascript">
 var qstring = '';
 //var w_qstringx = window.opener.qstringx;
-var dbindex = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
+var dbindex = parseInt(getURIParameter("dbindex"));
+var popYear = getURIParameter("popYear");
 var progVal = 0; 
 //var qstringd = '';
 var d = new Date();
@@ -54,6 +55,8 @@ function EscFunc(){
 }
 
 $(document).ready(function(){
+	setPopOptions();
+	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -122,7 +125,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/stateSR?key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/stateSR?key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
 		async: true,
 		success: function(d){				
 			$('h2').append('Statewide Summary Report <br><hr>');
@@ -144,20 +147,20 @@ $(document).ready(function(){
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    	var keyName = Math.random();
 		    		localStorage.setItem(keyName, qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex/* +'&username='+getSession() */);			    	   
+			    	window.open('/TNAtoolAPI-Webapp/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);			    	   
 			    }else if($(this).attr('type')=="ASR"){
 		    		qstringx = '0.25';
-		    		window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex/* +'&username='+getSession() */);	    		
+		    		window.open('/TNAtoolAPI-Webapp/report.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);	    		
 			    }else if($(this).attr('type')=="USR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex/* +'&username='+getSession() */);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);	    		
 			    }else if($(this).attr('type')=="CDSR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex/* +'&username='+getSession() */);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);	    		
 			    }else if($(this).attr('type')=="OSR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex/* +'&username='+getSession() */);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);	    		
 			    }else if($(this).attr('type')=="CPSR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex/* +'&username='+getSession() */);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);	    		
 			    }else if($(this).attr('type')=="CSR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex/* +'&username='+getSession() */);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);	    		
 			    };
 			});
 			
@@ -248,24 +251,7 @@ function dbchange(){
 }
 
 function reload(){	
-	//var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
-	//history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
 	location.reload();
-	
-}
-
-$(".export").on('click', function (event) {    
-	exportbutton.apply(this, ['export.csv']);
-});
-
-function exportbutton(){
-	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
-	window.open(uri, 'AgencySummaryReport.csv');
-}
-
-function pageLoad(){
-	
-	
 }
 
 
@@ -274,14 +260,15 @@ function pageLoad(){
 
 
 </head>
-<body onload="pageLoad()">
+<body>
 		<div class="container">
 			<div class="headerL">
 				<h1>Transit Network Analysis Tool Reports</h1>
 			</div>
 			
 			<div class="headerR">
-				<select id='dbselect' onchange='dbchange()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='popselect(this)' style="margin-right:2em;height:81%"></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

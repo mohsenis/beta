@@ -22,6 +22,7 @@ var qstring = '';
 //var w_qstringx = window.opener.qstringx;
 var w_qstringx = parseFloat(getURIParameter("x"));
 var dbindex = parseInt(getURIParameter("dbindex"));
+var popYear = getURIParameter("popYear");
 var qstringx = '0.25';
 var progVal = 0; 
 var qstringd = '';
@@ -81,6 +82,7 @@ function EscFunc(){
 }
 
 $(document).ready(function(){
+
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -147,7 +149,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
 		async: true,
 		success: function(d){			
 
@@ -197,41 +199,41 @@ $(document).ready(function(){
 				    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 				    	var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
-				    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);
+				    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
 				    }else if($(this).attr('type')=="SC"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');			    		
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+ '&n=' + keyName +  '&x='+qstringx+'&dbindex='+dbindex);	    		
+			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+ '&n=' + keyName +  '&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear);	    		
 				    }else if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex);	    		
+			    		window.open('/TNAtoolAPI-Webapp/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);	    		
 				    }else if($(this).attr('type')=="CSA"){
 				    	qstring = $(this).attr('id');
 				    	//alert('Counties service allocation for '+qstring)0
-				    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&agency='+qstring+'&dbindex='+dbindex);
+				    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
 				    }else if($(this).attr('type')=="CPSA"){
 				    	qstring = $(this).attr('id');
 				    	//alert('Census Places service allocation for '+qstring)2
-				    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&agency='+qstring+'&dbindex='+dbindex);
+				    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
 				    }else if($(this).attr('type')=="UASA"){
 				    	qstring = $(this).attr('id');
 				    	//alert('Urban Areas service allocation for '+qstring)3
-				    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&agency='+qstring+'&dbindex='+dbindex);
+				    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
 				    }else if($(this).attr('type')=="CDSA"){
 				    	qstring = $(this).attr('id');
 				    	//alert('Congressional Districts service allocation for '+qstring)5
-				    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&agency='+qstring+'&dbindex='+dbindex);
+				    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
 				    }else if($(this).attr('type')=="OTSA"){
 				    	qstring = $(this).attr('id');
 				    	//alert('ODOT Transit Regions service allocation for '+qstring)4
-				    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&agency='+qstring+'&dbindex='+dbindex);
+				    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
 				    	
 				    };
 				});
@@ -348,15 +350,6 @@ function reload(){
 	
 }
 
-$(".export").on('click', function (event) {    
-	exportbutton.apply(this, ['export.csv']);
-});
-
-function exportbutton(){
-	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
-	window.open(uri, 'AgencySummaryReport.csv');
-}
-
 function showDollarSign(v){
 	if(!isNaN(v)){
 		return '$ ';
@@ -365,16 +358,12 @@ function showDollarSign(v){
 	}
 }
 
-function pageLoad(){
-	
-}
-
 </script>
 
 
 
 </head>
-<body onload="pageLoad()">
+<body>
 		<div class="container">
 			<div class="headerL">
 				<h1>Transit Network Analysis Tool Reports</h1>
@@ -383,7 +372,8 @@ function pageLoad(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
-				<select id='dbselect' onchange='dbchange()'></select>
+				<!-- <label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='popselect(this)' style="margin-right:2em;height:81%"></select> -->
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

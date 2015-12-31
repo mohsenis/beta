@@ -26,6 +26,7 @@ var w_qstringx2 = parseFloat(getURIParameter("x2")); // population search radius
 var w_qstringx3 = parseFloat(getURIParameter("x3")); // park and ride search radius
 var keyName = parseFloat(getURIParameter("n"));
 var dbindex = parseInt(getURIParameter("dbindex"));
+var popYear = getURIParameter("popYear");
 var dateID;
 var boo;
 var gg = 1.0/1.1;
@@ -78,6 +79,8 @@ var stops = [];
 var key = Math.random();
 
 $(document).ready(function(){
+	setPopOptions();
+
 	$('#PopSradius').val(w_qstringx2);
 	$('#PnrSradius').val(w_qstringx3);
 	$.ajax({
@@ -108,7 +111,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/hubsR2?'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/hubsR2?'+ajaxURL+'&day='+w_qstringd+'&popYear='+popYear+'&key='+ key+'&username='+getSession(),
 		async: true,
 		success: function(d){
 			var ID = 0;
@@ -360,7 +363,8 @@ function dbchange(){
 			</div>
 			
 			<div class="headerR">				
-				<select id='dbselect' onchange='dbchange()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='popselect(this)' style="margin-right:2em;height:81%"></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	
