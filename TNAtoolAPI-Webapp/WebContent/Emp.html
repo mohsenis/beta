@@ -16,7 +16,6 @@
 	<script src="js/jQueryContent.js"></script>
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="js/lib/date.js"></script>
-	<script src="js/EmpDescription.js"></script>
 	<script src="js/EmpJstree.js"></script>
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
@@ -306,6 +305,8 @@
 			$('#dataSet').removeAttr('disabled');
 			$('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
 					+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?');
+			$("#checkbox").removeAttr("disabled");
+
 		}			
 			
 		else{
@@ -314,8 +315,11 @@
 			bindEvents();
 			$('#dataSet').attr('disabled', 'disabled');;
 			$('#dataSet').val('lodes_blocks_rac');
-			$('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>ALIREZA - > This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
-					+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?');
+			$('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>ALIREZA - > This report is generated based on' 
+				+ ' the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
+				+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?');
+			$("#checkbox").attr("disabled", true);  
+			$('#checkbox').attr('checked', false);
 			racBool = true;
 			wacBool = false;			
 		}			
@@ -377,18 +381,17 @@
 			data.node.data.title = data.text;
 		});
 		
-		$("#jstree").bind("changed.jstree", function (e, data) {
+		/* $("#jstree").bind("changed.jstree", function (e, data) {
 			$('.jstree-leaf').each(function(){
 				$(this).attr('title', description[$(this).attr('id')]); 
 			});
-		});
+		}); 
 		
-
 		$("#jstree").bind("ready.jstree", function (e, data){
 			$('.jstree-leaf').each(function(){
 				$(this).attr('title', description[$(this).attr('id')]);			
 			});
-		});
+		});*/
 	}
 	</script>
 
@@ -753,14 +756,14 @@
 			<tr><td>Population Search Radius (miles)</td><td><input type="text" name="Sradius" id="Sradius" style="text-indent: 2px; height:21px;width:92%;" value="0.25" onkeypress="return isNumber(event)"/></td></tr>
 			<tr><td>Minimum Level of Service </td><td><input type="text" name="LOS" id="LOS" style="text-indent: 2px; height:21px; width:92%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
 			</table>
-			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
+			<input id="checkbox" type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>
 		<div id="jstree" class="demo" style="width:98%"></div>
 		<br>
 	</div>
 	
 	<div id="dialog-confirm" title="Meta-data">
-	  <div id="promptText"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 40px 0;"></span>This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure
+	  <div id="promptText"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 45px 0;"></span>This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure
 Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?</div>
 	</div>
 		
