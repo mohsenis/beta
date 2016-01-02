@@ -25,11 +25,12 @@ var qstringd = '';
 var agencyId = getURIParameter("agency");
 var nameString = ''
 var dbindex = parseInt(getURIParameter("dbindex"));
+var popYear = getURIParameter("popYear");
 var d = new Date();
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Name of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population (2010)<em title="Total population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Population  <em title="Total population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Land Area <em title="Total land area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Agencies <em title="Total number of transit agencies operating in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -51,6 +52,8 @@ function EscFunc(){
 }
 
 $(document).ready(function(){
+	setPopOptions();
+
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -116,9 +119,9 @@ $(document).ready(function(){
 	timeVar = setInterval(progress, 100);
 	
 	//document.getElementById("Sradius").value = window.opener.qstringx;
-	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=2'+'&dbindex='+dbindex+'&username='+getSession();
+	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=2'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
 	if (agencyId!=null){
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&agency='+agencyId+'&type=2'+'&dbindex='+dbindex+'&username='+getSession();
+		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&agency='+agencyId+'&type=2'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
 	}
 	$.ajax({
 		type: 'GET',
@@ -153,10 +156,10 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		var keyName = Math.random();
 			    		localStorage.setItem(keyName, qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/GeoPlacesXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoPlacesXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);    		
 			    }else if($(this).attr('type')=="AC"){
 			    	qstring = $(this).attr('id');			    	
-			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=2'+'&dbindex='+dbindex+'&username='+getSession());
+			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=2'+'&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if($(this).attr('type')=="RC"){
 			    	qstring = $(this).attr('id');
 			    	qstringx = '0.25';
@@ -167,7 +170,7 @@ $(document).ready(function(){
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=2'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex;
+		    		url +='&areaid='+qstring+'&type=2'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
 			    	window.open(url);			    	
 			    }else if($(this).attr('type')=="SC"){
 			    	qstring = $(this).attr('id');
@@ -179,7 +182,7 @@ $(document).ready(function(){
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=2'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex;
+		    		url +='&areaid='+qstring+'&type=2'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
 		    		window.open(url);
 			    };
 			});
@@ -292,7 +295,8 @@ function dbchange(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
-				<select id='dbselect' onchange='dbchange()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='popselect(this)' style="margin-right:2em;height:81%"></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

@@ -278,10 +278,17 @@ static{
 /**
  * returns number of all geo areas in the DB: keys are : county, tract, place, urban, congdist, region, pop, landarea, urbanpop, ruralpop
  */
-	public static HashMap<String, Long> getGeoCounts(int sessionindex) throws FactoryException, TransformException {			
+	public static HashMap<String, Long> getGeoCounts(int sessionindex, String popYear) throws FactoryException, TransformException {			
 		session[sessionindex].beginTransaction();
-		Query q = session[sessionindex].getNamedQuery("GEO_COUNTS");
-		@SuppressWarnings("unchecked")
+		//Query q = session[sessionindex].getNamedQuery("GEO_COUNTS");
+		//q.setParameter("popYear","population"+popYear);
+		//@SuppressWarnings("unchecked")
+		String hql = "select (select count(countyId) from County) as county, (select count(tractId) from Tract) as tract, "
+				+ "(select count(placeId) from Place) as place, (select count(urbanId) from Urban) as urban, "
+				+ "(select count(congdistId) from CongDist) as congdist, (select count(distinct regionId) from County) as region, "
+				+ "sum(population"+popYear+"), sum(landarea), (select sum(population"+popYear+") from Census where poptype='U'), "
+				+ "(select sum(population"+popYear+") from Census where poptype='R') from County";
+		Query q = session[sessionindex].createQuery(hql);
 		List results = q.list();
 		Object[] counts = (Object[]) results.get(0);
 		HashMap<String, Long> response = new HashMap<String, Long>();
@@ -350,11 +357,13 @@ static{
 /**
  * returns list of urban areas with population greater than pop
  */
-	public static List<Urban> geturbansbypop(int pop, int sessionindex) throws FactoryException, TransformException {			
+	public static List<Urban> geturbansbypop(int pop, int sessionindex, String popYear) throws FactoryException, TransformException {			
 		session[sessionindex].beginTransaction();
-		Query q = session[sessionindex].getNamedQuery("URBANS_BYPOP");
-		q.setParameter("pop", (long)pop);
-		@SuppressWarnings("unchecked")
+		//Query q = session[sessionindex].getNamedQuery("URBANS_BYPOP");
+		//q.setParameter("pop", (long)pop);
+		//@SuppressWarnings("unchecked")
+		String hql = "from Urban where population"+popYear+" >= "+pop;
+		Query q = session[sessionindex].createQuery(hql);
 		List<Urban> results = (List<Urban>) q.list();
         Hutil.getSessionFactory()[sessionindex].close();
         return results;
@@ -1436,7 +1445,7 @@ static{
 		return pop;		
     }
 	
-	public static GeoArea QueryGeoAreabyId(String id, int type, int sessionindex){
+	public static GeoArea QueryGeoAreabyId(String id, int type, int sessionindex, int popYear){
 		Query q;
 		List results;
 		GeoArea response = new GeoArea();
@@ -1454,7 +1463,7 @@ static{
 			response.setName(cn.getName());
 			response.setLandarea(cn.getLandarea());
 			response.setWaterarea(cn.getWaterarea());
-			response.setPopulation(cn.getPopulation());
+			response.setPopulation(cn.getPopulation(popYear));
 			}
 			break;						
 		case 1:	//census tract
@@ -1468,7 +1477,7 @@ static{
 			response.setName(ct.getLongname());
 			response.setLandarea(ct.getLandarea());
 			response.setWaterarea(ct.getWaterarea());
-			response.setPopulation(ct.getPopulation());
+			response.setPopulation(ct.getPopulation(popYear));
 			}			
 			break;
 		case 2:	//census place
@@ -1482,7 +1491,7 @@ static{
 			response.setName(pl.getName());
 			response.setLandarea(pl.getLandarea());
 			response.setWaterarea(pl.getWaterarea());
-			response.setPopulation(pl.getPopulation());
+			response.setPopulation(pl.getPopulation(popYear));
 			}
 			break;
 		case 3:	//urban area
@@ -1496,7 +1505,7 @@ static{
 			response.setName(ur.getName());
 			response.setLandarea(ur.getLandarea());
 			response.setWaterarea(ur.getWaterarea());
-			response.setPopulation(ur.getPopulation());
+			response.setPopulation(ur.getPopulation(popYear));
 			}
 			break;
 		case 4:	//ODOT region
@@ -1513,7 +1522,7 @@ static{
 			for (County inst:cns){
 				LandArea+=inst.getLandarea();
 				WaterArea+=inst.getWaterarea();
-				Population+=inst.getPopulation();
+				Population+=inst.getPopulation(popYear);
 			}
 			response.setId(cns.get(0).getRegionId());			
 			response.setName("ODOT Transit "+cns.get(0).getRegionName());
@@ -1533,7 +1542,7 @@ static{
 			response.setName(cd.getName());
 			response.setLandarea(cd.getLandarea());
 			response.setWaterarea(cd.getWaterarea());
-			response.setPopulation(cd.getPopulation());
+			response.setPopulation(cd.getPopulation(popYear));
 			}
 			break;
 		}		
