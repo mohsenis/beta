@@ -27,7 +27,6 @@
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery.qtip.min.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/jstree-themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="report.css" />
-	
 	<style>
 	.navicon-line{
 		width:25px;
@@ -56,6 +55,27 @@
 	var racData = {};
 	var html = "";
 	var tmp = "";
+	var showPrompt = true; // detemines whether to show the meta data prompt box.
+	
+	$(function() {
+	    $( "#dialog-confirm" ).dialog({
+	      resizable: false,
+	      height: 220,
+	      width: 600,
+	      modal: true,
+	      autoOpen: false,
+	      buttons: {
+	        "Yes": function() {
+	          $( this ).dialog( "close" );
+	        },
+	        "No": function() {
+	          $( this ).dialog( "close" );
+	          showPrompt = false;
+	        }
+	      }
+	    });
+	    $( "#dialog-confirm" ).dialog("close");
+	  });
 	
 	(function($) {
 	    $(document).ready(function() {	    	
@@ -101,26 +121,7 @@
 	
 	$(function () {
 		$('#jstree').jstree(default_jstree);
-				
-		$(document).on("dnd_stop.vakata", function (e, data) { 
-			$('.jstree-node').each(function(){
-				if (!$('#jstree').jstree(true).is_disabled(this)) $('#jstree').jstree(true).deselect_node(this);
-			})	
-		});
-		
-		$("#jstree").bind("changed.jstree", function (e, data) {
-			$('.jstree-leaf').each(function(){
-				$(this).attr('title', description[$(this).attr('id')]); 
-			
-			});
-		});
-
-		$("#jstree").bind("ready.jstree", function (e, data){
-			$('.jstree-leaf').each(function(){
-				$(this).attr('title', description[$(this).attr('id')]); 
-			
-			});
-		});		
+		bindEvents();		
 	});
 	
 	function racWacAjax(){
@@ -192,7 +193,7 @@
 	}
 	
 	function toggleCheckbox(checkbox){	
-		var tree= $('#jstree').jstree(true);
+		//var tree= $('#jstree').jstree(true);
 		if (checkbox.checked){
 		tree.select_all();
 		}else{
@@ -220,14 +221,15 @@
 			}
 			 
 			nodesList.forEach (function (item, index, array){
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ item.attr('id') +' (RAC)<em title="Total '+item.attr('id')+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y +='<th>'+ item.attr('id') +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+item.attr('id')+' employees living within X distance of any stop. This metric is date independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ item.attr('id') +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+item.attr('id')+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ item.attr('id') +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+item.attr('id')+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ item.attr('id') +' (WAC)<em title="Total '+item.attr('id')+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y += '<th>'+ item.attr('id') +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+item.attr('id')+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ item.attr('id') +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+item.attr('id')+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ item.attr('id') +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+item.attr('id')+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				var node = tree.get_node(item.attr('id'));
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ node.data.title +' (RAC)<em title="Total '+node.data.title+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y +='<th>'+ node.data.title +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+node.data.title+' employees living within X distance of any stop. This metric is date independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ node.data.title+' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+node.data.title+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ node.data.title +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+node.data.title+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ node.data.title +' (WAC)<em title="Total '+node.data.title+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y += '<th>'+ node.data.title +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+node.data.title+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ node.data.title +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+node.data.title+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ node.data.title +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+node.data.title+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});
 		}else if (racBool){
 			if ($('#reportType').val() == 'Agencies'){
@@ -236,11 +238,12 @@
 				y += '<th>Number of employees residing in the area (RAC)</th>';
 			}
 			
-			nodesList.forEach (function (item, index, array){				
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ item.attr('id') +' (RAC)<em title="Total '+item.attr('id')+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y +='<th>'+ item.attr('id') +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+item.attr('id')+' employees living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ item.attr('id') +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+item.attr('id')+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ item.attr('id') +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+item.attr('id')+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+			nodesList.forEach (function (item, index, array){	
+				var node = tree.get_node(item.attr('id'));
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ node.data.title +' (RAC)<em title="Total '+node.data.title+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y +='<th>'+ node.data.title +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+node.data.title+' employees living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ node.data.title +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+node.data.title+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ node.data.title +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+node.data.title+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});	
 		}else{
 			if ($('#reportType').val() == 'Agencies'){
@@ -248,11 +251,12 @@
 			}else{
 				y += '<th>Number of employees working in the area (WAC)</th>';
 			}
-			nodesList.forEach (function (item, index, array){				
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ item.attr('id') +' (WAC)<em title="Total '+item.attr('id')+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y += '<th>'+ item.attr('id') +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+item.attr('id')+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ item.attr('id') +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+item.attr('id')+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ item.attr('id') +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+item.attr('id')+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+			nodesList.forEach (function (item, index, array){	
+				var node = tree.get_node(item.attr('id'));
+				if ($('#reportType').val() != 'Agencies') y += '<th>'+ node.data.title +' (WAC)<em title="Total '+node.data.title+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+				y += '<th>'+ node.data.title +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+node.data.title+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ node.data.title +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+node.data.title+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
+				+'<th>'+ node.data.title +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+node.data.title+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
 			});
 		}
 		return y;
@@ -299,17 +303,92 @@
 		$('#jstree').jstree(true).destroy();
 		if ($('#projectionYear').val() == 'current'){
 			$('#jstree').jstree(default_jstree);
-			$('#dataSet').removeAttr('disabled');						
+			$('#dataSet').removeAttr('disabled');
+			$('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
+					+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?');
 		}			
 			
 		else{
 			$('#jstree').jstree(new_jstree);
+			
+			bindEvents();
 			$('#dataSet').attr('disabled', 'disabled');;
 			$('#dataSet').val('lodes_blocks_rac');
+			$('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>ALIREZA - > This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
+					+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?');
 			racBool = true;
-			wacBool = false;
+			wacBool = false;			
+		}			
+	}
+	
+	function sectorPercentage(x){
+		if (x.indexOf('.')>-1){
+			return '0'+ x.slice(-3);			
 		}
-			
+		else return 1;
+	}
+	
+	function getTrimmedNodeID(x){
+		var y = ($(x).attr('id')).toLowerCase()
+		if (y.indexOf('_.')>-1) return y.substring(0,y.length-4);
+		else return y;
+	}
+	
+	/**
+	* return the leaf nodes of a given node.
+	*/
+	function getLeaves(x){
+		var y = [x];
+		var hasLeaf = true;
+		var nodesToAdd = new Array();
+		var nodesToRemove = new Array();
+		tree = $('#jstree').jstree(true);				
+		while (hasLeaf){
+			hasLeaf = false;
+			nodesToAdd = [];
+			nodesToRemove = [];
+			for (var i = 0; i < y.length; i++){
+				var node = y[i];
+				if (tree.is_parent(node)) {
+					hasLeaf = true;
+					nodesToRemove.push(node);
+					nodesToAdd.push.apply(nodesToAdd, tree.get_children_dom(node));				
+				}
+			}
+			// removing nodesToRemove from y
+			for (var k=0;k<nodesToRemove.length;k++){
+				var index = y.indexOf(nodesToRemove[k]);
+				if (index > -1)	y.splice(index,1);
+			}
+			y.push.apply(y,nodesToAdd);
+		}
+	return y;
+	}
+	
+	function bindEvents(){
+		tree = $('#jstree').jstree(true);				
+		$(document).on("dnd_stop.vakata", function (e, data) { 
+			$('.jstree-node').each(function(){
+				if (!$('#jstree').jstree(true).is_disabled(this)) $('#jstree').jstree(true).deselect_node(this);
+			})	
+		});
+		
+		$("#jstree").bind("rename_node.jstree", function (e, data) {
+			data.node.data.title = data.text;
+		});
+		
+		$("#jstree").bind("changed.jstree", function (e, data) {
+			$('.jstree-leaf').each(function(){
+				$(this).attr('title', description[$(this).attr('id')]); 
+			});
+		});
+		
+
+		$("#jstree").bind("ready.jstree", function (e, data){
+			$('.jstree-leaf').each(function(){
+				$(this).attr('title', description[$(this).attr('id')]);			
+			});
+		});
 	}
 	</script>
 
@@ -317,7 +396,6 @@
 	<script type="text/javascript">
 	
 	function openReport(){
-		alert($('#dataSet').val());
 		clearReport();
 		if (exceedsMaxRadius($('#Sradius').val())){	// Checks if the entered search radius exceeds the maximum.
 			alert('Enter a number less than ' + maxRadius + ' miles for the population search radius.');
@@ -329,6 +407,9 @@
 			return 0;
 		}
 		
+		// prompt for showing meta-data
+		if (showPrompt) $('#dialog-confirm').dialog('open');
+		
 		// update dates
 		var dates = $('#datepicker').multiDatesPicker('getDates');
 		if(dates.length==0){
@@ -339,11 +420,11 @@
 		w_qstringd = dates.join(",");
 		
 		// close slidebar
-		mySlidebar.slidebars.close();
-		$('#dialogPreLoader').show();
-		$('#bePatient').show();
-		
+		mySlidebar.slidebars.close();		
 		$("#initialText").hide();
+		$('#bePatient').show();
+		$('#dialogPreLoader').show();
+		
 		document.getElementById('displayReport').innerHTML = "";
 		html = '<table id="Emp" class="display" align="center">';
 		if ($('#reportType').val() == 'Agencies'){
@@ -378,11 +459,11 @@
 		rootList.forEach (function (item, index, array){
 			var parentID = $(item).attr('id');
 			if (tree.is_parent(item)){						
-				var children = tree.get_children_dom(item);
+				var children = getLeaves(item);
 				var childrenIDs = [];
 				$.each(children, function(ind,obj){
 					if (tree.is_selected(obj)){
-						childrenIDs.push($(obj).attr('id'));
+						childrenIDs.push($(obj).attr('id'));  // You should push the leaf nodes not the Category nodes.
 					}							
 				});
 				tableContent.push([parentID,childrenIDs]);
@@ -391,7 +472,6 @@
 				tableContent.push([parentID,childrenIDs]);
 			}
 		});
-		
 		// Filling in the first 3 columns of the datatable and making a hashmap of the query results 
 		if (racBool && wacBool){
 			for (var i=0; i<racData.EmpDataList2.length;i++){
@@ -464,10 +544,11 @@
 			
 			$.each(racData.EmpDataList2, function(i,item){
 				$('.jstree-leaf').each(function(){
-					if ($('#reportType').val() != 'Agencies') resultSetRac[$(this).attr('id')] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
-					resultSetRac[$(this).attr('id')+'los'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
-					resultSetRac[$(this).attr('id')+'within'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
-					resultSetRac[$(this).attr('id')+'served'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
+					var sectorPercent = sectorPercentage($(this).attr('id')); 
+					if ($('#reportType').val() != 'Agencies') resultSetRac[$(this).attr('id')] = Math.round(sectorPercent * racData.EmpDataList2[i][getTrimmedNodeID(this)]);
+					resultSetRac[$(this).attr('id')+'los'] = Math.round(sectorPercent * racData.EmpDataList2[i][getTrimmedNodeID(this)+'los']);
+					resultSetRac[$(this).attr('id')+'within'] = Math.round(sectorPercent * racData.EmpDataList2[i][getTrimmedNodeID(this)+'within']);
+					resultSetRac[$(this).attr('id')+'served'] = Math.round(sectorPercent * racData.EmpDataList2[i][getTrimmedNodeID(this)+'served']);
 				});
 				
 				html += '<tr><td>'+ item.id + '</a></td>'+
@@ -491,7 +572,7 @@
 						racServedByServiceSummation += resultSetRac[j+'served'];	
 					}							
 				});
-				if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(racSummation) + '</td>'
+				if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(racSummation) + '</td>';
 				html += '<td>' + numWithCommas(racPopServedSummation) + '</td>'
 				+ '<td>' + numWithCommas(racPopAtLOSSummation) + '</td>'
 				+ '<td>' + numWithCommas(racServedByServiceSummation) + '</td>';
@@ -613,8 +694,9 @@
 		<p id="displayReport" style="margin:5px; "><br></p>
 		<br>
 		<br>
-		<img id="dialogPreLoader" src="images/287.GIF" alt="Page Loading" style="width:100px; height:100px; position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;" >
-		<p id="bePatient" style="text-align: center; margin-top:150px; line-height: 70vh;"><b>This might take a few minutes.</b></p>
+		<div id="dialogPreLoader"><img src="images/287.GIF" alt="Page Loading" style="width:90px; height:90px; position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;" >
+			<br><p style="text-align: center; margin-top:80px; line-height: 70vh;"><b>This might take a few minutes.</b></p>
+		</div>
 	</div>
 </div> 
 	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="25%" style="height:100vh; overflow:auto; border-style:groove; background-color:white; border-width:5px;">
@@ -675,6 +757,11 @@
 		</div>
 		<div id="jstree" class="demo" style="width:98%"></div>
 		<br>
+	</div>
+	
+	<div id="dialog-confirm" title="Meta-data">
+	  <div id="promptText"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 40px 0;"></span>This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure
+Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?</div>
 	</div>
 		
 </body>

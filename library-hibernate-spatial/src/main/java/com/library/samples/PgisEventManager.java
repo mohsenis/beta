@@ -788,7 +788,7 @@ public class PgisEventManager {
 				+"	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0 "
 				+"	group by stime.stop_agencyid, stime.stop_id, stop.location), "				
 				+"popatlos as (select "
-				+"distinct	c000" + projectionYear + ","
+				+"	c000" + projectionYear + ","
 				+"	ca01" + projectionYear + ","
 				+"	ca02" + projectionYear + ","
 				+"	ca03" + projectionYear + ","
@@ -1864,7 +1864,9 @@ public class PgisEventManager {
       String query = "with ";
       String join = "";
       String aidsjoin = "";
+      String routesidsjoin = "";
       String routesquery = "";
+      String tractsFilter = "";
       if (agencyId==null){
     	  query += "aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'),";
     	  join = "left";
@@ -1872,24 +1874,26 @@ public class PgisEventManager {
       }else {
     	  join = "inner";
     	  aidsjoin = "where map.agencyid='"+agencyId+"'";
+    	  routesidsjoin = aidsjoin;
+    	  tractsFilter = " INNER JOIN stops ON ST_Contains(census_tracts.shape, stops.location) ";
       }
       if (type==0){//county: tracts are queries and summed up to reflect the true number of census tracts in the results
     	  criteria = "left(blockid,11)";      
     	  areaquery = "areas as (select countyid as areaid, cname as areaname, population, landarea, waterarea, odotregionid, regionname from census_counties), "
-    	  		+ "tracts as (select count(tractid) as tracts, left(tractid,5) as areaid from census_tracts group by left(tractid,5)) ";    	  
+    	  		+ "tracts as (select count(distinct tractid) as tracts, left(tractid,5) as areaid from census_tracts " + tractsFilter + " group by left(tractid,5)) ";    	  
     	  selectquery = "select areaid, areaname, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, coalesce(stops,0) as stops,"
     	  		+ " odotregionid, regionname, tracts from areas "+join+" join stoproutes using(areaid) left join tracts using (areaid) left join routes using(areaid)";
-    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, countyid AS areaid FROM census_counties_trip_map GROUP BY areaid),";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, countyid AS areaid FROM census_counties_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  stoproutes = "left(areaid,5)";
       } else if (type==1){//census tract
     	  criteria = "left(blockid,11)";      
     	  areaquery = "areas as (select tractid as areaid, tname as areaname, tract.population, tract.landarea, tract.waterarea from census_tracts tract)";
-    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, tractid AS areaid FROM census_tracts_trip_map GROUP BY areaid),";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, tractid AS areaid FROM census_tracts_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)";
       } else if (type==3){//census urban
     	  criteria = Types.getIdColumnName(type);
-    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, urbanid AS areaid FROM census_urbans_trip_map GROUP BY areaid),";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, urbanid AS areaid FROM census_urbans_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population, landarea, waterarea from " + Types.getTableName(type)+" where population>"+urbanPop+")";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
       	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)";
@@ -1897,23 +1901,23 @@ public class PgisEventManager {
     	  criteria = Types.getIdColumnName(type);
     	  areaquery = "areas as (select odotregionid as areaid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties, "
     	  		+ "sum(population) as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname)";
-    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, regionid AS areaid FROM census_counties_trip_map GROUP BY areaid),";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, regionid AS areaid FROM census_counties_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  selectquery = " select areas.areaid, areaname, counties, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)  left join routes USING(areaid)";
       } else {// census place, urban area, or congressional district    	  
     	  criteria = Types.getIdColumnName(type);
-    	  if (type == 2) routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, placeid AS areaid FROM census_places_trip_map GROUP BY areaid),";
-    	  else if (type == 5) routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, congdistid AS areaid FROM census_congdists_trip_map GROUP BY areaid),";
+    	  if (type == 2) routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, placeid AS areaid FROM census_places_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
+    	  else if (type == 5) routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, congdistid AS areaid FROM census_congdists_trip_map  AS map " + routesidsjoin + " GROUP BY areaid),";
     	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population, landarea, waterarea from " + Types.getTableName(type)+")";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)";
       }      
-     query +="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid from gtfs_stops stop inner join "
+     query +="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location from gtfs_stops stop inner join "
     		+ "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), stoproutes as (select "
     		+ "coalesce(count(distinct(concat(aid,stops.stopid))),0) as stops, coalesce(count(distinct aid),0) as agencies,"
     		+stoproutes+" as areaid from stops inner join gtfs_stop_route_map map on stops.aid_def = map.agencyid_def and stops.stopid = map.stopid group by "
     		+stoproutes+"),"+routesquery+areaquery+ selectquery;
-//    System.out.println(query);
+    System.out.println(query);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
@@ -1943,7 +1947,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+//        System.exit(0);
       }
       dropConnection(connection);      
       return response;
@@ -2310,7 +2314,7 @@ public class PgisEventManager {
 				+ "left join rpop on routes.agencyid=rpop.aid and routes.id=rpop.routeid "
 				+ "left join stopscount on routes.id = stopscount.routeid "
 				+ "left join areas on routes.id = areas.routeid and routes.agencyid = areas.aid";					
-		System.out.println(mainquery);
+//		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();				
