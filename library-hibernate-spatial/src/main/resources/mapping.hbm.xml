@@ -18,6 +18,15 @@
         <property name="poptype" type="string" />
         <property name="landarea" type="integer" />
         <property name="waterarea" type="integer" />
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>
     </class>
     
     <class name="Tract" table="census_tracts">
@@ -30,6 +39,15 @@
         <property name="housing" type="long" />
         <property name="landarea" type="long" />
         <property name="waterarea" type="long" />
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>
     </class>
     
     <class name="County" table="census_counties">
@@ -42,7 +60,16 @@
         <property name="landarea" type="long" />
         <property name="waterarea" type="long" />
         <property name="regionId" column="odotregionid" type="string" length="2" />
-        <property name="regionName" column="odotregionname" type="string" length="9" />        
+        <property name="regionName" column="odotregionname" type="string" length="9" />     
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>   
     </class>
     
     <class name="ParknRide" table="parknride">
@@ -88,6 +115,15 @@
         <property name="housing" type="long" />
         <property name="landarea" type="long" />
         <property name="waterarea" type="long" />
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>
     </class>
     
     <class name="Urban" table="census_urbans">
@@ -99,6 +135,15 @@
         <property name="longitude" type="double" column="lon"/>        
         <property name="landarea" type="long" />
         <property name="waterarea" type="long" />
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>
     </class>
     
     <class name="CongDist" table="census_congdists">
@@ -110,6 +155,15 @@
         <property name="longitude" type="double" column="lon"/>        
         <property name="landarea" type="long" />
         <property name="waterarea" type="long" />
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>
     </class>
     
     <class name="GeoStop" table="gtfs_stops">
