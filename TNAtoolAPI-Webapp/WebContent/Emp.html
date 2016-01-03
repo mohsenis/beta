@@ -315,9 +315,11 @@
 			bindEvents();
 			$('#dataSet').attr('disabled', 'disabled');;
 			$('#dataSet').val('lodes_blocks_rac');
-			$('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>ALIREZA - > This report is generated based on' 
-				+ ' the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
-				+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?');
+			$('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>'
+			    +'The numbers shown for the projected employment are linearly estimated based on the projected employments of 2015 and 2025 for different counties.');
+			    //+'ALIREZA - > This report is generated based on' 
+				//+' the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
+				//+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?');
 			$("#checkbox").attr("disabled", true);  
 			$('#checkbox').attr('checked', false);
 			racBool = true;
