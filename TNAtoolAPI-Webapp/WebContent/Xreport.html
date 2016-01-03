@@ -34,6 +34,7 @@ var boo;
 var gg = 1.0/1.1;
 var progVal = 0; 
 var w_qstringd = localStorage.getItem(keyName);
+var popYear = getURIParameter("popYear");
 var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 var tmp = '<tr><th>Metric</th><th>Value</th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
@@ -41,6 +42,8 @@ var fAverage = new Array();
 var fMedian = new Array();
 var key = Math.random();
 $(document).ready(function(){
+	setPopOptions();
+
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -69,7 +72,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&popYear='+popYear,
 		async: true,
 		success: function(item){			
 			$('h2').append(item.AgencyName+' Extended Report <br><hr>');	
@@ -147,7 +150,8 @@ function dbchange(){
 			</div>
 			
 			<div class="headerR">				
-				<select id='dbselect' onchange='dbchange()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='popselect(this)' style="margin-right:2em;height:81%"></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

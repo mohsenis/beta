@@ -88,7 +88,6 @@ import org.xml.sax.SAXException;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-
 	private final static String basePath = "C:/Users/tnatool/Development/Repository/test/";
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/";
 	private final static int USER_COUNT = 10;
@@ -97,7 +96,7 @@ public class DbUpdate {
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
 	private static final int DBINDEX = Databases.dbsize-1;
-	public final static String VERSION = "V3.15.12";
+	public final static String VERSION = "V3.16.01";
 	
 	public static List<String> getSelectedAgencies(String username){
 		List<String> selectedAgencies = new ArrayList<String>();
@@ -273,7 +272,7 @@ public class DbUpdate {
 		
 		  String to = email;
 	      final String emailUser = "tnatooltech";
-	      final String emailPass = "***";
+	      final String emailPass = "OSUteam007@gmail";
 	      String host = "smtp.gmail.com";
 	
 	      Properties properties = System.getProperties();
@@ -1073,7 +1072,7 @@ public class DbUpdate {
 					+ "VALUES ('"+fName+"','admin',TRUE);");
 			statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname,agency_id) "
 					+ "VALUES ('admin','"+fName+"','"+defaultId+"');");
-			UpdateEventManager.updateTables(DBINDEX, defaultId);
+			//UpdateEventManager.updateTables(DBINDEX, defaultId);
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			

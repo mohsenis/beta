@@ -11,6 +11,24 @@ function exceedsMaxRadius(x){
 	}
 }
 
+function setPopOptions(){
+	var popselect = document.getElementById("popselect");
+	var years = [2010,2015,2020,2025,2030,2035,2040,2045,2050];
+	var option;
+	for(var i=0; i<years.length;i++){
+		option  = document.createElement('option');
+	    option.text = years[i];
+	    option.value = years[i];
+	    popselect.add(option, i);
+	};
+	$('#popselect').val(popYear);
+}
+function popselect(e){
+	if (e.value !=popYear){
+		location.replace(document.URL.split("popYear")[0]+'popYear='+e.value);
+	}
+}
+
 function getURIParameter(param, asArray) {
     return document.location.search.substring(1).split('&').reduce(function(p,c) {
         var parts = c.split('=', 2).map(function(param) { return decodeURIComponent(param); });

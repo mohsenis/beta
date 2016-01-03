@@ -67,7 +67,7 @@ public class PgisEventManager {
            Databases.usernames[dbindex], Databases.passwords[dbindex]);
 		}catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }
 		return response;
 	}
@@ -144,7 +144,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return RouteMiles;
@@ -184,7 +184,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);
       if (faredata.size()>0){
@@ -238,7 +238,7 @@ public class PgisEventManager {
 	      } catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
 	        e.getStackTrace();
-	        //System.exit(0);
+	        // 
 	      }
 	      dropConnection(connection);
 	      
@@ -436,7 +436,7 @@ public class PgisEventManager {
 	      } catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
 	        e.getStackTrace();
-	        //System.exit(0);
+	        // 
 	      }
 	      dropConnection(connection);
 		
@@ -470,7 +470,8 @@ public class PgisEventManager {
 	/**
 	 * Queries employment data on a given area (based on the reportType)
 	 */
-	public static EmpDataList getEmpData(String DS, String reportType, String[] dates, String[] day, String[] fulldates, double radius, int L, int dbindex, String username){
+	public static EmpDataList getEmpData(String projection, String DS, String reportType, String[] dates, String[] day, String[] fulldates, double radius, int L, int dbindex, String username){
+		String projectionYear = "";
 		EmpDataList results = new EmpDataList();
 		Connection connection = makeConnection(dbindex);
 	    Statement stmt = null;
@@ -760,6 +761,11 @@ public class PgisEventManager {
 				criteria5 = "'Region ' || regions.regionid";
 		    }
 		    
+		    // Checks to see whether current data or projection data is queried 
+		    if (!projection.equals("current")) {
+		    	DS = "lodes_rac_projection_block"; projectionYear = "_" + projection;
+		    }
+		    
 		    query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='admin'), svcids AS (";
 		    for (int i=0; i<dates.length; i++){
   	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
@@ -780,141 +786,142 @@ public class PgisEventManager {
 				+"stops as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service "
 				+"	from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
 				+"	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0 "
-				+"	group by stime.stop_agencyid, stime.stop_id, stop.location), "
+				+"	group by stime.stop_agencyid, stime.stop_id, stop.location), "				
 				+"popatlos as (select "
-				+"	c000,"
-				+"	ca01,"
-				+"	ca02,"
-				+"	ca03,"
-				+"	ce01,"
-				+"	ce02,"
-				+"	ce03,"
-				+"	cns01,"
-				+"	cns02,"
-				+"	cns03,"
-				+"	cns04,"
-				+"	cns05,"
-				+"	cns06,"
-				+"	cns07,"
-				+"	cns08,"
-				+"	cns09,"
-				+"	cns10,"
-				+"	cns11,"
-				+"	cns12,"
-				+"	cns13,"
-				+"	cns14,"
-				+"	cns15,"
-				+"	cns16,"
-				+"	cns17,"
-				+"	cns18,"
-				+"	cns19,"
-				+"	cns20,"
-				+"	cr01,"
-				+"	cr02,"
-				+"	cr03,"
-				+"	cr04,"
-				+"	cr05,"
-				+"	cr07,"
-				+"	ct01,"
-				+"	ct02,"
-				+"	cd01,"
-				+"	cd02,"
-				+"	cd03,"
-				+"	cd04,"
-				+"	cs01,"
-				+"	cs02,"
+				+"	c000" + projectionYear + ","
+				+"	ca01" + projectionYear + ","
+				+"	ca02" + projectionYear + ","
+				+"	ca03" + projectionYear + ","
+				+"	ce01" + projectionYear + ","
+				+"	ce02" + projectionYear + ","
+				+"	ce03" + projectionYear + ","
+				+"	cns01" + projectionYear + ","
+				+"	cns02" + projectionYear + ","
+				+"	cns03" + projectionYear + ","
+				+"	cns04" + projectionYear + ","
+				+"	cns05" + projectionYear + ","
+				+"	cns06" + projectionYear + ","
+				+"	cns07" + projectionYear + ","
+				+"	cns08" + projectionYear + ","
+				+"	cns09" + projectionYear + ","
+				+"	cns10" + projectionYear + ","
+				+"	cns11" + projectionYear + ","
+				+"	cns12" + projectionYear + ","
+				+"	cns13" + projectionYear + ","
+				+"	cns14" + projectionYear + ","
+				+"	cns15" + projectionYear + ","
+				+"	cns16" + projectionYear + ","
+				+"	cns17" + projectionYear + ","
+				+"	cns18" + projectionYear + ","
+				+"	cns19" + projectionYear + ","
+				+"	cns20" + projectionYear + ","
+				+"	cr01" + projectionYear + ","
+				+"	cr02" + projectionYear + ","
+				+"	cr03" + projectionYear + ","
+				+"	cr04" + projectionYear + ","
+				+"	cr05" + projectionYear + ","
+				+"	cr07" + projectionYear + ","
+				+"	ct01" + projectionYear + ","
+				+"	ct02" + projectionYear + ","
+				+"	cd01" + projectionYear + ","
+				+"	cd02" + projectionYear + ","
+				+"	cd03" + projectionYear + ","
+				+"	cd04" + projectionYear + ","
+				+"	cs01" + projectionYear + ","
+				+"	cs02" + projectionYear + ","
 				+ DS + ".blockid, blocks.urbanid, blocks.regionid, blocks.congdistid, blocks.placeid "
 				+"	from "+ DS + " inner join stopsatlos on st_dwithin(" + DS + ".location,stopsatlos.location,"+radius+")"
-				+"	inner join census_blocks blocks ON " + DS + ".blockid = blocks.blockid GROUP BY " + DS + ".blockid, blocks.urbanid, blocks.regionid, blocks.congdistid, blocks.placeid), "
+				+"	inner join census_blocks blocks ON " + DS + ".blockid = blocks.blockid "
+				+ "GROUP BY " + DS + ".blockid, blocks.urbanid, blocks.regionid, blocks.congdistid, blocks.placeid), "
 				+"popatlos1 as (select "
-				+ "sum(c000) AS c000los, "
-				+ "sum(ca01) AS ca01los, "
-				+ "sum(ca02) AS ca02los, "
-				+ "sum(ca03) AS ca03los, "
-				+ "sum(ce01) AS ce01los, "
-				+ "sum(ce02) AS ce02los, "
-				+ "sum(ce03) AS ce03los, "
-				+ "sum(cns01) AS cns01los, "
-				+ "sum(cns02) AS cns02los, "
-				+ "sum(cns03) AS cns03los, "
-				+ "sum(cns04) AS cns04los, "
-				+ "sum(cns05) AS cns05los, "
-				+ "sum(cns06) AS cns06los, "
-				+ "sum(cns07) AS cns07los, "
-				+ "sum(cns08) AS cns08los, "
-				+ "sum(cns09) AS cns09los, "
-				+ "sum(cns10) AS cns10los, "
-				+ "sum(cns11) AS cns11los, "
-				+ "sum(cns12) AS cns12los, "
-				+ "sum(cns13) AS cns13los, "
-				+ "sum(cns14) AS cns14los, "
-				+ "sum(cns15) AS cns15los, "
-				+ "sum(cns16) AS cns16los, "
-				+ "sum(cns17) AS cns17los, "
-				+ "sum(cns18) AS cns18los, "
-				+ "sum(cns19) AS cns19los, "
-				+ "sum(cns20) AS cns20los, "
-				+ "sum(cr01) AS cr01los, "
-				+ "sum(cr02) AS cr02los, "
-				+ "sum(cr03) AS cr03los, "
-				+ "sum(cr04) AS cr04los, "
-				+ "sum(cr05) AS cr05los, "
-				+ "sum(cr07) AS cr07los, "
-				+ "sum(ct01) AS ct01los, "
-				+ "sum(ct02) AS ct02los, "
-				+ "sum(cd01) AS cd01los, "
-				+ "sum(cd02) AS cd02los, "
-				+ "sum(cd03) AS cd03los, "
-				+ "sum(cd04) AS cd04los, "
-				+ "sum(cs01) AS cs01los, "
-				+ "sum(cs02) AS cs02los, "
+				+ "sum(c000" + projectionYear + ") AS c000los, "
+				+ "sum(ca01" + projectionYear + ") AS ca01los, "
+				+ "sum(ca02" + projectionYear + ") AS ca02los, "
+				+ "sum(ca03" + projectionYear + ") AS ca03los, "
+				+ "sum(ce01" + projectionYear + ") AS ce01los, "
+				+ "sum(ce02" + projectionYear + ") AS ce02los, "
+				+ "sum(ce03" + projectionYear + ") AS ce03los, "
+				+ "sum(cns01" + projectionYear + ") AS cns01los, "
+				+ "sum(cns02" + projectionYear + ") AS cns02los, "
+				+ "sum(cns03" + projectionYear + ") AS cns03los, "
+				+ "sum(cns04" + projectionYear + ") AS cns04los, "
+				+ "sum(cns05" + projectionYear + ") AS cns05los, "
+				+ "sum(cns06" + projectionYear + ") AS cns06los, "
+				+ "sum(cns07" + projectionYear + ") AS cns07los, "
+				+ "sum(cns08" + projectionYear + ") AS cns08los, "
+				+ "sum(cns09" + projectionYear + ") AS cns09los, "
+				+ "sum(cns10" + projectionYear + ") AS cns10los, "
+				+ "sum(cns11" + projectionYear + ") AS cns11los, "
+				+ "sum(cns12" + projectionYear + ") AS cns12los, "
+				+ "sum(cns13" + projectionYear + ") AS cns13los, "
+				+ "sum(cns14" + projectionYear + ") AS cns14los, "
+				+ "sum(cns15" + projectionYear + ") AS cns15los, "
+				+ "sum(cns16" + projectionYear + ") AS cns16los, "
+				+ "sum(cns17" + projectionYear + ") AS cns17los, "
+				+ "sum(cns18" + projectionYear + ") AS cns18los, "
+				+ "sum(cns19" + projectionYear + ") AS cns19los, "
+				+ "sum(cns20" + projectionYear + ") AS cns20los, "
+				+ "sum(cr01" + projectionYear + ") AS cr01los, "
+				+ "sum(cr02" + projectionYear + ") AS cr02los, "
+				+ "sum(cr03" + projectionYear + ") AS cr03los, "
+				+ "sum(cr04" + projectionYear + ") AS cr04los, "
+				+ "sum(cr05" + projectionYear + ") AS cr05los, "
+				+ "sum(cr07" + projectionYear + ") AS cr07los, "
+				+ "sum(ct01" + projectionYear + ") AS ct01los, "
+				+ "sum(ct02" + projectionYear + ") AS ct02los, "
+				+ "sum(cd01" + projectionYear + ") AS cd01los, "
+				+ "sum(cd02" + projectionYear + ") AS cd02los, "
+				+ "sum(cd03" + projectionYear + ") AS cd03los, "
+				+ "sum(cd04" + projectionYear + ") AS cd04los, "
+				+ "sum(cs01" + projectionYear + ") AS cs01los, "
+				+ "sum(cs02" + projectionYear + ") AS cs02los, "
 				+ criteria1 + " AS " + criteria4 + " FROM popatlos GROUP BY " + criteria1 + "), "
 				+ "popserved as (select "
-				 + " c000*(stops.service) as c000served, "
-				 + " ca01*(stops.service) as ca01served, "
-				 + " ca02*(stops.service) as ca02served, "
-				 + " ca03*(stops.service) as ca03served, "
-				 + " ce01*(stops.service) as ce01served, "
-				 + " ce02*(stops.service) as ce02served, "
-				 + " ce03*(stops.service) as ce03served, "
-				 + " cns01*(stops.service) as cns01served, "
-				 + " cns02*(stops.service) as cns02served, "
-				 + " cns03*(stops.service) as cns03served, "
-				 + " cns04*(stops.service) as cns04served, "
-				 + " cns05*(stops.service) as cns05served, "
-				 + " cns06*(stops.service) as cns06served, "
-				 + " cns07*(stops.service) as cns07served, "
-				 + " cns08*(stops.service) as cns08served, "
-				 + " cns09*(stops.service) as cns09served, "
-				 + " cns10*(stops.service) as cns10served, "
-				 + " cns11*(stops.service) as cns11served, "
-				 + " cns12*(stops.service) as cns12served, "
-				 + " cns13*(stops.service) as cns13served, "
-				 + " cns14*(stops.service) as cns14served, "
-				 + " cns15*(stops.service) as cns15served, "
-				 + " cns16*(stops.service) as cns16served, "
-				 + " cns17*(stops.service) as cns17served, "
-				 + " cns18*(stops.service) as cns18served, "
-				 + " cns19*(stops.service) as cns19served, "
-				 + " cns20*(stops.service) as cns20served, "
-				 + " cr01*(stops.service) as cr01served, "
-				 + " cr02*(stops.service) as cr02served, "
-				 + " cr03*(stops.service) as cr03served, "
-				 + " cr04*(stops.service) as cr04served, "
-				 + " cr05*(stops.service) as cr05served, "
-				 + " cr07*(stops.service) as cr07served, "
-				 + " ct01*(stops.service) as ct01served, "
-				 + " ct02*(stops.service) as ct02served, "
-				 + " cd01*(stops.service) as cd01served, "
-				 + " cd02*(stops.service) as cd02served, "
-				 + " cd03*(stops.service) as cd03served, "
-				 + " cd04*(stops.service) as cd04served, "
-				 + " cs01*(stops.service) as cs01served, "
-				 + " cs02*(stops.service) as cs02served, "
+				+ " c000" + projectionYear + "*(stops.service) as c000served, "
+				 + " ca01" + projectionYear + "*(stops.service) as ca01served, "
+				 + " ca02" + projectionYear + "*(stops.service) as ca02served, "
+				 + " ca03" + projectionYear + "*(stops.service) as ca03served, "
+				 + " ce01" + projectionYear + "*(stops.service) as ce01served, "
+				 + " ce02" + projectionYear + "*(stops.service) as ce02served, "
+				 + " ce03" + projectionYear + "*(stops.service) as ce03served, "
+				 + " cns01" + projectionYear + "*(stops.service) as cns01served, "
+				 + " cns02" + projectionYear + "*(stops.service) as cns02served, "
+				 + " cns03" + projectionYear + "*(stops.service) as cns03served, "
+				 + " cns04" + projectionYear + "*(stops.service) as cns04served, "
+				 + " cns05" + projectionYear + "*(stops.service) as cns05served, "
+				 + " cns06" + projectionYear + "*(stops.service) as cns06served, "
+				 + " cns07" + projectionYear + "*(stops.service) as cns07served, "
+				 + " cns08" + projectionYear + "*(stops.service) as cns08served, "
+				 + " cns09" + projectionYear + "*(stops.service) as cns09served, "
+				 + " cns10" + projectionYear + "*(stops.service) as cns10served, "
+				 + " cns11" + projectionYear + "*(stops.service) as cns11served, "
+				 + " cns12" + projectionYear + "*(stops.service) as cns12served, "
+				 + " cns13" + projectionYear + "*(stops.service) as cns13served, "
+				 + " cns14" + projectionYear + "*(stops.service) as cns14served, "
+				 + " cns15" + projectionYear + "*(stops.service) as cns15served, "
+				 + " cns16" + projectionYear + "*(stops.service) as cns16served, "
+				 + " cns17" + projectionYear + "*(stops.service) as cns17served, "
+				 + " cns18" + projectionYear + "*(stops.service) as cns18served, "
+				 + " cns19" + projectionYear + "*(stops.service) as cns19served, "
+				 + " cns20" + projectionYear + "*(stops.service) as cns20served, "
+				 + " cr01" + projectionYear + "*(stops.service) as cr01served, "
+				 + " cr02" + projectionYear + "*(stops.service) as cr02served, "
+				 + " cr03" + projectionYear + "*(stops.service) as cr03served, "
+				 + " cr04" + projectionYear + "*(stops.service) as cr04served, "
+				 + " cr05" + projectionYear + "*(stops.service) as cr05served, "
+				 + " cr07" + projectionYear + "*(stops.service) as cr07served, "
+				 + " ct01" + projectionYear + "*(stops.service) as ct01served, "
+				 + " ct02" + projectionYear + "*(stops.service) as ct02served, "
+				 + " cd01" + projectionYear + "*(stops.service) as cd01served, "
+				 + " cd02" + projectionYear + "*(stops.service) as cd02served, "
+				 + " cd03" + projectionYear + "*(stops.service) as cd03served, "
+				 + " cd04" + projectionYear + "*(stops.service) as cd04served, "
+				 + " cs01" + projectionYear + "*(stops.service) as cs01served, "
+				 + " cs02" + projectionYear + "*(stops.service) as cs02served, "
 				+ "	blocks.blockid, census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid  "
 				+ "	from " + DS + " blocks inner join stops on st_dwithin(blocks.location, stops.location,"+radius+") "
 				+ "	inner join census_blocks ON blocks.blockid=census_blocks.blockid "
-				+ "	group by stops.service, blocks.blockid,census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid), "
+				+ "	GROUP BY stops.service, blocks.blockid,census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid), "
 				+ " popserved1 as (select "
 				+ "sum(c000served) AS c000served, "
 				+ "sum(ca01served) AS ca01served, "
@@ -963,92 +970,92 @@ public class PgisEventManager {
 				+ "from census_blocks block inner join tempstops on st_dwithin(block.location, tempstops.location, "+radius+")  "
 				+ "group by block.blockid),  "
 				+ "popwithinx as (select  "
-				+ "sum(c000) AS c000withinx, "
-				+ "sum(ca01) AS ca01withinx, "
-				+ "sum(ca02) AS ca02withinx, "
-				+ "sum(ca03) AS ca03withinx, "
-				+ "sum(ce01) AS ce01withinx, "
-				+ "sum(ce02) AS ce02withinx, "
-				+ "sum(ce03) AS ce03withinx, "
-				+ "sum(cns01) AS cns01withinx, "
-				+ "sum(cns02) AS cns02withinx, "
-				+ "sum(cns03) AS cns03withinx, "
-				+ "sum(cns04) AS cns04withinx, "
-				+ "sum(cns05) AS cns05withinx, "
-				+ "sum(cns06) AS cns06withinx, "
-				+ "sum(cns07) AS cns07withinx, "
-				+ "sum(cns08) AS cns08withinx, "
-				+ "sum(cns09) AS cns09withinx, "
-				+ "sum(cns10) AS cns10withinx, "
-				+ "sum(cns11) AS cns11withinx, "
-				+ "sum(cns12) AS cns12withinx, "
-				+ "sum(cns13) AS cns13withinx, "
-				+ "sum(cns14) AS cns14withinx, "
-				+ "sum(cns15) AS cns15withinx, "
-				+ "sum(cns16) AS cns16withinx, "
-				+ "sum(cns17) AS cns17withinx, "
-				+ "sum(cns18) AS cns18withinx, "
-				+ "sum(cns19) AS cns19withinx, "
-				+ "sum(cns20) AS cns20withinx, "
-				+ "sum(cr01) AS cr01withinx, "
-				+ "sum(cr02) AS cr02withinx, "
-				+ "sum(cr03) AS cr03withinx, "
-				+ "sum(cr04) AS cr04withinx, "
-				+ "sum(cr05) AS cr05withinx, "
-				+ "sum(cr07) AS cr07withinx, "
-				+ "sum(ct01) AS ct01withinx, "
-				+ "sum(ct02) AS ct02withinx, "
-				+ "sum(cd01) AS cd01withinx, "
-				+ "sum(cd02) AS cd02withinx, "
-				+ "sum(cd03) AS cd03withinx, "
-				+ "sum(cd04) AS cd04withinx, "
-				+ "sum(cs01) AS cs01withinx, "
-				+ "sum(cs02) AS cs02withinx, "
+				+ "sum(c000" + projectionYear + ") AS c000withinx, "
+				+ "sum(ca01" + projectionYear + ") AS ca01withinx, "
+				+ "sum(ca02" + projectionYear + ") AS ca02withinx, "
+				+ "sum(ca03" + projectionYear + ") AS ca03withinx, "
+				+ "sum(ce01" + projectionYear + ") AS ce01withinx, "
+				+ "sum(ce02" + projectionYear + ") AS ce02withinx, "
+				+ "sum(ce03" + projectionYear + ") AS ce03withinx, "
+				+ "sum(cns01" + projectionYear + ") AS cns01withinx, "
+				+ "sum(cns02" + projectionYear + ") AS cns02withinx, "
+				+ "sum(cns03" + projectionYear + ") AS cns03withinx, "
+				+ "sum(cns04" + projectionYear + ") AS cns04withinx, "
+				+ "sum(cns05" + projectionYear + ") AS cns05withinx, "
+				+ "sum(cns06" + projectionYear + ") AS cns06withinx, "
+				+ "sum(cns07" + projectionYear + ") AS cns07withinx, "
+				+ "sum(cns08" + projectionYear + ") AS cns08withinx, "
+				+ "sum(cns09" + projectionYear + ") AS cns09withinx, "
+				+ "sum(cns10" + projectionYear + ") AS cns10withinx, "
+				+ "sum(cns11" + projectionYear + ") AS cns11withinx, "
+				+ "sum(cns12" + projectionYear + ") AS cns12withinx, "
+				+ "sum(cns13" + projectionYear + ") AS cns13withinx, "
+				+ "sum(cns14" + projectionYear + ") AS cns14withinx, "
+				+ "sum(cns15" + projectionYear + ") AS cns15withinx, "
+				+ "sum(cns16" + projectionYear + ") AS cns16withinx, "
+				+ "sum(cns17" + projectionYear + ") AS cns17withinx, "
+				+ "sum(cns18" + projectionYear + ") AS cns18withinx, "
+				+ "sum(cns19" + projectionYear + ") AS cns19withinx, "
+				+ "sum(cns20" + projectionYear + ") AS cns20withinx, "
+				+ "sum(cr01" + projectionYear + ") AS cr01withinx, "
+				+ "sum(cr02" + projectionYear + ") AS cr02withinx, "
+				+ "sum(cr03" + projectionYear + ") AS cr03withinx, "
+				+ "sum(cr04" + projectionYear + ") AS cr04withinx, "
+				+ "sum(cr05" + projectionYear + ") AS cr05withinx, "
+				+ "sum(cr07" + projectionYear + ") AS cr07withinx, "
+				+ "sum(ct01" + projectionYear + ") AS ct01withinx, "
+				+ "sum(ct02" + projectionYear + ") AS ct02withinx, "
+				+ "sum(cd01" + projectionYear + ") AS cd01withinx, "
+				+ "sum(cd02" + projectionYear + ") AS cd02withinx, "
+				+ "sum(cd03" + projectionYear + ") AS cd03withinx, "
+				+ "sum(cd04" + projectionYear + ") AS cd04withinx, "
+				+ "sum(cs01" + projectionYear + ") AS cs01withinx, "
+				+ "sum(cs02" + projectionYear + ") AS cs02withinx, "
 				+ criteria1 + " AS " + criteria4 + " FROM census INNER JOIN " + DS + " USING(blockid) GROUP BY " + criteria4 + "), "
 			
 				+ "totalpop AS (SELECT " + DS + ".*, LEFT(" + DS + ".blockid,5) AS countyid, census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid "
 				+ "	FROM " + DS + " INNER JOIN census_blocks USING(blockid)), "
-				+ "totalpop1 AS (SELECT sum(c000) AS c000, "
-				+ "sum(ca01) AS ca01,"
-				+ "sum(ca02) AS ca02,"
-				+ "sum(ca03) AS ca03,"
-				+ "sum(ce01) AS ce01,"
-				+ "sum(ce02) AS ce02,"
-				+ "sum(ce03) AS ce03,"
-				+ "sum(cns01) AS cns01,"
-				+ "sum(cns02) AS cns02,"
-				+ "sum(cns03) AS cns03,"
-				+ "sum(cns04) AS cns04,"
-				+ "sum(cns05) AS cns05,"
-				+ "sum(cns06) AS cns06,"
-				+ "sum(cns07) AS cns07,"
-				+ "sum(cns08) AS cns08,"
-				+ "sum(cns09) AS cns09,"
-				+ "sum(cns10) AS cns10,"
-				+ "sum(cns11) AS cns11,"
-				+ "sum(cns12) AS cns12,"
-				+ "sum(cns13) AS cns13,"
-				+ "sum(cns14) AS cns14,"
-				+ "sum(cns15) AS cns15,"
-				+ "sum(cns16) AS cns16,"
-				+ "sum(cns17) AS cns17,"
-				+ "sum(cns18) AS cns18,"
-				+ "sum(cns19) AS cns19,"
-				+ "sum(cns20) AS cns20,"
-				+ "sum(cr01) AS cr01,"
-				+ "sum(cr02) AS cr02,"
-				+ "sum(cr03) AS cr03,"
-				+ "sum(cr04) AS cr04,"
-				+ "sum(cr05) AS cr05,"
-				+ "sum(cr07) AS cr07,"
-				+ "sum(ct01) AS ct01,"
-				+ "sum(ct02) AS ct02,"
-				+ "sum(cd01) AS cd01,"
-				+ "sum(cd02) AS cd02,"
-				+ "sum(cd03) AS cd03,"
-				+ "sum(cd04) AS cd04,"
-				+ "sum(cs01) AS cs01,"
-				+ "sum(cs02) AS cs02,"
+				+ "totalpop1 AS (SELECT sum(c000" + projectionYear + ") AS c000, "
+				+ "sum(ca01" + projectionYear + ") AS ca01,"
+				+ "sum(ca02" + projectionYear + ") AS ca02,"
+				+ "sum(ca03" + projectionYear + ") AS ca03,"
+				+ "sum(ce01" + projectionYear + ") AS ce01,"
+				+ "sum(ce02" + projectionYear + ") AS ce02,"
+				+ "sum(ce03" + projectionYear + ") AS ce03,"
+				+ "sum(cns01" + projectionYear + ") AS cns01,"
+				+ "sum(cns02" + projectionYear + ") AS cns02,"
+				+ "sum(cns03" + projectionYear + ") AS cns03,"
+				+ "sum(cns04" + projectionYear + ") AS cns04,"
+				+ "sum(cns05" + projectionYear + ") AS cns05,"
+				+ "sum(cns06" + projectionYear + ") AS cns06,"
+				+ "sum(cns07" + projectionYear + ") AS cns07,"
+				+ "sum(cns08" + projectionYear + ") AS cns08,"
+				+ "sum(cns09" + projectionYear + ") AS cns09,"
+				+ "sum(cns10" + projectionYear + ") AS cns10,"
+				+ "sum(cns11" + projectionYear + ") AS cns11,"
+				+ "sum(cns12" + projectionYear + ") AS cns12,"
+				+ "sum(cns13" + projectionYear + ") AS cns13,"
+				+ "sum(cns14" + projectionYear + ") AS cns14,"
+				+ "sum(cns15" + projectionYear + ") AS cns15,"
+				+ "sum(cns16" + projectionYear + ") AS cns16,"
+				+ "sum(cns17" + projectionYear + ") AS cns17,"
+				+ "sum(cns18" + projectionYear + ") AS cns18,"
+				+ "sum(cns19" + projectionYear + ") AS cns19,"
+				+ "sum(cns20" + projectionYear + ") AS cns20,"
+				+ "sum(cr01" + projectionYear + ") AS cr01,"
+				+ "sum(cr02" + projectionYear + ") AS cr02,"
+				+ "sum(cr03" + projectionYear + ") AS cr03,"
+				+ "sum(cr04" + projectionYear + ") AS cr04,"
+				+ "sum(cr05" + projectionYear + ") AS cr05,"
+				+ "sum(cr07" + projectionYear + ") AS cr07,"
+				+ "sum(ct01" + projectionYear + ") AS ct01,"
+				+ "sum(ct02" + projectionYear + ") AS ct02,"
+				+ "sum(cd01" + projectionYear + ") AS cd01,"
+				+ "sum(cd02" + projectionYear + ") AS cd02,"
+				+ "sum(cd03" + projectionYear + ") AS cd03,"
+				+ "sum(cd04" + projectionYear + ") AS cd04,"
+				+ "sum(cs01" + projectionYear + ") AS cs01,"
+				+ "sum(cs02" + projectionYear + ") AS cs02,"
 				+ criteria4
 				+ " FROM totalpop GROUP BY " + criteria4 + ") "
 				+ "select popserved1.*, popatlos1.*, popwithinx.*, totalpop1.*, " + criteria2 + "." + criteria4 + " AS areaid, " + criteria5 + " AS areaname "
@@ -1056,7 +1063,7 @@ public class PgisEventManager {
 				+ "LEFT JOIN popatlos1 USING(" + criteria4 + ") "
 				+ "LEFT JOIN popwithinx USING(" + criteria4 + ") "
 				+ "LEFT JOIN totalpop1 USING(" + criteria4 + ") ";
-				//		    System.out.println(query);
+						    System.out.println(query);
 			    try {
 			    	stmt = connection.createStatement();
 					ResultSet rs = stmt.executeQuery(query); 
@@ -1721,7 +1728,7 @@ public class PgisEventManager {
 	/**
 	 *Queries Stops count, unduplicated urban pop and rural pop within x meters of all stops within the given geographic area
 	 */
-	public static long[] stopsPop(int type, String areaId, String username, double x, int dbindex) 
+	public static long[] stopsPop(int type, String areaId, String username, double x, int dbindex, String popYear) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
@@ -1742,7 +1749,7 @@ public class PgisEventManager {
     	  criteria2 = "block."+Types.getIdColumnName(type);
       }
       String querytext = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), stops as (select id, agencyid, "+column+", location from "
-      		+ "gtfs_stops stop inner join aids on stop.agencyid = aids.aid), census as (select population, poptype from "
+      		+ "gtfs_stops stop inner join aids on stop.agencyid = aids.aid), census as (select population"+popYear+" as population, poptype from "
       		+ "census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+criteria2 +"='"+areaId+"' group by block.blockid), urbanpop as "
       		+ "(select COALESCE(sum(population),0) upop from census where poptype = 'U'), ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'),"
       		+ " stopcount as (select count(stops.id) as stopscount from stops) select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop, COALESCE(rpop,0) as "
@@ -1761,7 +1768,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return results;
@@ -1771,7 +1778,7 @@ public class PgisEventManager {
 	 *Queries Service miles, service hours, service stops, served pop at level of service (urban and rural), served population (urban and rural), service days, hours of service,
 	 *and connected communities for a geographic area. keys are: svcmiles, svchours, svcstops, upopatlos, rpopatlos, uspop, rspop, svcdays, fromtime, totime, connections
 	 */
-	public static HashMap<String, String> ServiceMetrics(int type, String[] date, String[] day, String[] fulldates, String areaId, String username, int LOS, double x, int dbindex) 
+	public static HashMap<String, String> ServiceMetrics(int type, String[] date, String[] day, String[] fulldates, String areaId, String username, int LOS, double x, int dbindex, String popYear) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
@@ -1806,8 +1813,8 @@ public class PgisEventManager {
       		+ "COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), concom as (select distinct map."+Types.getIdColumnName(type)+" from "
       		+Types.getTripMapTableName(type)+" map inner join trips on trips.aid=map.agencyid and trips.tripid=map.tripid),concomnames as (select coalesce(string_agg(distinct "
       		+Types.getNameColumn(type)+",'; ' order by "+Types.getNameColumn(type)+"),'-') as connections from concom inner join "+Types.getTableName(type)+" using("
-      		+Types.getIdColumnName(type)+")), popserved as (select (population*sum(service)) as population, poptype from census_blocks block inner join stops on "
-      		+ "st_dwithin(block.location, stops.location,"+String.valueOf(x)+") where "+criteria+"='"+areaId+"' group by blockid), popatlos as (select population, poptype from "
+      		+Types.getIdColumnName(type)+")), popserved as (select (population"+popYear+"*sum(service)) as population, poptype from census_blocks block inner join stops on "
+      		+ "st_dwithin(block.location, stops.location,"+String.valueOf(x)+") where "+criteria+"='"+areaId+"' group by blockid), popatlos as (select population"+popYear+" as population, poptype from "
       		+ "census_blocks block inner join stopsatlos on st_dwithin(block.location,stopsatlos.location,"+String.valueOf(x)+") where "+criteria+"='"+areaId+"' group by blockid),"
       		+ "upopatlos as (select COALESCE(sum(population),0) as upoplos from popatlos where poptype='U'), rpopatlos as (select COALESCE(sum(population),0) as rpoplos from "
       		+ "popatlos where poptype='R'), upopserved as (select COALESCE(sum(population),0) as uspop from popserved where poptype='U'), rpopserved as (select "
@@ -1835,7 +1842,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return response;
@@ -1845,7 +1852,7 @@ public class PgisEventManager {
 	 *Queries geographic allocation of service for transit agency reports
 	 *0:county 1:census tracts 2:census places 3:urban areas 4:ODOT region 5:congressional district
 	 */
-	public static List<GeoR> geoallocation(int type, String agencyId, int dbindex, String username, int urbanPop) 
+	public static List<GeoR> geoallocation(int type, String agencyId, int dbindex, String username, int urbanPop, String popYear) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
@@ -1857,7 +1864,9 @@ public class PgisEventManager {
       String query = "with ";
       String join = "";
       String aidsjoin = "";
+      String routesidsjoin = "";
       String routesquery = "";
+      String tractsFilter = "";
       if (agencyId==null){
     	  query += "aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'),";
     	  join = "left";
@@ -1865,48 +1874,50 @@ public class PgisEventManager {
       }else {
     	  join = "inner";
     	  aidsjoin = "where map.agencyid='"+agencyId+"'";
+    	  routesidsjoin = aidsjoin;		
+    	  tractsFilter = " INNER JOIN stops ON ST_Contains(census_tracts.shape, stops.location) ";
       }
       if (type==0){//county: tracts are queries and summed up to reflect the true number of census tracts in the results
     	  criteria = "left(blockid,11)";      
-    	  areaquery = "areas as (select countyid as areaid, cname as areaname, population, landarea, waterarea, odotregionid, regionname from census_counties), "
-    	  		+ "tracts as (select count(tractid) as tracts, left(tractid,5) as areaid from census_tracts group by left(tractid,5)) ";    	  
+    	  areaquery = "areas as (select countyid as areaid, cname as areaname, population"+popYear+" as population, landarea, waterarea, odotregionid, regionname from census_counties), "
+    	  		+ "tracts as (select count(distinct tractid) as tracts, left(tractid,5) as areaid from census_tracts " + tractsFilter + " group by left(tractid,5)) ";    	  
     	  selectquery = "select areaid, areaname, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, coalesce(stops,0) as stops,"
     	  		+ " odotregionid, regionname, tracts from areas "+join+" join stoproutes using(areaid) left join tracts using (areaid) left join routes using(areaid)";
-    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, countyid AS areaid FROM census_counties_trip_map GROUP BY areaid),";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, countyid AS areaid FROM census_counties_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  stoproutes = "left(areaid,5)";
       } else if (type==1){//census tract
     	  criteria = "left(blockid,11)";      
-    	  areaquery = "areas as (select tractid as areaid, tname as areaname, tract.population, tract.landarea, tract.waterarea from census_tracts tract)";
-    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, tractid AS areaid FROM census_tracts_trip_map GROUP BY areaid),";
+    	  areaquery = "areas as (select tractid as areaid, tname as areaname, tract.population"+popYear+" as population, tract.landarea, tract.waterarea from census_tracts tract)";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, tractid AS areaid FROM census_tracts_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)";
       } else if (type==3){//census urban
     	  criteria = Types.getIdColumnName(type);
-    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, urbanid AS areaid FROM census_urbans_trip_map GROUP BY areaid),";
-    	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population, landarea, waterarea from " + Types.getTableName(type)+" where population>"+urbanPop+")";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, urbanid AS areaid FROM census_urbans_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
+    	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" where population"+popYear+">"+urbanPop+")";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
       	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)";
       } else if (type==4) { //ODOT Regions
     	  criteria = Types.getIdColumnName(type);
     	  areaquery = "areas as (select odotregionid as areaid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties, "
-    	  		+ "sum(population) as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname)";
-    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, regionid AS areaid FROM census_counties_trip_map GROUP BY areaid),";
+    	  		+ "sum(population"+popYear+") as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname)";
+    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, regionid AS areaid FROM census_counties_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  selectquery = " select areas.areaid, areaname, counties, population, landarea, waterarea, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid)  left join routes USING(areaid)";
-      } else {// census place, urban area, or congressional district    	  
+      } else {// census place or congressional district    	  
     	  criteria = Types.getIdColumnName(type);
-    	  if (type == 2) routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, placeid AS areaid FROM census_places_trip_map GROUP BY areaid),";
-    	  else if (type == 5) routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, congdistid AS areaid FROM census_congdists_trip_map GROUP BY areaid),";
-    	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population, landarea, waterarea from " + Types.getTableName(type)+")";
+    	  if (type == 2) routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, placeid AS areaid FROM census_places_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
+    	  else if (type == 5) routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, congdistid AS areaid FROM census_congdists_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
+    	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+")";
     	  selectquery = " select areas.areaid, areaname, population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)";
       }      
-     query +="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid from gtfs_stops stop inner join "
+     query +="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
     		+ "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), stoproutes as (select "
     		+ "coalesce(count(distinct(concat(aid,stops.stopid))),0) as stops, coalesce(count(distinct aid),0) as agencies,"
     		+stoproutes+" as areaid from stops inner join gtfs_stop_route_map map on stops.aid_def = map.agencyid_def and stops.stopid = map.stopid group by "
     		+stoproutes+"),"+routesquery+areaquery+ selectquery;
-//    System.out.println(query);
+    System.out.println(query);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
@@ -1936,7 +1947,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return response;
@@ -2054,7 +2065,7 @@ public class PgisEventManager {
 			stmt.close();
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -2069,7 +2080,7 @@ public class PgisEventManager {
 	 *stops by geographic are, agency, and route
 	 * @throws SQLException 
 	*/
-	public static ArrayList <StopR> stopGeosr(String username, int type, String[] dates, String[] days, String areaId, String agency, String route, double x, int dbindex) throws SQLException {
+	public static ArrayList <StopR> stopGeosr(String username, int type, String[] dates, String[] days, String areaId, String agency, String route, double x, int dbindex, String popYear) throws SQLException {
 		ArrayList <StopR> response = new ArrayList<StopR>();		
 		StopR instance;
 		Connection connection = makeConnection(dbindex);	
@@ -2123,12 +2134,12 @@ public class PgisEventManager {
 		}
 		mainquery += "stops0 as (select map.agencyid as agencyid,stop.lat, stop.lon, stop.name as name, stop.id as id, url, location, urbanid, regionid, congdistid, placeid, blockid "
 				+ "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id " + stopsfilter + "), "
-				+ "stops AS (select stops0.*, urban.population AS urbanpop FROM stops0 LEFT JOIN census_urbans AS urban ON urban.urbanid = stops0.urbanid AND population >50000), "
+				+ "stops AS (select stops0.*, urban.population"+popYear+" AS urbanpop FROM stops0 LEFT JOIN census_urbans AS urban ON urban.urbanid = stops0.urbanid AND population"+popYear+" >50000), "
 				+ "agencies as (select agencies.id as agencyid, agencies.name as aname from gtfs_agencies "
 				+ "agencies "+agenciesfilter+"), routes as (select map.agencyid, stops.id, coalesce(string_agg(map.routeid,'; '),'-') as routes from gtfs_stop_route_map map inner "
 				+ "join stops on stops.agencyid=map.agencyid and stops.id=map.stopid "+routesfilter+" group by map.agencyid, stops.id), upops as (select stops.agencyid, stops.id, "
-				+ "coalesce(sum(population),0) as upop from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "
-				+ popsfilter+" poptype='U' group by agencyid, id), rpops as (select stops.agencyid, stops.id, coalesce(sum(population),0) as rpop from census_blocks block inner "
+				+ "coalesce(sum(population"+popYear+"),0) as upop from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "
+				+ popsfilter+" poptype='U' group by agencyid, id), rpops as (select stops.agencyid, stops.id, coalesce(sum(population"+popYear+"),0) as rpop from census_blocks block inner "
 				+ "join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+popsfilter+" poptype='R' group by agencyid, id), "
 				+ "result AS (select stops.agencyid, stops.lat, stops.lon, aname, id, name, url, stops.urbanid, stops.regionid, stops.congdistid, stops.placeid, stops.blockid, "
 				+ "routes, coalesce(upop,0) as upop, coalesce(rpop,0) as rpop, COALESCE(urbanpop,0) AS overfiftypop "
@@ -2175,7 +2186,7 @@ public class PgisEventManager {
 			stmt.close();
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -2206,7 +2217,7 @@ public class PgisEventManager {
 	 *routes by geographic area	
 	 *routes by agency and geographic area  
 	*/
-	public static ArrayList <RouteR> RouteGeosr(String username, int type, String areaId, String agency, String[] date, String[] day, double x, int dbindex) {
+	public static ArrayList <RouteR> RouteGeosr(String username, int type, String areaId, String agency, String[] date, String[] day, double x, int dbindex, String popYear) {
 		ArrayList <RouteR> response = new ArrayList<RouteR>();		
 		RouteR instance;
 		Connection connection = makeConnection(dbindex);		
@@ -2267,7 +2278,7 @@ public class PgisEventManager {
 		mainquery+= "), "+ routesfilter + tripsfilter + stopscountfilter 
 				+ "freq as (select aid, routeid, coalesce(count(concat(routeid)),0) as frequency from trips group by aid, routeid), service as (select aid, routeid, COALESCE(sum(length),0) "
 				+ "as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips group by aid,routeid), "
-				+ "blocks as (select trips.aid, trips.routeid, population, poptype, block.blockid, block.regionid, block.urbanid, block.placeid, block.congdistid "
+				+ "blocks as (select trips.aid, trips.routeid, population"+popYear+" as population, poptype, block.blockid, block.regionid, block.urbanid, block.placeid, block.congdistid "
 				+ " from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
 				+ "inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid inner join census_blocks block on "
 				+ "st_dwithin(block.location, stop.location, "+String.valueOf(x)+") "+blocksfilter+" group by aid,routeid,block.blockid),"
@@ -2337,7 +2348,7 @@ public class PgisEventManager {
 			stmt.close();
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-//	        System.exit(0);
+//	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -2433,7 +2444,7 @@ public class PgisEventManager {
 			stmt.close();
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -2444,13 +2455,13 @@ public class PgisEventManager {
 	/**
 	 *Queries Route miles for all urban areas with population => pop
 	 */
-	public static float AUrbansRouteMiles(long pop, String username, int dbindex) 
+	public static float AUrbansRouteMiles(long pop, String username, int dbindex, String popYear) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
       float RouteMiles = 0;
       String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where "
-      		+ "population>="+String.valueOf(pop)+"), trips as (select agencyid, routeid, round(max(length)::numeric,2) as length from census_urbans_trip_map map inner "
+      		+ "population"+popYear+">="+String.valueOf(pop)+"), trips as (select agencyid, routeid, round(max(length)::numeric,2) as length from census_urbans_trip_map map inner "
       		+ "join aids on map.agencyid_def=aids.aid inner join areas on areas.urbanid = map.urbanid group by agencyid, routeid) select sum(length) as routemiles from trips";
       try {
         stmt = connection.createStatement();
@@ -2462,7 +2473,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return RouteMiles;
@@ -2471,13 +2482,13 @@ public class PgisEventManager {
 	/**
 	 *Queries Fare Information for urban areas with population >= pop. keys are; minfare, maxfare, medianfare, averagefare
 	 */
-	public static HashMap<String, Float> AUrbansFareInfo(String[] date, String[] day, long pop, String username, int dbindex) 
+	public static HashMap<String, Float> AUrbansFareInfo(String[] date, String[] day, long pop, String username, int dbindex, String popYear) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
       HashMap<String, Float> response = new HashMap<String, Float>();
       ArrayList<Float> faredata = new ArrayList<Float>();
-      String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where population>="
+      String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where population"+popYear+">="
       +String.valueOf(pop)+"), svcids as (";
       for (int i=0; i<date.length; i++){
     	  query+= "(select serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]+
@@ -2503,7 +2514,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);
       if (faredata.size()>0){
@@ -2532,13 +2543,13 @@ public class PgisEventManager {
 	/**
 	 *Queries Stops count and unduplicated urban pop within x meters of all stops within urban areas with population >= pop
 	 */
-	public static long[] AUrbansstopsPop(long pop, String username, double x, int dbindex) 
+	public static long[] AUrbansstopsPop(long pop, String username, double x, int dbindex, String popYear) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
       String querytext = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where "
-      		+ "population>="+pop+"), stops as (select id, agencyid, blockid, location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid inner join areas on "
-      		+ "stop.urbanid = areas.urbanid), census as (select population from census_blocks block inner join stops on st_dwithin(block.location, stops.location,"
+      		+ "population"+popYear+">="+pop+"), stops as (select id, agencyid, blockid, location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid inner join areas on "
+      		+ "stop.urbanid = areas.urbanid), census as (select population"+popYear+" as population from census_blocks block inner join stops on st_dwithin(block.location, stops.location,"
       		+ String.valueOf(x)+") inner join areas on block.urbanid = areas.urbanid group by block.blockid), urbanpop as (select COALESCE(sum(population),0) upop from census ),"
       		+ "stopcount as (select count(stops.id) as stopscount from stops) select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop from stopcount inner join "
       		+ "urbanpop on true";
@@ -2556,7 +2567,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return results;
@@ -2566,13 +2577,13 @@ public class PgisEventManager {
 	 *Queries Service miles, service hours, service stops, served pop at level of service (urban and rural), served population (urban and rural), service days, hours of service,
 	 *and connected communities for urban areas with population >= pop. keys are: svcmiles, svchours, svcstops, upopatlos, uspop, svcdays, fromtime, totime, connections
 	 */
-	public static HashMap<String, String> UAreasServiceMetrics(String[] date, String[] day, String[] fulldates, long pop, String username, int LOS, double x, int dbindex) 
+	public static HashMap<String, String> UAreasServiceMetrics(String[] date, String[] day, String[] fulldates, long pop, String username, int LOS, double x, int dbindex, String popYear) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
       HashMap<String, String> response = new HashMap<String, String>();      
       String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where "
-      		+ "population>="+pop+"), svcids as (";
+      		+ "population"+popYear+">="+pop+"), svcids as (";
       for (int i=0; i<date.length; i++){
     	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
     	  		+ "startdate::int<="+date[i]+" and enddate::int>="+date[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
@@ -2591,8 +2602,8 @@ public class PgisEventManager {
     		+ "min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on "
     		+ "stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid inner join areas "
     		+ "on stop.urbanid = areas.urbanid where stime.arrivaltime>0 and stime.departuretime>0 group by stime.stop_agencyid, stime.stop_id, stop.location), undupblocks as "
-    		+ "(select block.population, max(stops.service) as service from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)
-    		+") inner join areas on block.urbanid = areas.urbanid group by blockid), undupblocksatlos as (select block.population from census_blocks block inner join stopsatlos "
+    		+ "(select block.population"+popYear+" as population, max(stops.service) as service from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)
+    		+") inner join areas on block.urbanid = areas.urbanid group by blockid), undupblocksatlos as (select block.population"+popYear+" as population from census_blocks block inner join stopsatlos "
     		+ "on st_dwithin(block.location, stopsatlos.location, "+String.valueOf(x)+") inner join areas on block.urbanid = areas.urbanid group by blockid), svchrs as (select "
     		+ "COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), concom as (select distinct map.urbanid from census_urbans_trip_map map "
     		+ "inner join trips on trips.aid=map.agencyid and trips.tripid=map.tripid), concomnames as (select array_agg(uname order by uname)::text as connections from concom "
@@ -2621,7 +2632,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return response;
@@ -2632,11 +2643,11 @@ public class PgisEventManager {
 	/**
 	 *Queries Stops count, unduplicated urban pop and rural pop within x meters of all stops, and route miles for a givn transit agency
 	 */
-	public static double[] stopsPopMiles(String agencyId, double x, int dbindex) 
+	public static double[] stopsPopMiles(String agencyId, double x, int dbindex, String popYear) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;      
-      String querytext = "with census as (select population, poptype from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+
+      String querytext = "with census as (select population"+popYear+" as population, poptype from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+
       String.valueOf(x)+") inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid where map.agencyid= '" + agencyId +
       "' group by block.blockid), urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), ruralpop as (select COALESCE(sum(population),0) rpop " +
       "from census where poptype = 'R'), stopcount as (select count(stop.id) as stopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and " +
@@ -2659,7 +2670,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return results;
@@ -2669,7 +2680,7 @@ public class PgisEventManager {
 	 *Queries Service miles, service hours, service stops, served population (urban and rural), service days, and hours of service for a given agency id. 
 	 *keys are: svcmiles, svchours, svcstops, uspop, rspop, svcdays, fromtime, and totime
 	 */
-	public static HashMap<String, String> AgencyServiceMetrics(String[] date, String[] day, String[] fulldates, String agencyId, double x, int dbindex) 
+	public static HashMap<String, String> AgencyServiceMetrics(String[] date, String[] day, String[] fulldates, String agencyId, double x, int dbindex, String popYear) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
@@ -2688,7 +2699,7 @@ public class PgisEventManager {
     		+ "aid, stime.stop_id as stopid, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, stop.location, count(trips.aid) as service from gtfs_stops "
     		+ "stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid "
     		+ "and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0 group by stime.stop_agencyid, stime.stop_id, stop.location), undupblocks as "
-    		+ "(select block.population, block.poptype, max(stops.service) as service from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+
+    		+ "(select block.population"+popYear+" as population, block.poptype, max(stops.service) as service from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+
     		String.valueOf(x)+") group by blockid), svchrs as (select COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), upopserved as "
     		+ "(select COALESCE(sum(population*service),0) as uspop from undupblocks where poptype='U'), rpopserved as (select COALESCE(sum(population*service),0) as rspop from "
     		+ "undupblocks where poptype='R'), svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) select svcmiles, svchours, svcstops, uspop, "
@@ -2711,7 +2722,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return response;
@@ -2723,7 +2734,7 @@ public class PgisEventManager {
 	 *Queries Service miles, service hours, service stops, served pop at level of service (urban and rural), served population (urban and rural), service days, and hours of service
 	 * for the whole state. keys are: svcmiles, svchours, svcstops, upopatlos, rpopatlos, uspop, rspop, svcdays, fromtime, totime.
 	 */
-	public static HashMap<String, String> StatewideServiceMetrics(String[] date, String[] day, String[] fulldates, String username, int LOS, double x, int dbindex) 
+	public static HashMap<String, String> StatewideServiceMetrics(String[] date, String[] day, String[] fulldates, String username, int LOS, double x, int dbindex, String popYear) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
@@ -2746,8 +2757,8 @@ public class PgisEventManager {
     		+ "stops as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as "
     		+ "departure, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
     		+ "inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0 group by stime.stop_agencyid, "
-    		+ "stime.stop_id, stop.location),undupblocks as (select block.population, block.poptype, max(stops.service) as service from census_blocks block inner join stops on "
-    		+ "st_dwithin(block.location, stops.location,"+String.valueOf(x)+") group by blockid), undupblocksatlos as (select block.population, block.poptype from census_blocks "
+    		+ "stime.stop_id, stop.location),undupblocks as (select block.population"+popYear+" as population, block.poptype, max(stops.service) as service from census_blocks block inner join stops on "
+    		+ "st_dwithin(block.location, stops.location,"+String.valueOf(x)+") group by blockid), undupblocksatlos as (select block.population"+popYear+" as population, block.poptype from census_blocks "
     		+ "block inner join stopsatlos on st_dwithin(block.location, stopsatlos.location,"+String.valueOf(x)+") group by blockid), svchrs as (select COALESCE(min(arrival),-1)"
     		+ " as fromtime, COALESCE(max(departure),-1) as totime from stops), upopatlos as (select COALESCE(sum(population),0) as upoplos from undupblocksatlos where poptype='U')"
     		+ ", rpopatlos as (select COALESCE(sum(population),0) as rpoplos from undupblocksatlos where poptype='R'), upopserved as (select COALESCE(sum(population*service),0) "
@@ -2775,7 +2786,7 @@ public class PgisEventManager {
         stmt.close();        
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return response;
@@ -2784,13 +2795,13 @@ public class PgisEventManager {
 	/**
 	 *returns sum of unduplicated population within x distance of all stops in the state
 	 */
-	public static long PopWithinX(double x, String username, int dbindex){
+	public static long PopWithinX(double x, String username, int dbindex, String popYear){
 		long response = 0;
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery( "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pops as (select population "
+			ResultSet rs = stmt.executeQuery( "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pops as (select population"+popYear+" as population "
 					+ "from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location,stop.location,"+String.valueOf(x)+") inner join aids on "
 					+ "stop.agencyid=aids.aid group by block.blockid) select sum(population) as pop from pops");	
 			while ( rs.next() ) {
@@ -2798,7 +2809,7 @@ public class PgisEventManager {
 			}
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }
 		dropConnection(connection);
 		return response;
@@ -2812,20 +2823,20 @@ public class PgisEventManager {
 	 * @param dbindex
 	 * @return
 	 */
-	public static long[] cutOff50(double x, String username, int dbindex){
+	public static long[] cutOff50(double x, String username, int dbindex, String popYear){
 		long[] response = new long[4];
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery( "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
-					+ "pops as (select population, poptype, block.urbanid "
+					+ "pops as (select population"+popYear+" as population, poptype, block.urbanid "
 					+ "from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location,stop.location," + String.valueOf(x) + ") inner join aids on "
 					+ "stop.agencyid=aids.aid group by block.blockid), "
-					+ "overfiftypop AS (select sum(pops.population) as overfiftypop from pops INNER JOIN census_urbans USING(urbanid) where census_urbans.population>50000), "
-					+ "belowfiftypop AS (select sum(pops.population) as belowfiftypop from pops INNER JOIN census_urbans USING(urbanid) where census_urbans.population<50000),"
-					+ "totaloverfifty AS (select sum(population) as totaloverfifty from census_urbans WHERE census_urbans.population>50000), "
-					+ "totalbelowfifty AS (select sum(population) as totalbelowfifty from census_urbans WHERE census_urbans.population<50000)"
+					+ "overfiftypop AS (select sum(pops.population) as overfiftypop from pops INNER JOIN census_urbans USING(urbanid) where census_urbans.population"+popYear+">50000), "
+					+ "belowfiftypop AS (select sum(pops.population) as belowfiftypop from pops INNER JOIN census_urbans USING(urbanid) where census_urbans.population"+popYear+"<50000),"
+					+ "totaloverfifty AS (select sum(population"+popYear+") as totaloverfifty from census_urbans WHERE census_urbans.population"+popYear+">50000), "
+					+ "totalbelowfifty AS (select sum(population"+popYear+") as totalbelowfifty from census_urbans WHERE census_urbans.population"+popYear+"<50000)"
 					+ "select * from belowfiftypop INNER JOIN overfiftypop ON TRUE INNER JOIN totaloverfifty ON TRUE INNER JOIN totalbelowfifty ON TRUE");	
 			while ( rs.next() ) {
 				response[0] = rs.getLong("overfiftypop");
@@ -2856,7 +2867,7 @@ public class PgisEventManager {
 			}
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }
 		dropConnection(connection);
 		return response;
@@ -2889,7 +2900,7 @@ public class PgisEventManager {
 			}
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }
 		dropConnection(connection);
 		return response;
@@ -2914,7 +2925,7 @@ public class PgisEventManager {
 			}
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }
 		dropConnection(connection);
 		return response;
@@ -2939,7 +2950,7 @@ public class PgisEventManager {
 			}
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }
 		dropConnection(connection);
 		return response;
@@ -2966,7 +2977,7 @@ public class PgisEventManager {
 			}
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }
 		dropConnection(connection);
 		return response;
@@ -2997,7 +3008,7 @@ public class PgisEventManager {
         //c.close();
       } catch ( Exception e ) {
         System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-        System.exit(0);
+         
       }
       dropConnection(connection);      
       return population;
@@ -3048,7 +3059,7 @@ public class PgisEventManager {
 		        }
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }
 		dropConnection(connection);
 		return response;
@@ -3099,7 +3110,7 @@ public class PgisEventManager {
 		        }
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }
 		dropConnection(connection);
 		return response;
@@ -3173,7 +3184,7 @@ public class PgisEventManager {
 				stmt.close();
 			} catch ( Exception e ) {
 		        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-		        System.exit(0);
+		         
 		      }
 						
 		dropConnection(connection);
@@ -3250,7 +3261,7 @@ public class PgisEventManager {
 			stmt.close();
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }		
 		dropConnection(connection);
 		//System.out.println("Processing Clusters");
@@ -3275,7 +3286,7 @@ public class PgisEventManager {
 				+ " stops3 AS (SELECT stops2.* FROM stops2 INNER JOIN gtfs_stop_service_map AS map ON stop1=map.stopid AND stops2.agencyid1=map.agencyid_def),"
 				+ " stops4 AS (SELECT stops3.* FROM stops3 INNER JOIN gtfs_stop_service_map AS map ON stop2=map.stopid AND stops3.agencyid2=map.agencyid_def)"
 				+ " SELECT stops4.clusterid, array_agg(stop) AS stops FROM stops4 GROUP BY clusterid"; 
-System.out.println(query);
+		//System.out.println(query);
 		Statement stmt = null;
 		try {
 			Connection connection = makeConnection(dbindex);			
@@ -3611,7 +3622,7 @@ System.out.println(query);
 			stmt.close();
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -3783,7 +3794,7 @@ System.out.println(query);
 			stmt.close();
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -3934,7 +3945,7 @@ System.out.println(query);
 			stmt.close();
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -3976,7 +3987,7 @@ System.out.println(query);
 			stmt.close();
 		} catch ( Exception e ) {
 	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        System.exit(0);
+	         
 	      }					
 		dropConnection(connection);
 		response.Startdate = startDate;
