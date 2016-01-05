@@ -2604,7 +2604,7 @@ Loop:  	for (Trip trip: routeTrips){
 					+ "countiescount AS (SELECT count(distinct counties.countyid) AS countiescount FROM counties), "
 					+ "urbanarray AS (SELECT COALESCE(sum(distinct population"+popYear+")::text, 'N/A') AS urbanareaspop, COALESCE(array_agg(distinct stops.urbanid),'{N/A}') AS urbanids, COALESCE(array_agg(distinct uname),'{N/A}') AS urbannames FROM census_urbans INNER JOIN stops ON census_urbans.urbanid = stops.urbanid),"
 					+ "regionsarray  AS (SELECT  COALESCE(array_agg(distinct ' Region '||regionid),'{N/A}') AS regionids FROM stops),"
-					+ "pop0 AS (SELECT distinct census_blocks.blockid, population"+popYear+" FROM census_blocks INNER JOIN stops ON ST_Dwithin(census_blocks.location, stops.location, " + popRadius + ")), "
+					+ "pop0 AS (SELECT distinct census_blocks.blockid, population"+popYear+" as population FROM census_blocks INNER JOIN stops ON ST_Dwithin(census_blocks.location, stops.location, " + popRadius + ")), "
 					+ "pop AS (SELECT COALESCE(sum(population),0) AS pop FROM pop0),"
 					+ "pnr AS (SELECT pr.* FROM parknride AS pr INNER JOIN clustercoor ON ST_Dwithin(pr.geom,ST_transform(ST_setsrid(ST_MakePoint(clustercoor.lon, clustercoor.lat),4326), 2993)," + pnrRadius + ")), "
 					+ "pnrarray AS (SELECT COALESCE(count(pnr.pnrid),0) AS pnrcount,COALESCE(array_agg(pnr.pnrid),'{}') AS pnrids, COALESCE(array_agg(pnr.lat),'{}') AS pnrlats, "
