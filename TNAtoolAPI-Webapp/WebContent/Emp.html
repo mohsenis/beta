@@ -59,18 +59,21 @@
 	$(function() {
 	    $( "#dialog-confirm" ).dialog({
 	      resizable: false,
-	      height: 220,
+	      height: 240,
 	      width: 600,
 	      modal: true,
 	      autoOpen: false,
 	      buttons: {
-	        "Yes": function() {
+	        "Proceed": function() {
 	          $( this ).dialog( "close" );
+	          if($('#showMSG').prop('checked')){
+	        	  showPrompt = false;
+	          }
 	        },
-	        "No": function() {
+	        /* "No": function() {
 	          $( this ).dialog( "close" );
 	          showPrompt = false;
-	        }
+	        } */
 	      }
 	    });
 	    $( "#dialog-confirm" ).dialog("close");
@@ -303,8 +306,9 @@
 		if ($('#projectionYear').val() == 'current'){
 			$('#jstree').jstree(default_jstree);
 			$('#dataSet').removeAttr('disabled');
-			$('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
-					+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?');
+			/* $('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>'
+					+'This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
+					+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?'); */
 			$("#checkbox").removeAttr("disabled");
 
 		}			
@@ -315,11 +319,10 @@
 			bindEvents();
 			$('#dataSet').attr('disabled', 'disabled');;
 			$('#dataSet').val('lodes_blocks_rac');
-			$('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>'
-			    +'The numbers shown for the projected employment are linearly estimated based on the projected employments of 2015 and 2025 for different counties.');
-			    //+'ALIREZA - > This report is generated based on' 
-				//+' the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
-				//+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?');
+			$('#promptText').html(/* '<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' */''
+			    +'<span style="line-height: 150%;">The future employment figures provided by this report were estimated using a linear projection '
+			    +'that used county-level employment for 2010 and employment estimates for the years 2015 and 2025 as a basis.</span>'
+			    +'<br><br><input type="checkbox" id="showMSG">Do not show this message again');
 			$("#checkbox").attr("disabled", true);  
 			$('#checkbox').attr('checked', false);
 			racBool = true;
@@ -413,7 +416,7 @@
 		}
 		
 		// prompt for showing meta-data
-		if (showPrompt) $('#dialog-confirm').dialog('open');
+		if (showPrompt && $('#projectionYear').val() != 'current') $('#dialog-confirm').dialog('open');
 		$('.ui-dialog').css("opacity","1");
 		
 		// update dates
@@ -711,7 +714,7 @@
 		<br>
 		<br>
 		<div>
-			<div class="headerBC" id="accordion" >
+			<div class="headerBC" id="accordion" style="margin-bottom:1em">
 				<h3></h3>
 				<div>
 					<table style="width:100%;">
@@ -732,12 +735,12 @@
 				</div>
 			</div>
 			<table style="width:100%">
-			<tr><td><label for="dataSet">Select Data Set:</label></td><td style="width: 45%;"><select name="dataSet" id="dataSet" onchange=datasetChange(this) style="height:25px;width:95%;">
-					  <option value="lodes_blocks_wac" selected>WAC -  Workplace Area Characteristic data</option>
-					  <option value="lodes_blocks_rac">RAC - Residence Area Characteristic data</option>
+			<tr><td><label for="dataSet">Select Data Set:</label></td><td><select name="dataSet" id="dataSet" onchange=datasetChange(this) style="height:25px;width:95%;">
+					  <option value="lodes_blocks_wac" selected>WAC - Workplace Area Characteristic</option>
+					  <option value="lodes_blocks_rac">RAC - Residence Area Characteristic</option>
 					  <option value="3">WAC & RAC</option>
 				 </select><br></td></tr>
-			 <tr><td><label for="reportType">Select report type:</label></td><td><select name="reportType" id="reportType" style="height:25px;width:95%;" onchange="selectFunction()">
+			 <tr><td><label for="reportType">Select report type:</label></td><td><select name="reportType" id="reportType" style="height:25px;width:65%;" onchange="selectFunction()">
 				  <option value="Counties" selected>Counties</option>
 				  <option value="Census Places">Census Places</option>
 				  <option value="Congressional Districts">Congressional Districts</option>
@@ -745,7 +748,7 @@
 				  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
 				  <option value="Agencies">Agencies</option>
 			 </select><br></td></tr>
-			 <tr><td><label for="projectionYear">Select year:</label></td><td><select name="projectionYear" id="projectionYear" style="height:25px;width:95%;" onchange="updateProjection()">
+			 <tr><td><label for="projectionYear">Select year:</label></td><td><select name="projectionYear" id="projectionYear" style="height:25px;width:65%;" onchange="updateProjection()">
 				  <option value="current" selected>2013</option>
 				  <option value="2015">2015 (Projection)</option>
 				  <option value="2020">2020 (Projection)</option>
@@ -756,8 +759,8 @@
 				  <option value="2045">2045 (Projection)</option>
 				  <option value="2050">2050 (Projection)</option>
 			 </select><br></td></tr>
-			<tr><td>Population Search Radius (miles)</td><td><input type="text" name="Sradius" id="Sradius" style="text-indent: 2px; height:21px;width:92%;" value="0.25" onkeypress="return isNumber(event)"/></td></tr>
-			<tr><td>Minimum Level of Service </td><td><input type="text" name="LOS" id="LOS" style="text-indent: 2px; height:21px; width:92%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
+			<tr><td>Population Search Radius</td><td><input type="text" name="Sradius" id="Sradius" style="text-indent: 2px; height:21px;width:49%;" value="0.25" onkeypress="return isNumber(event)"/><span style="margin-left:4px">miles</span></td></tr>
+			<tr><td>Minimum Level of Service </td><td><input type="text" name="LOS" id="LOS" style="text-indent: 2px; height:21px; width:49%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
 			</table>
 			<input id="checkbox" type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>
@@ -765,9 +768,12 @@
 		<br>
 	</div>
 	
-	<div id="dialog-confirm" title="Meta-data">
-	  <div id="promptText"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 45px 0;"></span>This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure
-Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?</div>
+	<div id="dialog-confirm" style="text-align: justify;" title="Disclaimer">
+	  <div id="promptText"><!-- <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 45px 0;"></span> -->
+		  The future employment figures provided by the selected report were estimated using a linear projection
+		  that used county-level employment of 2010 and county-level employment estimates for the years 2015 and 2025 as a basis.
+		  <br><br><input type="checkbox" id="showMSG">Do not show this message again
+	  </div>
 	</div>
 		
 </body>
