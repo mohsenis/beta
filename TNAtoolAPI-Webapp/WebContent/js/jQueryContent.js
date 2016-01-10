@@ -25,7 +25,7 @@ function setPopOptions(){
 }
 function popselect(e){
 	if (e.value !=popYear){
-		location.replace(document.URL.split("popYear")[0]+'popYear='+e.value);
+		location.replace(document.URL.split("popYear")[0]+'&popYear='+e.value);
 	}
 }
 
