@@ -633,6 +633,9 @@ public class Queries {
        	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
+       	if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
        	int totalLoad = 10;
        	int index =0;
        	String[] dates = date.split(",");
@@ -715,6 +718,9 @@ public class Queries {
     	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
+    	if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
     	String[] dates = date.split(",");
     	String[][] datedays = daysOfWeekString(dates);
     	String[] fulldates = datedays[0];
@@ -847,6 +853,9 @@ public class Queries {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
+		if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
 		int index =0;
 		int totalLoad = 2;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -944,7 +953,9 @@ public class Queries {
     		agency = (agency.equals("null"))? null:agency;    	
     	if (areaid!=null)
     		areaid = (areaid.equals("null"))? null:areaid;
-    	
+    	if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
     	String[] dates = date.split(",");
     	String[][] datedays = daysOfWeekString(dates);
     	String[] sdates = datedays[0]; //date in YYYYMMDD format
@@ -1178,6 +1189,9 @@ Loop:  	for (Trip trip: routeTrips){
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
+		if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
 		int index = 1;
 		int totalLoad = 3;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -1495,6 +1509,9 @@ Loop:  	for (Trip trip: routeTrips){
 		if (upop==null || upop<=0){
        		upop=50000;
        	}
+		if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
 		List<Urban> allurbanareas = new ArrayList<Urban> ();
 		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		try {
@@ -1590,6 +1607,9 @@ Loop:  	for (Trip trip: routeTrips){
 		if (L==null || L<0){
        		L = LEVEL_OF_SERVICE;
        	}
+		if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
 		String[] dates = date.split(",");
     	String[][] datedays = daysOfWeekString(dates);
     	String[] fulldates = fulldate(dates);
@@ -2176,6 +2196,9 @@ Loop:  	for (Trip trip: routeTrips){
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
 			dbindex = default_dbindex;
         }
+		if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
 		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		int totalLoad = 2;
 		int index = 0;
@@ -2243,6 +2266,9 @@ Loop:  	for (Trip trip: routeTrips){
 		if (L==null || L<0){
        		L = LEVEL_OF_SERVICE;
        	}
+		if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
 		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		String[] dates = date.split(",");
     	String[][] datedays = daysOfWeekString(dates);
@@ -2357,6 +2383,9 @@ Loop:  	for (Trip trip: routeTrips){
 		if (L==null || L<0){
        		L = LEVEL_OF_SERVICE;
        	}
+		if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
 		String[] dates = date.split(",");
     	String[][] datedays = daysOfWeekString(dates);
     	String[] fulldates = fulldate(dates);
@@ -2522,6 +2551,9 @@ Loop:  	for (Trip trip: routeTrips){
 	@Path("/hubsR2")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object getHubs(@QueryParam("x1") double x1, @QueryParam("x2") double x2, @QueryParam("popYear") String popYear, @QueryParam("x3") double x3, @QueryParam("key") double key, @QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException {
+		if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
 		HubsClusterList response = new HubsClusterList();
 		String[] dates = date.split(",");
     	String[][] datedays = daysOfWeekString(dates);
