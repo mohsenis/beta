@@ -88,15 +88,15 @@ import org.xml.sax.SAXException;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-	private final static String basePath = "C:/Users/PB/git/TNAtool/";
-	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/";
+	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
+	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
 	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
 	private static final int DBINDEX = Databases.dbsize-1;
-	public final static String VERSION = "V3.15.12";
+	public final static String VERSION = "V3.16.01";
 	
 	public static List<String> getSelectedAgencies(String username){
 		List<String> selectedAgencies = new ArrayList<String>();
