@@ -30,7 +30,7 @@ var html;
 var key = Math.random();
 var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3]+"&"+document.URL.split("&")[4],"");
 var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
-var w_qstringd = localStorage.getItem(keyName);
+var w_qstringd = getDates(keyName);
 var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 var dbindex = parseInt(document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1));
 $(document).ready(function(){
@@ -92,7 +92,8 @@ $(document).ready(function(){
 	    altFormat: "DD, d MM, yy",
 		onSelect: function (date) {
 			w_qstringd = date;
-			localStorage.setItem(keyName, w_qstringd);
+    		///localStorage.setItem(keyName, qstringd);
+			var keyName = setDates(qstringd);
 			reload();
 	    }
 	});

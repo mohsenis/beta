@@ -37,7 +37,7 @@ var gg = 1.0/1.1;
 var progVal = 0; 
 var d = new Date();
 var boo;
-var w_qstringd = localStorage.getItem(keyName);
+var w_qstringd = getDates(keyName);
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th>Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -152,8 +152,9 @@ $(document).ready(function(){
 				if ($(this).attr('id')!=undefined){	
 					var d = new Date();
 					qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-				    var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);
+					//var keyName = Math.random();
+		    		///localStorage.setItem(keyName, qstringd);
+					var keyName = setDates(qstringd);
 					url = '/TNAtoolAPI-Webapp/stopreport.html?agency='+$(this).attr('aid')+'&x='+qstringx+ '&route=' + $(this).attr('id')+'&n='+keyName+'&popYear='+popYear;
 					if (areaId!=null){
 						url+='&areaid='+areaId+'&type='+type;
@@ -165,8 +166,9 @@ $(document).ready(function(){
 				if ($(this).attr('id')!==undefined){					
 				    var d = new Date();
 				    qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-				    var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);		    		
+				    //var keyName = Math.random();
+		    		///localStorage.setItem(keyName, qstringd);
+					var keyName = setDates(qstringd);		    		
 				    window.open('/TNAtoolAPI-Webapp/schedulereport.html?&agency='+$(this).attr('aid') + '&route=' + $(this).attr('id')+'&n='+keyName+'&dbindex='+dbindex);
 			}});
 			

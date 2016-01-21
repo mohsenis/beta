@@ -188,23 +188,26 @@ $(document).ready(function(){
 				    if ($(this).attr('type')=="RC"){
 				    	qstring = $(this).attr('id');
 				    	qstringx = '0.25';				    	
-				    	var keyName = Math.random();
+				    	//var keyName = Math.random();
 				    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		localStorage.setItem(keyName, qstringd);
+			    		//localStorage.setItem(keyName, qstringd);
+						var keyName = setDates(qstringd);
 				    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
 				    }else if($(this).attr('type')=="SC"){
 				    	qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		var keyName = Math.random();
-			    		localStorage.setItem(keyName, qstringd);  					    		
+			    		//var keyName = Math.random();
+			    		///localStorage.setItem(keyName, qstringd);
+						var keyName = setDates(qstringd);  					    		
 			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);	    		
 				    }else if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		var keyName = Math.random();
-			    		localStorage.setItem(keyName, qstringd);
+			    		//var keyName = Math.random();
+			    		///localStorage.setItem(keyName, qstringd);
+						var keyName = setDates(qstringd);
 			    		window.open('/TNAtoolAPI-Webapp/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);	    		
 				    };
 				});
