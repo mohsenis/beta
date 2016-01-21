@@ -280,12 +280,13 @@ var new_jstree = {
 					              },
 					              {"text" : "Category 08", "data":{"title" : "Category08"}, "type" : "CNS_default_2", "id" : "Category08",  "state" : {"opened" : true},
 					            	  "children" : [{"text" : "CNS10-sector 52 (Finance and Insurance)", "data":{"title" : "CNS10"}, "type" : "CNS", "id" : "CNS10", "state" : {"selected" : false, "disabled" : true}},
+					            	                {"text" : "CNS11-sector 53 (Real Estate and Rental and Leasing 530000 to 531999)", "data":{"title" : "CNS11"}, "type" : "CNS", "id" : "CNS11_.84", "state" : {"selected" : false, "disabled" : true}},
 					            	                {"text" : "CNS13-sector 55 (Management of Companies and Enterprises)", "data":{"title" : "CNS13"}, "type" : "CNS", "id" : "CNS13", "state" : {"selected" : false, "disabled" : true}}
 					            	  ]
 					              },
 					              {"text" : "Category 09", "data":{"title" : "Category09"}, "type" : "CNS_default_2", "id" : "Category09",  "state" : {"opened" : true},
 					            	  "children" : [{"text" : "CNS09-sector 51 (Information 513000 to 519999)", "data":{"title" : "CNS09"}, "type" : "CNS", "id" : "CNS09_.56", "state" : {"selected" : false, "disabled" : true}},
-					            	                {"text" : "CNS11-sector 53 (Real Estate and Rental and Leasing)", "data":{"title" : "CNS11"}, "type" : "CNS", "id" : "CNS11", "state" : {"selected" : false, "disabled" : true}},
+					            	                {"text" : "CNS11-sector 53 (Real Estate and Rental and Leasing 532000 to 539999)", "data":{"title" : "CNS11"}, "type" : "CNS", "id" : "CNS11_.16", "state" : {"selected" : false, "disabled" : true}},
 					            	                {"text" : "CNS12-sector 54 (Professional, Scientific, and Technical Services)", "data":{"title" : "CNS12"}, "type" : "CNS", "id" : "CNS12", "state" : {"selected" : false, "disabled" : true}},
 					            	                {"text" : "CNS14-sector 56 (Administrative and Support and Waste Management and Remediation Services)", "data":{"title" : "CNS14"}, "type" : "CNS", "id" : "CNS14", "state" : {"selected" : false, "disabled" : true}},
 													{"text" : "CNS15-sector 61 (Educational Services)", "data":{"title" : "CNS15"}, "type" : "CNS", "id" : "CNS15", "state" : {"selected" : false, "disabled" : true}},
