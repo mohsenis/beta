@@ -93,7 +93,9 @@ $(document).ready(function(){
 		onSelect: function (date) {
 			w_qstringd = date;
     		///localStorage.setItem(keyName, qstringd);
-			var keyName = setDates(qstringd);
+    		history.pushState('', '', document.URL.replace('n='+keyName,'n='+'temp'));
+			keyName = setDates(w_qstringd);
+	    	history.pushState('', '', document.URL.replace('n='+'temp','n='+keyName));
 			reload();
 	    }
 	});

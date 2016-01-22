@@ -49,7 +49,7 @@ function getDates(hex){
 		}
 		j++;
 	}
-	alert(str);
+	//alert(str);
 	return str;
 	
 	
@@ -95,7 +95,7 @@ function setDates(str){
 		alert(day[parseInt(date[1])]);
 		alert(year[parseInt(date[2])])*/;
 	}
-	alert(hex);
+	//alert(hex);
 	return hex;
 	
 	/*var params = {"iv":"m4IXrGvrhuEqq99PM8eIeg==","v":1,"iter":1000,"ks":128,"ts":64,"mode":"ccm","adata":"","cipher":"aes","salt":"1bQaPYUIAdw="}
@@ -296,7 +296,9 @@ function reload(){
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
 	///localStorage.setItem(keyName, w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+keyName,'n='+'temp'));
 	keyName = setDates(w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+'temp','n='+keyName));
 	location.reload();	
 }
 
@@ -324,7 +326,9 @@ function reloadG(){
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
 	///localStorage.setItem(keyName, w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+keyName,'n='+'temp'));
 	keyName = setDates(w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+'temp','n='+keyName));
 	location.reload();	
 }
 
@@ -348,7 +352,9 @@ function reloadUG(){
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
 	///localStorage.setItem(keyName, w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+keyName,'n='+'temp'));
 	keyName = setDates(w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+'temp','n='+keyName));
 	location.reload();	
 }
 
@@ -374,7 +380,9 @@ function reloadHR(){
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
 	///localStorage.setItem(keyName, w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+keyName,'n='+'temp'));
 	keyName = setDates(w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+'temp','n='+keyName));
 	location.reload();	
 }
 function closebutton(){
