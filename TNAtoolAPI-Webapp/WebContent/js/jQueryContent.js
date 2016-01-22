@@ -296,7 +296,9 @@ function reload(){
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
 	///localStorage.setItem(keyName, w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+keyName,'n='+'temp'));
 	keyName = setDates(w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+'temp','n='+keyName));
 	location.reload();	
 }
 
@@ -324,7 +326,9 @@ function reloadG(){
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
 	///localStorage.setItem(keyName, w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+keyName,'n='+'temp'));
 	keyName = setDates(w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+'temp','n='+keyName));
 	location.reload();	
 }
 
@@ -348,7 +352,9 @@ function reloadUG(){
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
 	///localStorage.setItem(keyName, w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+keyName,'n='+'temp'));
 	keyName = setDates(w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+'temp','n='+keyName));
 	location.reload();	
 }
 
@@ -374,7 +380,9 @@ function reloadHR(){
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
 	///localStorage.setItem(keyName, w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+keyName,'n='+'temp'));
 	keyName = setDates(w_qstringd);
+	history.pushState('', '', document.URL.replace('n='+'temp','n='+keyName));
 	location.reload();	
 }
 function closebutton(){
