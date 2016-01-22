@@ -49,7 +49,7 @@ function getDates(hex){
 		}
 		j++;
 	}
-	alert(str);
+	//alert(str);
 	return str;
 	
 	
@@ -95,7 +95,7 @@ function setDates(str){
 		alert(day[parseInt(date[1])]);
 		alert(year[parseInt(date[2])])*/;
 	}
-	alert(hex);
+	//alert(hex);
 	return hex;
 	
 	/*var params = {"iv":"m4IXrGvrhuEqq99PM8eIeg==","v":1,"iter":1000,"ks":128,"ts":64,"mode":"ccm","adata":"","cipher":"aes","salt":"1bQaPYUIAdw="}
