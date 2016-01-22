@@ -44,7 +44,7 @@
 	var dbindex = parseInt(getURIParameter("dbindex"));;
 	var key = Math.random();
 	var keyName = parseFloat(getURIParameter("n"));
-	var w_qstringd = localStorage.getItem(keyName);
+	var w_qstringd = getDates(keyName);
 	var w_qstringx = $('#Sradius').val();
 	if (w_qstringx == null) {w_qstringx = 0.25};
 	var mySlidebar;
@@ -81,7 +81,7 @@
 	
 	(function($) {
 	    $(document).ready(function() {	    	
-	    	$('.sb-slidebar').css('width', '28%');
+	    	$('.sb-slidebar').css('width', '35%');
 	    	$.ajax({
 	    		type: 'GET',
 	    		datatype: 'json',
@@ -602,7 +602,7 @@
 						if ($('#reportType').val() == 'Agencies') html += '<td>' + numWithCommas(item.c000served) + '</td>';
 						else html += '<td>' + numWithCommas(item.c000) + '</td>';
 					
-					// filling in the other columns of the datatable
+				// filling in the other columns of the datatable
 				for (var index in tableContent){
 					var wacSummation = 0;
 					var wacPopServedSummation = 0;
@@ -670,6 +670,7 @@
 	    $("#Emp_filter").insertBefore("#Emp_info");	    
 	    $( ".dataTables_filter" ).css( "float", "left");
 	    $( ".dataTables_filter" ).before( "<br>" );	    
+		$(".jstree-anchor").css("font-size","80%");
 	}
 	</script>
 </head>

@@ -31,7 +31,7 @@ var dateID;
 var boo;
 var gg = 1.0/1.1;
 var progVal = 0; 
-var w_qstringd = localStorage.getItem(keyName);
+var w_qstringd = getDates(keyName);
 var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 var tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based on its importance. Lower ID number means higher cluster importance."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Cluster Centroid Latitude<em title="Latitude of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
