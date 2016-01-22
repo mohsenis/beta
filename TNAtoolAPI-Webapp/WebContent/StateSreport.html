@@ -145,8 +145,9 @@ $(document).ready(function(){
 			    if ($(this).attr('type')=="SXR"){
 			    	qstringx = '0.25';
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    	var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);
+			    	//var keyName = Math.random();
+		    		///localStorage.setItem(keyName, qstringd);
+					var keyName = setDates(qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);			    	   
 			    }else if($(this).attr('type')=="ASR"){
 		    		qstringx = '0.25';

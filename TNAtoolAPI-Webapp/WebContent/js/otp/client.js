@@ -1,4 +1,4 @@
-var key = Math.random();
+var key="--"; //= Math.random();
 var default_dbindex = getDefaultDbIndex();
 var dbindex = default_dbindex;
 var newdates = null;
@@ -10,7 +10,8 @@ if (URL.split("?").length >0){
 		URL +="?&n="+key;
 	} else {
 		var index = (document.URL.split("n=")[1].indexOf("&")>0) ? document.URL.split("n=")[1].indexOf("&"):document.URL.split("n=")[1].length;
-		key = parseFloat(document.URL.split("n=")[1].substr(0,index));
+		//key = parseFloat(document.URL.split("n=")[1].substr(0,index));
+		key = document.URL.split("n=")[1].substr(0,index);
 		URL +="?&n="+key;
 	}
 	if (document.URL.indexOf("dbindex=")<1){
@@ -24,8 +25,8 @@ if (URL.split("?").length >0){
 	URL +="?&n="+key+"&dbindex="+dbindex;
 }
 history.pushState('data', '', URL);
-var w_qstringd = localStorage.getItem(key);
-/*alert(w_qstringd);*/
+var w_qstringd = getDates(key);//localStorage.getItem(key);
+//alert(w_qstringd);
 var INIT_LOCATION = new L.LatLng(44.141894, -121.783660); 
 var dialogheight = Math.round((window.innerHeight)*.9); 
 if (dialogheight > 1000){
@@ -123,7 +124,7 @@ function loadDialog2(node){
 	$('#displayConAgenciesTable').empty();
 	var html='';
 	var connectionsClusters=new Array();
-
+	var key = Math.random();
 	
 	$.ajax({
 		type: 'GET',
@@ -1235,8 +1236,9 @@ $mylist
 					var qstringx2 = '0.25'; // population search radius					
 					var qstringx3 = '2.0'  // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-		    		var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);
+		    		//var keyName = Math.random();
+		    		///localStorage.setItem(keyName, qstringd);
+					var keyName = setDates(qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/HubSreport2.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
@@ -1267,20 +1269,23 @@ $mylist
 			    	if (dbindex!=parseInt(casestring.substring(2)))
 			    		if ($('#datepicker').multiDatesPicker('getDates').length>0){
 			    			var dates = $('#datepicker').multiDatesPicker('getDates');			    			
-			    			localStorage.setItem(key, dates.join(","));			    			
+			    			//localStorage.setItem(key, dates.join(","));	
+			    			key = setDates(dates.join(","));
 			    		}
 			    		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+parseInt(casestring.substring(2)));			    		    		
 			    }else if(casestring=="Emp"){
 			    	var d = new Date();
 			    	var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-		    		var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);
+			    	//var keyName = Math.random();
+		    		///localStorage.setItem(keyName, qstringd);
+					var keyName = setDates(qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/Emp.html?&n='+keyName+'&dbindex='+dbindex);
 			    }else if(casestring=="T6"){	
 			    	var d = new Date();
 			    	var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-		    		var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);
+			    	//var keyName = Math.random();
+		    		///localStorage.setItem(keyName, qstringd);
+					var keyName = setDates(qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/T6.html?&n='+keyName+'&dbindex='+dbindex);
 			    }
 			});
@@ -1419,10 +1424,12 @@ function updatepicker(){
 	if ($('#datepicker').multiDatesPicker('getDates').length>0){
 		var dates = $('#datepicker').multiDatesPicker('getDates');
 		newdates = dates.join(",");
-		localStorage.setItem(key, newdates);			    			
+		//localStorage.setItem(key, newdates);
+		key = setDates(newdates);
 	} else {						
 			$("#datepick").css({"border":""});
-			localStorage.removeItem(key);
+			//localStorage.removeItem(key);
+			key="--";
 	}
 	location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
 

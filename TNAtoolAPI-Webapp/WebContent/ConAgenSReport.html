@@ -145,8 +145,9 @@ $(document).ready(function(){
 			$('a').click(function(e){
 				if($(this).attr('type')=="XR"){
 		    		qstring = $(this).attr('id');		    				    		
-		    		var keyName = Math.random();
-		    		localStorage.setItem(keyName, qstringd);			    		
+		    		//var keyName = Math.random();
+		    		///localStorage.setItem(keyName, qstringd);
+					var keyName = setDates(qstringd);			    		
 		    		window.open('/TNAtoolAPI-Webapp/ConAgenXReport.html?&gap='+gap+'&agency='+qstring+'&dbindex='+dbindex);
 				}				
 			});

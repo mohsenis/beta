@@ -11,6 +11,103 @@ function exceedsMaxRadius(x){
 	}
 }
 
+function getDates(hex){
+	if(hex=="--"){
+		return null;
+	}
+	
+	var year = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+			    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+			    '0','1','2','3','4','5','6','7','8','9','!','@','#','$','%','^','*','(',')','-','+','_','`','~'];
+	var month = ['a','b','c','d','e','f','g','h','i','j','k','l'];
+	var day = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+	           'A','B','C','D','E'];
+	
+	var str="";
+	var tmp="";
+	var j =0;
+	for(var i=0; i<Math.floor(hex.length/3); i++){
+		tmp=month.indexOf(hex[j])+1;
+		if(tmp<10){
+			str+='0';
+		}
+		str+=tmp;
+		str+='/';
+		j++;
+		
+		tmp=day.indexOf(hex[j])+1;
+		if(tmp<10){
+			str+='0';
+		}
+		str+=tmp;
+		str+='/';
+		j++;
+		
+		str+=year.indexOf(hex[j])+2000;
+		if(i<Math.floor(hex.length/3)-1){
+			str+=',';
+		}
+		j++;
+	}
+	alert(str);
+	return str;
+	
+	
+	/*hex = hex.replace(/%22/g,'"');
+	//alert(hex);
+	if(hex=="--"){
+		return null;
+	}else{
+		//var params = {"iv":"m4IXrGvrhuEqq99PM8eIeg==","v":1,"iter":1000,"ks":128,"ts":64,"mode":"ccm","adata":"","cipher":"aes","salt":"1bQaPYUIAdw="}
+		var str = '{"iv":"m4IXrGvrhuEqq99PM8eIeg==","v":1,"iter":1000,"ks":128,"ts":64,"mode":"ccm","adata":"","cipher":"aes","salt":"1bQaPYUIAdw=","ct":';
+		//var msg = sjcl.encrypt("", "nadireza", params);
+		//var one = msg.split('"ct":')[1].split('}')[0];
+		//console.log(one);
+		str=str+hex+'}';
+		return sjcl.decrypt("", str);
+	}*/
+		
+}
+
+function setDates(str){
+	var year = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+			    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+			    '0','1','2','3','4','5','6','7','8','9','!','@','#','$','%','^','*','(',')','-','+','_','`','~'];
+	var month = ['a','b','c','d','e','f','g','h','i','j','k','l'];
+	var day = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+	           'A','B','C','D','E'];
+	
+	//str = "02/15/2016,02/16/2016,02/17/2016";
+	//str = "02/15/2016";
+	var strs = str.split(',');
+	var hex = "";
+	var date;
+	for(var i=0; i<strs.length; i++){
+		date = strs[i].split('/');
+		if(parseInt(date[2])>2075){
+			date[2]='2075';
+		}else if(parseInt(date[2])<2000){
+			date[2]='2000';
+		}
+		hex+=month[parseInt(date[0])-1]+day[parseInt(date[1]-1)]+year[parseInt(date[2])-2000];
+		
+		/*alert(month[parseInt(date[0])]);
+		alert(day[parseInt(date[1])]);
+		alert(year[parseInt(date[2])])*/;
+	}
+	alert(hex);
+	return hex;
+	
+	/*var params = {"iv":"m4IXrGvrhuEqq99PM8eIeg==","v":1,"iter":1000,"ks":128,"ts":64,"mode":"ccm","adata":"","cipher":"aes","salt":"1bQaPYUIAdw="}
+	//var str = '{"iv":"m4IXrGvrhuEqq99PM8eIeg==","v":1,"iter":1000,"ks":128,"ts":64,"mode":"ccm","adata":"","cipher":"aes","salt":"1bQaPYUIAdw=","ct":';
+	var msg = sjcl.encrypt("", str, params);
+	var hex = msg.split('"ct":')[1].split('}')[0];
+	//console.log(hex);
+	//str=str+hex+'}';
+	//console.log(sjcl.decrypt("", str));
+	return hex;*/
+}
+
 function setPopOptions(){
 	var popselect = document.getElementById("popselect");
 	var years = [2010,2015,2020,2025,2030,2035,2040,2045,2050];
@@ -25,7 +122,7 @@ function setPopOptions(){
 }
 function popselect(e){
 	if (e.value !=popYear){
-		location.replace(document.URL.split("popYear")[0]+'popYear='+e.value);
+		location.replace(document.URL.split("popYear")[0]+'&popYear='+e.value);
 	}
 }
 
@@ -198,7 +295,8 @@ function reload(){
 	}
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
-	localStorage.setItem(keyName, w_qstringd);
+	///localStorage.setItem(keyName, w_qstringd);
+	keyName = setDates(w_qstringd);
 	location.reload();	
 }
 
@@ -225,7 +323,8 @@ function reloadG(){
 	}
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
-	localStorage.setItem(keyName, w_qstringd);
+	///localStorage.setItem(keyName, w_qstringd);
+	keyName = setDates(w_qstringd);
 	location.reload();	
 }
 
@@ -248,7 +347,8 @@ function reloadUG(){
 	}
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
-	localStorage.setItem(keyName, w_qstringd);
+	///localStorage.setItem(keyName, w_qstringd);
+	keyName = setDates(w_qstringd);
 	location.reload();	
 }
 
@@ -273,7 +373,8 @@ function reloadHR(){
 	}
 	dates = $('#datepicker').multiDatesPicker('getDates');
 	w_qstringd = dates.join(",");
-	localStorage.setItem(keyName, w_qstringd);
+	///localStorage.setItem(keyName, w_qstringd);
+	keyName = setDates(w_qstringd);
 	location.reload();	
 }
 function closebutton(){

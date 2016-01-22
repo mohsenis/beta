@@ -140,8 +140,9 @@ $(document).ready(function(){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		var keyName = Math.random();
-			    		localStorage.setItem(keyName, qstringd);
+			    		//var keyName = Math.random();
+			    		///localStorage.setItem(keyName, qstringd);
+						var keyName = setDates(qstringd);
 			    		window.open('/TNAtoolAPI-Webapp/GeoCountiesXreport1.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex/* +'&username='+getSession() */);    		
 			    }else if($(this).attr('type')=="TC"){
 			    	qstring = $(this).attr('id');
