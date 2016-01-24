@@ -21,8 +21,8 @@ var qstring = '';
 var boo;
 var progVal = 0; 
 var qstringd = '';
-var gap = parseFloat(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-var dbindex = parseInt(document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1));
+var gap = parseFloat(getURIParameter("gap"));
+var dbindex = parseInt(getURIParameter("dbindex"));
 var d = new Date();
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -123,8 +123,6 @@ $(document).ready(function(){
 	  	}
 	} 
 	timeVar = setInterval(progress, 100);
-	
-	//document.getElementById("Sradius").value = window.opener.qstringx;
 	
 	$.ajax({
 		type: 'GET',

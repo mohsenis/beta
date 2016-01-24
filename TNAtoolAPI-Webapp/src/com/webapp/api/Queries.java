@@ -2077,7 +2077,7 @@ Loop:  	for (Trip trip: routeTrips){
     	    	"Selected Database:" +Databases.dbnames[dbindex]+";Minimum Spatial Gap (ft.):"+String.valueOf(gap)+";Selected Agency:"+agencyId + ";" + DbUpdate.VERSION;
 		response.type = "ExtendedGapReport";
 		response.agency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agencyId, dbindex).getName();
-		gap = gap / 3.28084;		
+		gap = gap * 1609.34;		
 		List<agencyCluster> results= new ArrayList<agencyCluster>();
 		results = PgisEventManager.agencyClusterDetails(gap, agencyId, username, dbindex);
 		int totalLoad = results.size();

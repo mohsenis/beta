@@ -22,10 +22,9 @@ var boo;
 var qstringx = '0.1';
 var progVal = 0; 
 var qstringd = '';
-var gap = parseFloat(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-var agency = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
-var dbindex = parseInt(document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1));
-//var d = new Date();
+var gap = parseFloat(getURIParameter("gap"));
+var agency = getURIParameter("agency");
+var dbindex = parseInt(getURIParameter("dbindex"));
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -129,8 +128,6 @@ $(document).ready(function(){
 	  	}
 	} 
 	timeVar = setInterval(progress, 100);
-	
-	//document.getElementById("Sradius").value = window.opener.qstringx;
 	
 	$.ajax({
 		type: 'GET',
