@@ -24,7 +24,7 @@ var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+docum
 var w_qstringx = parseFloat(getURIParameter("x1"));//document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 var w_qstringx2 = parseFloat(getURIParameter("x2")); // population search radius
 var w_qstringx3 = parseFloat(getURIParameter("x3")); // park and ride search radius
-var keyName = parseFloat(getURIParameter("n"));
+var keyName = getURIParameter("n");
 var dbindex = parseInt(getURIParameter("dbindex"));
 var popYear = getURIParameter("popYear");
 var dateID;
@@ -32,6 +32,8 @@ var boo;
 var gg = 1.0/1.1;
 var progVal = 0; 
 var w_qstringd = getDates(keyName);
+alert('KeyName: ' + keyName);
+alert('Date: ' + w_qstringd);
 var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 var tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based on its importance. Lower ID number means higher cluster importance."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Cluster Centroid Latitude<em title="Latitude of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
