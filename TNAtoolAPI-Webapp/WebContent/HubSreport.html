@@ -26,7 +26,7 @@ var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+docum
 var w_qstringx = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 //var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
 //var w_qstring = '174'
-var keyName = parseFloat(getURIParameter("n"));
+var keyName = getURIParameter("n");
 var dbindex = parseInt(getURIParameter("dbindex"));
 var dateID;
 var boo;
