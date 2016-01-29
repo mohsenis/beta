@@ -27,29 +27,38 @@ function getDates(hex){
 	var tmp="";
 	var j =0;
 	for(var i=0; i<Math.floor(hex.length/3); i++){
-		tmp=month.indexOf(hex[j])+1;
-		if(tmp<10){
-			str+='0';
+		if(month.indexOf(hex[j])!=-1 && day.indexOf(hex[j+1])!=-1 && year.indexOf(hex[j+2])!=-1){
+			tmp=month.indexOf(hex[j])+1;
+			if(tmp<10){
+				str+='0';
+			}
+			str+=tmp;
+			str+='/';
+			j++;
+			
+			tmp=day.indexOf(hex[j])+1;
+			if(tmp<10){
+				str+='0';
+			}
+			str+=tmp;
+			str+='/';
+			j++;
+			
+			str+=year.indexOf(hex[j])+2000;
+			//if(i<Math.floor(hex.length/3)-1){
+				str+=',';
+			//}
+			j++;
 		}
-		str+=tmp;
-		str+='/';
-		j++;
-		
-		tmp=day.indexOf(hex[j])+1;
-		if(tmp<10){
-			str+='0';
-		}
-		str+=tmp;
-		str+='/';
-		j++;
-		
-		str+=year.indexOf(hex[j])+2000;
-		if(i<Math.floor(hex.length/3)-1){
-			str+=',';
-		}
-		j++;
 	}
-	//alert(str);
+	
+	if(str==""){
+		var d = new Date();
+		str = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+	}else{
+		str = str.slice(0, -1);
+	}
+	alert(str);
 	return str;
 	
 	

@@ -2074,7 +2074,7 @@ Loop:  	for (Trip trip: routeTrips){
       	}		
 		ClusterRList response = new ClusterRList();
 		response.metadata = "Report Type:Connected Transit Agencies Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Minimum Spatial Gap (ft.):"+String.valueOf(gap)+";Selected Agency:"+agencyId + ";" + DbUpdate.VERSION;
+    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Minimum Spatial Gap (miles):"+String.valueOf(gap)+";Selected Agency:"+agencyId + ";" + DbUpdate.VERSION;
 		response.type = "ExtendedGapReport";
 		response.agency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agencyId, dbindex).getName();
 		gap = gap * 1609.34;		
