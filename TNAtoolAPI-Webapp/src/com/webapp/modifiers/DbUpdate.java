@@ -96,7 +96,7 @@ public class DbUpdate {
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
 	private static final int DBINDEX = Databases.dbsize-1;
-	public final static String VERSION = "V3.16.01";
+	public final static String VERSION = "V3.16.02";
 	
 	public static List<String> getSelectedAgencies(String username){
 		List<String> selectedAgencies = new ArrayList<String>();
@@ -1069,7 +1069,7 @@ public class DbUpdate {
 				statement.executeUpdate("UPDATE gtfs_feed_info SET feedname = '"+fName+"' WHERE defaultid = '"+defaultId+"';");
 			}
 			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic) "
-					+ "VALUES ('"+fName+"','admin',TRUE);");
+					+ "VALUES ('"+fName+"','admin',False);");
 			statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname,agency_id) "
 					+ "VALUES ('admin','"+fName+"','"+defaultId+"');");
 			//UpdateEventManager.updateTables(DBINDEX, defaultId);

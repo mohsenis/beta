@@ -29,9 +29,9 @@ var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Number of Connections<em title="Number of transit stops that have at least one stop within the specified distance of the specified transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Min Connection distance<em title="Smallest distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Max Connection distance<em title="Largest distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Average Connection distance<em title="Average distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Min Connection distance (ft.)<em title="Smallest distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Max Connection distance (ft.)<em title="Largest distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Average Connection distance (ft.)<em title="Average distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Connections<em title="List of transit stops within the specified distance of the specified transit agency stops and the distance between them in ft"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>SourceStopNames<em title="List of the specified transit agency stop names within the specified distance of other transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>DestStopNames<em title="List of other transit agency stop names within the specified distance of the specified transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -233,7 +233,7 @@ $(document).ready(function(){
 		                '<td>'+connections[p]+'</td>'+
 		            '</tr>'+		            		            
 		        '</table>'; */
-		    	var subTable = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;"><tr><th>Source Agency Stop Name</th><th>Source Agency Stop Coordinates</th><th>Connected Agency Stop Name</th><th>Connected Agency Stop Coordinates</th><th>Connection Gap</th></tr>'
+		    	var subTable = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;"><tr><th>Source Agency Stop Name</th><th>Source Agency Stop Coordinates</th><th>Connected Agency Stop Name</th><th>Connected Agency Stop Coordinates</th><th>Connection Gap (ft.)</th></tr>'
 		        	var conns = connections[p];
 		        	for (var i=0; i<conns.length; i++){
 		        		subTable+='<tr><td>'+conns[i].SSname+'</td><td>'+conns[i].Scoords+'</td><td>'+conns[i].DSname+'</td><td>'+conns[i].Dcoords+'</td><td>'+conns[i].gap+'</td></tr>';
