@@ -58,7 +58,7 @@ function getDates(hex){
 	}else{
 		str = str.slice(0, -1);
 	}
-	alert(str);
+	//alert(str);
 	return str;
 	
 	
