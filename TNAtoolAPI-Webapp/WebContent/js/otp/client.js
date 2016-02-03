@@ -149,8 +149,6 @@ function loadDialog2(node){
 			html += '<thead>'+tmp+'</thead><tbody>';
 			var html2 = '<tfoot>'+tmp+'</tfoot>';
 			
-			
-			
 			for (i = 0; i < data.ClusterR.length; i++) {
 				html += '<td>'+ data.ClusterR[i].id +'</td>'+
 				'<td>'+ data.ClusterR[i].name +'</td>'+
@@ -162,7 +160,6 @@ function loadDialog2(node){
 			var connectedAgenciesTable = $('#connectedAgenciesTable').DataTable( {
 				"paging": false,
 				"bSort": false,
-				//"scrollY": "40%",
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -220,7 +217,6 @@ function loadDialog2(node){
 				async: true,
 				success: function(data){
 					var stopsCluster = new L.MarkerClusterGroup({
-//						maxClusterRadius: 120,
 						iconCreateFunction: function (cluster) {
 							return new L.DivIcon({ html: cluster.getChildCount(), className: 'ycluster', iconSize: new L.Point(25, 25) });						
 						},
@@ -248,6 +244,7 @@ function loadDialog2(node){
 
 function onMarkerClick(){
 	var id = this.id;
+
 	if (polylines[id]==null){
 		var selectedStopLat= this.lat;
 		var selectedStopLon=this.lon;
@@ -266,21 +263,20 @@ function onMarkerClick(){
 				bounds.push(sourceMarker.getLatLng());
 				var tmpConnectionsPolylines = new L.FeatureGroup();
 				$.each(data.stopsList, function(i,item){
-					if (item.Lat!=selectedStopLat){
+					if (item.lat!=selectedStopLat){
 						var latlngs= Array();
 						var destMarker = new L.marker([item.lat,item.lon] /*,{className: 'ycluster', iconSize: new L.Point(10, 10)}).on('click',onClick*/);
 						bounds.push(destMarker.getLatLng());
 						latlngs.push(sourceMarker.getLatLng());
 						latlngs.push(destMarker.getLatLng());
 						var polyline = L.polyline(latlngs, {color: color});
-						tmpConnectionsPolylines.addLayer(polyline);	
-					}				
+						tmpConnectionsPolylines.addLayer(polyline);
+					}		
 				});
 				polylines[id] = tmpConnectionsPolylines;
 				connectionPolylines.addLayer(polylines[id]);
 				dialog2.dialogExtend("minimize");
 				map.fitBounds(bounds);
-				
 			}
 		});
 		selectedAgencies.push(this.agencyId);

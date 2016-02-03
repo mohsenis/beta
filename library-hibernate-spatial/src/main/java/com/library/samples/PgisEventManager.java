@@ -92,11 +92,25 @@ public class PgisEventManager {
 		
 		Connection connection = makeConnection(dbindex);
 	    Statement stmt = null;
-	    String query = "WITH main AS (SELECT agencyid, id, name, description, lat, lon "
-  						+ "FROM gtfs_stops WHERE agencyid = ANY('{"+agencies+"}'::text[]) "
-  						+ "AND ST_Dwithin(ST_transform(ST_setsrid(ST_MakePoint("+lon+", "+lat+"),4326), 2993), location, "+gap+")) "
+	    String query = "WITH stops AS (select map.agencyid as agencyid, stop.description, stop.lat, stop.lon, stop.name as name, stop.id as id, stop.url, location "
+	    		+ "   		from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id "
+	    		+ "    		and map.agencyid=ANY('{"+agencies+"}'::text[]) ), "
+	    		+ "    	main AS (SELECT agencyid, id, name, description, lat, lon "
+	    		+ "    		FROM stops WHERE ST_Dwithin(ST_transform(ST_setsrid(ST_MakePoint("+lon+", "+lat+"),4326), 2993), location, "+gap+")) "
+	    		+ "     SELECT main.id, main.name stopname, main.description, main.agencyid, gtfs_agencies.name agencyname, main.lat, main.lon "
+	    		+ "    		FROM main INNER JOIN gtfs_agencies ON main.agencyid=gtfs_agencies.id";
+	    		
+	    		/*"WITH stops AS (select map.agencyid as agencyid, stop.description, stop.lat, stop.lon, stop.name as name, stop.id as id, stop.url, location ) "
+	    		+ " from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id "
+				+ " inner join gtfs_agencies on gtfs_agencies.id=map.agencyid where map.agencyid=ANY('{"+agencies+"}'::text[])' , "
+	    		+ "main AS (SELECT agencyid, id, name, description, lat, lon "
+  						+ "FROM stops WHERE ST_Dwithin(ST_transform(ST_setsrid(ST_MakePoint("+lon+", "+lat+"),4326), 2993), location, "+gap+")) "
   						+ "SELECT main.id, main.name stopname, main.description, main.agencyid, gtfs_agencies.name agencyname, main.lat, main.lon "
   						+ "FROM main INNER JOIN gtfs_agencies ON main.agencyid=gtfs_agencies.id";
+	    
+	    query = "select map.agencyid as agencyid,gtfs_agencies.name as agencyname, stop.lat, stop.lon, stop.name as stopname, stop.id as stopid, stop.url, location "
+				+ " from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id "
+				+ " inner join gtfs_agencies on gtfs_agencies.id=map.agencyid where map.agencyid='"+ agencyId + "'";*/
 	    System.out.println(query);
 
 	    try {
@@ -3084,7 +3098,7 @@ public class PgisEventManager {
 					+ "round((3.28084*avg(pairs.dist))::numeric, 2) as avg_gap, array_agg(name1) as names1, array_agg(stp1loc) as locs1, array_agg(sid2) as sids2, array_agg(name2) as names2, "
 					+ "array_agg(stp2loc) as locs2, array_agg(round((3.28084*dist)::numeric, 2)::text) as dists from agency ag1 inner join pairs on ag1.aid_def=pairs.aid1 and "
 					+ "ag1.sid= pairs.sid1 inner join agencies ag2 on ag2.aid_def=pairs.aid2 and ag2.sid= pairs.sid2 where ag1.aid!=ag2.aid group by ag1.aid, ag2.aid, ag2.aname";					
-			//System.out.println(query);
+			System.out.println(query);
 			ResultSet rs = stmt.executeQuery(query);
 			while ( rs.next() ) {
 				agencyCluster instance = new agencyCluster();
