@@ -100,11 +100,11 @@ public class Queries {
     @Path("/castops")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object getCAS(@QueryParam("lat") double lat, @QueryParam("lon") double lon, @QueryParam ("agencies") String agencies,
- 		   @QueryParam("radius") Integer gap, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+ 		   @QueryParam("radius") double gap, @QueryParam("dbindex") Integer dbindex) throws JSONException {
     	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
-    	double temp = gap / 3.28084;
+    	double temp = gap * 1609.34;
     	gap = (int) temp;
     	CAStopsList results = PgisEventManager.getConnectedStops(lat, lon, gap, agencies, dbindex);
     	try {
@@ -2070,7 +2070,7 @@ Loop:  	for (Trip trip: routeTrips){
        	dbindex = default_dbindex;
        }
 		if (gap<=0){
-      		gap=500;
+      		gap=0.1;
       	}		
 		ClusterRList response = new ClusterRList();
 		response.metadata = "Report Type:Connected Transit Agencies Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+

@@ -160,7 +160,7 @@ function showOnMapReport(lat, lon, date, x){
 	onMapCluster.addLayer(onMapPnrCluster);
 	onMapCluster.addLayer(onMapPnrStopCluster);
 	onMapCluster.addLayer(onMapPnrRouteCluster);
-	//onMapCluster.addLayer(onMapTractCluster);
+	onMapCluster.addLayer(onMapTractCluster);
 	map.addLayer(onMapCluster);
 	stopCluster = new Array();
 	routeCluster = new Array();

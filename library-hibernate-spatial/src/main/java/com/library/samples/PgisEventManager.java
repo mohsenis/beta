@@ -87,7 +87,7 @@ public class PgisEventManager {
 	/**
 	 * Queries stops within a certain distance of a given stop while filtering the agencies.
 	 */
-	public static CAStopsList getConnectedStops(double lat, double lon, int gap, String agencies, int dbindex){
+	public static CAStopsList getConnectedStops(double lat, double lon, double gap, String agencies, int dbindex){
 		CAStopsList results=new CAStopsList();	// This object is declared to hold the stops
 		
 		Connection connection = makeConnection(dbindex);
@@ -3127,10 +3127,9 @@ public class PgisEventManager {
 		
 		try {
 			stmt = connection.createStatement();
-			String query = "WITH main AS (SELECT id stopid, name stopname, agencyid, lat, lon, location "
-					+ "FROM gtfs_stops WHERE agencyid='" + agencyId + "') "
-							+ "SELECT main.stopid, main.stopname, main.agencyid, gtfs_agencies.name agencyname, main.lat, main.lon, gtfs_agencies.url "
-							+ "FROM main INNER JOIN gtfs_agencies ON main.agencyid = gtfs_agencies.id";
+			String query = "select map.agencyid as agencyid,gtfs_agencies.name as agencyname, stop.lat, stop.lon, stop.name as stopname, stop.id as stopid, stop.url, location "
+					+ " from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id "
+					+ " inner join gtfs_agencies on gtfs_agencies.id=map.agencyid where map.agencyid='"+ agencyId + "'";
 			
 			ResultSet rs = stmt.executeQuery(query);
 			while (rs.next()){

@@ -17,6 +17,7 @@
 	<link rel="stylesheet" type="text/css" href="report.css" />
 	
 <script type="text/javascript">
+var maxRadius = 5;
 var qstring = '';
 var boo;
 var qstringx = '0.1';
@@ -91,8 +92,8 @@ $(document).ready(function(){
 	        progressLabel.html( '<table><tr><td>Report in progress... </td><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
 	    }
 	}); 
-	document.getElementById("gap").value = gap;
-	jQuery('#gap').on('input', function() {		
+	document.getElementById("Sradius").value = gap;
+	jQuery('#Sradius').on('input', function() {		
 		$("#submit").trigger('mouseenter');		
 	});
 	
@@ -264,8 +265,12 @@ function dbchange(){
 	}
 }
 
-function reloadC(){		
-	var tmpG = (parseFloat(document.getElementById("gap").value)).toString();	
+function reloadC(){
+	var tmpG = (parseFloat(document.getElementById("Sradius").value)).toString();	
+	if (exceedsMaxRadius(tmpG)){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a number less than ' + maxRadius + ' miles for Search Radius.');
+		return;
+	}
 	history.pushState("", "", document.URL.replace('gap='+gap, 'gap='+tmpG));	
 	location.reload();	
 }
@@ -295,7 +300,7 @@ function reloadC(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Maximum Spatial Gap (miles) <input type="text" name="gap" id="gap" class="utbox" onkeypress="return isWholeNumber(event)"/>
+			    	Maximum Spatial Gap (miles) <input type="text" name="Sradius" id="Sradius" class="utbox" onkeypress="return isNumber(event)"/>
 			    	<input id="submit" type="button" onclick="reloadC()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
 		    	</div>
 			  </td>
