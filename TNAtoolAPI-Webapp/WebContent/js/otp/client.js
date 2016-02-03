@@ -60,7 +60,7 @@ $("#overlay").show();
 ///******Variables declared for the on-Map connected agencies report ********///
 var connectionMarkers = new L.FeatureGroup();
 var connectionPolylines = new L.FeatureGroup();
-var gap=1;
+var gap=0.1;
 var selectedAgency;
 var selectedAgencies=Array();
 var polylines = Array();
@@ -91,8 +91,8 @@ var dialog2=$("#connectedAgencies-form").dialog({
     	connectionPolylines.eachLayer(function (layer) {
     		connectionPolylines.removeLayer(layer);
 		});
-    	$('#gap').val(1);
-    	gap=1;
+    	$('#gap').val(0.1);
+    	gap=0.1;
     	selectedAgency = [];
     	selectedAgencies = [];
     	polylines = [];
@@ -213,7 +213,6 @@ function loadDialog2(node){
 		    	}                   		    	
 		    });
 		    $('#dialogPreLoader2').hide();
-		    
 			$.ajax({
 				type: 'GET',
 				datatype: 'jason',
@@ -249,15 +248,12 @@ function loadDialog2(node){
 
 function onMarkerClick(){
 	var id = this.id;
-	
 	if (polylines[id]==null){
-		
 		var selectedStopLat= this.lat;
 		var selectedStopLon=this.lon;
 		var color = this.color;
 		selectedAgencies.splice(selectedAgencies.indexOf(this.agencyId),1);
 		this.closePopup();
-		
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
@@ -295,8 +291,8 @@ function onMarkerClick(){
 	}
 }
 function reloadDialog2(input){
-	if (!isNormalInteger(input)){
-		alert('Please enter a positive integer.');
+	if (input > 5){	// Checks if the entered search radius exceeds the maximum.
+		alert('Enter a radius less than 5 miles.');
 		return;
 	}
 	gap=input;
@@ -927,7 +923,6 @@ $mylist
             "success" : function(ops) {  
             	
             	try {
-            		console.log(ops.data[0].attr.id);
             		$.each(ops.data, function(i,item){
                 		dialogAgencies.push(item.data);
                 		dialogAgenciesId.push(item.attr.id);
