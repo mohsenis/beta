@@ -40,7 +40,7 @@
 	var maxRadius = 5;
 	var dbindex = parseInt(getURIParameter("dbindex"));;
 	var key = Math.random();
-	var keyName = getURIParameter("n");
+	var keyName = parseFloat(getURIParameter("n"));
 	var w_qstringd = getDates(keyName);
 	var t6 = {};
 	var w_qstringx = $('#Sradius').val();
