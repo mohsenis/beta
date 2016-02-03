@@ -60,7 +60,7 @@ $("#overlay").show();
 ///******Variables declared for the on-Map connected agencies report ********///
 var connectionMarkers = new L.FeatureGroup();
 var connectionPolylines = new L.FeatureGroup();
-var gap=500;
+var gap=1;
 var selectedAgency;
 var selectedAgencies=Array();
 var polylines = Array();
@@ -91,8 +91,8 @@ var dialog2=$("#connectedAgencies-form").dialog({
     	connectionPolylines.eachLayer(function (layer) {
     		connectionPolylines.removeLayer(layer);
 		});
-    	$('#gap').val(500);
-    	gap=500;
+    	$('#gap').val(1);
+    	gap=1;
     	selectedAgency = [];
     	selectedAgencies = [];
     	polylines = [];
