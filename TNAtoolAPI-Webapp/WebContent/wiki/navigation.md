@@ -1,4 +1,4 @@
-[TNA Software Tool (beta)](https://tnasoftwaretool.engr.oregonstate.edu/TNAtoolAPI-Webapp "TNA Software Tool") 
+[TNAST (beta)](https://tnasoftwaretool.engr.oregonstate.edu/TNAtoolAPI-Webapp "TNA Software Tool") 
 [Home](index.md)
 [About]()
 
