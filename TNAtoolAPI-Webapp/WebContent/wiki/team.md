@@ -21,11 +21,11 @@ The project team members are:
 </p>
 
 ---
-<p><img width=110 height=110 src="http://saeed.undo.it/images/Saeed_Personal.jpg" alt="Saeed Ghanbartehrani" style="float:left;" title="Saeed Ghanbartehrani">
+<p><img width=110 height=110 src="http://mime.oregonstate.edu/sites/mime.oregonstate.edu/files/photos/grad-directory/ghanbartehrani-saeed-325x325-01.jpg" alt="Saeed Ghanbartehrani" style="float:left;" title="Saeed Ghanbartehrani">
 <span style="margin-left:100px; display:block;">Saeed Ghanbartehrani</span></b>
 <span style="margin-left:100px; display:block;">PhD Candidate in Industrial Engineering</span></b>
 <span style="margin-left:100px; display:block;">Oregon State University</span></b>
-<span style="margin-left:100px; display:block;">Home page : http://saeed.undo.it</span></b>
+<span style="margin-left:100px; display:block;">Home page : http://mime.oregonstate.edu/grad/ghanbartehrani-saeed</span></b>
 </p>
 
 ---
@@ -33,11 +33,13 @@ The project team members are:
 <span style="margin-left:100px; display:block;">Alireza Mohseni</span></b>
 <span style="margin-left:100px; display:block;">PhD Candidate in Industrial Engineering</span></b>
 <span style="margin-left:100px; display:block;">Oregon State University</span></b>
+<span style="margin-left:100px; display:block;">Home page : http://mime.oregonstate.edu/grad/mohseni-seyed</span></b>
 </p>
 ---
 <p><img width=110 height=110 src="http://mime.oregonstate.edu/sites/mime.oregonstate.edu/files/photos/grad-directory/pouya-barahimi-325x325-01.jpg" alt="Pouya Barahimi" style="float:left;" title="Pouya Barahimi">
 <span style="margin-left:100px; display:block;">Pouya Barahimi</span></b>
 <span style="margin-left:100px; display:block;">PhD Student in Industrial Engineering</span></b>
 <span style="margin-left:100px; display:block;">Oregon State University</span></b>
+<span style="margin-left:100px; display:block;">Home page : http://mime.oregonstate.edu/grad/barahimi-pouya</span></b>
 </p>
 ---
