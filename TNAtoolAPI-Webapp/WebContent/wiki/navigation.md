@@ -2,8 +2,8 @@
 [Home](index.md)
 [About]()
 
-  * [The Project](project.md)
-  * [Objectives](objectives.md)
+  * [Project History](project.md)
+  * [Project Objectives](objectives.md)
   * [Software Architecture](architecture.md)  
   * [User Manual](manual.md)
   
