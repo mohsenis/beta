@@ -1,4 +1,4 @@
-Transit Network Analysis Software Tool -- New Features
+New Features
 =========
 
 This is a list of the new(est) features/updates implemented in the Transit Network Analysis Software Tool (TNAST).

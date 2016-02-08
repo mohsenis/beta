@@ -1,8 +1,9 @@
-Transit Network Analysis Software Tool Project
+Project History
 =========
 
 Assessing the current "state of health" of individual transit networks is a fundamental part of studies aimed at planning changes and/or upgrades to the transportation network serving a region. To be able to effect changes that benefit both the individual transit networks as well as the larger transportation system, organizations need to develop meaningful strategies guided by specific performance metrics. A fundamental requirement for the development of these performance metrics is the availability of accurate data regarding transit networks.
-  Prior to 2005, transit data was not readily available. This situation complicated the assessment of single transit networks, let alone performing a state-wide or region-wide study. The advent of the [General Transit Feed Specification](https://developers.google.com/transit/gtfs) (GTFS) changed this constrained landscape and motivated transit operators to release their schedules and route information to third party developers.
+
+Prior to 2005, transit data was not readily available. This situation complicated the assessment of single transit networks, let alone performing a state-wide or region-wide study. The advent of the [General Transit Feed Specification](https://developers.google.com/transit/gtfs) (GTFS) changed this constrained landscape and motivated transit operators to release their schedules and route information to third party developers.
 
 The [Research Unit](http://www.oregon.gov/ODOT/TD/TP_RES/Pages/Research-Program-2.aspx "Research Unit") of the [Oregon Department of Transportation](http://www.oregon.gov/ODOT "Oregon Department of Transportation") (ODOT) provided the funding to develop the open source, web-based Transit Network Analysis Software Tool (TNAST). The [Rail and Public Transit Division](http://www.oregon.gov/ODOT/PT) (RPTD) of ODOT and Oregon State University collaborated in the definition of the functional and technical specifications of the software tool.
  
@@ -28,8 +29,8 @@ NOTE: The final report of Phase I of the project can be accessed via the [ODOT](
 
 Phase II
 -------
-The second phase of the project is titled "An Open Source Tool For The Visualization, Analysis And Reporting Of Regional And Statewide Transit Networks". The software development efforts in Phase II spanned from November 2013 until December 2014. Since the prior version of the TNAST developed in Phase I could no longer accommodate the new project requirements, a new version of the TNAST was developed from scratch using open source development tools and platforms. 
+The second phase of the project is titled "An Open Source Tool For The Visualization, Analysis And Reporting of Regional And Statewide Transit Networks". The software development efforts in Phase II spanned from November 2013 until December 2014. Since the prior version of the TNAST developed in Phase I could no longer accommodate the new project requirements, a new version of the TNAST was developed from scratch using open source development tools and platforms. 
 
 Phase III
 -------
-The third phase of the project is titled "". The software development efforts in Phase III spanned from January 2015 until March 2016. The main focus of Phase III has been on further advancing the functionality of the TNAST and on integrating transit data (i.e., GTFS data) with other data sources such as population, demographics, park & ride, and employment.
+The third phase of the project is titled "Phase III: An Open Source Tool for the Visualization, Analysis, and Reporting of Regional and Statewide Transit Networks". The software development efforts in Phase III spanned from January 2015 until March 2016. The main focus of Phase III has been on further advancing the functionality of the TNAST and on integrating transit data (i.e., GTFS data) with other data sources such as population, demographics, park & ride, and employment.
