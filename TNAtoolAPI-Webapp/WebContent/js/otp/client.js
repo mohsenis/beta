@@ -91,7 +91,7 @@ var dialog2=$("#connectedAgencies-form").dialog({
     	connectionPolylines.eachLayer(function (layer) {
     		connectionPolylines.removeLayer(layer);
 		});
-    	$('#gap').val(0.1);
+    	$('#Sradius').val(0.1);
     	gap=0.1;
     	selectedAgency = [];
     	selectedAgencies = [];
