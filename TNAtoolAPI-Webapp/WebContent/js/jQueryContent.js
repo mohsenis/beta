@@ -614,7 +614,7 @@ function gos(key){
 	} 
 	
 	timeVar = setInterval(progress, 100);
-	
+
 	//check if the selected dates are within the agency's start and end date.
 	/*if (typeof w_qstring == 'undefined') {
 		   w_qstring = null;	   
