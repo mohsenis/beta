@@ -311,7 +311,7 @@ $(document).ready(function(){
 
 function dbchange(){
 	if (document.getElementById("dbselect").selectedIndex !=dbindex){
-		location.replace(document.URL.split("?")[0]+'?&x=0.25&dbindex='+document.getElementById("dbselect").selectedIndex);
+		location.replace(document.URL.split("&dbindex=")[0]+"&dbindex="+document.getElementById("dbselect").selectedIndex+"&popYear=2010");
 	}
 }
 

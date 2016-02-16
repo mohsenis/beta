@@ -484,7 +484,7 @@ function go(key){
 	timeVar = setInterval(progress, 100);
 	
 	//check if the selected dates are within the agency's start and end date.
-	var startDateUnion="";
+	/*var startDateUnion="";
 	var endDateUnion="";	
 	$.ajax({
 		type: 'GET',
@@ -511,14 +511,14 @@ function go(key){
 	}
 	
 	var maxDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(endDateUnion))));
-	var minDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(startDateUnion))));
+	var minDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(startDateUnion))));*/
 	//*****************//
 	
 	$( "#datepicker" ).multiDatesPicker({
 		changeMonth: true,
       	changeYear: true,
-      	minDate: minDate,
-      	maxDate: maxDate,
+      	/*minDate: minDate,
+      	maxDate: maxDate,*/
 		addDates: w_qstringd.split(","),
 		onSelect: function (date) {
 			dateID = date.replace("/","").replace("/","");
@@ -614,9 +614,9 @@ function gos(key){
 	} 
 	
 	timeVar = setInterval(progress, 100);
-	
+
 	//check if the selected dates are within the agency's start and end date.
-	if (typeof w_qstring == 'undefined') {
+	/*if (typeof w_qstring == 'undefined') {
 		   w_qstring = null;	   
 		}
 	$.ajax({
@@ -643,14 +643,14 @@ function gos(key){
 	}
 	
 	var maxDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(endDate))));
-	var minDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(startDate))));
+	var minDate = Math.ceil(daydiff(new Date(), parseDate(stringToDate(startDate))));*/
 	//*****************//
 	
 	$( "#datepicker" ).multiDatesPicker({
 		changeMonth: true,
       	changeYear: true,
-      	minDate: minDate,
-      	maxDate: maxDate,
+      	/*minDate: minDate,
+      	maxDate: maxDate,*/
 		addDates: w_qstringd.split(","),
 		onSelect: function (date) {
 			dateID = date.replace("/","").replace("/","");

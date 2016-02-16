@@ -1,7 +1,7 @@
-Transit Network Analysis Software Tool Features
+Features List
 =========
 
-This is a list of all features implemented in the most current version of the TNA Software Tool.
+This is a list of all features implemented in the most current version of the Transit Network Analysis Software Tool (TNAST).
 
 |Feature/Feature Group|Implementation Phase|
 |:------------- |-------------:|

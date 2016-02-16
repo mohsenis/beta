@@ -27,7 +27,7 @@ var qstringx = '0.25';
 var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3]+"&"+document.URL.split("&")[4],"");
 var w_qstringx = parseFloat(getURIParameter("x"));
 var w_qstring = getURIParameter("agency");
-var keyName = parseFloat(getURIParameter("n"));
+var keyName = getURIParameter("n");
 var dbindex = parseInt(getURIParameter("dbindex"));
 var areaId = getURIParameter("areaid");
 var type = parseInt(getURIParameter("type"));
@@ -266,7 +266,7 @@ function dbchange(){
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
 				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='popselect(this)' style="margin-right:2em;height:81%"></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select disabled id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

@@ -1,9 +1,9 @@
-[TNA Software Tool (beta)](https://tnasoftwaretool.engr.oregonstate.edu/TNAtoolAPI-Webapp "TNA Software Tool") 
+[TNAST (beta)](https://tnasoftwaretool.engr.oregonstate.edu/TNAtoolAPI-Webapp "TNA Software Tool") 
 [Home](index.md)
 [About]()
 
-  * [The Project](project.md)
-  * [Objectives](objectives.md)
+  * [Project History](project.md)
+  * [Project Objectives](objectives.md)
   * [Software Architecture](architecture.md)  
   * [User Manual](manual.md)
   
