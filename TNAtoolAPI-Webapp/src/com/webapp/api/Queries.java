@@ -2584,8 +2584,8 @@ Loop:  	for (Trip trip: routeTrips){
 			head.add(response.Clusters.get(i));
 		}
 		response.Clusters = new ArrayList<HubCluster>();
-		response.Clusters.addAll(head);*/
-		System.out.println(response.Clusters.size());
+		response.Clusters.addAll(head);
+		System.out.println(response.Clusters.size());*/
 		return response;
 	}
 	
