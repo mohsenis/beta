@@ -210,7 +210,13 @@ $(document).ready(function(){
 	 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"}},
 	 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}},
 	 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"}} ]
-	 		                }  
+	 		                },
+	 		                {
+	 		                	"sExtends":    "text",
+	 		                    "sButtonText": "Metadata",
+	 		                    "sToolTip": "Sources of the data and description of the metrics",
+	 		                    "fnClick" : function(){/* to be filled in later */}
+	 		                }   
 		            ]
 		        }
 				
