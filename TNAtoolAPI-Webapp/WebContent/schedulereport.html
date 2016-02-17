@@ -316,8 +316,13 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 				                    					"sButtonText": "PDF - Visible Columns Only", 
 				                    					"bSelectedOnly": true, 
 				                    					"mColumns": "visible",
-				                    					"bFooter": false}]
-				                }
+				                    					"bFooter": false}]},
+				    		 		                {
+				    		 		                	"sExtends":    "text",
+				    		 		                    "sButtonText": "Metadata", /* <img src='images/metadata.ico' alt='metadata' height='15' width='15'>  */
+				    		 		                    "sToolTip": "Sources of the data and description of the metrics",
+				    		 		                    "fnClick" : function(){/* to be filled in later */}
+				    		 		                }
 				            ]
 				        },
 				        "fnDrawCallback": function( oSettings ) {
