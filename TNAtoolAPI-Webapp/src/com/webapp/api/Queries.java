@@ -2579,12 +2579,12 @@ Loop:  	for (Trip trip: routeTrips){
 		response = getClusterData(y, fulldates, days, dbindex, x2, x3, username, key, popYear);
 		response.metadata = "Report Type:Transit Hubs Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
 		    	"Selected Database:" +Databases.dbnames[dbindex]+";Stop Cluster Radius(miles):"+String.valueOf(x1) + ";"+";Pop. Search Radius(miles):"+String.valueOf(x2) + ";" + DbUpdate.VERSION;
-		List<HubCluster> head = new ArrayList<HubCluster>();//response.Clusters.subList(0, 10);
+		/*List<HubCluster> head = new ArrayList<HubCluster>();//response.Clusters.subList(0, 10);
 		for(int i=0;i<10;i++){
 			head.add(response.Clusters.get(i));
 		}
 		response.Clusters = new ArrayList<HubCluster>();
-		response.Clusters.addAll(head);
+		response.Clusters.addAll(head);*/
 		System.out.println(response.Clusters.size());
 		return response;
 	}
