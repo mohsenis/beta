@@ -3183,10 +3183,16 @@ public class PgisEventManager {
 			if (i+1<date.length)
 				mainquery+=" union all ";
 		}
-		mainquery +="), trips as (select agencyid as aid, id as tripid from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)) select "
-				+ "stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips.aid),0) as service from aids inner join gtfs_stop_times stime on "
-				+ "aids.aid=stime.stop_agencyid left join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id";
-//		System.out.println("visit frequency: " + mainquery);
+		mainquery +="), trips as (select agencyid as aid, id as tripid from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)), "
+				+ "stopservices0 as (select stime.stop_agencyid as aid, stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips.aid),0) as service "
+				+ "		from gtfs_stop_times stime JOIN trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid "
+				+ "		group by stime.stop_agencyid, stime.stop_id), "
+				+ "stopservices1 as (select stop_agencyid as aid, stop_agencyid||stop_id as stopid, 0 as service "
+				+ "		FROM gtfs_stop_times  where stop_agencyid||stop_id NOT IN (SELECT stopid FROM stopservices0) "
+				+ "		group by stop_agencyid, stop_id), "
+				+ "stopservices as (select * from stopservices0 UNION ALL select * from stopservices1)"
+				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices USING(aid)";
+		System.out.println("visit frequency: " + mainquery);
 			try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
