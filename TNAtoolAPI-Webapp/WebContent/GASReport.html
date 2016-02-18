@@ -154,7 +154,7 @@ $(document).ready(function(){
 					agencytxt = item.AgencyId;
 				}		
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.AgencyId+'">'+agencytxt+'</a></td>'+ '<td><a href="' 
-				+ item.URL + '">'+ item.AgencyName + '</a></td>'+ '<td>' + item.Phone +'</td>'+ '<td><a href="#" type="RC" id="'
+				+ item.URL + '" target="_blank">'+ item.AgencyName + '</a></td>'+ '<td>' + item.Phone +'</td>'+ '<td><a href="#" type="RC" id="'
 				+ item.AgencyId+'">'+item.RoutesCount+'</a></td>'+ '<td><a href="#" type="SC" id="'+item.AgencyId+'">'+item.StopsCount
 				+'</a></td>'+'<td class="details-control" type="FA"></td><td>'+item.MinFare+'</td><td>'+item.AverageFare+'</td><td>'+item.MedianFare
 				+'</td><td>'+item.MaxFare+'</td><td>'+item.FareURL+'</td><td>'+item.FeedStartDate+'</td><td>'+item.FeedEndDate+'</a></td><td class="details-control" type="FE"></td><td>'

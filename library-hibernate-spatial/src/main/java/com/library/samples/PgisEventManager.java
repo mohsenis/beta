@@ -3192,7 +3192,7 @@ public class PgisEventManager {
 				+ "		group by stop_agencyid, stop_id), "
 				+ "stopservices as (select * from stopservices0 UNION ALL select * from stopservices1)"
 				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices USING(aid)";
-		System.out.println("visit frequency: " + mainquery);
+		//System.out.println("visit frequency: " + mainquery);
 			try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
