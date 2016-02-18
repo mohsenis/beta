@@ -2602,14 +2602,28 @@ Loop:  	for (Trip trip: routeTrips){
     	int totalLoad = x.entrySet().size();
     	HashMap<String, HashSet<String>> first = new HashMap<String, HashSet<String>>();
     	HashMap<String, HashSet<String>> second = new HashMap<String, HashSet<String>>();
-    	boolean b = false;
+    	HashMap<String, HashSet<String>> third = new HashMap<String, HashSet<String>>();
+    	HashMap<String, HashSet<String>> forth = new HashMap<String, HashSet<String>>();
+    	int b = 0;
     	for (Entry<String, HashSet<String>> e: x.entrySet()) {
-    	  if (b)
-    	    first.put(e.getKey(), e.getValue());
-    	  else
-    	    second.put(e.getKey(), e.getValue());
-    	  b = !b;
+    	  if (b==0)
+    		  first.put(e.getKey(), e.getValue());
+    	  else if(b==1)
+    		  second.put(e.getKey(), e.getValue());
+    	  else if(b==2)
+    		  third.put(e.getKey(), e.getValue());
+    	  else{
+    		  forth.put(e.getKey(), e.getValue());
+			  b=0;
+			  continue;
+    	  }
+    	  b++;
     	}
+    	System.out.println(first.size());
+    	System.out.println(second.size());
+    	System.out.println(third.size());
+    	System.out.println(forth.size());
+    	System.out.println(x.size());
     	class fillClusters implements Runnable {
     		private Thread t;
     		private String threadName;
@@ -2782,8 +2796,14 @@ Loop:  	for (Trip trip: routeTrips){
         fillClusters fc2 = new fillClusters( "Thread-2", second, output);
         fc2.start();
         
-        while(fc1.bool || fc2.bool){
-        	progress=fc1.threadProgress+fc2.threadProgress;
+        fillClusters fc3 = new fillClusters( "Thread-2", second, output);
+        fc3.start();
+        
+        fillClusters fc4 = new fillClusters( "Thread-2", second, output);
+        fc4.start();
+        
+        while(fc1.bool || fc2.bool || fc3.bool || fc4.bool){
+        	progress=fc1.threadProgress+fc2.threadProgress+fc3.threadProgress+fc4.threadProgress;
         	setprogVal(key, 10+((int) Math.round(progress*90/totalLoad)));
         	try {
     			Thread.sleep(500);
