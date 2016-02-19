@@ -3039,34 +3039,42 @@ public class PgisEventManager {
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery( "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pairs as (select stp1.agencyid as "
-					+ "aid1, stp1.id as sid1, stp2.agencyid as aid2, stp2.id as sid2, st_distance(stp1.location,stp2.location) as dist from gtfs_stops stp1 inner join gtfs_stops "
-					+ "stp2 on st_dwithin(stp1.location, stp2.location,"+String.valueOf(dist)+") inner join aids on stp1.agencyid = aids.aid inner join aids aids2 on "
-					+ "aids2.aid = stp2.agencyid), agencies as (select agency.id as aid, map.agencyid_def as aid_def, agency.name as aname, map.stopid as sid from gtfs_agencies "
-					+ "agency inner join gtfs_stop_service_map map on agency.id=map.agencyid), clusters as (select ag1.aid as aid1, ag2.aid as aid2, ag2.aname, "
-					+ "round((3.28084*min(pairs.dist))::numeric, 2) as min_gap from agencies ag1 inner join pairs on ag1.aid_def=pairs.aid1 and ag1.sid= pairs.sid1 inner join "
-					+ "agencies ag2 on ag2.aid_def=pairs.aid2 and ag2.sid= pairs.sid2 where ag1.aid !=ag2.aid group by ag1.aid, ag2.aid, ag2.aname order by aid1, aname), results "
-					+ "as (select aid1, count(aid2) as size, array_agg(aid2) as aids, array_agg(aname) as names, array_agg(min_gap::text) as min_gaps from clusters group by aid1), "
-					+ "selctedagencies as (select agency.name, agency.id from gtfs_agencies agency inner join gtfs_stop_service_map map on agency.id=map.agencyid inner join aids on"
-					+ " map.agencyid_def=aids.aid group by agency.id, agency.name) select agency.id as aid, agency.name, size, aids, names, min_gaps from selctedagencies agency left"
-					+ " join results on agency.id=results.aid1");					
+			String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'),"
+					+ " stops AS (SELECT map.agencyid, stops.location"
+					+ " 	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map"
+					+ " 	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id"
+					+ " 	WHERE stops.agencyid IN (SELECT * FROM aids)),"
+					+ " agencyshapes AS (SELECT agencyid, ST_COLLECT(location) AS shape FROM stops GROUP BY agencyid),"
+					+ " connections AS (SELECT agencyshapes.agencyid, gtfs_agencies.name AS agencyname, stops.agencyid AS connectedagency"
+					+ " 	FROM stops INNER JOIN agencyshapes ON ST_DWITHIN(agencyshapes.shape,stops.location," + dist + ")"
+					+ " 	INNER JOIN gtfs_agencies ON agencyshapes.agencyid = gtfs_agencies.id"
+					+ " 	WHERE stops.agencyid != agencyshapes.agencyid"
+					+ " 	GROUP BY agencyshapes.agencyid, agencyshapes.shape, stops.agencyid, gtfs_agencies.name),"
+					+  "connectedagencies AS (SELECT agencyid AS aid, agencyname AS name, count(connectedagency) AS size, array_agg(connectedagency) AS aids, array_agg(gtfs_agencies.name) AS names"
+					+ "	FROM connections INNER JOIN gtfs_agencies ON connections.connectedagency = gtfs_agencies.id"
+					+ " 	GROUP BY agencyid, agencyname),"
+					+ " disconnectedagencies AS (SELECT agencies.id, agencies.name, 0, NULL::char varying[], NULL::char varying[] FROM gtfs_agencies AS agencies WHERE agencies.id NOT IN (SELECT agencyid FROM connections))"
+					+ " SELECT * FROM connectedagencies UNION ALL SELECT * FROM disconnectedagencies";
+			System.out.println(query);
+			
+			ResultSet rs = stmt.executeQuery(query);
 			while ( rs.next() ) {
 				agencyCluster instance = new agencyCluster();
 				instance.agencyId = rs.getString("aid");
 				instance.agencyName = rs.getString("name");
-				if (rs.getString("size")!=null){
+				if (!rs.getString("size").equals("0")){
 					instance.clusterSize = rs.getLong("size");
 					String[] buffer = (String[]) rs.getArray("aids").getArray();
 					instance.agencyIds= Arrays.asList(buffer);
 					buffer = (String[]) rs.getArray("names").getArray();
 					instance.agencyNames= Arrays.asList(buffer);
-					buffer = (String[]) rs.getArray("min_gaps").getArray();
-					instance.minGaps= Arrays.asList(buffer);
+//					buffer = (String[]) rs.getArray("min_gaps").getArray();
+//					instance.minGaps= Arrays.asList(buffer);
 				} else {
 					instance.clusterSize = 0;
 					instance.agencyIds= new ArrayList<String>();
 					instance.agencyNames= new ArrayList<String>();
-					instance.minGaps= new ArrayList<String>();
+//					instance.minGaps= new ArrayList<String>();
 				}
 				
 		        response.add(instance);
@@ -3087,7 +3095,25 @@ public class PgisEventManager {
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pairs as (select stp1.agencyid as aid1,"
+			String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
+					+ "stops AS (SELECT map.agencyid, stops.location, stops.lat, stops.lon, name "
+					+ "	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map "
+					+ "	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id "
+					+ "	WHERE stops.agencyid IN (SELECT * FROM aids)), "
+					+ "agencyshape AS (SELECT agencyid, ST_COLLECT(location) AS shape FROM stops WHERE agencyid = '" + agencyId + "' GROUP BY agencyid), "
+					+ "connections AS (SELECT agencyshape.agencyid, stops.agencyid AS connectedagency "
+					+ "	FROM stops INNER JOIN agencyshape ON ST_DWITHIN(agencyshape.shape,stops.location," + dist + ") WHERE stops.agencyid != agencyshape.agencyid "
+					+ "	GROUP BY agencyshape.agencyid, agencyshape.shape, stops.agencyid ), "
+					+ "distances AS (SELECT connections.*, agencies.name AS agencyname, 3.28084*ST_DISTANCE(stops1.location,stops2.location)::NUMERIC AS dist, stops1.name AS name1, stops2.name AS name2, "
+					+ "	array[stops1.lat,stops1.lon]::TEXT AS stop1loc, ARRAY[stops2.lat,stops2.lon]::TEXT AS stop2loc "
+					+ "	FROM connections INNER JOIN stops AS stops1 USING(agencyid) "
+					+ "	INNER JOIN stops AS stops2 ON connections.connectedagency = stops2.agencyid "
+					+ "	INNER JOIN gtfs_agencies AS agencies ON connections.agencyid = agencies.id "
+					+ "	WHERE stops1.agencyid = '" + agencyId + "' AND ST_DISTANCE(stops1.location,stops2.location) <" + dist + ") "
+					+ " SELECT agencyid AS aid1, agencyname AS aname1, connectedagency AS aid2, gtfs_agencies.name AS aname2, COUNT(dist) AS size, ROUND(MIN(dist),2) AS min_gap, ROUND(MAX(dist),2) AS max_gap, ROUND(AVG(dist),2) AS avg_gap, "
+					+ "	ARRAY_AGG(name1) AS names1, ARRAY_AGG(name2) AS names2, ARRAY_AGG(ROUND(dist,2)::TEXT) AS dists, ARRAY_AGG(stop1loc) AS locs1, ARRAY_AGG(stop2loc) AS locs2 "
+					+ "	FROM distances INNER JOIN gtfs_agencies ON connectedagency = gtfs_agencies.id GROUP BY agencyid, connectedagency, agencyname, gtfs_agencies.name";
+			/*String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pairs as (select stp1.agencyid as aid1,"
 					+ " stp1.id as sid1, array[stp1.lat, stp1.lon]::text as stp1loc, stp1.name as name1, stp2.agencyid as aid2, stp2.id as sid2, array[stp2.lat, stp2.lon]::text "
 					+ "as stp2loc, stp2.name as name2, st_distance(stp1.location,stp2.location) as dist from gtfs_stops stp1 inner join gtfs_stops stp2 on "
 					+ "st_dwithin(stp1.location, stp2.location,"+String.valueOf(dist)+") inner join aids on stp1.agencyid=aids.aid inner join aids aids2 on stp2.agencyid=aids2.aid)"
@@ -3097,13 +3123,13 @@ public class PgisEventManager {
 					+ "as size, round((3.28084*min(pairs.dist))::numeric, 2) as min_gap, round((3.28084*max(pairs.dist))::numeric, 2) as max_gap, "
 					+ "round((3.28084*avg(pairs.dist))::numeric, 2) as avg_gap, array_agg(name1) as names1, array_agg(stp1loc) as locs1, array_agg(sid2) as sids2, array_agg(name2) as names2, "
 					+ "array_agg(stp2loc) as locs2, array_agg(round((3.28084*dist)::numeric, 2)::text) as dists from agency ag1 inner join pairs on ag1.aid_def=pairs.aid1 and "
-					+ "ag1.sid= pairs.sid1 inner join agencies ag2 on ag2.aid_def=pairs.aid2 and ag2.sid= pairs.sid2 where ag1.aid!=ag2.aid group by ag1.aid, ag2.aid, ag2.aname";					
+					+ "ag1.sid= pairs.sid1 inner join agencies ag2 on ag2.aid_def=pairs.aid2 and ag2.sid= pairs.sid2 where ag1.aid!=ag2.aid group by ag1.aid, ag2.aid, ag2.aname";*/					
 			System.out.println(query);
 			ResultSet rs = stmt.executeQuery(query);
 			while ( rs.next() ) {
 				agencyCluster instance = new agencyCluster();
 				instance.agencyId = rs.getString("aid2");
-				instance.agencyName = rs.getString("aname");
+				instance.agencyName = rs.getString("aname2");
 				instance.clusterSize = rs.getLong("size");
 				instance.minGap = rs.getFloat("min_gap");
 				instance.maxGap = rs.getFloat("max_gap");
@@ -3118,14 +3144,13 @@ public class PgisEventManager {
 				instance.sourceStopCoords = Arrays.asList(buffer);
 				buffer = (String[]) rs.getArray("locs2").getArray();
 				instance.destStopCoords = Arrays.asList(buffer);
-				buffer = (String[]) rs.getArray("sids2").getArray();
-				instance.destStopIds = Arrays.asList(buffer);
+//				buffer = (String[]) rs.getArray("sids2").getArray();
+//				instance.destStopIds = Arrays.asList(buffer);
 		        response.add(instance);
 		        }
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
-	      }
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );	         
+	    }
 		dropConnection(connection);
 		return response;
 	}
