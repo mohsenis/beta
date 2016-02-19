@@ -28,16 +28,12 @@ var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Number of Connected Agenies<em title="Number of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Agency Details<em title="Name of transit agencies that have at least one stop within the specified distance of the transit agency stops and minimum spatial gap in feet between between the transit agencies listed and the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Connected Agency Names<em title="Name of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Agency Min Spatial Gaps<em title="Minimum spatial gap in feet between between the transit agencies listed and the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 
 html += '<thead>'+tmp+'</thead><tbody>';
 var html2 = '<tfoot>'+tmp+'</tfoot>';
-var netNames = new Array();
-var minDistances = new Array();
 
 var key = Math.random();
 
@@ -133,18 +129,14 @@ $(document).ready(function(){
 			$('h2').append('Connected Transit Agencies Summary Report <br><hr>');
 			$.each(d.ClusterR, function(i,item){
 				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +item.name+'</td><td>' +item.size +
-				'</td><td>' +item.ids +'</td>'+ '<td class="details-control"></td><td>'+item.names+'</td><td>'+item.distances+'</td><td>'+d.metadata+'</td></tr>';
-				netNames.push(item.names);
-				minDistances.push(item.distances);
+				'</td><td>' +item.names +'</td><td>'+item.ids+'</td><td>'+d.metadata+'</td></tr>';
 			});		
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			$('a').click(function(e){
 				if($(this).attr('type')=="XR"){
-		    		qstring = $(this).attr('id');		    				    		
-		    		//var keyName = Math.random();
-		    		///localStorage.setItem(keyName, qstringd);
+		    		qstring = $(this).attr('id');		    		
 					var keyName = setDates(qstringd);			    		
 		    		window.open('/TNAtoolAPI-Webapp/ConAgenXReport.html?&gap='+gap+'&agency='+qstring+'&dbindex='+dbindex);
 				}				
@@ -154,8 +146,8 @@ $(document).ready(function(){
 				"paging": true,				
 				"iDisplayLength": 14,
 				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [3,4,5,6 ] },
-				                 { "visible": false, "targets": [5,6,7]}
+				                 { "bSortable": false, "aTargets": [3,4,5]},
+				                 { "visible": false, "targets": [5]}
 				               ],
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
@@ -170,11 +162,11 @@ $(document).ready(function(){
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
 		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
-		 		                    				  "mColumns": [ 0, 1, 2, 3]},
+		 		                    				  "mColumns": [ 0, 1, 2, 3, 4]},
 		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                                      "mColumns": [ 0, 1, 2, 3, 5, 6, 7]},
+		 		                                      "mColumns": [ 0, 1, 2, 3, 4, 5]},
 		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                                      "mColumns": [ 0, 1, 2, 3, 5, 6, 7]} ]
+		 		                                      "mColumns": [ 0, 1, 2, 3, 4, 5]} ]
 		 		                },
 		 		                {
 		 		                	"sExtends":    "text",
@@ -186,7 +178,7 @@ $(document).ready(function(){
 		        }
 				
 			} );
-		    $('#RT tbody').on('click', 'td.details-control', function () {
+		   /*  $('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
 		        var row = table.row( tr );
 		        var pos = row.index();
@@ -211,7 +203,7 @@ $(document).ready(function(){
 		                '<td>'+minDistances[p]+'</td>'+
 		            '</tr>'+		            
 		        '</table>';
-		    }
+		    } */
 		    $('#RT_wrapper').css("width", $('#RT').css("width"));
 		    $('#RT_wrapper').css("margin", "auto");
 			$("#RT_length").remove();
