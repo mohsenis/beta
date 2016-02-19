@@ -2579,165 +2579,234 @@ Loop:  	for (Trip trip: routeTrips){
 		response = getClusterData(y, fulldates, days, dbindex, x2, x3, username, key, popYear);
 		response.metadata = "Report Type:Transit Hubs Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
 		    	"Selected Database:" +Databases.dbnames[dbindex]+";Stop Cluster Radius(miles):"+String.valueOf(x1) + ";"+";Pop. Search Radius(miles):"+String.valueOf(x2) + ";" + DbUpdate.VERSION;
-		List<HubCluster> head = new ArrayList<HubCluster>();//response.Clusters.subList(0, 10);
+		/*List<HubCluster> head = new ArrayList<HubCluster>();//response.Clusters.subList(0, 10);
 		for(int i=0;i<10;i++){
 			head.add(response.Clusters.get(i));
 		}
 		response.Clusters = new ArrayList<HubCluster>();
 		response.Clusters.addAll(head);
-		System.out.println(response.Clusters.size());
+		System.out.println(response.Clusters.size());*/
 		return response;
 	}
 	
-	public HubsClusterList getClusterData(HashMap<String, HashSet<String>> x, String[] dates, String[] days, int dbindex, double popRadius, double pnrRadius, String username, double key, String popYear) throws SQLException{
+	public HubsClusterList getClusterData(HashMap<String, HashSet<String>> x, String[] dates, String[] days, final int dbindex, final double popRadius, final double pnrRadius, String username, final double key, final String popYear) throws SQLException{
 		HubsClusterList output = new HubsClusterList();
     	int progress = 0;
     	setprogVal(key, 5);
-		HashMap<String, Integer> serviceMap = PgisEventManager.stopFrequency(null, dates, days, username, dbindex);
-		String query = new String();
-		Connection connection = PgisEventManager.makeConnection(dbindex);
-		Statement stmt = null;
-		stmt = connection.createStatement();
-		setprogVal(key, 40);
+		final HashMap<String, Integer> serviceMap = PgisEventManager.stopFrequency(null, dates, days, username, dbindex);
+		//String query = new String();
+		//Connection connection = PgisEventManager.makeConnection(dbindex);
+		//Statement stmt = null;
+		//stmt = connection.createStatement();
+		setprogVal(key, 10);
     	int totalLoad = x.entrySet().size();
-		for (Entry<String, HashSet<String>> entry : x.entrySet()){
-			progress++;
-			HubCluster response = new HubCluster();
-			List<String> agencyids = new ArrayList<String>();
-			List<String> stopids = new ArrayList<String>();
-			int visits = 0;
-			for(String instance : entry.getValue()){
-				String[] temp = instance.split(":");
-				stopids.add(temp[0]);
-				agencyids.add(temp[1]);
-				int stopVisits = serviceMap.get(temp[1]+temp[0]);
-				response.stopsVisits.add(stopVisits);
-				visits += stopVisits;
+    	HashMap<String, HashSet<String>> first = new HashMap<String, HashSet<String>>();
+    	HashMap<String, HashSet<String>> second = new HashMap<String, HashSet<String>>();
+    	HashMap<String, HashSet<String>> third = new HashMap<String, HashSet<String>>();
+    	HashMap<String, HashSet<String>> forth = new HashMap<String, HashSet<String>>();
+    	int b = 0;
+    	for (Entry<String, HashSet<String>> e: x.entrySet()) {
+    	  if (b==0)
+    		  first.put(e.getKey(), e.getValue());
+    	  else if(b==1)
+    		  second.put(e.getKey(), e.getValue());
+    	  else if(b==2)
+    		  third.put(e.getKey(), e.getValue());
+    	  else{
+    		  forth.put(e.getKey(), e.getValue());
+			  b=0;
+			  continue;
+    	  }
+    	  b++;
+    	}
+    	class fillClusters implements Runnable {
+    		private Thread t;
+    		private String threadName;
+    		private HashMap<String, HashSet<String>> threadSet;
+    		HubsClusterList tOutput;
+    		
+    		public boolean bool = true;
+    		public int threadProgress=0;
+    		
+		   
+    		fillClusters(String name, HashMap<String, HashSet<String>> set, HubsClusterList output){
+    			threadName = name;
+    			threadSet = set;
+    			tOutput = output;
+    		}
+    		
+			public void run() {
+				String query;
+				Connection connection = PgisEventManager.makeConnection(dbindex);
+				try {
+					Statement stmt = connection.createStatement();
+					for (Entry<String, HashSet<String>> entry : threadSet.entrySet()){
+						threadProgress++;
+						HubCluster response = new HubCluster();
+						List<String> agencyids = new ArrayList<String>();
+						List<String> stopids = new ArrayList<String>();
+						int visits = 0;
+						for(String instance : entry.getValue()){
+							String[] temp = instance.split(":");
+							stopids.add(temp[0]);
+							agencyids.add(temp[1]);
+							int stopVisits = serviceMap.get(temp[1]+temp[0]);
+							response.stopsVisits.add(stopVisits);
+							visits += stopVisits;
+						}
+						
+						query = "WITH list AS (VALUES ";
+						String temp = "";
+						for (int i=0; i<stopids.size(); i++){
+							temp += "('" + stopids.get(i) + "','" + agencyids.get(i) + "'),";
+						}
+						query += temp.substring(0, temp.length()-1);
+						query += "), "
+								+ "stops AS (SELECT gtfs_stops.* FROM gtfs_stops INNER JOIN list ON id = column1 AND agencyid = column2), "
+								+ "stopsarray0 AS (SELECT stops.id, stops.name, map.agencyid, lat, lon FROM stops INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def),"
+								+ "stopsarray1 AS (SELECT stopsarray0.*, gtfs_agencies.name AS stopsagenciesnames FROM stopsarray0 INNER JOIN gtfs_agencies ON stopsarray0.agencyid = gtfs_agencies.id),"
+								+ "stopsarray AS (SELECT array_agg(agencyid) AS stopsagencyids, array_agg(stopsagenciesnames) AS stopsagenciesnames, array_agg(id) AS stopsids, array_agg(name) AS stopsnames ,array_agg(lat) AS stopslats,array_agg(lon) AS stopslons FROM stopsarray1),"
+								+ "stopscount AS (SELECT count(distinct agencyid||id) AS stopscount FROM stops), "
+								+ "clustercoor AS (SELECT avg(stops.lat) AS lat, avg(stops.lon) AS lon FROM stops),"
+								+ "agenciesarray AS (SELECT array_agg(distinct stopsagenciesnames) AS agenciesnames FROM stopsarray1), "
+								+ "agenciescount AS (SELECT count(distinct stopsagenciesnames) AS agenciescount FROM stopsarray1), "
+								+ "tmproutes AS (SELECT map.* FROM gtfs_stop_route_map AS map INNER JOIN stops ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id), "
+								+ "routes AS (SELECT gtfs_routes.* FROM gtfs_routes INNER JOIN tmproutes ON tmproutes.routeid = gtfs_routes.id AND tmproutes.agencyid = gtfs_routes.agencyid), "
+								+ "routesarray0 AS (SELECT routes.agencyid, routes.id, routes.shortname, routes.longname, gtfs_agencies.name AS agencyname "
+								+ "	FROM routes INNER JOIN gtfs_agencies "
+								+ "	ON routes.agencyid = gtfs_agencies.id "
+								+ "	GROUP BY routes.agencyid, routes.id, routes.shortname, routes.longname, agencyname), "
+								+ "routesarray  AS (SELECT COALESCE(array_agg(agencyid),'{N/A}') AS routesagencies, COALESCE(array_agg(agencyname),'{N/A}') AS routesagenciesnames, COALESCE(array_agg(id),'{N/A}') AS routesids, COALESCE(array_agg(shortname),'{N/A}') AS routesshortnames, COALESCE(array_agg(longname),'{N/A}') AS routeslongnames FROM routesarray0),  "
+								+ "routescount AS (SELECT count(distinct agencyid||id) AS routescount FROM routes), "
+								+ "counties AS (SELECT counties.countyid, counties.cname FROM census_counties AS counties INNER JOIN stops ON LEFT(stops.blockid,5) = counties.countyid), "
+								+ "countiesarray AS (SELECT COALESCE(array_agg(distinct countyid),'{N/A}') AS countiesids, COALESCE(array_agg(distinct cname),'{N/A}') AS countiesnames FROM counties), "
+								+ "countiescount AS (SELECT count(distinct counties.countyid) AS countiescount FROM counties), "
+								+ "urbanarray AS (SELECT COALESCE(sum(distinct population"+popYear+")::text, 'N/A') AS urbanareaspop, COALESCE(array_agg(distinct stops.urbanid),'{N/A}') AS urbanids, COALESCE(array_agg(distinct uname),'{N/A}') AS urbannames FROM census_urbans INNER JOIN stops ON census_urbans.urbanid = stops.urbanid),"
+								+ "regionsarray  AS (SELECT  COALESCE(array_agg(distinct ' Region '||regionid),'{N/A}') AS regionids FROM stops),"
+								+ "pop0 AS (SELECT distinct census_blocks.blockid, population"+popYear+" as population FROM census_blocks INNER JOIN stops ON ST_Dwithin(census_blocks.location, stops.location, " + popRadius + ")), "
+								+ "pop AS (SELECT COALESCE(sum(population),0) AS pop FROM pop0),"
+								+ "pnr AS (SELECT pr.* FROM parknride AS pr INNER JOIN clustercoor ON ST_Dwithin(pr.geom,ST_transform(ST_setsrid(ST_MakePoint(clustercoor.lon, clustercoor.lat),4326), 2993)," + pnrRadius + ")), "
+								+ "pnrarray AS (SELECT COALESCE(count(pnr.pnrid),0) AS pnrcount,COALESCE(array_agg(pnr.pnrid),'{}') AS pnrids, COALESCE(array_agg(pnr.lat),'{}') AS pnrlats, "
+								+ "COALESCE(array_agg(pnr.lon),'{}') AS pnrlons, COALESCE(array_agg(pnr.lotname),'{N/A}') AS pnrnames, COALESCE(array_agg(pnr.city),'{N/A}') AS pnrcities, "
+								+ "	COALESCE(array_agg(pnr.spaces),'{0}') AS pnrspaces "
+								+ "	FROM pnr), "
+								+ "placesarray0 AS (SELECT distinct places.placeid FROM census_places AS places INNER JOIN stops ON stops.placeid = places.placeid), "
+								+ "placesarray AS (SELECT COALESCE(array_agg(places.placeid),'{N/A}') AS placesids, COALESCE(array_agg(pname),'{N/A}') AS placesnames, count(distinct places.placeid) AS placescount "
+								+ "FROM census_places AS places INNER JOIN placesarray0 ON placesarray0.placeid = places.placeid) "
+								+ ""
+								+ "SELECT clustercoor.*, stopscount.*, agenciescount.*, pop.* AS pop, regionsarray.*, "
+								+ "	urbanarray.*, countiesarray.*, agenciesarray.*, countiescount.*, routescount.*,"
+								+ " stopsarray.*, routesarray.*,pnrarray.*, placesarray.*"
+								+ "	FROM stopsarray CROSS JOIN stopscount CROSS JOIN agenciesarray CROSS JOIN routesarray"
+								+ "	CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop"
+								+ "	CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount"
+								+ "	CROSS JOIN pnrarray CROSS JOIN placesarray";
+	//					System.out.println(query);			
+					
+						
+						ResultSet rs = stmt.executeQuery(query);
+							
+						while(rs.next()){
+							response.lat = rs.getString("lat");
+							response.lon = rs.getString("lon");
+							response.agenciescount = rs.getString("agenciescount");
+							response.countiescount = rs.getString("countiescount");
+							response.pop = rs.getString("pop");
+							response.stopscount = rs.getString("stopscount");
+							response.routescount = rs.getString("routescount");
+							response.pnrcount = rs.getInt("pnrcount");
+							response.placescount = rs.getInt("placescount");
+							response.urbanareaspop = rs.getString("urbanareaspop");
+							response.visits = visits + "";
+							String[] tempCountiesNames = (String[]) rs.getArray("countiesnames").getArray();
+							response.countiesNames =  Arrays.asList(tempCountiesNames);
+							String[] tempAgenciesNames = (String[]) rs.getArray("agenciesnames").getArray();
+							response.agenciesNames =  Arrays.asList(tempAgenciesNames);
+							String[] tempUrbanNames = (String[]) rs.getArray("urbannames").getArray();
+							response.urbanNames = Arrays.asList(tempUrbanNames);
+							String[] tempRoutesAgencies = (String[]) rs.getArray("routesagencies").getArray();
+							response.routesAgencies = Arrays.asList(tempRoutesAgencies);
+							String[] tempRoutesAgenciesNames = (String[]) rs.getArray("routesagenciesnames").getArray();
+							response.routesAgenciesNames = Arrays.asList(tempRoutesAgenciesNames);
+							String[] tempRoutesIDs = (String[]) rs.getArray("routesids").getArray();
+							response.routesIDs = Arrays.asList(tempRoutesIDs);
+							String[] tempRoutesShortnames = (String[]) rs.getArray("routesshortnames").getArray();
+							response.routeShortnames = Arrays.asList(tempRoutesShortnames);
+							String[] tempRoutesLongnames = (String[]) rs.getArray("routeslongnames").getArray();
+							response.routesLongnames = Arrays.asList(tempRoutesLongnames);
+							String[] tempStopsIDs = (String[]) rs.getArray("stopsids").getArray();
+							response.stopsIDs =  Arrays.asList(tempStopsIDs);
+							String[] tempStopsAgencies = (String[]) rs.getArray("stopsagencyids").getArray();
+							response.stopsAgencies = Arrays.asList(tempStopsAgencies);
+							String[] tempStopsAgenciesNames = (String[]) rs.getArray("stopsagenciesnames").getArray();
+							response.stopsAgenciesNames = Arrays.asList(tempStopsAgenciesNames);
+							String[] tempStopsNames = (String[]) rs.getArray("stopsnames").getArray();
+							response.stopsNames = Arrays.asList(tempStopsNames);
+							String[] tempregionsIDs = (String[]) rs.getArray("regionids").getArray();
+							response.regionsIDs = Arrays.asList(tempregionsIDs);
+							Double[] tempStopsLats = (Double[]) rs.getArray("stopslats").getArray();
+							response.stopsLats = Arrays.asList(tempStopsLats);
+							Double[] tempStopsLons = (Double[]) rs.getArray("stopslons").getArray();
+							response.stopsLons =  Arrays.asList(tempStopsLons);					
+							Integer[] tempPnrIDs = (Integer[]) rs.getArray("pnrids").getArray();
+							response.pnrIDs =  Arrays.asList(tempPnrIDs);
+							Double[] tempPnrLats = (Double[]) rs.getArray("pnrlats").getArray();
+							response.pnrLats =  Arrays.asList(tempPnrLats);
+							Double[] tempPnrLons = (Double[]) rs.getArray("pnrlons").getArray();
+							response.pnrLons =  Arrays.asList(tempPnrLons);
+							String[] tempPnrNames = (String[]) rs.getArray("pnrnames").getArray();
+							response.pnrNames = Arrays.asList(tempPnrNames);
+							String[] tempPnrCities = (String[]) rs.getArray("pnrnames").getArray();
+							response.pnrCities = Arrays.asList(tempPnrCities);
+							Integer[] tempPnrSpaces = (Integer[]) rs.getArray("pnrspaces").getArray();
+							response.pnrSpaces = Arrays.asList(tempPnrSpaces);
+							String[] tempPlacesIDs = (String[]) rs.getArray("placesids").getArray();
+							response.placesIDs = Arrays.asList(tempPlacesIDs);
+							String[] tempPlacesNames = (String[]) rs.getArray("placesnames").getArray();
+							response.placesNames = Arrays.asList(tempPlacesNames);
+							tOutput.Clusters.add(response);
+						}
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+						
+				PgisEventManager.dropConnection(connection);
+				bool=false;
 			}
 			
-			query = "WITH list AS (VALUES ";
-			String temp = "";
-			for (int i=0; i<stopids.size(); i++){
-				temp += "('" + stopids.get(i) + "','" + agencyids.get(i) + "'),";
-			}
-			query += temp.substring(0, temp.length()-1);
-			query += "), "
-					+ "stops AS (SELECT gtfs_stops.* FROM gtfs_stops INNER JOIN list ON id = column1 AND agencyid = column2), "
-					+ "stopsarray0 AS (SELECT stops.id, stops.name, map.agencyid, lat, lon FROM stops INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def),"
-					+ "stopsarray1 AS (SELECT stopsarray0.*, gtfs_agencies.name AS stopsagenciesnames FROM stopsarray0 INNER JOIN gtfs_agencies ON stopsarray0.agencyid = gtfs_agencies.id),"
-					+ "stopsarray AS (SELECT array_agg(agencyid) AS stopsagencyids, array_agg(stopsagenciesnames) AS stopsagenciesnames, array_agg(id) AS stopsids, array_agg(name) AS stopsnames ,array_agg(lat) AS stopslats,array_agg(lon) AS stopslons FROM stopsarray1),"
-					+ "stopscount AS (SELECT count(distinct agencyid||id) AS stopscount FROM stops), "
-					+ "clustercoor AS (SELECT avg(stops.lat) AS lat, avg(stops.lon) AS lon FROM stops),"
-					+ "agenciesarray AS (SELECT array_agg(distinct stopsagenciesnames) AS agenciesnames FROM stopsarray1), "
-					+ "agenciescount AS (SELECT count(distinct stopsagenciesnames) AS agenciescount FROM stopsarray1), "
-					+ "tmproutes AS (SELECT map.* FROM gtfs_stop_route_map AS map INNER JOIN stops ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id), "
-					+ "routes AS (SELECT gtfs_routes.* FROM gtfs_routes INNER JOIN tmproutes ON tmproutes.routeid = gtfs_routes.id AND tmproutes.agencyid = gtfs_routes.agencyid), "
-					+ "routesarray0 AS (SELECT routes.agencyid, routes.id, routes.shortname, routes.longname, gtfs_agencies.name AS agencyname "
-					+ "	FROM routes INNER JOIN gtfs_agencies "
-					+ "	ON routes.agencyid = gtfs_agencies.id "
-					+ "	GROUP BY routes.agencyid, routes.id, routes.shortname, routes.longname, agencyname), "
-					+ "routesarray  AS (SELECT COALESCE(array_agg(agencyid),'{N/A}') AS routesagencies, COALESCE(array_agg(agencyname),'{N/A}') AS routesagenciesnames, COALESCE(array_agg(id),'{N/A}') AS routesids, COALESCE(array_agg(shortname),'{N/A}') AS routesshortnames, COALESCE(array_agg(longname),'{N/A}') AS routeslongnames FROM routesarray0),  "
-					+ "routescount AS (SELECT count(distinct agencyid||id) AS routescount FROM routes), "
-					+ "counties AS (SELECT counties.countyid, counties.cname FROM census_counties AS counties INNER JOIN stops ON LEFT(stops.blockid,5) = counties.countyid), "
-					+ "countiesarray AS (SELECT COALESCE(array_agg(distinct countyid),'{N/A}') AS countiesids, COALESCE(array_agg(distinct cname),'{N/A}') AS countiesnames FROM counties), "
-					+ "countiescount AS (SELECT count(distinct counties.countyid) AS countiescount FROM counties), "
-					+ "urbanarray AS (SELECT COALESCE(sum(distinct population"+popYear+")::text, 'N/A') AS urbanareaspop, COALESCE(array_agg(distinct stops.urbanid),'{N/A}') AS urbanids, COALESCE(array_agg(distinct uname),'{N/A}') AS urbannames FROM census_urbans INNER JOIN stops ON census_urbans.urbanid = stops.urbanid),"
-					+ "regionsarray  AS (SELECT  COALESCE(array_agg(distinct ' Region '||regionid),'{N/A}') AS regionids FROM stops),"
-					+ "pop0 AS (SELECT distinct census_blocks.blockid, population"+popYear+" as population FROM census_blocks INNER JOIN stops ON ST_Dwithin(census_blocks.location, stops.location, " + popRadius + ")), "
-					+ "pop AS (SELECT COALESCE(sum(population),0) AS pop FROM pop0),"
-					+ "pnr AS (SELECT pr.* FROM parknride AS pr INNER JOIN clustercoor ON ST_Dwithin(pr.geom,ST_transform(ST_setsrid(ST_MakePoint(clustercoor.lon, clustercoor.lat),4326), 2993)," + pnrRadius + ")), "
-					+ "pnrarray AS (SELECT COALESCE(count(pnr.pnrid),0) AS pnrcount,COALESCE(array_agg(pnr.pnrid),'{}') AS pnrids, COALESCE(array_agg(pnr.lat),'{}') AS pnrlats, "
-					+ "COALESCE(array_agg(pnr.lon),'{}') AS pnrlons, COALESCE(array_agg(pnr.lotname),'{N/A}') AS pnrnames, COALESCE(array_agg(pnr.city),'{N/A}') AS pnrcities, "
-					+ "	COALESCE(array_agg(pnr.spaces),'{0}') AS pnrspaces "
-					+ "	FROM pnr), "
-					+ "placesarray0 AS (SELECT distinct places.placeid FROM census_places AS places INNER JOIN stops ON stops.placeid = places.placeid), "
-					+ "placesarray AS (SELECT COALESCE(array_agg(places.placeid),'{N/A}') AS placesids, COALESCE(array_agg(pname),'{N/A}') AS placesnames, count(distinct places.placeid) AS placescount "
-					+ "FROM census_places AS places INNER JOIN placesarray0 ON placesarray0.placeid = places.placeid) "
-					+ ""
-					+ "SELECT clustercoor.*, stopscount.*, agenciescount.*, pop.* AS pop, regionsarray.*, "
-					+ "	urbanarray.*, countiesarray.*, agenciesarray.*, countiescount.*, routescount.*,"
-					+ " stopsarray.*, routesarray.*,pnrarray.*, placesarray.*"
-					+ "	FROM stopsarray CROSS JOIN stopscount CROSS JOIN agenciesarray CROSS JOIN routesarray"
-					+ "	CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop"
-					+ "	CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount"
-					+ "	CROSS JOIN pnrarray CROSS JOIN placesarray";
-//			System.out.println(query);			
-			try {
-				
-				ResultSet rs = stmt.executeQuery(query);
-					
-				while(rs.next()){
-					response.lat = rs.getString("lat");
-					response.lon = rs.getString("lon");
-					response.agenciescount = rs.getString("agenciescount");
-					response.countiescount = rs.getString("countiescount");
-					response.pop = rs.getString("pop");
-					response.stopscount = rs.getString("stopscount");
-					response.routescount = rs.getString("routescount");
-					response.pnrcount = rs.getInt("pnrcount");
-					response.placescount = rs.getInt("placescount");
-					response.urbanareaspop = rs.getString("urbanareaspop");
-					response.visits = visits + "";
-					String[] tempCountiesNames = (String[]) rs.getArray("countiesnames").getArray();
-					response.countiesNames =  Arrays.asList(tempCountiesNames);
-					String[] tempAgenciesNames = (String[]) rs.getArray("agenciesnames").getArray();
-					response.agenciesNames =  Arrays.asList(tempAgenciesNames);
-					String[] tempUrbanNames = (String[]) rs.getArray("urbannames").getArray();
-					response.urbanNames = Arrays.asList(tempUrbanNames);
-					String[] tempRoutesAgencies = (String[]) rs.getArray("routesagencies").getArray();
-					response.routesAgencies = Arrays.asList(tempRoutesAgencies);
-					String[] tempRoutesAgenciesNames = (String[]) rs.getArray("routesagenciesnames").getArray();
-					response.routesAgenciesNames = Arrays.asList(tempRoutesAgenciesNames);
-					String[] tempRoutesIDs = (String[]) rs.getArray("routesids").getArray();
-					response.routesIDs = Arrays.asList(tempRoutesIDs);
-					String[] tempRoutesShortnames = (String[]) rs.getArray("routesshortnames").getArray();
-					response.routeShortnames = Arrays.asList(tempRoutesShortnames);
-					String[] tempRoutesLongnames = (String[]) rs.getArray("routeslongnames").getArray();
-					response.routesLongnames = Arrays.asList(tempRoutesLongnames);
-					String[] tempStopsIDs = (String[]) rs.getArray("stopsids").getArray();
-					response.stopsIDs =  Arrays.asList(tempStopsIDs);
-					String[] tempStopsAgencies = (String[]) rs.getArray("stopsagencyids").getArray();
-					response.stopsAgencies = Arrays.asList(tempStopsAgencies);
-					String[] tempStopsAgenciesNames = (String[]) rs.getArray("stopsagenciesnames").getArray();
-					response.stopsAgenciesNames = Arrays.asList(tempStopsAgenciesNames);
-					String[] tempStopsNames = (String[]) rs.getArray("stopsnames").getArray();
-					response.stopsNames = Arrays.asList(tempStopsNames);
-					String[] tempregionsIDs = (String[]) rs.getArray("regionids").getArray();
-					response.regionsIDs = Arrays.asList(tempregionsIDs);
-					Double[] tempStopsLats = (Double[]) rs.getArray("stopslats").getArray();
-					response.stopsLats = Arrays.asList(tempStopsLats);
-					Double[] tempStopsLons = (Double[]) rs.getArray("stopslons").getArray();
-					response.stopsLons =  Arrays.asList(tempStopsLons);					
-					Integer[] tempPnrIDs = (Integer[]) rs.getArray("pnrids").getArray();
-					response.pnrIDs =  Arrays.asList(tempPnrIDs);
-					Double[] tempPnrLats = (Double[]) rs.getArray("pnrlats").getArray();
-					response.pnrLats =  Arrays.asList(tempPnrLats);
-					Double[] tempPnrLons = (Double[]) rs.getArray("pnrlons").getArray();
-					response.pnrLons =  Arrays.asList(tempPnrLons);
-					String[] tempPnrNames = (String[]) rs.getArray("pnrnames").getArray();
-					response.pnrNames = Arrays.asList(tempPnrNames);
-					String[] tempPnrCities = (String[]) rs.getArray("pnrnames").getArray();
-					response.pnrCities = Arrays.asList(tempPnrCities);
-					Integer[] tempPnrSpaces = (Integer[]) rs.getArray("pnrspaces").getArray();
-					response.pnrSpaces = Arrays.asList(tempPnrSpaces);
-					String[] tempPlacesIDs = (String[]) rs.getArray("placesids").getArray();
-					response.placesIDs = Arrays.asList(tempPlacesIDs);
-					String[] tempPlacesNames = (String[]) rs.getArray("placesnames").getArray();
-					response.placesNames = Arrays.asList(tempPlacesNames);
-					output.Clusters.add(response);
-				}				
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			setprogVal(key, 40+((int) Math.round(progress*60/totalLoad)));
-		}			
-		PgisEventManager.dropConnection(connection);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}        
+			public void start (){
+				if (t == null){
+					t = new Thread (this, threadName);
+					t.start ();
+				}
+		   }
+    		
+    	}
+		
+    	fillClusters fc1 = new fillClusters( "Thread-1", first, output);
+        fc1.start();
+        
+        fillClusters fc2 = new fillClusters( "Thread-2", second, output);
+        fc2.start();
+        
+        fillClusters fc3 = new fillClusters( "Thread-2", third, output);
+        fc3.start();
+        
+        fillClusters fc4 = new fillClusters( "Thread-2", forth, output);
+        fc4.start();
+        
+        while(fc1.bool || fc2.bool || fc3.bool || fc4.bool){
+        	progress=fc1.threadProgress+fc2.threadProgress+fc3.threadProgress+fc4.threadProgress;
+        	setprogVal(key, 10+((int) Math.round(progress*90/totalLoad)));
+        	try {
+    			Thread.sleep(500);
+    		} catch (InterruptedException e) {
+    			e.printStackTrace();
+    		} 
+        }
+		       
         progVal.remove(key);
 		return output;
 	}
