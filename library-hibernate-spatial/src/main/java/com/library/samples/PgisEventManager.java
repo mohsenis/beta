@@ -3062,7 +3062,7 @@ public class PgisEventManager {
 				agencyCluster instance = new agencyCluster();
 				instance.agencyId = rs.getString("aid");
 				instance.agencyName = rs.getString("name");
-				if (rs.getString("size")!=null){
+				if (!rs.getString("size").equals("0")){
 					instance.clusterSize = rs.getLong("size");
 					String[] buffer = (String[]) rs.getArray("aids").getArray();
 					instance.agencyIds= Arrays.asList(buffer);

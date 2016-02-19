@@ -2047,7 +2047,7 @@ Loop:  	for (Trip trip: routeTrips){
 			instance.size = String.valueOf(acl.getClusterSize());
 			instance.ids = StringUtils.join(acl.getAgencyIds(), ";");
 			instance.names = StringUtils.join(acl.getAgencyNames(), ";");
-			instance.distances = StringUtils.join(acl.getMinGaps(), ";");
+//			instance.distances = StringUtils.join(acl.getMinGaps(), ";");
 			response.ClusterR.add(instance);
 			setprogVal(key, (int) Math.round(index*100/totalLoad));
 		}
@@ -2093,7 +2093,7 @@ Loop:  	for (Trip trip: routeTrips){
 			instance.meanGap = String.valueOf(acl.getMeanGap());
 			for (int i=0;i<acl.getClusterSize();i++){
 				ClusterR inst = new ClusterR();
-				inst.id = acl.destStopIds.get(i);
+//				inst.id = acl.destStopIds.get(i);
 				inst.name = acl.sourceStopNames.get(i);
 				inst.names = acl.destStopNames.get(i);
 				inst.scoords = acl.sourceStopCoords.get(i);
