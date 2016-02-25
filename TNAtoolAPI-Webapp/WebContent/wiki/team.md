@@ -25,7 +25,7 @@ The project team members are:
 <span style="margin-left:100px; display:block;">Dr. Saeed Ghanbartehrani</span></b>
 <span style="margin-left:100px; display:block;">Instructor in Industrial and Manufacturing Engineering</span></b>
 <span style="margin-left:100px; display:block;">Oregon State University</span></b>
-<span style="margin-left:100px; display:block;">Home page : http://mime.oregonstate.edu/grad/ghanbartehrani-saeed</span></b>
+<span style="margin-left:100px; display:block;">Home page : http://saeedt.us.to</span></b>
 </p>
 
 ---
