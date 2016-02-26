@@ -3053,7 +3053,8 @@ public class PgisEventManager {
 					+  "connectedagencies AS (SELECT agencyid AS aid, agencyname AS name, count(connectedagency) AS size, array_agg(connectedagency) AS aids, array_agg(gtfs_agencies.name) AS names"
 					+ "	FROM connections INNER JOIN gtfs_agencies ON connections.connectedagency = gtfs_agencies.id"
 					+ " 	GROUP BY agencyid, agencyname),"
-					+ " disconnectedagencies AS (SELECT agencies.id, agencies.name, 0, NULL::char varying[], NULL::char varying[] FROM gtfs_agencies AS agencies WHERE agencies.id NOT IN (SELECT agencyid FROM connections))"
+					+ " disconnectedagencies AS (SELECT agencies.id, agencies.name, 0, NULL::char varying[], NULL::char varying[] FROM gtfs_agencies AS agencies "
+					+ "		WHERE agencies.id NOT IN (SELECT agencyid FROM connections) AND agencies.id IN (SELECT aid FROM aids)) "
 					+ " SELECT * FROM connectedagencies UNION ALL SELECT * FROM disconnectedagencies";
 			System.out.println(query);
 			
