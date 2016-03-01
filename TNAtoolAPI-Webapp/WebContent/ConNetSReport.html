@@ -26,9 +26,9 @@ var dbindex = parseInt(document.URL.split("&")[2].substr(document.URL.split("&")
 var d = new Date();
 var html = '<table id="RT" class="display" align="center">';
 var tmp = '<tr><th id="aid">Cluster ID<em title="Transit network cluster ID."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Network Cluster Size<em title="Number of transit agencies that have at least one stop within the specified distance of at least one transit agency in the cluster"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Agency Names<em title="Name of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Network Cluster Size<em title="Number of transit agencies that have at least one stop within the specified distance of at least one transit agency in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency Names<em title="List of transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 
 html += '<thead>'+tmp+'</thead><tbody>';
@@ -158,7 +158,7 @@ $(document).ready(function(){
 			
 			var table = $('#RT').DataTable( {
 				"paging": true,				
-				"iDisplayLength": 4,
+				"iDisplayLength": 14,
 				"aoColumnDefs": [
 				                 { "bSortable": false, "aTargets": [2,3] },
 				                 { "visible": false, "targets": [4]}
