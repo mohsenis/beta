@@ -385,7 +385,6 @@ function showOnMapReport(lat, lon, date, x){
 					marker.markerLon = jtem.lon;
 					var temp='<b>County Name:</b> '+jtem.countyName+
 							'<br><b>Lot Name:</b> '+jtem.lotName+
-							'<br><b>Transit Services:</b> '+jtem.transitSerives+
 							'<br><b>Total Spaces: </b> '+jtem.spaces+
 							'<br><b>Availability: </b> '+jtem.availability+
 							'<br><b>Display stops within:</b><input type="text" style="width:3em" id="'+jtem.lat+'pnrRadius" name="radius" class="utbox" size="5" value='+ pnrRadius +' required class="utbox">miles'+

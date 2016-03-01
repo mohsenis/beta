@@ -506,7 +506,7 @@ public class PgisEventManager {
 			+"inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid), "
 	    	+ "stops as (select stime.trip_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service "
 			+"from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
-			+"inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0	"
+			+"inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0	and stop.agencyid IN (SELECT aid FROM aids) "
 			+"group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location), "
 		
 		+"stopsatlostemp as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, count(trips.aid) as service "
@@ -597,6 +597,7 @@ public class PgisEventManager {
 		+"from gtfs_agencies AS agencies LEFT JOIN popwithinx ON agencies.id=aid "
 		+"LEFT JOIN popatlos1 USING(aid) "
 		+"LEFT JOIN popserved USING(aid) "
+		+ "WHERE agencies.defaultid IN (SELECT aid FROM aids) "
 		+"ORDER BY agencies.id ";
 	    System.out.println(query);
 		    	
@@ -1285,7 +1286,7 @@ public class PgisEventManager {
 			+ " inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid), "
 	    	+ " stops as (select stime.trip_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service "
 			+ " from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
-			+ " inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0	"
+			+ " inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0 and stop.agencyid in (select aid from aids)	"
 			+ " group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location), "
 			+ " stopsatlostemp as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, count(trips.aid) as service "
 			+ " from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
@@ -1366,7 +1367,6 @@ public class PgisEventManager {
 			+ "	  white ,"
 			+ "	  hispanic_or_latino ,"
 			+ "	  t6.blockid,"
-			+ ""
 			+ "	  agencyid "
 			+ "from tempstops INNER JOIN title_vi_blocks_float AS t6 ON ST_Dwithin(t6.location, tempstops.location, "+radius+") GROUP BY agencyid, t6.blockid),"
 			+ "popwithinx as (select SUM(english) AS english_withinx,"
@@ -1421,8 +1421,9 @@ public class PgisEventManager {
 			+ "	FROM popserved0 INNER JOIN title_vi_blocks_float USING(blockid) GROUP BY aid) "
 			+ "SELECT agencies.name AS agency_name, agencies.id AS agency_id, popserved.*, popatlos1.*, popwithinx.* "
 			+ "from gtfs_agencies AS agencies LEFT JOIN popwithinx ON agencies.id=aid "
-			+ "LEFT JOIN popatlos1 USING(aid)"			
-			+ "LEFT JOIN popserved USING(aid)"
+			+ "LEFT JOIN popatlos1 USING(aid) "			
+			+ "LEFT JOIN popserved USING(aid) "
+			+ "WHERE agencies.defaultid IN (SELECT aid FROM aids) "
 			+ "ORDER BY agencies.id ";
 //	    	System.out.println(query);
 	    	}else{
@@ -3101,11 +3102,11 @@ public class PgisEventManager {
 					+ "	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map "
 					+ "	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id "
 					+ "	WHERE stops.agencyid IN (SELECT * FROM aids)), "
-					+ "agencyshape AS (SELECT agencyid, ST_COLLECT(location) AS shape FROM stops WHERE agencyid = '" + agencyId + "' GROUP BY agencyid), "
-					+ "connections AS (SELECT agencyshape.agencyid, stops.agencyid AS connectedagency "
+					+ " agencyshape AS (SELECT agencyid, ST_COLLECT(location) AS shape FROM stops WHERE agencyid = '" + agencyId + "' GROUP BY agencyid), "
+					+ " connections AS (SELECT agencyshape.agencyid, stops.agencyid AS connectedagency "
 					+ "	FROM stops INNER JOIN agencyshape ON ST_DWITHIN(agencyshape.shape,stops.location," + dist + ") WHERE stops.agencyid != agencyshape.agencyid "
 					+ "	GROUP BY agencyshape.agencyid, agencyshape.shape, stops.agencyid ), "
-					+ "distances AS (SELECT connections.*, agencies.name AS agencyname, 3.28084*ST_DISTANCE(stops1.location,stops2.location)::NUMERIC AS dist, stops1.name AS name1, stops2.name AS name2, "
+					+ " distances AS (SELECT connections.*, agencies.name AS agencyname, 3.28084*ST_DISTANCE(stops1.location,stops2.location)::NUMERIC AS dist, stops1.name AS name1, stops2.name AS name2, "
 					+ "	array[stops1.lat,stops1.lon]::TEXT AS stop1loc, ARRAY[stops2.lat,stops2.lon]::TEXT AS stop2loc "
 					+ "	FROM connections INNER JOIN stops AS stops1 USING(agencyid) "
 					+ "	INNER JOIN stops AS stops2 ON connections.connectedagency = stops2.agencyid "
@@ -3114,17 +3115,6 @@ public class PgisEventManager {
 					+ " SELECT agencyid AS aid1, agencyname AS aname1, connectedagency AS aid2, gtfs_agencies.name AS aname2, COUNT(dist) AS size, ROUND(MIN(dist),2) AS min_gap, ROUND(MAX(dist),2) AS max_gap, ROUND(AVG(dist),2) AS avg_gap, "
 					+ "	ARRAY_AGG(name1) AS names1, ARRAY_AGG(name2) AS names2, ARRAY_AGG(ROUND(dist,2)::TEXT) AS dists, ARRAY_AGG(stop1loc) AS locs1, ARRAY_AGG(stop2loc) AS locs2 "
 					+ "	FROM distances INNER JOIN gtfs_agencies ON connectedagency = gtfs_agencies.id GROUP BY agencyid, connectedagency, agencyname, gtfs_agencies.name";
-			/*String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), pairs as (select stp1.agencyid as aid1,"
-					+ " stp1.id as sid1, array[stp1.lat, stp1.lon]::text as stp1loc, stp1.name as name1, stp2.agencyid as aid2, stp2.id as sid2, array[stp2.lat, stp2.lon]::text "
-					+ "as stp2loc, stp2.name as name2, st_distance(stp1.location,stp2.location) as dist from gtfs_stops stp1 inner join gtfs_stops stp2 on "
-					+ "st_dwithin(stp1.location, stp2.location,"+String.valueOf(dist)+") inner join aids on stp1.agencyid=aids.aid inner join aids aids2 on stp2.agencyid=aids2.aid)"
-					+ ", agency as (select map.agencyid as aid, map.agencyid_def as aid_def, map.stopid as sid from gtfs_stop_service_map map where map.agencyid='"+agencyId+"'), "
-					+ "agencies as (select agency.id as aid, map.agencyid_def as aid_def, agency.name as aname, map.stopid as sid from gtfs_agencies agency inner join "
-					+ "gtfs_stop_service_map map on agency.id=map.agencyid where agency.id!='"+agencyId+"') select ag1.aid as aid1, ag2.aid as aid2, ag2.aname, count(pairs.sid2) "
-					+ "as size, round((3.28084*min(pairs.dist))::numeric, 2) as min_gap, round((3.28084*max(pairs.dist))::numeric, 2) as max_gap, "
-					+ "round((3.28084*avg(pairs.dist))::numeric, 2) as avg_gap, array_agg(name1) as names1, array_agg(stp1loc) as locs1, array_agg(sid2) as sids2, array_agg(name2) as names2, "
-					+ "array_agg(stp2loc) as locs2, array_agg(round((3.28084*dist)::numeric, 2)::text) as dists from agency ag1 inner join pairs on ag1.aid_def=pairs.aid1 and "
-					+ "ag1.sid= pairs.sid1 inner join agencies ag2 on ag2.aid_def=pairs.aid2 and ag2.sid= pairs.sid2 where ag1.aid!=ag2.aid group by ag1.aid, ag2.aid, ag2.aname";*/					
 			System.out.println(query);
 			ResultSet rs = stmt.executeQuery(query);
 			while ( rs.next() ) {

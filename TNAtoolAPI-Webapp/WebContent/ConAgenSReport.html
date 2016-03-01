@@ -158,7 +158,10 @@ $(document).ready(function(){
 		 							"sMessage": ""
 		 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
 		 		                
-		 		                {
+ 								{"sExtends": "csv", "sButtonText": "Export Report", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
+                                      "mColumns": [ 0, 1, 2, 3, 4, 5]
+ 								},
+                                /* {
 		 		                    "sExtends":    "collection",
 		 		                    "sButtonText": "Export Report",
 		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
@@ -167,7 +170,7 @@ $(document).ready(function(){
 		 		                                      "mColumns": [ 0, 1, 2, 3, 4, 5]},
 		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
 		 		                                      "mColumns": [ 0, 1, 2, 3, 4, 5]} ]
-		 		                },
+		 		                }, */
 		 		                {
 		 		                	"sExtends":    "text",
 		 		                    "sButtonText": "Metadata",
