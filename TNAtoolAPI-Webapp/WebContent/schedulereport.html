@@ -46,7 +46,7 @@ $(document).ready(function(){
 		    $.each(d.DBelement, function(i,item){
 		    	var option = document.createElement('option');
 		        option.text = item;
-		        option.value = 'DB'+i;
+		        option.value = i;
 		        select.add(option, i);		    	
 		    	menusize++;
 		    });		    		    
@@ -405,11 +405,6 @@ function reload(){
 	
 	location.reload();
 }
-function dbchange(){
-	if (document.getElementById("dbselect").selectedIndex !=dbindex){
-		location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
-	}
-}
 
 
 </script>
@@ -423,7 +418,7 @@ function dbchange(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
-				<select disabled id='dbselect' onchange='dbchange()'></select>
+				<select disabled id='dbselect' onchange='setURIParameter(this,"dbindex",dbindex)'></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

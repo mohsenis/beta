@@ -66,7 +66,7 @@ $(document).ready(function(){
 		    $.each(d.DBelement, function(i,item){
 		    	var option = document.createElement('option');
 		        option.text = item;
-		        option.value = 'DB'+i;
+		        option.value = i;
 		        select.add(option, i);		    	
 		    	menusize++;
 		    });		    		    
@@ -284,12 +284,6 @@ function exportbutton(){
 	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
 	window.open(uri, 'AgencySummaryReport.csv');
 }
-function dbchange(){
-	if (document.getElementById("dbselect").selectedIndex !=dbindex){
-		location.replace(document.URL.split("dbindex")[0]+'dbindex='+document.getElementById("dbselect").selectedIndex);
-	}
-}
-
 </script>
 
 
@@ -304,8 +298,8 @@ function dbchange(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='popselect(this)' style="margin-right:2em;height:81%"></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='setURIParameter(this,"popYear",popYear)' style="margin-right:2em;height:81%"></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='setURIParameter(this,"dbindex",dbindex)' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	
