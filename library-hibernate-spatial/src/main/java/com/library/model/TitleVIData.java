@@ -97,83 +97,83 @@ public class TitleVIData {
 
 	@XmlAttribute
 	@JsonSerialize
-	public int english_served;
+	public long english_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int spanish_served;
+	public long spanish_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int indo_european_served;
+	public long indo_european_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_and_pacific_island_served;
+	public long asian_and_pacific_island_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int other_languages_served;
+	public long other_languages_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int below_poverty_served;
+	public long below_poverty_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int above_poverty_served;
+	public long above_poverty_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int with_disability_served;
+	public long with_disability_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int without_disability_served;
+	public long without_disability_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int from5to17_served;
+	public long from5to17_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int from18to64_served;
+	public long from18to64_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int above65_served;
+	public long above65_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int black_or_african_american_served;
+	public long black_or_african_american_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int american_indian_and_alaska_native_served;
+	public long american_indian_and_alaska_native_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_served;
+	public long asian_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int native_hawaiian_and_other_pacific_islander_served;
+	public long native_hawaiian_and_other_pacific_islander_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int other_races_served;
+	public long other_races_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int two_or_more_served;
+	public long two_or_more_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int white_served;
+	public long white_served;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int hispanic_or_latino_served;
+	public long hispanic_or_latino_served;
 	
 	@XmlAttribute
 	@JsonSerialize
@@ -257,81 +257,81 @@ public class TitleVIData {
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int english_atlos;
+	public long english_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int spanish_atlos;
+	public long spanish_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int indo_european_atlos;
+	public long indo_european_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_and_pacific_island_atlos;
+	public long asian_and_pacific_island_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int other_languages_atlos;
+	public long other_languages_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int below_poverty_atlos;
+	public long below_poverty_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int above_poverty_atlos;
+	public long above_poverty_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int with_disability_atlos;
+	public long with_disability_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int without_disability_atlos;
+	public long without_disability_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int from5to17_atlos;
+	public long from5to17_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int from18to64_atlos;
+	public long from18to64_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int above65_atlos;
+	public long above65_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int black_or_african_american_atlos;
+	public long black_or_african_american_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int american_indian_and_alaska_native_atlos;
+	public long american_indian_and_alaska_native_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_atlos;
+	public long asian_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int native_hawaiian_and_other_pacific_islander_atlos;
+	public long native_hawaiian_and_other_pacific_islander_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int other_races_atlos;
+	public long other_races_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int two_or_more_atlos;
+	public long two_or_more_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int white_atlos;
+	public long white_atlos;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int hispanic_or_latino_atlos;
+	public long hispanic_or_latino_atlos;
 }

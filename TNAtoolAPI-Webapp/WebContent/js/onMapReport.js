@@ -166,10 +166,7 @@ function showOnMapReport(lat, lon, date, x){
 	routeCluster = new Array();
 	blockCluster = new Array();
 	tractCluster = new Array();
-	pnrCluster = new Array();
-//	pnrStopCluster = new Array();
-//	pnrRouteCluster = new Array();
-	
+	pnrCluster = new Array();	
 	
 	var GcolorArray=['blockscluster', 'tractscluster'];
 	$('#displayTransitReport').empty();
@@ -399,12 +396,6 @@ function showOnMapReport(lat, lon, date, x){
 			pnrCluster.push(tmpPnrCluster);
 			});
 			
-			/*function onClick(){
-				nearbyStops(PnrRadius);
-			}*/
-			
-
-			
 			html = html + '</tbody></table>';
 			$('#displayPnrCounties').append($(html));
 			var pnrTable = $('#pnrTable').DataTable( {
@@ -425,7 +416,13 @@ function showOnMapReport(lat, lon, date, x){
 		    
 		    pnrTable.$('tr').click( function () {
 		    	if($(this).hasClass('selected')){
-		    		onMapPnrCluster.removeLayer(pnrCluster[$(this).children().eq(0).html()-1]);
+		    		onMapPnrCluster.removeLayer(pnrCluster[$(this).children().eq(0).html()-1]);	// remove P&R icons
+		    		onMapPnrStopCluster.eachLayer(function (layer) {		// remove nearby stops
+						onMapPnrStopCluster.removeLayer(layer);
+						});
+		    		onMapPnrRouteCluster.eachLayer(function (layer) {		// remove nearby routes
+						onMapPnrRouteCluster.removeLayer(layer);
+						});
 		    	}else{
 //		    		alert($(hits).find( ":hidden" ).not( "script" ).html);
 		    		onMapPnrCluster.addLayer(pnrCluster[$(this).children().eq(0).html()-1]);
@@ -449,9 +446,7 @@ function nearbyStops(markerId, countyId, lat ,lon, radius){
 	if (exceedsMaxRadius(PnrRadius)){	// Checks if the entered search radius exceeds the maximum.
 		alert('Enter a number less than ' + maxRadius + ' miles for the population search radius.');
 		return;
-	}
-	
-	
+	}	
 	PnrRadius = PnrRadius*1609.34;
 	
 	$.ajax({
@@ -491,7 +486,6 @@ function nearbyStops(markerId, countyId, lat ,lon, radius){
 				tmpPnrRouteCluster.addLayer(polyline);
 				});
 			pnrRouteCluster = tmpPnrRouteCluster;
-			// End
 			
 			onMapPnrStopCluster.eachLayer(function (layer) {
 				onMapPnrStopCluster.removeLayer(layer);

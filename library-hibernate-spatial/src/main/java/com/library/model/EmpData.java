@@ -140,251 +140,251 @@ public class EmpData {
 
 	@XmlAttribute
 	@JsonSerialize
-	public int c000served;
+	public long c000served;
 	@XmlAttribute
 	@JsonSerialize
-	public int ca01served;
+	public long ca01served;
 	@XmlAttribute
 	@JsonSerialize
-	public int ca02served;
+	public long ca02served;
 	@XmlAttribute
 	@JsonSerialize
-	public int ca03served;	
+	public long ca03served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int ce01served;
+	public long ce01served;
 	@XmlAttribute
 	@JsonSerialize
-	public int ce02served;
+	public long ce02served;
 	@XmlAttribute
 	@JsonSerialize
-	public int ce03served;	
+	public long ce03served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cns01served;
+	public long cns01served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns02served;	
+	public long cns02served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cns03served;
+	public long cns03served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns04served;
+	public long cns04served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns05served;
+	public long cns05served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns06served;
+	public long cns06served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns07served;	
+	public long cns07served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cns08served;
+	public long cns08served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns09served;
+	public long cns09served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns10served;
+	public long cns10served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns11served;
+	public long cns11served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns12served;	
+	public long cns12served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cns13served;
+	public long cns13served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns14served;
+	public long cns14served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns15served;
+	public long cns15served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns16served;
+	public long cns16served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns17served;	
+	public long cns17served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cns18served;
+	public long cns18served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns19served;
+	public long cns19served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns20served;	
+	public long cns20served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cr01served;
+	public long cr01served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cr02served;	
+	public long cr02served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cr03served;
+	public long cr03served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cr04served;
+	public long cr04served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cr05served;
+	public long cr05served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cr07served;	
+	public long cr07served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int ct01served;
+	public long ct01served;
 	@XmlAttribute
 	@JsonSerialize
-	public int ct02served;	
+	public long ct02served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cd01served;
+	public long cd01served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cd02served;	
+	public long cd02served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cd03served;
+	public long cd03served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cd04served;	
+	public long cd04served;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cs01served;
+	public long cs01served;
 	@XmlAttribute
 	@JsonSerialize
-	public int cs02served;
+	public long cs02served;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int c000los;
+	public long c000los;
 	@XmlAttribute
 	@JsonSerialize
-	public int ca01los;
+	public long ca01los;
 	@XmlAttribute
 	@JsonSerialize
-	public int ca02los;
+	public long ca02los;
 	@XmlAttribute
 	@JsonSerialize
-	public int ca03los;	
+	public long ca03los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int ce01los;
+	public long ce01los;
 	@XmlAttribute
 	@JsonSerialize
-	public int ce02los;
+	public long ce02los;
 	@XmlAttribute
 	@JsonSerialize
-	public int ce03los;	
+	public long ce03los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cns01los;
+	public long cns01los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns02los;	
+	public long cns02los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cns03los;
+	public long cns03los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns04los;
+	public long cns04los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns05los;
+	public long cns05los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns06los;
+	public long cns06los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns07los;	
+	public long cns07los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cns08los;
+	public long cns08los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns09los;
+	public long cns09los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns10los;
+	public long cns10los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns11los;
+	public long cns11los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns12los;	
+	public long cns12los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cns13los;
+	public long cns13los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns14los;
+	public long cns14los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns15los;
+	public long cns15los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns16los;
+	public long cns16los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns17los;	
+	public long cns17los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cns18los;
+	public long cns18los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns19los;
+	public long cns19los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cns20los;	
+	public long cns20los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cr01los;
+	public long cr01los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cr02los;	
+	public long cr02los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cr03los;
+	public long cr03los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cr04los;
+	public long cr04los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cr05los;
+	public long cr05los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cr07los;	
+	public long cr07los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int ct01los;
+	public long ct01los;
 	@XmlAttribute
 	@JsonSerialize
-	public int ct02los;	
+	public long ct02los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cd01los;
+	public long cd01los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cd02los;	
+	public long cd02los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cd03los;
+	public long cd03los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cd04los;	
+	public long cd04los;	
 	@XmlAttribute
 	@JsonSerialize
-	public int cs01los;
+	public long cs01los;
 	@XmlAttribute
 	@JsonSerialize
-	public int cs02los;
+	public long cs02los;
 	
 	@XmlAttribute
 	@JsonSerialize
