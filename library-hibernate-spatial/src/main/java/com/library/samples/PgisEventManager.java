@@ -99,18 +99,6 @@ public class PgisEventManager {
 	    		+ "    		FROM stops WHERE ST_Dwithin(ST_transform(ST_setsrid(ST_MakePoint("+lon+", "+lat+"),4326), 2993), location, "+gap+")) "
 	    		+ "     SELECT main.id, main.name stopname, main.description, main.agencyid, gtfs_agencies.name agencyname, main.lat, main.lon "
 	    		+ "    		FROM main INNER JOIN gtfs_agencies ON main.agencyid=gtfs_agencies.id";
-	    		
-	    		/*"WITH stops AS (select map.agencyid as agencyid, stop.description, stop.lat, stop.lon, stop.name as name, stop.id as id, stop.url, location ) "
-	    		+ " from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id "
-				+ " inner join gtfs_agencies on gtfs_agencies.id=map.agencyid where map.agencyid=ANY('{"+agencies+"}'::text[])' , "
-	    		+ "main AS (SELECT agencyid, id, name, description, lat, lon "
-  						+ "FROM stops WHERE ST_Dwithin(ST_transform(ST_setsrid(ST_MakePoint("+lon+", "+lat+"),4326), 2993), location, "+gap+")) "
-  						+ "SELECT main.id, main.name stopname, main.description, main.agencyid, gtfs_agencies.name agencyname, main.lat, main.lon "
-  						+ "FROM main INNER JOIN gtfs_agencies ON main.agencyid=gtfs_agencies.id";
-	    
-	    query = "select map.agencyid as agencyid,gtfs_agencies.name as agencyname, stop.lat, stop.lon, stop.name as stopname, stop.id as stopid, stop.url, location "
-				+ " from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id "
-				+ " inner join gtfs_agencies on gtfs_agencies.id=map.agencyid where map.agencyid='"+ agencyId + "'";*/
 	    System.out.println(query);
 
 	    try {

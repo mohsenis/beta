@@ -243,8 +243,7 @@ function loadDialog2(node){
 }
 
 function onMarkerClick(){
-	var id = this.id;
-
+	var id = this._leaflet_id;
 	if (polylines[id]==null){
 		var selectedStopLat= this.lat;
 		var selectedStopLon=this.lon;
@@ -298,6 +297,8 @@ function reloadDialog2(input){
 	connectionPolylines.eachLayer(function (layer) {
 	    connectionPolylines.removeLayer(layer);
 	});
+	selectedAgencies = [];
+	selectedAgencies.push(selectedAgency.attr("id"));
 	loadDialog2(selectedAgency);
 }
 
