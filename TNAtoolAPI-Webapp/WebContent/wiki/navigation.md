@@ -10,7 +10,6 @@
   
 [Features]()
 
- * [What's New](newfeatures.md)
  * [Features List](features.md)
 
 [Project Team](team.md)

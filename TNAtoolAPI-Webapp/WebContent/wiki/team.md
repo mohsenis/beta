@@ -37,7 +37,7 @@ The project team members are:
 </p>
 
 ---
-<p><img width=110 height=110 src="http://mime.oregonstate.edu/sites/mime.oregonstate.edu/files/photos/grad-directory/pouya-barahimi-325x325-01.jpg" alt="Pouya Barahimi" style="float:left;" title="Pouya Barahimi">
+<p><img width=110 height=110 src="https://media.licdn.com/media/p/5/005/0b9/026/05e68fb.jpg" alt="Pouya Barahimi" style="float:left;" title="Pouya Barahimi">
 <span style="margin-left:100px; display:block;">Pouya Barahimi</span></b>
 <span style="margin-left:100px; display:block;">PhD Student in Industrial Engineering</span></b>
 <span style="margin-left:100px; display:block;">Oregon State University</span></b>

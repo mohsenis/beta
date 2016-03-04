@@ -547,7 +547,7 @@ function getdata(type,agency,route,variant,k,callback,popup,node) {
 			if (points.length!=0) callback("R"+agency+route,k,points,popup,node);
 	    }});
 		break;
-	case 3:			
+	case 3:	
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
@@ -905,7 +905,6 @@ map.addControl(new L.Control.Layers(baseMaps,overlayMaps));
 info.addTo(map);
 var $mylist = $("#list");
 var popYear = 2010;
-
 $mylist
 .jstree({
 	"checkbox": {        

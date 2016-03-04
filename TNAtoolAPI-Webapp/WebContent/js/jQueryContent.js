@@ -126,6 +126,18 @@ function popselect(e){
 	}
 }
 
+function setURIParameter(e, param, currentValue){
+	if(e.value !=currentValue){
+		var URL = document.URL.split(param);
+		var last="";
+		if(URL[1].indexOf("&")!=-1){
+			last = URL[1].substring(URL[1].indexOf("&"));
+		}
+		var finalURL = URL[0]+param+"="+e.value+last;
+		location.replace(finalURL);
+	}
+}
+
 function getURIParameter(param, asArray) {
     return document.location.search.substring(1).split('&').reduce(function(p,c) {
         var parts = c.split('=', 2).map(function(param) { return decodeURIComponent(param); });
