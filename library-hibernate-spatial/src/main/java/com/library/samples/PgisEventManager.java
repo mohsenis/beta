@@ -3898,9 +3898,12 @@ public class PgisEventManager {
 			int routes_cntr = 0;
 			int trips_cntr = 0;
 			int c = 1;
-			while (rs.next()) {	    			    		
+			boolean achanged;
+			while (rs.next()) {	 
+				achanged=false;
 				aid = rs.getString("aid");					        	
 	        	if (!(caid.equals(aid))){
+	        		achanged = true;
 					if (agencies_cntr>0){
 						///add some children to it and add it to the rfesponse
 						instance.children.add(rinstance);
@@ -3922,7 +3925,7 @@ public class PgisEventManager {
 					agencies_cntr++;										
 	        	}
 	        	rid = rs.getString("routeid");					        	
-	        	if (!(crid.equals(rid))){
+	        	if (!(crid.equals(rid)) || achanged){
 					if (routes_cntr>0){
 						///add some children to it and add it to the rfesponse
 						instance.children.add(rinstance);
