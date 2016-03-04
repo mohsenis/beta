@@ -90,7 +90,7 @@ $(document).ready(function(){
 		    $.each(d.DBelement, function(i,item){
 		    	var option = document.createElement('option');
 		        option.text = item;
-		        option.value = 'DB'+i;
+		        option.value = i;
 		        select.add(option, i);		    	
 		    	menusize++;
 		    });		    		    
@@ -309,12 +309,6 @@ $(document).ready(function(){
 	
 });
 
-function dbchange(){
-	if (document.getElementById("dbselect").selectedIndex !=dbindex){
-		location.replace(document.URL.split("&dbindex=")[0]+"&dbindex="+document.getElementById("dbselect").selectedIndex+"&popYear=2010");
-	}
-}
-
 function reload(){	
 	var tmpX = (parseFloat(document.getElementById("Sradius").value)).toString();
 	history.pushState("", "", document.URL.replace('x='+w_qstringx, 'x='+tmpX));
@@ -350,7 +344,7 @@ function pageLoad(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='dbchange()' style="margin-right:2em;height:81%"></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='setURIParameter(this,"dbindex",dbindex)' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	
