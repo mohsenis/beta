@@ -187,7 +187,7 @@ function showOnMapReport(lat, lon, date, x){
 			var tmp = '<th>Agency Name</th>'+
 			'<th>Routes</th>'+
 			'<th>Stops</th>'+
-			'<th>Service Stops</th></tr>';	
+			'<th>Level of Service</th></tr>';	
 			html += '<thead>'+tmp+'</thead><tbody>';
 			var html2 = '<tfoot>'+tmp+'</tfoot>';
 			var popupOptions = {'offset': L.point(0, -8)};
@@ -385,7 +385,7 @@ function showOnMapReport(lat, lon, date, x){
 							'<br><b>Total Spaces: </b> '+jtem.spaces+
 							'<br><b>Availability: </b> '+jtem.availability+
 							'<br><b>Display stops within:</b><input type="text" style="width:3em" id="'+jtem.lat+'pnrRadius" name="radius" class="utbox" size="5" value='+ pnrRadius +' required class="utbox">miles'+
-							'<br><input type="submit" style="margin:1px auto;width:100px; text-align:center;" value="submit" onclick="nearbyStops(\''+marker.markerId+'\',\''+marker.markerCountyId+'\', \''+marker.markerLat+'\', \''+marker.markerLon+'\', \''+marker.markerLat+'pnrRadius\')" title="Click submit to reload the near stop(s)" class="button">';
+							'<br><input type="submit" style="margin:1px auto;width:100px; text-align:center;" value="Submit" onclick="nearbyStops(\''+marker.markerId+'\',\''+marker.markerCountyId+'\', \''+marker.markerLat+'\', \''+marker.markerLon+'\', \''+marker.markerLat+'pnrRadius\')" title="Click submit to reload the near stop(s)" class="button">';
 					marker.bindPopup(temp);
 					marker.markerId = jtem.id;
 					marker.markerCountyId = jtem.countyId;
