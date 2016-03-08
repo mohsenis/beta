@@ -132,7 +132,7 @@ function loadDialog2(node){
 		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+node.attr("id")+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(data){
-			var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
+			var colorArray=['cagcluster', 'capicluster', 'caccluster', 'carcluster', 'capucluster', 'cabrcluster'];
 			var colors = ['rgba(110, 204, 57, 0.8)',
 			              'rgba(255, 51, 255, 0.8)',
 			              'rgba(5, 250, 252, 0.7)',
@@ -218,7 +218,7 @@ function loadDialog2(node){
 				success: function(data){
 					var stopsCluster = new L.MarkerClusterGroup({
 						iconCreateFunction: function (cluster) {
-							return new L.DivIcon({ html: cluster.getChildCount(), className: 'ycluster', iconSize: new L.Point(25, 25) });						
+							return new L.DivIcon({ html: cluster.getChildCount(), className: 'caycluster', iconSize: new L.Point(25, 25) });						
 						},
 						spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
 					});
