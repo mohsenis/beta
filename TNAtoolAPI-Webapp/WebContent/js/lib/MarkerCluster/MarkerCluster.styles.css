@@ -160,6 +160,12 @@
 	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
   }
   
-  .cagcluster, .capicluster, .caccluster, .carcluster, .capucluster, .cabrcluster, .caycluster {
+  .cagcluster, .capicluster, .caccluster, .carcluster, .capucluster, .cabrcluster {
   	border-radius: 0px;
+  	width: 35px;
+	height: 35px;
+	-ms-transform: rotate(45deg); 
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+  	
   }  
