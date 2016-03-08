@@ -187,7 +187,7 @@ function showOnMapReport(lat, lon, date, x){
 			var tmp = '<th>Agency Name</th>'+
 			'<th>Routes</th>'+
 			'<th>Stops</th>'+
-			'<th>Level of Service</th></tr>';	
+			'<th>Visit Count</th></tr>';	
 			html += '<thead>'+tmp+'</thead><tbody>';
 			var html2 = '<tfoot>'+tmp+'</tfoot>';
 			var popupOptions = {'offset': L.point(0, -8)};
