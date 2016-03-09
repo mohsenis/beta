@@ -132,7 +132,8 @@ function loadDialog2(node){
 		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+node.attr("id")+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(data){
-			var colorArray=['cagcluster', 'capicluster', 'caccluster', 'carcluster', 'capucluster', 'cabrcluster'];
+			var cacolorArray=['cagcluster', 'capicluster', 'caccluster', 'carcluster', 'capucluster', 'cabrcluster'];
+			var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
 			var colors = ['rgba(110, 204, 57, 0.8)',
 			              'rgba(255, 51, 255, 0.8)',
 			              'rgba(5, 250, 252, 0.7)',
@@ -183,10 +184,11 @@ function loadDialog2(node){
 		    		var tmpConnectionsClusters = new L.MarkerClusterGroup({
 //    					maxClusterRadius: 120,
     					iconCreateFunction: function (cluster) {
-    						return new L.DivIcon({ html: cluster.getChildCount(), className: colorArray[c], iconSize: new L.Point(25, 25) });						
+    						return new L.DivIcon({ html: cluster.getChildCount(), className: cacolorArray[c], iconSize: new L.Point(25, 25) });						
     					},
-    					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+    					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
     				});
+		    		//var tmpConnectionsClusters = new L.MarkerClusterGroup();
     				var agencyName=data.ClusterR[$(this).index()].name;
     				$.each(data.ClusterR[$(this).index()].connections, function (i, item){
     					var str = item.dcoords.replace("{","");
@@ -195,7 +197,7 @@ function loadDialog2(node){
     					var lat = str[0];
     					var lon = str[1];
     					
-    					var marker = new L.marker([lat,lon] /*,{icon: onMapIcon}*/).on('click',onMarkerClick);
+    					var marker = new L.marker([lat,lon], {icon: L.divIcon({html:'1',iconSize: new L.point( 25, 25 ),className: colorArray[c]})}).on('click',onMarkerClick);
     					marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
     					marker.agencyId = agencyId;
     					marker.lat = lat;
@@ -204,6 +206,21 @@ function loadDialog2(node){
     					marker.bindPopup('<b>Agency: </b>'+ agencyName +'<br>'+
     									'<b>Stop Name: </b>'+item.name);
     					tmpConnectionsClusters.addLayer(marker);
+    				});
+    				/*tmpConnectionsClusters.on('click', function (a) {
+    				    console.log('marker ' + a.layer);
+    				});*/
+
+    				tmpConnectionsClusters.on('clusterclick', function (a) {
+    				    // a.layer is actually a cluster
+    					for(var i=0; i<a.layer.getAllChildMarkers().length;i++){
+    						if(polylines[a.layer.getAllChildMarkers()[i]._leaflet_id]!=null){
+    							a.layer.getAllChildMarkers()[i].closePopup();
+    							connectionPolylines.removeLayer(polylines[a.layer.getAllChildMarkers()[i]._leaflet_id]);
+    							delete polylines[a.layer.getAllChildMarkers()[i]._leaflet_id];
+    						}
+    					}
+    				    //console.log('cluster ' + a.layer.getAllChildMarkers().length);
     				});
     				connectionsClusters[$(this).index()] = (tmpConnectionsClusters);
 		    		connectionMarkers.addLayer(connectionsClusters[$(this).index()]);
