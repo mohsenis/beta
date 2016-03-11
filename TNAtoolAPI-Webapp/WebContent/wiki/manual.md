@@ -1,8 +1,12 @@
 Transit Network Analysis (TNA) Software Tool - User Manual
 =========
-The latest version of the user manual can be accessed [here](TNA_Software_Tool_UserGuide_v01082015.pdf "TNA Software Tool User Guide").
+
+<embed src="TNA_Software_Tool_UserGuide_v01082015.pdf" width="100%" height="1100px">
 
 <!--
+
+The latest version of the user manual can be accessed [here](TNA_Software_Tool_UserGuide_v01082015.pdf "TNA Software Tool User Guide").
+
 <br><br>
 This is a test Video Tutorial uploaded directly on the server hard disk
 <video width="420" height="315" controls>
