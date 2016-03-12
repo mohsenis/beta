@@ -5,6 +5,7 @@
   * [Project History](project.md)
   * [Project Objectives](objectives.md)
   * [Software Architecture](architecture.md)  
+  * [Video Tutorials](videos.md)
   * [User Manual](manual.md)
   
   
