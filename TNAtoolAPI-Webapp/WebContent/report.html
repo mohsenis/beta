@@ -303,9 +303,9 @@ $(document).ready(function(){
 		        	row.child.hide("slow");
 		            tr.removeClass('shown');
 		            ctype = row.child().attr('type');		            
-		        if (type!=ctype){
-		        	showdetails(tr,type);
-		        }
+			        if (type!=ctype){
+			        	showdetails(tr,type);
+			        }
 		        } else {
 		        	showdetails(tr,type);
 		        }		        
@@ -315,33 +315,33 @@ $(document).ready(function(){
 		    	var p = row.index();
 		    	var html;
 		    	switch(type){		    	
-		    	case "GA":
-		    		html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Total Counties: </td><td><a href="#" type="CSA" id="'+agencyIds[p]
-		    		+'">'+counties[p]+'</a></td></tr>'+'<tr><td>Total Census Places: </td><td><a href="#" type="CPSA" id="'+agencyIds[p]+'">'+cplaces[p]+'</a></td></tr>'
-		    		+'<tr><td>Total Urban Areas: </td><td><a href="#" type="UASA" id="'+agencyIds[p]+'">'+uareas[p]+'</a></td></tr>'
-		    		+'<tr><td>Total Congressional Districts: </td><td><a href="#" type="CDSA" id="'+agencyIds[p]+'">'+cdistricts[p]+'</a></td></tr>'
-		    		+'<tr><td>Total ODOT Transit Regions: </td><td><a href="#" type="OTSA" id="'+agencyIds[p]+'">'+ODOTregions[p]+'</a></td></table>';
-		    	break;
-		    	case "FA":
-		    		if (fURL[p]=="-"){
-			        	html = '<td>'+fURL[p]+'</td>';
-			        }else{
-			        	html = '<td><a href="'+fURL[p]+'">'+fURL[p]+'</a></td>';
-			        }
-			    	html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Minimum Fare: </td><td>'+fare(fMin[p])+'</td></tr>'
-			    	+'<tr><td>Average Fare: </td><td>'+fare(fAverage[p])+'</td></tr>'+'<tr><td>Median Fare: </td><td>'+fare(fMedian[p])+'</td></tr>'
-			    	+'<tr><td>Maximum Fare: </td><td>'+fare(fMax[p])+'</td></tr>'+'<tr><td>Fare URL: </td>'+html+'</tr>'+'</table>';
-		    	break;
-		    	case "FE":
-		    		html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Feed Name: </td><td>'+feedName[p]+'</td></tr>'
-			    	+'<tr><td>Feed Version: </td><td>'+feedVersion[p]+'</td></tr>'+'<tr><td>Feed Publisher Name: </td><td>'+feedPubName[p]+'</td></tr>'
-			    	+'<tr><td>Feed Publisher URL: </td><td><a href="'+feedPubUrl[p]+'">'+feedPubUrl[p]+'</a></td>'+'</table>';
-		  		break;
-	    	}		    	
+			    	case "GA":
+			    		html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Total Counties: </td><td><a href="#" type="CSA" id="'+agencyIds[p]
+			    		+'">'+counties[p]+'</a></td></tr>'+'<tr><td>Total Census Places: </td><td><a href="#" type="CPSA" id="'+agencyIds[p]+'">'+cplaces[p]+'</a></td></tr>'
+			    		+'<tr><td>Total Urban Areas: </td><td><a href="#" type="UASA" id="'+agencyIds[p]+'">'+uareas[p]+'</a></td></tr>'
+			    		+'<tr><td>Total Congressional Districts: </td><td><a href="#" type="CDSA" id="'+agencyIds[p]+'">'+cdistricts[p]+'</a></td></tr>'
+			    		+'<tr><td>Total ODOT Transit Regions: </td><td><a href="#" type="OTSA" id="'+agencyIds[p]+'">'+ODOTregions[p]+'</a></td></table>';
+			    	break;
+			    	case "FA":
+			    		if (fURL[p]=="-"){
+				        	html = '<td>'+fURL[p]+'</td>';
+				        }else{
+				        	html = '<td><a href="'+fURL[p]+'">'+fURL[p]+'</a></td>';
+				        }
+				    	html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Minimum Fare: </td><td>'+fare(fMin[p])+'</td></tr>'
+				    	+'<tr><td>Average Fare: </td><td>'+fare(fAverage[p])+'</td></tr>'+'<tr><td>Median Fare: </td><td>'+fare(fMedian[p])+'</td></tr>'
+				    	+'<tr><td>Maximum Fare: </td><td>'+fare(fMax[p])+'</td></tr>'+'<tr><td>Fare URL: </td>'+html+'</tr>'+'</table>';
+			    	break;
+			    	case "FE":
+			    		html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Feed Name: </td><td>'+feedName[p]+'</td></tr>'
+				    	+'<tr><td>Feed Version: </td><td>'+feedVersion[p]+'</td></tr>'+'<tr><td>Feed Publisher Name: </td><td>'+feedPubName[p]+'</td></tr>'
+				    	+'<tr><td>Feed Publisher URL: </td><td><a href="'+feedPubUrl[p]+'">'+feedPubUrl[p]+'</a></td>'+'</table>';
+			  		break;
+		    	}		    	
 		    row.child(html).show();
 		    row.child().attr('type',type);		    
 	        tr.addClass('shown');
-	        SetEvents();
+	        //SetEvents();
 		    }	    
 		    $('#RT_wrapper').css("width", $('#RT').css("width"));
 		    $('#RT_wrapper').css("margin", "auto");
