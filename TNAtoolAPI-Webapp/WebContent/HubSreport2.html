@@ -8,13 +8,27 @@
 	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="js/lib/date.js"></script>
 	<script src="js/jQueryContent.js"></script>
-	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
-	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>	
+	<!-- <script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>	 -->
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<!-- <link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" /> -->
 	<link rel="stylesheet" type="text/css" href="report.css" />
+	
+	<link rel="stylesheet" type="text/css" href="js/lib/contextMenu/jquery.contextMenu.css" />
+	<script src="js/lib/contextMenu/jquery.contextMenu.js"></script>
+	<script src="js/lib/contextMenu/jquery.ui.position.js"></script>
+	
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<!-- <script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.min.js"></script> -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
 	 
 <script type="text/javascript">
 var reportName = "Transit Hub Summary";
@@ -40,12 +54,12 @@ var tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based
 '<th>Routes Count <em title="Total number of routes that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Agencies Count <em title="Total number of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Visits Count <em title="Total number of times all stops in the cluster are served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Park and Ride Lots Count <em title="Number of park and ride lots located within X-radius of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Counties Count <em title="Number of counties that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Places Count <em title="Number of census places that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Park and Ride Lots Count <em title="Total number of park and ride lots within X distance of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Counties Count <em title="Total number of counties that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Census Places Count <em title="Total number of census places that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Population Served<em title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Urban Population <em title="Sum of the population of urban areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Transit Agencies <em title="List of transit agencies that serve at least one of the stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Transit Agencies <em title="Unduplicated list of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops <em title="Detailed list of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Routes <em title="Unduplicated detailed list of routes in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Park and Ride Lots <em title="Detailed list of park and ride lots within the X radius of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -179,35 +193,81 @@ $(document).ready(function(){
 				                 { "bSortable": false, "aTargets": [1,2,13,14,15,16,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39]}],
 				//"bAutoWidth": false,
 				"order": [[ 0, "asc" ]],
-				"dom": 'T<"clear">lfrtip',
-			    "tableTools": {
-			    	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
-			    	"sRowSelect": "os",
-			    	"aButtons": [
-									{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-										"sMessage": ""
-											+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
-					                
-					                {
-					                    "sExtends":    "collection",
-					                    "sButtonText": "Export Report",
-					                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
-					                    				  "mColumns": [ 0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,23,24,25,26,27,30,31,32,33,34,35,36,37,38,39]},
-					                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-					                                      "mColumns": [ 0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,23,24,25,26,27,30,31,32,33,34,35,36,37,38,39]},
-					                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-					                                      "mColumns": [ 0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,23,24,25,26,27,30,31,32,33,34,35,36,37,38,39]} ]
-					                },
-			 		                {
-			 		                	"sExtends":    "text",
-			 		                    "sButtonText": "Metadata", /* <img src='images/metadata.ico' alt='metadata' height='15' width='15'>  */
-			 		                    "sToolTip": "Sources of the data and description of the metrics",
-			 		                    "fnClick" : function(){/* to be filled in later */}
-			 		                }
-					            ]
-			    }
+				select: {
+		            style: 'os',
+		            //blurable: true
+		        },
+				dom: 'Bfrtip',
+			    
+				buttons: [
+							{
+							    extend: 'csvHtml5',
+							    text: 'Export to CSV',
+							    footer: false,
+							    exportOptions: {
+							        columns: [ 0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,23,24,25,26,27,30,31,32,33,34,35,36,37,38,39],
+							    }
+							},
+							{
+							    extend: 'print',
+							    text: 'Print Report',
+							    footer: false,
+							    exportOptions: {
+							    	stripHtml: false,
+							    	stripNewlines: false,
+							    	columns: ':visible'
+							    }
+							},
+				            {
+				                extend: 'copyHtml5',
+			                    text: 'Copy selected',
+				                exportOptions: {
+				                    columns: [ 0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,23,24,25,26,27,30,31,32,33,34,35,36,37,38,39],
+				                    modifier: {
+				                        selected: true
+				                    }
+				                }
+				            },
+				            {
+				            	text: "Metadata",
+	 		                    toolTip: "Sources of the data and description of the metrics",
+	 		                    action: function ( e, dt, node, config ) {
+				                    //alert('Button activated');
+				                }
+	 		                },
+				        ],
+				        language: {
+							buttons: {
+								copyTitle: '<p><b>Copy to clipboard</b></p>',
+								copySuccess: {
+									0: "No row was copied",
+									1: "Copied one row to clipboard",
+									_: "Copied %d rows to clipboard"
+								},
+							}
+						},
 				
 			} );
+			
+			
+			$( ".dt-buttons" ).css( "float", "right");
+		    $( ".dt-buttons" ).css( "margin-bottom", "1em");
+		    $.contextMenu({
+	            selector: '#RT tbody tr', 
+	            callback: function(key, options) {
+	                $(".buttons-copy").click();
+	                //alert($('#ToolTables_RT_2').attr('id'));
+	            },
+	            items: {
+	                "copy": {name: "Copy Selected Rows", icon: "copy"}
+	            }
+	        });
+		    $( ".buttons-copy" ).hide();
+		    $(document).keydown(function(e) {
+		        if (e.keyCode == 67 && e.ctrlKey) {
+		        	$(".buttons-copy").click();
+		        }
+		    });
 			
 			$('.ColVis').css("float", "left");
 			$('#RT tbody').on('click', 'td.details-control', function () {

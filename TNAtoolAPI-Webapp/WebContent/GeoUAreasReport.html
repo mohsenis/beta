@@ -9,12 +9,26 @@
 	<script src="js/lib/date.js"></script>
 	<script src="js/jQueryContent.js"></script>
 	<!-- <script src="js/lib/sorttable.js"></script>  -->
-	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
-	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>	
+	<!-- <script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script> -->	
 	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<!-- <link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" /> -->
 	<link rel="stylesheet" type="text/css" href="report.css" />
+	
+	<link rel="stylesheet" type="text/css" href="js/lib/contextMenu/jquery.contextMenu.css" />
+	<script src="js/lib/contextMenu/jquery.contextMenu.js"></script>
+	<script src="js/lib/contextMenu/jquery.ui.position.js"></script>
+	
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<!-- <script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.min.js"></script> -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
 	
 <script type="text/javascript">
 var qstring = '';
@@ -195,35 +209,77 @@ $(document).ready(function(){
 				"paging": true,				
 				"iDisplayLength": 14,
 				"aoColumnDefs": [{"visible": false, "targets": [8]}],
-				"dom": 'T<"clear">lfrtip',
-		        "tableTools": {
-		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
-		        	"sRowSelect": "os",
-		        	"aButtons": [
-		 						{"sExtends": "print", "sButtonText": "Print Report", "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 							"sMessage": ""
-		 								+ " <input type='button' value='Return to regular view' onclick='TableTools.fnGetInstance(\"RT\")._fnPrintEnd({keyCode:27, preventDefault:function(){}})' />"},
-		 		                
-		 		                {
-		 		                    "sExtends":    "collection",
-		 		                    "sButtonText": "Export Report",
-		 		                    "aButtons":    [ {"sExtends": "copy", "bSelectedOnly": true, "oSelectorOpts": {"filter": "applied"},
-		 		                    				  "mColumns":'visible'},
-		 		                                     {"sExtends": "csv", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                    				  "mColumns":'all'},
-		 		                                     {"sExtends": "pdf", "bSelectedOnly": true, "bFooter": false, "oSelectorOpts": {"filter": "applied"},
-		 		                    				  "mColumns":'all'} ]
-		 		                },
-		 		                {
-		 		                	"sExtends":    "text",
-		 		                    "sButtonText": "Metadata",
-		 		                    "sToolTip": "Sources of the data and description of the metrics",
-		 		                    "fnClick" : function(){/* to be filled in later */}
-		 		                } 
-		 		            ]
-		        }
+				select: {
+		            style: 'os',
+		            //blurable: true
+		        },
+			    dom: 'Bfrtip',
+			    
+				buttons: [
+							{
+							    extend: 'csvHtml5',
+							    text: 'Export to CSV',
+							    footer: false,
+							},
+							{
+							    extend: 'print',
+							    text: 'Print Report',
+							    footer: false,
+							    exportOptions: {
+							    	stripHtml: false,
+							    	stripNewlines: false,
+							    	columns: ':visible'
+							    }
+							},
+				            {
+				                extend: 'copyHtml5',
+			                    text: 'Copy selected',
+				                exportOptions: {
+				                    modifier: {
+				                        selected: true
+				                    }
+				                }
+				            },
+				            {
+				            	text: "Metadata",
+	 		                    toolTip: "Sources of the data and description of the metrics",
+	 		                    action: function ( e, dt, node, config ) {
+				                    //alert('Button activated');
+				                }
+	 		                },
+				        ],
+				        language: {
+							buttons: {
+								copyTitle: '<p><b>Copy to clipboard</b></p>',
+								copySuccess: {
+									0: "No row was copied",
+									1: "Copied one row to clipboard",
+									_: "Copied %d rows to clipboard"
+								},
+							}
+						},
 				
 			} );
+			
+			
+			$( ".dt-buttons" ).css( "float", "right");
+		    $( ".dt-buttons" ).css( "margin-bottom", "1em");
+		    $.contextMenu({
+	            selector: '#RT tbody tr', 
+	            callback: function(key, options) {
+	                $(".buttons-copy").click();
+	                //alert($('#ToolTables_RT_2').attr('id'));
+	            },
+	            items: {
+	                "copy": {name: "Copy Selected Rows", icon: "copy"}
+	            }
+	        });
+		    $( ".buttons-copy" ).hide();
+		    $(document).keydown(function(e) {
+		        if (e.keyCode == 67 && e.ctrlKey) {
+		        	$(".buttons-copy").click();
+		        }
+		    });
 			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
