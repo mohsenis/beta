@@ -269,7 +269,7 @@ function onMarkerClick(){
 		agencies = selectedAgencies.slice(0);		
 		agencies.splice(agencies.indexOf(this.agencyId),1);
 	}else{
-		var agencies = selectedAgency.attr("id");
+		agencies = selectedAgency.attr("id");
 	} 		
 	
 	if (polylines[id]==null){
