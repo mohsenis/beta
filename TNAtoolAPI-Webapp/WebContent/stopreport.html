@@ -278,6 +278,7 @@ $(document).ready(function(){
 	                "copy": {name: "Copy Selected Rows", icon: "copy"}
 	            }
 	        });
+		    $( ".buttons-copy" ).hide();
 		    $(document).keydown(function(e) {
 		        if (e.keyCode == 67 && e.ctrlKey) {
 		        	$(".buttons-copy").click();
