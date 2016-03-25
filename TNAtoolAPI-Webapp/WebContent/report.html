@@ -204,7 +204,7 @@ $(document).ready(function(){
 			$('#displayReport').append($(html));
 			progressbar.remove();			
 			function SetEvents(){
-				$('a').off('click');
+				//$('a').off('click');
 				$('a').click(function(e){
 					var d = new Date();
 				    if ($(this).attr('type')=="RC"){
@@ -289,7 +289,7 @@ $(document).ready(function(){
 							    exportOptions: {
 							    	stripHtml: false,
 							    	stripNewlines: false,
-							    	columns: 'visible'
+							    	columns: ':visible'
 							    }
 							},
 				            {
@@ -308,7 +308,62 @@ $(document).ready(function(){
 	 		                    action: function ( e, dt, node, config ) {
 				                    //alert('Button activated');
 				                }
-	 		                },
+				                
+				            	/* className: 'buttons-csv-meta buttons-html5',
+
+				            	available: function () {
+				            		return window.FileReader !== undefined && window.Blob;
+				            	},
+
+				            	text: "CSV+Metadata",
+
+				            	action: function ( e, dt, button, config ) {
+				            		// Set the text
+				            		var newLine = dt.buttons._newLine( config );
+				            		var output = _exportData( dt, config ).str;
+				            		var charset = config.charset;
+
+				            		if ( config.customize ) {
+				            			output = config.customize( output, config );
+				            		}
+
+				            		if ( charset !== false ) {
+				            			if ( ! charset ) {
+				            				charset = document.characterSet || document.charset;
+				            			}
+
+				            			if ( charset ) {
+				            				charset = ';charset='+charset;
+				            			}
+				            		}
+				            		else {
+				            			charset = '';
+				            		}
+
+				            		_saveAs(
+				            			new Blob( [output], {type: 'text/csv'+charset} ),
+				            			_filename( config )
+				            		);
+				            	},
+
+				            	filename: '*',
+
+				            	extension: '.csv',
+
+				            	exportOptions: {},
+
+				            	fieldSeparator: ',',
+
+				            	fieldBoundary: '"',
+
+				            	escapeChar: '"',
+
+				            	charset: null,
+
+				            	header: true,
+
+				            	footer: false*/
+	 		                }, 
 				        ],
 				        language: {
 							buttons: {
@@ -372,7 +427,7 @@ $(document).ready(function(){
 		    row.child(html).show();
 		    row.child().attr('type',type);		    
 	        tr.addClass('shown');
-	        //SetEvents();
+	        SetEvents();
 		    }	    
 		    $('#RT_wrapper').css("width", $('#RT').css("width"));
 		    $('#RT_wrapper').css("margin", "auto");
@@ -398,6 +453,12 @@ $(document).ready(function(){
 		        if (e.keyCode == 67 && e.ctrlKey) {
 		        	$(".buttons-copy").click();
 		        }
+		    });
+		    
+		    $( ".buttons-csv" ).click(function() {
+		    	var data1 = table.buttons.exportData();
+			    console.log(data1);
+			    console.log(table.data());
 		    });
     }});
 		
