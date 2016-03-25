@@ -198,6 +198,8 @@ $(document).ready(function(){
 			progressbar.remove();			
 			table = $('#RT').DataTable( {
 				"paging": true,
+				"scrollX": "100%",
+				"width": "100%",
 				"iDisplayLength": 14,
 				"aoColumnDefs": [                 
 				                {"visible": false, "targets": [17]}
@@ -282,7 +284,7 @@ $(document).ready(function(){
 		        }
 		    });
 			
-			$('#RT_wrapper').css("width", $('#RT').css("width"));
+			//$('#RT_wrapper').css("width", $('#RT').css("width"));
         	$('#RT_wrapper').css("margin", "auto");
 			$("#RT_length").remove();
 		    $("#RT_filter").insertBefore("#RT_info");

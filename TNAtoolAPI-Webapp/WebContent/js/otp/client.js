@@ -57,6 +57,7 @@ var aerialLayer = new L.TileLayer(aerialURL,
 map.addLayer(osmLayer);
 $("body").css("display","");
 $("#overlay").show();
+
 ///******Variables declared for the on-Map connected agencies report ********///
 var connectionMarkers = new L.FeatureGroup();
 var connectionPolylines = new L.FeatureGroup();
@@ -182,13 +183,11 @@ function loadDialog2(node){
 		    		var agencyId = $(this).children().eq(0).html();
 		    		var c = ($(this).index()+1)%6;
 		    		var tmpConnectionsClusters = new L.MarkerClusterGroup({
-//    					maxClusterRadius: 120,
     					iconCreateFunction: function (cluster) {
     						return new L.DivIcon({ html: cluster.getChildCount(), className: cacolorArray[c], iconSize: new L.Point(25, 25) });						
     					},
     					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
     				});
-		    		//var tmpConnectionsClusters = new L.MarkerClusterGroup();
     				var agencyName=data.ClusterR[$(this).index()].name;
     				$.each(data.ClusterR[$(this).index()].connections, function (i, item){
     					var str = item.dcoords.replace("{","");
@@ -207,9 +206,6 @@ function loadDialog2(node){
     									'<b>Stop Name: </b>'+item.name);
     					tmpConnectionsClusters.addLayer(marker);
     				});
-    				/*tmpConnectionsClusters.on('click', function (a) {
-    				    console.log('marker ' + a.layer);
-    				});*/
 
     				tmpConnectionsClusters.on('clusterclick', function (a) {
     				    // a.layer is actually a cluster
@@ -220,7 +216,6 @@ function loadDialog2(node){
     							delete polylines[a.layer.getAllChildMarkers()[i]._leaflet_id];
     						}
     					}
-    				    //console.log('cluster ' + a.layer.getAllChildMarkers().length);
     				});
     				connectionsClusters[$(this).index()] = (tmpConnectionsClusters);
 		    		connectionMarkers.addLayer(connectionsClusters[$(this).index()]);
@@ -261,17 +256,33 @@ function loadDialog2(node){
 
 function onMarkerClick(){
 	var id = this._leaflet_id;
+	
+	/*
+	 * A shallow copy of selectedAgencies. This array is trimmed based on whether a stop
+	 * of the original agency is clicked or a stops for one of the agencies in the list.
+	 * This is done to make sure only the connections between the original and the other
+	 * agencies are displayed.
+	 */ 	
+	var agencies;									 	
+	if (this.agencyId == selectedAgency.attr("id")){
+		var agencies = [];
+		agencies = selectedAgencies.slice(0);		
+		agencies.splice(agencies.indexOf(this.agencyId),1);
+	}else{
+		agencies = selectedAgency.attr("id");
+	} 		
+	
 	if (polylines[id]==null){
 		var selectedStopLat= this.lat;
 		var selectedStopLon=this.lon;
 		var color = this.color;
-		selectedAgencies.splice(selectedAgencies.indexOf(this.agencyId),1);
+		
 		this.closePopup();
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
 			url: 	'/TNAtoolAPI-Webapp/queries/transit/castops?&lat=' + selectedStopLat +
-					'&lon=' + selectedStopLon +'&agencies='+ selectedAgencies +'&radius=' + gap + '&dbindex=' + dbindex,
+					'&lon=' + selectedStopLon +'&agencies='+ agencies +'&radius=' + gap + '&dbindex=' + dbindex,
 			async: true,
 			success: function(data){
 				var sourceMarker = new L.marker([selectedStopLat,selectedStopLon]);
@@ -279,7 +290,7 @@ function onMarkerClick(){
 				bounds.push(sourceMarker.getLatLng());
 				var tmpConnectionsPolylines = new L.FeatureGroup();
 				$.each(data.stopsList, function(i,item){
-					if (item.lat!=selectedStopLat){
+					if (item.lat!=selectedStopLat && item.lon != selectedStopLon){
 						var latlngs= Array();
 						var destMarker = new L.marker([item.lat,item.lon] /*,{className: 'ycluster', iconSize: new L.Point(10, 10)}).on('click',onClick*/);
 						bounds.push(destMarker.getLatLng());
@@ -295,7 +306,7 @@ function onMarkerClick(){
 				map.fitBounds(bounds);
 			}
 		});
-		selectedAgencies.push(this.agencyId);
+//		selectedAgencies.push(this.agencyId);
 	}else{
 		this.closePopup();
 		connectionPolylines.removeLayer(polylines[id]);
