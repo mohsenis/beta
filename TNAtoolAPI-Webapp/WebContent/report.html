@@ -343,7 +343,7 @@ $(document).ready(function(){
 	 		                    	//var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
 	 		                    	
 	 		                    	var zip = new JSZip();
-									zip.file($(document).find("title").text()+"-metaData.txt", "Hello World\n");
+									zip.file($(document).find("title").text()+"-metaData.txt", "test\n");
 									zip.file($(document).find("title").text()+".csv", output, {type: 'text/csv'+charset});
 									var content = zip.generate({type:"blob"});
 									saveAs(content, $(document).find("title").text()+".zip");
