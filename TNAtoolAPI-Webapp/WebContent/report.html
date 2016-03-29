@@ -277,35 +277,15 @@ $(document).ready(function(){
 			    dom: 'Bfrtip',
 			    
 				buttons: [
-							{
+							/* {
 							    extend: 'csvHtml5',
 							    text: 'Export to CSV',
 							    footer: false,
 							    exportOptions: {
 							        columns: [0,1,2,3,4,6,7,8,9,10,12,13,14,15,16,17,18,20,21,22,23,24],
 							    }
-							},
+							}, */
 							{
-							    extend: 'print',
-							    text: 'Print Report',
-							    footer: false,
-							    exportOptions: {
-							    	stripHtml: false,
-							    	stripNewlines: false,
-							    	columns: ':visible'
-							    }
-							},
-				            {
-				                extend: 'copyHtml5',
-			                    text: 'Copy selected',
-				                exportOptions: {
-				                    columns: [0,1,2,3,4,17,18 ],
-				                    modifier: {
-				                        selected: true
-				                    }
-				                }
-				            },
-				            {
 				            	className: 'buttons-csv-meta buttons-html5',
 				            	footer: false,
 							    exportOptions: {
@@ -316,7 +296,7 @@ $(document).ready(function(){
 								escapeChar: '"',
 								charset: null,
 								header: true,
-				            	text: "Export CSV+Metadata",
+				            	text: "Export CSV & Metadata",
 	 		                    //toolTip: "Sources of the data and description of the metrics",
 	 		                    action: function ( e, dt, node, config ) {
 	 		                    	//var output = dt.buttons.exportData(config.exportOptions);
@@ -351,7 +331,28 @@ $(document).ready(function(){
 	 		                    	//var blob = new Blob( [output], {type: 'text/csv'+charset} );
 	 		                    	//saveAs(blob, $(document).find("title").text()+".csv");
 				                }
-	 		                }, 
+	 		                },
+							{
+							    extend: 'print',
+							    text: 'Print Report',
+							    footer: false,
+							    exportOptions: {
+							    	stripHtml: false,
+							    	stripNewlines: false,
+							    	columns: ':visible'
+							    }
+							},
+				            {
+				                extend: 'copyHtml5',
+			                    text: 'Copy selected',
+				                exportOptions: {
+				                    columns: [0,1,2,3,4,17,18 ],
+				                    modifier: {
+				                        selected: true
+				                    }
+				                }
+				            },
+				             
 				        ],
 				        language: {
 							buttons: {
