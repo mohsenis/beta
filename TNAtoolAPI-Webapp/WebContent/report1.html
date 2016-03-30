@@ -268,34 +268,27 @@ $(document).ready(function(){
 			    "order": [[ 1, "asc" ]],
 			    select: {
 		            style: 'os',
-		            blurable: true
+		            //blurable: true
 		        },
 			    dom: 'Bfrtip',
 			    
 				buttons: [
-							{
-							    extend: 'print',
-							    text: 'Print Report',
-							    footer: false,
-							    customize: function ( win ) {
-				                    			 
-				                    $(win.document.body).find( 'table' )
-				                    	.css({"margin": "0", "padding": "0","border": "1px solid black", "outline": "0"})
-				                        .addClass( 'compact' )
-				                        .css( 'font-size', 'inherit' );
-				                }
-
-							},
 							{
 							    extend: 'csvHtml5',
 							    text: 'Export to CSV',
 							    footer: false,
 							    exportOptions: {
 							        columns: [0,1,2,3,4,6,7,8,9,10,12,13,14,15,16,17,18,20,21,22,23,24],
-							        /* modifier: {
-							            selected: true
-							        } */
-							        
+							    }
+							},
+							{
+							    extend: 'print',
+							    text: 'Print Report',
+							    footer: false,
+							    exportOptions: {
+							    	stripHtml: false,
+							    	stripNewlines: false,
+							    	columns: ':visible'
 							    }
 							},
 				            {
@@ -309,10 +302,10 @@ $(document).ready(function(){
 				                }
 				            },
 				            {
-				            	text: "Metadata", /* <img src='images/metadata.ico' alt='metadata' height='15' width='15'>  */
+				            	text: "Metadata",
 	 		                    toolTip: "Sources of the data and description of the metrics",
 	 		                    action: function ( e, dt, node, config ) {
-				                    //alert( 'Button activated' );
+				                    //alert('Button activated');
 				                }
 	 		                },
 				        ],
@@ -378,7 +371,7 @@ $(document).ready(function(){
 		    row.child(html).show();
 		    row.child().attr('type',type);		    
 	        tr.addClass('shown');
-	        SetEvents();
+	        //SetEvents();
 		    }	    
 		    $('#RT_wrapper').css("width", $('#RT').css("width"));
 		    $('#RT_wrapper').css("margin", "auto");
