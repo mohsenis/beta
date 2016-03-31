@@ -246,7 +246,7 @@ $(document).ready(function(){
 				buttons: [
 							{
 							    extend: 'csvHtml5',
-							    text: 'Export to CSV',
+							    text: 'Export CSV & Dataset',
 							    footer: false,
 							    exportOptions: {
 							        columns: [0,1,2,3,4,6,7,8,9,10,11,12,14,15,16,17,18],
@@ -261,24 +261,7 @@ $(document).ready(function(){
 							    	stripNewlines: false,
 							    	columns: ':visible'
 							    }
-							},
-				            {
-				                extend: 'copyHtml5',
-			                    text: 'Copy selected',
-				                exportOptions: {
-				                    columns: [0,1,2,3,4,11,12],
-				                    modifier: {
-				                        selected: true
-				                    }
-				                }
-				            },
-				            {
-				            	text: "Metadata",
-	 		                    toolTip: "Sources of the data and description of the metrics",
-	 		                    action: function ( e, dt, node, config ) {
-				                    //alert('Button activated');
-				                }
-	 		                },
+							}
 				        ],
 				        language: {
 							buttons: {
