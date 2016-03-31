@@ -213,7 +213,7 @@ $(document).ready(function(){
 				buttons: [
 							{
 							    extend: 'csvHtml5',
-							    text: 'Export to CSV',
+							    text: 'Export CSV & Metadata',
 							    footer: false,
 							    exportOptions: {
 							        columns: [ 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12],
@@ -228,24 +228,7 @@ $(document).ready(function(){
 							    	stripNewlines: false,
 							    	columns: ':visible'
 							    }
-							},
-				            {
-				                extend: 'copyHtml5',
-			                    text: 'Copy selected',
-				                exportOptions: {
-				                    columns: [ 0, 1, 2, 3, 4, 5],
-				                    modifier: {
-				                        selected: true
-				                    }
-				                }
-				            },
-				            {
-				            	text: "Metadata",
-	 		                    toolTip: "Sources of the data and description of the metrics",
-	 		                    action: function ( e, dt, node, config ) {
-				                    //alert('Button activated');
-				                }
-	 		                },
+							}
 				        ],
 				        language: {
 							buttons: {
@@ -256,7 +239,7 @@ $(document).ready(function(){
 									_: "Copied %d rows to clipboard"
 								},
 							}
-						},
+						}
 				
 			} );
 			
@@ -315,6 +298,25 @@ $(document).ready(function(){
 		    $("#RT_filter").insertBefore("#RT_info");
 		    $( ".dataTables_filter" ).css( "float", "left");
 		    $( ".dataTables_filter" ).before( "<br>" );
+		    
+		    $( ".dt-buttons" ).css( "float", "right");
+		    $( ".dt-buttons" ).css( "margin-bottom", "1em");
+		    $.contextMenu({
+	            selector: '#RT tbody tr', 
+	            callback: function(key, options) {
+	                $(".buttons-copy").click();
+	                //alert($('#ToolTables_RT_2').attr('id'));
+	            },
+	            items: {
+	                "copy": {name: "Copy Selected Rows", icon: "copy"}
+	            }
+	        });
+		    $( ".buttons-copy" ).hide();
+		    $(document).keydown(function(e) {
+		        if (e.keyCode == 67 && e.ctrlKey) {
+		        	$(".buttons-copy").click();
+		        }
+		    });
     }});	
 });
 

@@ -169,7 +169,7 @@ $(document).ready(function(){
 				buttons: [
 							{
 							    extend: 'csvHtml5',
-							    text: 'Export to CSV',
+							    text: 'Export CSV & Metadata',
 							    footer: false,
 							    exportOptions: {
 							        columns: [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
@@ -184,24 +184,7 @@ $(document).ready(function(){
 							    	stripNewlines: false,
 							    	columns: ':visible'
 							    }
-							},
-				            {
-				                extend: 'copyHtml5',
-			                    text: 'Copy selected',
-				                exportOptions: {
-				                    columns: [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-				                    modifier: {
-				                        selected: true
-				                    }
-				                }
-				            },
-				            {
-				            	text: "Metadata",
-	 		                    toolTip: "Sources of the data and description of the metrics",
-	 		                    action: function ( e, dt, node, config ) {
-				                    //alert('Button activated');
-				                }
-	 		                },
+							}
 				        ],
 				        language: {
 							buttons: {
