@@ -74,7 +74,7 @@ function buildDatatables(){
 	    "order": [[ 1, "asc" ]],
 		
 	    select: {
-            style: 'os',
+            style: 'multi',
         },
 	    dom: 'Bfrtip',
 	    
@@ -90,7 +90,7 @@ function buildDatatables(){
 						escapeChar: '"',
 						charset: null,
 						header: true,
-		            	text: "Export CSV & Metadata",
+		            	text: "Export to CSV",
 		                    //toolTip: "Sources of the data and description of the metrics",
 		                    action: function ( e, dt, node, config ) {
 		                    	//var output = dt.buttons.exportData(config.exportOptions);
