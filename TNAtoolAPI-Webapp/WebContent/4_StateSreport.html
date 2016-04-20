@@ -4,9 +4,6 @@
 	<meta charset="utf-8" />
 	<title>Statewide Summary Report</title>
 	
-	<script src="js/lib/date.js"></script>
-	<script src="js/jQueryContent.js"></script>
-	<script src="Phase4/JSMethods.js"></script>
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
@@ -19,23 +16,21 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="js/lib/date.js"></script>
+	<script src="Phase4/JSMethods.js"></script>
 	
-	<link rel="stylesheet" type="text/css" href="report.css" />
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
-	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
 	
 <script type="text/javascript">
-var qstring = '';
-var dbindex = parseInt(getURIParameter("dbindex"));
-var popYear = getURIParameter("popYear");
-var progVal = 0; 
-var d = new Date();
-var boo;
-var html = '<table id="RT" class="display" align="center">';
-var tmp = '<tr><th id="aid">State <em title="Name of the state"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+
+
+html = '<table id="RT" class="display" align="center">';
+tmp = '<tr><th id="aid">State <em title="Name of the state"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Land Area <em title="Total Land area of the state in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Total Population <em title="Total population of the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Urban Population <em title="Total population of the state living in urbanized areas."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -51,8 +46,6 @@ var tmp = '<tr><th id="aid">State <em title="Name of the state"><img src="images
 '<th>Census Tracts Count <em title="Count of census tracts within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
-
-var key = Math.random();
 
 $(document).ready(function(){
 	setPopOptions();
@@ -101,11 +94,10 @@ $(document).ready(function(){
 			    };
 			});
 			
-			var table = buildDatatables();
+			table = buildDatatables();
 			
 			// Hide the last column in the table (Metadata)
-			var column = table.column($('#RT thead th').length - 1);
-			column.visible( ! column.visible() );
+			hideLastCol(table);
 			
 			// Detail controls
 		    $('#RT tbody').on('click', 'td.details-control', function () {
@@ -161,7 +153,7 @@ $(document).ready(function(){
 			<div class="headerR">
 				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' class='input' name='popYear' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' class='input' name='dbindex' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
-				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	
 		<table id="controls">
