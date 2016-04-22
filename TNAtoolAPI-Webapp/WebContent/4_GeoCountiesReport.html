@@ -2,11 +2,12 @@
 
 <head>
 	<meta charset="utf-8" />
+	<title>Counties Summary Report</title>
 	
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
-	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="http://stuk.github.io/jszip/dist/jszip.js"></script>
 	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
 	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
 	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
@@ -184,9 +185,9 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' class='input' name='popYear' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' class='input' name='dbindex' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
-				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button" />
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
 		<table id="controls">

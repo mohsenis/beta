@@ -51,11 +51,11 @@ html2 = '<tfoot>'+tmp+'</tfoot>';
 var connections = [];
 
 $(document).ready(function(){
+	$("#Sradius").val(gap);
 	loadDBList();
 	updateToolTips();
 	progressBar();	
-	inputUpdateHint();
-	$("#Sradius").val(gap);
+	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -100,6 +100,7 @@ $(document).ready(function(){
 			tableProperties.unsortableCols = [6];
 			tableProperties.colsToExport = [ 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12];
 			table = buildDatatables();
+			orderTable(table, 1, 'asc');
 			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
@@ -137,7 +138,7 @@ $(document).ready(function(){
 
 		<div class="headerR">
 			<select disabled id='dbselect'></select> 
-			<input type="button" onclick="window.close()" title="Close Report" value="Close Report" class="button" />
+			<input type="button" onclick="window.close()" title="Close Report" value="Close Report" class="button closeButton" />
 		</div>
 	</div>
 	<table id="controls">
@@ -150,7 +151,7 @@ $(document).ready(function(){
 
 			<td id="td3">
 				<div class="headerBR">
-					Maximum Spatial Gap (miles) <input type="text" name="gap" id="Sradius" class="input utbox" onkeypress="return isNumber(event)" /> 
+					Maximum Spatial Gap (miles) <input type="text" name="gap" id="Sradius" class="input radius utbox" onkeypress="return isNumber(event)" /> 
 					<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report" value="Submit" class="button" />
 				</div>
 			</td>

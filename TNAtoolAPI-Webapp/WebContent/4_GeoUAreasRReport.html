@@ -2,7 +2,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>ODOT Transit Regions Summary Report</title>
+	<title>Aggregated Urban Areas Summary Report</title>
 	
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
@@ -28,9 +28,9 @@
 	
 <script type="text/javascript">
 
-var nameString = '';
 var fAverage = new Array();
 var fMedian = new Array();
+var upop = parseInt(getURIParameter("pop"));
 
 html = '<table id="RT" class="display" align="center">';
 tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -38,46 +38,33 @@ tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with 
 '<th>Population  <em title="Total population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Land Area <em title="Total land area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Agencies <em title="Total number of transit agencies operating in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban Areas <em title="Total number of urbanized areas aggregated to generate this report."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Routes <em title="Total number of routes serving stops in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Counties <em title="List of Counties within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 html2 = '<tfoot>'+tmp+'</tfoot>';
 
 $(document).ready(function(){
+	$('#Upop').val(upop);
 	setPopOptions();
 	loadDBList();
 	updateToolTips();
 	progressBar();
 	
-	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
-	if (agencyId!=null){
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?key='+ key+'&agency='+agencyId+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
-	}
-
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: url,
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&pop='+upop+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
 		async: true,
-		success: function(d){
-			if (agencyId!=null){
-				nameString ='For '+d.agencyName;
-			}
-			$('h2').append('ODOT Transit Regions Summary Report '+nameString+'<br><hr>');
+		success: function(d){			
+			$('h2').append('Aggregated Urban Areas Summary Report <br><hr>');
 			$.each(d.GeoR, function(i,item){
-				html +='<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
-				item.Name + '</td><td>' + numberconv(item.population) +
-				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>';
-				if (agencyId!=null){
-					html+='<td>1</td>';
-				} else {
-					html+='<td><a href="#" type="AC" id="'+item.id+'">'+item.AgenciesCount+'</a></td>';
-				}
-				html+='<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
-				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td><td>'+item.CountiesCount+'</td><td>'+d.metadata+'</td></tr>' ;								   			
+				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +'<a href="#" type="SR">'+item.Name+
+				'</a></td><td>' +numberconv(item.population) +
+				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td><td>'+ item.UrbansCount+'</td>'+
+		   '<td>' + item.RoutesCount + '</td>'+
+				'<td>' + item.StopsCount + '</td><td>'+d.metadata+'</td></tr>';								   			
 			});		
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
@@ -88,37 +75,16 @@ $(document).ready(function(){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-						var keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/GeoRegionsXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);    		
-			    }else if($(this).attr('type')=="AC"){
-			    	qstring = $(this).attr('id');			    	
-			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear);
-			    }else if($(this).attr('type')=="RC"){
-			    	qstring = $(this).attr('id');
-			    	qstringx = '0.25';
-			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-					var keyName = setDates(qstringd);
-		    		url = '/TNAtoolAPI-Webapp/routereport.html?';
-		    		if (agencyId!=null){
-		    			url += '&agency='+agencyId
-		    		}
-		    		url +='&areaid='+qstring+'&type=4'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
-			    	window.open(url);			    	
-			    }else if($(this).attr('type')=="SC"){
-			    	qstring = $(this).attr('id');
-		    		qstringx = '0.25';
-		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-					var keyName = setDates(qstringd);
-		    		url = '/TNAtoolAPI-Webapp/stopreport.html?';
-		    		if (agencyId!=null){
-		    			url += '&agency='+agencyId
-		    		}
-		    		url +='&areaid='+qstring+'&type=4'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
-		    		window.open(url);
+			    		//var keyName = Math.random();
+			    		///localStorage.setItem(keyName, qstringd);
+						var keyName = setDates(qstringd);			    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);    		
+			    } else if ($(this).attr('type')=="SR"){
+			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop='+upop+'&dbindex='+dbindex+'&popYear='+popYear);
 			    };
 			});
 			
-			tableProperties.hiddenCols = [9];
+			tableProperties.hiddenCols = [8];
 			table = buildDatatables();
 			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
@@ -157,12 +123,10 @@ $(document).ready(function(){
 		            '</tr>'+
 		        '</table>';
 		    }
-		}
-    });
+    	}
+	});
 });
 </script>
-
-
 
 </head>
 <body>
@@ -187,7 +151,8 @@ $(document).ready(function(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			  			    	    	
+			    	Urban Population Filter <input type="text" name="pop" id="Upop" class="input utbox" onkeypress="return isWholeNumber(event)"/>
+			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
 		    	</div>
 			  </td>
 			</tr>

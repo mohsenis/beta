@@ -28,7 +28,6 @@
 	
 <script type="text/javascript">
 
-qstringx = '0.25';
 var type = parseInt(getURIParameter("type"));
 var areaId = getURIParameter("areaid");
 var counties = new Array();
@@ -206,8 +205,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' class='input' name='dbindex' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
-				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button" />
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
 		<table id="controls">

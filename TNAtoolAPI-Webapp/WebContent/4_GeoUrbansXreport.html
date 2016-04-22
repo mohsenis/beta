@@ -43,6 +43,8 @@ tmp = '<tr><th>Metric</th><th>Value</th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
+	$('#Sradius').val(w_qstringx);
+	$('#LoS').val(w_qstringl);
 	setPopOptions();
 	loadDBList();
 	updateToolTips();
@@ -96,8 +98,7 @@ $(document).ready(function(){
 			progressbar.remove();
 			
 			tableProperties.paging = false;
-			tableProperties.bSort = false;
-			tableProperties.bAutoWidth = false;
+			tableProperties.ordering = false;
 			table = buildDatatables();
 			
 			$('#RT tbody').on('click', 'td.details-control', function () {
@@ -138,9 +139,9 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">				
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' name='popYear' class='input' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' name='dbindex' class='input' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
-				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button" />
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' name='popYear' class='input dropDown' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
 		
@@ -173,7 +174,7 @@ $(document).ready(function(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" name="x" id="Sradius" class="input tbox" onkeypress="return isNumber(event)"/>			    	
+			    	Population Search Radius (miles) <input type="text" name="x" id="Sradius" class="input radius tbox" onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reloadG()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
 			    	Minimum Level of Service (times) <input type="text" name="l" id="LoS" class="input tbox" onkeypress="return isWholeNumber(event)"/>	<br>	    	    	
 		    	</div>

@@ -153,8 +153,9 @@ $(document).ready(function(){
 			tableProperties.hiddenCols =  [20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39];
 			tableProperties.unsortableCols = [1,2,13,14,15,16,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39];
 			tableProperties.colsToExport = [0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,23,24,25,26,27,30,31,32,33,34,35,36,37,38,39];
-			tableProperties.bSort = false;
+			tableProperties.iDisplayLength = 3;
 			table = buildDatatables();
+			orderTable(table, 6, 'desc');
 			
 			$('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
@@ -304,9 +305,9 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">				
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' name='popYear' class='input' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' name='dbindex' class='input' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
-				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button" />
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
 		
@@ -339,7 +340,7 @@ $(document).ready(function(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Stop Cluster Radius(miles) <input type="text" name="x1" id="Sradius" class="input tbox" onkeypress="return isNumber(event)"/>			    	
+			    	Stop Cluster Radius(miles) <input type="text" name="x1" id="Sradius" class="input radius tbox" onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
 		    	</div>
 			  </td>
@@ -348,10 +349,10 @@ $(document).ready(function(){
 				<td></td>
 				<td></td>
 				<td><div style="float:right;"> 
-			    	Population Search Radius(miles) <input type="text" name="x2" id="PopSradius" class="input tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
+			    	Population Search Radius(miles) <input type="text" name="x2" id="PopSradius" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
 			    	</div><br>
 			    	<div style="float:right;margin-top:2px;"> 
-			    	Park & Ride Search Radius(miles) <input type="text" name="x3" id="PnrSradius" class="input tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
+			    	Park & Ride Search Radius(miles) <input type="text" name="x3" id="PnrSradius" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
 			    	</div>
 			    </td>			    
 			</tr>
