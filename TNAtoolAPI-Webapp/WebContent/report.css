@@ -265,7 +265,7 @@ div.container {
  
 div.headerL {
 	float: left;
-	width: 25%;
+	width: 30%;
 	margin: 0px;
 	height: 35px;
 }
@@ -357,4 +357,23 @@ form span.timeEntry select {
 	top: 4px;
 	font-weight: bold;
 	text-shadow: 1px 1px 0 #fff;
+}
+
+.navicon-line{
+	width:25px;
+	height:4px;
+	border:1px solid #565656; 
+	background-color:white; 
+	margin:4px;
+}
+
+.dropDown{
+	margin-right: 2em;
+    height: 81%;
+    margin-top: 2px;
+}
+
+.closeButton{
+	margin-right:5px; 
+	height:81%
 }

@@ -27,6 +27,7 @@ import java.util.TreeSet;
 
 import javax.swing.JOptionPane;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -549,7 +550,7 @@ public class Queries {
        	return progress;
     	
     }
-    
+        
     static Map <Double, Integer> progVal = new HashMap<Double, Integer>();
     public void setprogVal(double key, int val){
     	progVal.put(key, val);
@@ -2701,9 +2702,7 @@ Loop:  	for (Trip trip: routeTrips){
 								+ "	CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop"
 								+ "	CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount"
 								+ "	CROSS JOIN pnrarray CROSS JOIN placesarray";
-	//					System.out.println(query);			
-					
-						
+//						System.out.println(query);	
 						ResultSet rs = stmt.executeQuery(query);
 							
 						while(rs.next()){
