@@ -3,57 +3,39 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Transit Agency Routes Report</title>
-	<script src="js/lib/jquery-1.9.1.min.js"></script>
-	<script src="js/lib/jquery-ui.js"></script>
-	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
-	<script src="js/lib/date.js"></script>
-	<script src="js/jQueryContent.js"></script>
-	<!-- <script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
-	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script> -->
-	
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
-	<!-- <link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" /> -->
-	<link rel="stylesheet" type="text/css" href="report.css" />
-	
-	<link rel="stylesheet" type="text/css" href="js/lib/contextMenu/jquery.contextMenu.css" />
-	<script src="js/lib/contextMenu/jquery.contextMenu.js"></script>
-	<script src="js/lib/contextMenu/jquery.ui.position.js"></script>
-	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
 	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<!-- <script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.min.js"></script> -->
+	<script src="js/lib/date.js"></script>
+	<script src="Phase4/JSMethods.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
 	
 <script type="text/javascript">
-var reportName = "Transit Agency Routes";
-var maxRadius = 5;
-var startDate;
-var endDate;
-var qstring = '';
-var qstringx = '0.25';
-var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3]+"&"+document.URL.split("&")[4],"");
-var w_qstringx = parseFloat(getURIParameter("x"));
-var w_qstring = getURIParameter("agency");
-var keyName = getURIParameter("n");
-var dbindex = parseInt(getURIParameter("dbindex"));
+
+ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3]+"&"+document.URL.split("&")[4],"");
+w_qstring = getURIParameter("agency");
 var areaId = getURIParameter("areaid");
 var type = parseInt(getURIParameter("type"));
-var popYear = getURIParameter("popYear");
-var dateID;
-var gg = 1.0/1.1;
-var progVal = 0; 
-var d = new Date();
-var boo;
 var w_qstringd = getDates(keyName);
-var html = '<table id="RT" class="display" align="center">';
-var tmp = '<tr><th>Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+var description = new Array();
+
+html = '<table id="RT" class="display" align="center">';
+tmp = '<tr><th>Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route ID <em title="Unique route identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th id="rn">Route Name <em title="Route short name as reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -76,39 +58,17 @@ var tmp = '<tr><th>Agency ID <em title="Identification number reported in the tr
 '<th>More.. <em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route Description<em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
-
 html += '<thead>'+tmp+'</thead><tbody>';
-var html2 = '<tfoot>'+tmp+'</tfoot>';
-var key = Math.random();
-var description = new Array();
-$(document).ready(function(){
-	setPopOptions();
+html2 = '<tfoot>'+tmp+'</tfoot>';
 
-	$.ajax({
-		type: 'GET',
-		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
-		async: false,
-		success: function(d){	
-			var select = document.getElementById("dbselect");
-			select.options.length = 0;
-		    var menusize = 0;
-		    $.each(d.DBelement, function(i,item){
-		    	var option = document.createElement('option');
-		        option.text = item;
-		        option.value = i;
-		        select.add(option, i);		    	
-		    	menusize++;
-		    });		    		    
-		    if (dbindex<0 || dbindex>menusize-1){
-		    	dbindex = 0;
-		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');;
-		    }
-		    select.options.size = menusize;
-		    select.selectedIndex = dbindex;		    				    
-		}			
-	});
-	gos(key);
+$(document).ready(function(){
+	$('#Sradius').val(w_qstringx);
+	setPopOptions();
+	loadDBList();
+	updateToolTips();
+	progressBar();	
+	go(key);
+	
 	var url = '/TNAtoolAPI-Webapp/queries/transit/RoutesR?';
 	if (w_qstring!=null){
 		url+='agency='+w_qstring+'&';		
@@ -166,8 +126,6 @@ $(document).ready(function(){
 				if ($(this).attr('id')!=undefined){	
 					var d = new Date();
 					qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-					//var keyName = Math.random();
-		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
 					url = '/TNAtoolAPI-Webapp/stopreport.html?agency='+$(this).attr('aid')+'&x='+qstringx+ '&route=' + $(this).attr('id')+'&n='+keyName+'&popYear='+popYear;
 					if (areaId!=null){
@@ -180,98 +138,14 @@ $(document).ready(function(){
 				if ($(this).attr('id')!==undefined){					
 				    var d = new Date();
 				    qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-				    //var keyName = Math.random();
-		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);		    		
 				    window.open('/TNAtoolAPI-Webapp/schedulereport.html?&agency='+$(this).attr('aid') + '&route=' + $(this).attr('id')+'&n='+keyName+'&dbindex='+dbindex);
 			}});
 			
-			var table = $('#RT').DataTable( {
-				"scrollX": true,
-				"paging": true,
-				"iDisplayLength": 14,
-				"sScrollX": "100%",				
-				"width": "auto",
-				"aoColumnDefs": [
-				                 { "bSortable": false, "aTargets": [ 20 ] },
-				                 {"visible": false, "targets": [21,22]}				                 
-				               ],
-				"order": [[ 2, "asc" ]],
-				select: {
-		            style: 'os',
-		            //blurable: true
-		        },
-				dom: 'Bfrtip',
-			    
-				buttons: [
-							{
-							    extend: 'csvHtml5',
-							    text: 'Export to CSV',
-							    footer: false,
-							    exportOptions: {
-							        columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 17 ],
-							    }
-							},
-							{
-							    extend: 'print',
-							    text: 'Print Report',
-							    footer: false,
-							    exportOptions: {
-							    	stripHtml: false,
-							    	stripNewlines: false,
-							    	columns: ':visible'
-							    }
-							},
-				            {
-				                extend: 'copyHtml5',
-			                    text: 'Copy selected',
-				                exportOptions: {
-				                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-				                    modifier: {
-				                        selected: true
-				                    }
-				                }
-				            },
-				            {
-				            	text: "Metadata",
-	 		                    toolTip: "Sources of the data and description of the metrics",
-	 		                    action: function ( e, dt, node, config ) {
-				                    //alert('Button activated');
-				                }
-	 		                },
-				        ],
-				        language: {
-							buttons: {
-								copyTitle: '<p><b>Copy to clipboard</b></p>',
-								copySuccess: {
-									0: "No row was copied",
-									1: "Copied one row to clipboard",
-									_: "Copied %d rows to clipboard"
-								},
-							}
-						},
-				
-			} );
-			
-			
-			$( ".dt-buttons" ).css( "float", "right");
-		    $( ".dt-buttons" ).css( "margin-bottom", "1em");
-		    $.contextMenu({
-	            selector: '#RT tbody tr', 
-	            callback: function(key, options) {
-	                $(".buttons-copy").click();
-	                //alert($('#ToolTables_RT_2').attr('id'));
-	            },
-	            items: {
-	                "copy": {name: "Copy Selected Rows", icon: "copy"}
-	            }
-	        });
-		    $( ".buttons-copy" ).hide();
-		    $(document).keydown(function(e) {
-		        if (e.keyCode == 67 && e.ctrlKey) {
-		        	$(".buttons-copy").click();
-		        }
-		    });
+			tableProperties.hiddenCols = [21,22];
+			tableProperties.unsortableCols = [ 20 ];
+			tableProperties.colsToExport = [0,1,2,3,4,5,6,7,8,9,10,11,12,14,16,17];
+			table = buildDatatables();
 			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
@@ -296,19 +170,10 @@ $(document).ready(function(){
 		            
 		        '</table>';
 		    }
-		    //$('#RT_wrapper').css("width", $('#RT').css("width"));
-		    $('#RT_wrapper').css("margin", "auto");
-			$("#RT_length").remove();
-		    $("#RT_filter").insertBefore("#RT_info");
-		    $( ".dataTables_filter" ).css( "float", "left");
-		    $( ".dataTables_filter" ).before( "<br>" );
-			
-    }});
+		}
+    });
 });
-
 </script>
-
-
 
 </head>
 <body>
@@ -318,11 +183,9 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
-				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='setURIParameter(this,"popYear",popYear)' style="margin-right:2em;height:81%"></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select disabled id='dbselect' onchange='setURIParameter(this,"dbindex",dbindex)' style="margin-right:2em;height:81%"></select>
-				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select disabled id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
 		
@@ -355,7 +218,7 @@ $(document).ready(function(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
+			    	Population Search Radius (miles) <input type="text" name="x" id="Sradius" class="input radius tbox" onkeypress="return isNumber(event)"/>
 			    	<input type="button" onclick="reload()" title="Click submit to refresh the report"  value="Submit" class="button" />
 		    	    	
 		    	</div>

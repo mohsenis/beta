@@ -4,90 +4,50 @@
 	<!-- <meta charset="utf-8"> -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>Title VI Report</title>
-	<link rel="stylesheet" href="js/lib/jstree-themes/default/style.min.css" />
-	<script src="js/lib/jquery-1.11.1.min.js"></script>
-	<script src="js/lib/jstree.min.js"></script>
-	<script src="js/jQueryContent.js"></script>
-	<script src="js/lib/jquery-ui.js"></script>
-	<script src="js/lib/sorttable.js"></script>
-	<script src="js/lib/slidebars.min.js"></script>
-	<!-- <script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
-	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script> -->
-	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
-	<script src="js/lib/date.js"></script>
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
-	<!-- <link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" /> -->	
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
-	<link rel="stylesheet" type="text/css" href="report.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/slidebars.min.css" />
 	
-	<link rel="stylesheet" type="text/css" href="js/lib/contextMenu/jquery.contextMenu.css" />
-	<script src="js/lib/contextMenu/jquery.contextMenu.js"></script>
-	<script src="js/lib/contextMenu/jquery.ui.position.js"></script>
-	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
 	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<!-- <script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.min.js"></script> -->
+	<script src="http://plugins.adchsm.me/slidebars/scripts/slidebars/slidebars.min.js"></script>
+	<script src="https://static.jstree.com/3.3.0/assets/dist/jstree.min.js"></script>
+	<script src="js/lib/date.js"></script>
+	<script src="Phase4/JSMethods.js"></script>
+	<script src="Phase4/T6Methods.js"></script>
+	<script src="js/EmpJstree.js"></script>
+		
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/tabletools/2.2.1/css/dataTables.tableTools.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" href="http://plugins.adchsm.me/slidebars/scripts/slidebars/slidebars.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
 	
-	<style>
-	.navicon-line{
-		width:25px;
-		height:4px;
-		border:1px solid #565656; 
-		background-color:white; 
-		margin:4px;
-		}
-	
-	</style>
 	<script>
-	var reportName = "kjh";
-	var boo;
-	var progVal = 0;
-	var maxRadius = 5;
-	var dbindex = parseInt(getURIParameter("dbindex"));;
-	var key = Math.random();
-	var keyName = getURIParameter("n");
-	var w_qstringd = getDates(keyName);
+
 	var t6 = {};
 	var w_qstringx = $('#Sradius').val();
 	if (w_qstringx == null) {w_qstringx = 0.25};
 	var mySlidebar;
+	w_qstringd = getDates(keyName);
 	
 	(function($) {
 	    $(document).ready(function() {
 	    	$('.sb-slidebar').css('width', '28%');
-	    	$.ajax({
-	    		type: 'GET',
-	    		datatype: 'json',
-	    		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
-	    		async: false,
-	    		success: function(d){	
-	    			var select = document.getElementById("dbselect");
-	    			select.options.length = 0;
-	    		    var menusize = 0;
-	    		    $.each(d.DBelement, function(i,item){
-	    		    	var option = document.createElement('option');
-	    		        option.text = item;
-	    		        option.value = i;
-	    		        select.add(option, i);		    	
-	    		    	menusize++;
-	    		    });		    		    
-	    		    if (dbindex<0 || dbindex>menusize-1){
-	    		    	dbindex = 0;
-	    		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
-	    		    }
-	    		    select.options.size = menusize;
-	    		    select.selectedIndex = dbindex;		    				    
-	    		}			
-	    	});
-	    	gos(key);
+	    	loadDBList();
+	    	updateToolTips();
+	    	go(key);
+	    	
 	    	$('.ui-accordion-content').css('padding', '0px 0px');
 	    	$('#ui-accordion-accordion-header-0').css({'width':'80%','font-size':'80%','margin':'auto','text-align':'center'});
 	    	$('.ui-widget').css('font-size', '100%');
@@ -286,276 +246,7 @@
 			$('#jstree').jstree(true).deselect_all();
 		});
 	});
-	
-	function toggleCheckbox(checkbox){	
-		var tree= $('#jstree').jstree(true);
-		if (checkbox.checked){
-		tree.select_all();
-		}else{
-		tree.deselect_all();
-		}	
-	}
-	
-	function getTableHeaders(){
-		var nodesList = [];
-		var tree = $('#jstree').jstree(true);
-		$('.jstree-node').each(function(){
-			if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#')
-					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) ) {
-				nodesList.push($(this));
-			}
-		});
-		
-		var y = "";
-		if ($('#reportType').val() == 'Agencies'){
-			nodesList.forEach (function (item, index, array){
-				 y += '<th>'+ tree.get_text(item) +'-S<em title="Total number of individuals of that belong to the selected category and are living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-					+'<th>'+ tree.get_text(item) +'-SLOS<em title="Number of Individuals Served at Level of Service: Unduplicated summation of individuals of the selected category who receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-					+'<th>'+ tree.get_text(item) +'-SS<em title="Number of Individuals Served by Service: Unduplicated summation of individuals of the selected category who are served by service is calculated as service stops multiplied by the unduplicated individuals living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				});
-		}else{
-			nodesList.forEach (function (item, index, array){
-			 y += '<th>'+ tree.get_text(item) +'<em title="Total number of individuals of that belong to the selected category and are living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +'-S<em title="Number of Individuals Served: Unduplicated summation of individuals of the selected category who are living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +'-SLOS<em title="Number of Individuals Served at Level of Service: Unduplicated summation of individuals of the selected category who receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ tree.get_text(item) +'-SS<em title="Number of Individuals Served by Service: Unduplicated summation of individuals of the selected category who are served by service is calculated as service stops multiplied by the unduplicated individuals living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-			});
-		}
-		return y;
-	} 
-	
-	function clearReport(){
-		document.getElementById('displayReport').innerHTML = "";
-		$('#initialText').show();
-	}
-	
-	$(".export").on('click', function (event) {    
-		exportbutton.apply(this, ['export.csv']);
-	});
-
-	function exportbutton(){
-		var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
-		window.open(uri, 'AgencySummaryReport.csv');
-	}
-	
-	
-	function selectFunction(){
-		$('#reportTitle').html($('#reportType').val());
-	}
-	</script>
-
-	<!-- Beginning of the datatable -->
-	<script type="text/javascript">
-	
-	function openReport(){	
-		
-		if (exceedsMaxRadius($('#Sradius').val())){	// Checks if the entered search radius exceeds the maximum.
-			alert('Enter a number less than ' + maxRadius + ' miles for the population search radius.');
-			return;
-		}
-		
-		if ($('#jstree').jstree(true).get_selected()==""){
-			alert('At least select 1 category');
-			return 0;
-		}
-		
-		// update dates
-		var dates = $('#datepicker').multiDatesPicker('getDates');
-		if(dates.length==0){
-			$( "#datepicker" ).multiDatesPicker({
-				addDates: [new Date()]
-			});
-		}
-		w_qstringd = dates.join(",")
-		
-		// close slidebar
-		mySlidebar.slidebars.close();
-		$('#dialogPreLoader').show();
-		$("#initialText").hide();
-		document.getElementById('displayReport').innerHTML = "";
-		
-		// making a 2D array based on the selected categories and aggregated categories.
-		var tableContent = [];
-		var rootList = [];
-		var tree = $('#jstree').jstree(true);
-		$('.jstree-node').each(function(){
-		  if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#')
-					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) ){
-			 	rootList.push(this);
-			 }
-		});
-		
-		tree.open_all();
-		rootList.forEach (function (item, index, array){
-			var parentID = $(item).attr('id');
-			if (tree.is_parent(item)){						
-				var children = tree.get_children_dom(item);
-				var childrenIDs = [];
-				$.each(children, function(ind,obj){
-					if (tree.is_selected(obj)){
-						childrenIDs.push($(obj).attr('id'));
-					}							
-				});
-				tableContent.push([parentID,childrenIDs]);
-			}else{
-				var childrenIDs = [parentID];
-				tableContent.push([parentID,childrenIDs]);
-			}
-		});
-		
-		// Building header row of the table 
-		var html = '<table id="T6" class="display" align="center">';
-		if ($('#reportType').val() == 'Agencies'){
-			tmp = 	'<tr><th>Agency ID</em></th>'+
-				'<th>Agency Name</em></th>';
-		}else{
-			tmp = 	'<tr><th>Area ID</em></th>'+
-			'<th>Area Name</em></th>';
-		}
-		tmp += getTableHeaders() +
-				'<th>MetaData</th></tr>';
-		html += '<thead>'+tmp+'</thead><tbody>';
-		
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?emp?&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
-			async: true,
-			success: function(d){// making a hashmap of the query results.\
-				var temp = d.TitleVIDataList;
-				t6.metadata = d.metadata;
-				t6.TitleVIDataList = [];
-				temp.forEach(function(i, ind, arr){
-					t6.TitleVIDataList.push(i);
-				});
-				for (var i=0; i<t6.TitleVIDataList.length;i++){
-					html += '<tr><td>'+ t6.TitleVIDataList[i].id + '</td>'+
-						'<td>' + t6.TitleVIDataList[i].name + '</td>';
-					var resultSet= {};
-					$('.jstree-leaf').each(function(){
-						if ($('#reportType').val() != 'Agencies') resultSet[$(this).attr('id')] = t6.TitleVIDataList[i][$(this).attr('id')];//console.log($(this).attr('id'));
-						resultSet[$(this).attr('id')+'_atlos'] = t6.TitleVIDataList[i][($(this).attr('id')).toLowerCase()+'_atlos'];
-						resultSet[$(this).attr('id')+'_withinx'] = t6.TitleVIDataList[i][($(this).attr('id')).toLowerCase()+'_withinx'];
-						resultSet[$(this).attr('id')+'_served'] = t6.TitleVIDataList[i][($(this).attr('id')).toLowerCase()+'_served'];
-					});	
-							
-					// Filling in other columns of the table
-					for (var index in tableContent){
-						var Summation = 0;
-						var PopServedSummation = 0;
-						var PopAtLOSSummation = 0;
-						var ServedByServiceSummation = 0;
-						tableContent[index][1].forEach(function(j, ind, arr){
-							var node = $('#jstree').find("[id='"+j+"']");
-							if (tree.is_selected(node)){
-								if ($('#reportType').val() != 'Agencies') Summation += resultSet[j];
-								PopServedSummation += resultSet[j+'_withinx'];
-								PopAtLOSSummation += resultSet[j+'_atlos'];
-								ServedByServiceSummation += resultSet[j+'_served'];	
-							}							
-						});
-						if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(Summation) + '</td>';
-						html += '<td>' + numWithCommas(PopServedSummation) + '</td>'
-						+ '<td>' + numWithCommas(PopAtLOSSummation) + '</td>'
-						+ '<td>' + numWithCommas(ServedByServiceSummation) + '</td>';
-					}
-					html += '<td>' + t6.metadata + '</td></tr>';
-				}
-				var html2 = '<tfoot>'+tmp+'</tfoot>';
-				html +='</tbody>'+html2+'</table>';
-				$('#displayReport').append($(html));
-				$('#dialogPreLoader').hide();
-				
-				var table = $('#T6').DataTable({
-					
-					"bSort" : true,
-					"paging": true,	
-					"scrollX": true,
-					"iDisplayLength": 20,
-					"aoColumnDefs": [{"visible": false, "targets": [$('#T6 thead th').length - 1]}],
-					"order": [[ 0, "asc" ]],
-					select: {
-			            style: 'os',
-			            //blurable: true
-			        },
-				    dom: 'Bfrtip',
-				    
-					buttons: [
-								{
-								    extend: 'csvHtml5',
-								    text: 'Export to CSV',
-								    footer: false,
-								},
-								{
-								    extend: 'print',
-								    text: 'Print Report',
-								    footer: false,
-								    exportOptions: {
-								    	stripHtml: false,
-								    	stripNewlines: false,
-								    	columns: ':visible'
-								    }
-								},
-					            {
-					                extend: 'copyHtml5',
-				                    text: 'Copy selected',
-					                exportOptions: {
-					                    modifier: {
-					                        selected: true
-					                    }
-					                }
-					            },
-					            {
-					            	text: "Metadata",
-		 		                    toolTip: "Sources of the data and description of the metrics",
-		 		                    action: function ( e, dt, node, config ) {
-					                    //alert('Button activated');
-					                }
-		 		                },
-					        ],
-					        language: {
-								buttons: {
-									copyTitle: '<p><b>Copy to clipboard</b></p>',
-									copySuccess: {
-										0: "No row was copied",
-										1: "Copied one row to clipboard",
-										_: "Copied %d rows to clipboard"
-									},
-								}
-							},
-					
-				} );
-				
-				
-				$( ".dt-buttons" ).css( "float", "right");
-			    $( ".dt-buttons" ).css( "margin-bottom", "1em");
-			    $.contextMenu({
-		            selector: '#T6 tbody tr', 
-		            callback: function(key, options) {
-		                $(".buttons-copy").click();
-		                //alert($('#ToolTables_RT_2').attr('id'));
-		            },
-		            items: {
-		                "copy": {name: "Copy Selected Rows", icon: "copy"}
-		            }
-		        });
-			    $( ".buttons-copy" ).hide();
-			    $(document).keydown(function(e) {
-			        if (e.keyCode == 67 && e.ctrlKey) {
-			        	$(".buttons-copy").click();
-			        }
-			    });
-			    //$('#CEmp_wrapper').css("width", "inherit");
-			    $('#T6_wrapper').css("margin", "auto");
-				$("#T6_length").remove();
-			    $("#T6_filter").insertBefore("#T6_info");
-			    $( ".dataTables_filter" ).css( "float", "left");
-			    $( ".dataTables_filter" ).before( "<br>" );
-			}
-		});		
-	}		
-	
-	</script>
+</script>
 </head>
 
 <body>
@@ -571,9 +262,8 @@
 		</div>	
 			
 		<div class="headerR">
-			<select id='dbselect' onchange='setURIParameter(this,"dbindex",dbindex)'></select>
-			<input type="button" style="margin:3px" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
-			
+			<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+			<input type="button" style="margin-right:10px; height:81%" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 		</div>
 	</div>
 	<div class="headerBL" style=" height:25px" >

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Transit Agency Schedule Report</title>
-	<script src="js/lib/jquery-1.9.1.min.js"></script>
+	<!-- <script src="js/lib/jquery-1.9.1.min.js"></script>
 	<script src="js/lib/jquery-ui.js"></script>
 	<script src="js/lib/date.js"></script>
 	<script src="js/jQueryContent.js"></script>
@@ -17,53 +17,44 @@
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
 	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.colVis.css" />
-	<link rel="stylesheet" type="text/css" href="report.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" /> -->
+	<script src="js/jQueryContent.js"></script>
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="js/lib/date.js"></script>
+	<script src="Phase4/JSMethods.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.colVis.js"></script>
 	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.colVis.css" />
 	
 	
 <script type="text/javascript">
-var qstring = '';
-var dateID;
-var boo;
-var progVal = 0; 
-var html;
-var key = Math.random();
+
 var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3]+"&"+document.URL.split("&")[4],"");
-var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
 var w_qstringd = getDates(keyName);
-var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
-var dbindex = parseInt(document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1));
+var w_qstring = getURIParameter("agency");
+
 $(document).ready(function(){
-	$.ajax({
-		type: 'GET',
-		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
-		async: false,
-		success: function(d){	
-			var select = document.getElementById("dbselect");
-			select.options.length = 0;
-		    var menusize = 0;
-		    $.each(d.DBelement, function(i,item){
-		    	var option = document.createElement('option');
-		        option.text = item;
-		        option.value = i;
-		        select.add(option, i);		    	
-		    	menusize++;
-		    });		    		    
-		    if (dbindex<0 || dbindex>menusize-1){
-		    	dbindex = 0;
-		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
-		    }
-		    select.options.size = menusize;
-		    select.selectedIndex = dbindex;		    				    
-		}			
-	});
-	$(document).tooltip({
-		position: {
-	        my: "left bottom",
-	        at: "right bottom",
-	    }
-	});
+	loadDBList();
+	
 	$("#accordion").accordion({
 		collapsible: true,
 		active: false,
@@ -102,39 +93,8 @@ $(document).ready(function(){
 	$("#accordion > h3").html("Date selected: "+w_qstringd+"<span style='margin-left:3em;font-size:80%'>Active Service Dates: "+stringToDate(startDate)+" to "+stringToDate(endDate)+"<span>");
 	$( "#datepicker" ).datepicker( "setDate", w_qstringd );
 	$('.ui-datepicker').css("margin", "auto");
-	var progressLabel = $( ".progress-label" );
-	$( "#progressbar" ).progressbar({
-	    value: false,
-	    change: function() {
-	        progressLabel.html( '<table><tr><td>Report in progress... </td><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
-	    }
-	});  
-	var prog = false;
-	function progress() {
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/PorgVal?&key='+key,
-			async: true,
-			success: function(item){
-				progVal = parseInt(item.progVal);
-				if(progVal==0){
-					progVal=false;
-					if(prog){
-						clearTimeout(timeVar);
-					}
-				}else{
-					prog=true;
-				}
-				
-				$( "#progressbar" ).progressbar( "value", progVal );	
-			}			
-		});	
-	    if ( progVal == 100 ) {
-			clearTimeout(timeVar);
-	  	}
-	} 
-	timeVar = setInterval(progress, 100);		
+	
+	progressBar();
 	
 	$.ajax({
 		type: 'GET',
@@ -142,11 +102,9 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/ScheduleR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key,
 		async: true,
 		success: function(d){
-			//var headerArray;
 			$('h2').append(d.Agency+': Route '+d.Route+' schedule<br><br>Fare Price: $'+d.Fare+'<hr>');
 			var dCount=0;
 			$.each(d.directions, function(k, ktem){
-				//alert(ktem.schedules.length);
 				if(ktem.stops.length!=0){
 					dCount++;
 					var headerArray = new Array();
@@ -167,16 +125,13 @@ $(document).ready(function(){
 						var io=0;
 						$.each(jtem.stoptimes, function(i, item){
 							while(io<headerArray.length && item.StopId!=headerArray[io]){
-								//alert(io);
 								html += '<td class="'+k+io+'">__</td>';
 								io++;
-								//alert(io);
 							}
 							if(io<headerArray.length){
 								html += '<td class="'+k+io+'">'+item.StopTime+'</td>';
 								io++;
-							}
-							
+							}							
 						});
 						while(io<headerArray.length){
 							html += '<td class="'+k+io+'">__</td>';
@@ -192,13 +147,10 @@ $(document).ready(function(){
 loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 						columns = $('.'+k+jj);
 					    for (var ii = 1; ii < columns.length; ii++) {
-					    	//alert(rows[ii][jj]);
 					        if(columns[ii].innerHTML=="__"){
 					        	continue loop;
 					        }
 					    }
-					    //alert(columns[0].innerHTML);
-					    //columns[0].id='sn'+k;
 					    orderBy = jj;
 					    break;
 					} 
@@ -244,24 +196,9 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 						"sScrollX": "100%",
 						"bScrollCollapse": true,
 						"bAutoWidth": false,
-						//"iDisplayLength": 15,
+						//"iDisplayLength": 15
 						"paging": false,
 						"order": [[ orderBy, "asc" ]],
-						//"bSort": false,
-						/* "aoColumns": [
-							{ "sWidth": "80px" }, // 1st column width 
-							{ "sWidth": "80px" }, // 2nd column width 
-							{ "sWidth": "80px" }, // 3rd column width and so on 
-							{ "sWidth": "80px" }, // 1st column width 
-							{ "sWidth": "80px" }, // 2nd column width 
-							{ "sWidth": "80px" },
-							{ "sWidth": "80px" }, // 1st column width 
-							{ "sWidth": "80px" }, // 2nd column width 
-							{ "sWidth": "80px" },
-							{ "sWidth": "80px" }, // 1st column width 
-							{ "sWidth": "80px" }, // 2nd column width 
-							{ "sWidth": "80px" },
-						], */
 						"columnDefs": [
 				            {
 				                "targets": tar,
@@ -353,34 +290,18 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 				        	//$( '#RT'+k+'_wrapper .ColVis_Button').click();
 				        	//$( '#RT'+k+'_wrapper .ColVis_Button').click();
 				        },
-				        
-						
-					} );
-				    //table.fnDraw();
-				    
+					});
 				    $('.ColVis').css("float", "left");
 				    if(gr.length==0){
-				    	//alert();
 				    	$('.ColVis_Button').remove();
 				    	$('#ToolTables_RT0_3').remove();
 				    	$('#ToolTables_RT0_5').remove();
 				    	$('#ToolTables_RT0_7').remove();
-				    }else{
-				    	/* for(var d = 0; d<headerArray.length; d++){
-					    	if(d%10!=0){
-					    		table.column( d ).visible( false );
-					    	}
-					    } */
 				    }
-				    
-			
 				    $('#RT'+k+'_length').remove();
 				    $('#RT'+k+'_filter').insertBefore('#RT'+k+'_info');
 				    $( ".dataTables_filter" ).css( "float", "left");
 				    $( ".dataTables_filter" ).before( "<br>" );
-				    //$( ".dataTables_scroll" ).css( "overflow", "scroll");
-				    
-				   
 				}
 		
 			});
@@ -391,7 +312,6 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 				$('#displayReport0').append($(html));
 				$( "#displayReport0" ).css( "overflow", "visible");
 			}
-			//alert(d.directions[1].stops.length);
 			if(d.directions[1].stops.length==0){
 				$('#displayReport1').remove();
 				
@@ -402,10 +322,8 @@ loop: 				for (var jj = 0; jj < headerArray.length; jj++){
 });	
 
 function reload(){	
-	
 	location.reload();
 }
-
 
 </script>
 </head>
@@ -418,8 +336,8 @@ function reload(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
-				<select disabled id='dbselect' onchange='setURIParameter(this,"dbindex",dbindex)'></select>
-				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+				<select disabled id='dbselect' name='dbindex' class='input' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	
 		
@@ -435,27 +353,13 @@ function reload(){
 					<h3></h3>
 					<div>
 						<div id="datepicker" style="text-align:center;"></div>
-						<!-- <table style="width:100%;">
-							<tr>
-								<td id="accordionItems" style="padding-left:10px;vertical-align:top">
-									<ul data-role="listview">
-							
-									</ul>
-								</td>
-								<td style="vertical-align:top;padding-top:15px">
-									<div id="datepicker" ></div>
-								</td>
-							</tr>
-						</table> -->
 						
 					</div>
 				</div>
 			  </td> 
 			  <td id="td3" >
 			  	<div class="headerBR" > 
-			    	<!-- <input type="button" onclick="adjust()" title="Refresh Report"  value="Submit" class="button" /> -->
-		    	    <!-- <div id="datepicker" style="text-align:center"></div> -->
-		    	    <!-- <p ><input type="text" id="alternate" style="text-align:left;border:none; width:70%" ></input></p> -->
+			    	
 		    	</div>
 			  </td>
 			</tr>

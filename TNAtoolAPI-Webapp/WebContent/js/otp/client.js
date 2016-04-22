@@ -1258,12 +1258,12 @@ $mylist
 		    		//var keyName = Math.random();
 		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport2.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.25';
-			    	window.open('/TNAtoolAPI-Webapp/report.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '0.1';
 			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);

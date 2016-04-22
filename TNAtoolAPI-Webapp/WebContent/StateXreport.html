@@ -3,52 +3,35 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Statewide Extended Report</title>
-	<script src="js/lib/jquery-1.9.1.min.js"></script>
-	<script src="js/lib/jquery-ui.js"></script>
-	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
-	<script src="js/lib/date.js"></script>
-	<script src="js/jQueryContent.js"></script>
-	<!-- <script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
-	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script> -->
 	
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
-	<!-- <link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" /> -->
-	<link rel="stylesheet" type="text/css" href="report.css" />
-	
-	<link rel="stylesheet" type="text/css" href="js/lib/contextMenu/jquery.contextMenu.css" />
-	<script src="js/lib/contextMenu/jquery.contextMenu.js"></script>
-	<script src="js/lib/contextMenu/jquery.ui.position.js"></script>
-	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
 	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<!-- <script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.min.js"></script> -->
+	<script src="js/lib/date.js"></script>
+	<script src="Phase4/JSMethods.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
 	 
 <script type="text/javascript">
-var maxRadius = 5;
-var qstring = '';
-var qstringx = '0.25';
-var ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
-var w_qstringl = document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1);
-var w_qstringx = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
-//var w_qstring = document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1);
-var keyName = document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1);
-var dbindex = parseInt(document.URL.split("&")[4].substr(document.URL.split("&")[4].indexOf("=")+1));
-var dateID;
-var boo;
-var gg = 1.0/1.1;
-var progVal = 0; 
-var w_qstringd = getDates(keyName);//localStorage.getItem(keyName);
-var popYear = getURIParameter("popYear");
-var html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
-var tmp = '<tr><th id="an">State <em title="Name of the state"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+
+ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
+w_qstringd = getDates(keyName);
+html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
+tmp = '<tr><th id="an">State <em title="Name of the state"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Fare <em title="This field points to the fare information published by the transit agencies in their GTFS data."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Route Miles <em title="Summation of the lengths of the longest trips within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops Per Square Mile <em title="Stop count in the given state divided by the area of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
@@ -79,36 +62,16 @@ var fAverage = new Array();
 var fMedian = new Array();
 var fMin = new Array();
 var fMax = new Array();
-var key = Math.random();
 
 $(document).ready(function(){
+	$('#Sradius').val(w_qstringx);
+	$('#LoS').val(w_qstringl);
 	setPopOptions();
-
-	$.ajax({
-		type: 'GET',
-		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
-		async: false,
-		success: function(d){	
-			var select = document.getElementById("dbselect");
-			select.options.length = 0;
-		    var menusize = 0;
-		    $.each(d.DBelement, function(i,item){
-		    	var option = document.createElement('option');
-		        option.text = item;
-		        option.value = i;
-		        select.add(option, i);		    	
-		    	menusize++;
-		    });		    		    
-		    if (dbindex<0 || dbindex>menusize-1){
-		    	dbindex = 0;
-		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
-		    }
-		    select.options.size = menusize;
-		    select.selectedIndex = dbindex;		    				    
-		}			
-	});
-	go(key);	
+	loadDBList();
+	updateToolTips();
+	progressBar();
+	go(key);
+	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -150,75 +113,11 @@ $(document).ready(function(){
 			$('#displayReport').append($(html));	
 			progressbar.remove();
 			
+			tableProperties.paging = false;
+			tableProperties.hiddenCols = [21, 22, 23, 24, 25];
+			table = buildDatatables();
 			
-			var table = $('#RT').DataTable({
-				"bSort" : false,
-				"paging": false,
-				"sScrollX": "100%",				
-				"width": "auto",
-				"bScrollCollapse": true,
-				"bAutoWidth": false,
-				//"iDisplayWidth": 10,
-				"aoColumnDefs": [{"targets": [21, 22, 23, 24, 25],"visible": false}],
-				select: {
-		            style: 'os',
-		            //blurable: true
-		        },
-				dom: 'Bfrtip',
-			    
-				buttons: [
-							{
-							    extend: 'csvHtml5',
-							    text: 'Export CSV & Metadata',
-							    footer: false,
-							    exportOptions: {
-							        columns: [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
-							    }
-							},
-							{
-							    extend: 'print',
-							    text: 'Print Report',
-							    footer: false,
-							    exportOptions: {
-							    	stripHtml: false,
-							    	stripNewlines: false,
-							    	columns: ':visible'
-							    }
-							}
-				        ],
-				        language: {
-							buttons: {
-								copyTitle: '<p><b>Copy to clipboard</b></p>',
-								copySuccess: {
-									0: "No row was copied",
-									1: "Copied one row to clipboard",
-									_: "Copied %d rows to clipboard"
-								},
-							}
-						},
-				
-			} );
-			
-			
-			$( ".dt-buttons" ).css( "float", "right");
-		    $( ".dt-buttons" ).css( "margin-bottom", "1em");
-		    $.contextMenu({
-	            selector: '#RT tbody tr', 
-	            callback: function(key, options) {
-	                $(".buttons-copy").click();
-	                //alert($('#ToolTables_RT_2').attr('id'));
-	            },
-	            items: {
-	                "copy": {name: "Copy Selected Rows", icon: "copy"}
-	            }
-	        });
-		    $( ".buttons-copy" ).hide();
-		    $(document).keydown(function(e) {
-		        if (e.keyCode == 67 && e.ctrlKey) {
-		        	$(".buttons-copy").click();
-		        }
-		    });
-			$('.ColVis').css("float", "left");
+			// Adding control details
 			$('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
 		        var row = table.row( tr );
@@ -233,7 +132,6 @@ $(document).ready(function(){
 		        }
 		    } );	
 			function format ( p ) {
-		        //var html;
 		        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
 		        	'<tr>'+
 	                	'<td>Minimum Fare: </td>'+
@@ -253,15 +151,6 @@ $(document).ready(function(){
             		'</tr>'+
 		        '</table>';
 		    }
-			//$('#RT_wrapper').css("width", "");
-			$('#RT_wrapper').css("width", $('#RT').css("width"));
-		    $('#RT_wrapper').css("margin", "auto");
-		    //$('#dtcontainer').css("overflow-x", "scroll");		    
-			$("#RT_length").remove();
-			$("#RT_filter").remove();
-			$("#RT_info").remove();
-			//$( '#RT'+'_wrapper .dataTables_scrollHeadInner' ).css( "width", "" );
-			//$( '#RT'+'_wrapper .dataTables_scrollHeadInner > table:nth-child(1)' ).css( "width", $('#RT').css('width') );
     }});	    	
 });
 
@@ -274,9 +163,9 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">				
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' onchange='setURIParameter(this,"popYear",popYear)' style="margin-right:2em;height:81%"></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' onchange='setURIParameter(this,"dbindex",dbindex)' style="margin-right:2em;height:81%"></select>
-				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
 		
@@ -309,9 +198,9 @@ $(document).ready(function(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/>			    	
-			    	<input id="submit" type="button" onclick="reloadG()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
-			    	Minimum Level of Service (times) <input type="text" name="LoS" id="LoS" class="tbox" onkeypress="return isWholeNumber(event)"/>		    	    	
+			    	Population Search Radius (miles) <input type="text" class="input radius tbox" name="x" id="Sradius"onkeypress="return isNumber(event)"/>			    	
+			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
+			    	Minimum Level of Service (times) <input type="text" class="input tbox" name="l" id="LoS"  onkeypress="return isWholeNumber(event)"/>		    	    	
 		    	</div>
 			  </td>
 			</tr>

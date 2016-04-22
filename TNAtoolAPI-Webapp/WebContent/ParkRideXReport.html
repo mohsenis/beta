@@ -3,44 +3,34 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Park and Ride Extended Report</title>
-	<script src="js/lib/jquery-1.11.1.min.js"></script>
-	<script src="js/lib/jquery-ui.js"></script>
-	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
-	<script src="js/lib/date.js"></script>
-	<script src="js/jQueryContent.js"></script>
-	<script src="js/lib/sorttable.js"></script>
-	<!-- <script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
-	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>	
-	<script src="js/lib/DataTables/js/jquery.dataTables.min.js"></script> -->
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
-	<!-- <link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" /> -->
-	<link rel="stylesheet" type="text/css" href="report.css" />
 	
-	<link rel="stylesheet" type="text/css" href="js/lib/contextMenu/jquery.contextMenu.css" />
-	<script src="js/lib/contextMenu/jquery.contextMenu.js"></script>
-	<script src="js/lib/contextMenu/jquery.ui.position.js"></script>
-	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
 	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<!-- <script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.min.js"></script> -->
+	<script src="js/lib/date.js"></script>
+	<script src="Phase4/JSMethods.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
 	
 <script type="text/javascript">
-var maxRadius = 1;
-var boo;
-var progVal = 0;
-var countyId = parseInt(document.URL.split("&")[1].substr(document.URL.split("&")[1].indexOf("=")+1));
-var radius= parseFloat(document.URL.split("&")[2].substr(document.URL.split("&")[2].indexOf("=")+1));
-var dbindex = parseInt(document.URL.split("&")[3].substr(document.URL.split("&")[3].indexOf("=")+1));
-var key = Math.random();
-var html = '<table id="PRS" class="display" align="center">';
-var tmp = 	'<tr><th>P&R ID</th>'+
+var countyId = getURIParameter("countyid");
+maxRadius = 1;
+html = '<table id="RT" class="display" align="center">';
+tmp = 	'<tr><th>P&R ID</th>'+
 			'<th>Lot Name</th>'+
 			'<th>City</th>'+
 			'<th>Location</th>'+
@@ -75,85 +65,18 @@ var tmp = 	'<tr><th>P&R ID</th>'+
 			'<th>Local Expert</th>' +
 			'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
-var html2 = '<tfoot>'+tmp+'</tfoot>';
-
-
-function pad(s) { return (s < 10) ? '0' + s : s; }
-
-function EscFunc(){
-	jQuery.event.trigger({ type : 'keydown', which : 27 });
-}
+html2 = '<tfoot>'+tmp+'</tfoot>';
 
 $(document).ready(function(){
-	document.getElementById("Sradius").value = radius;
- 	$.ajax({
-		type: 'GET',
-		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
-		async: false,
-		success: function(d){	
-			var select = document.getElementById("dbselect");
-			select.options.length = 0;
-		    var menusize = 0;
-		    $.each(d.DBelement, function(i,item){
-		    	var option = document.createElement('option');
-		        option.text = item;
-		        option.value = i;
-		        select.add(option, i);		    	
-		    	menusize++;
-		    });		    		    
-		    if (dbindex<0 || dbindex>menusize-1){
-		    	dbindex = 0;
-		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
-		    }
-		    select.options.size = menusize;
-		    select.selectedIndex = dbindex;		    				    
-		}			
-	}); 
-	
-	$(document).tooltip({
-		position: {
-	        my: "left bottom",
-	        at: "right bottom",
-	    }
-	});
-	var progressLabel = $( ".progress-label" );
-	$( "#progressbar" ).progressbar({
-	    value: false,
-	    change: function() {
-	        progressLabel.html( '<table><tr><td>Report in progress... </td><td>' + $(this).progressbar( "value" ) + "% " + '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
-	    }
-	});  
-	var prog = false;
-	function progress() {
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/PorgVal?&key='+key,
-			async: true,
-			success: function(item){
-				progVal = parseInt(item.progVal);
-				if(progVal==0){
-					progVal=false;
-					if(prog){
-						clearTimeout(timeVar);
-					}
-				}else{
-					prog=true;
-				}
-				$( "#progressbar" ).progressbar( "value", progVal );	
-			}			
-		});	
-	    if ( progVal == 100 ) {
-			clearTimeout(timeVar);
-	  	}
-	} 
-	timeVar = setInterval(progress, 100);
+	$("#Sradius").val(w_qstringx);
+	loadDBList();
+	updateToolTips();
+	progressBar()
 	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/pnrsInCounty?&key=' + key + '&countyId=' + countyId + '&radius=' + radius + '&dbindex=' + dbindex + '&username=' + getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/pnrsInCounty?&key=' + key + '&countyId=' + countyId + '&radius=' + w_qstringx + '&dbindex=' + dbindex + '&username=' + getSession(),
 		async: true,
 		success: function(d){			
 			$('h2').append('Park & Ride Extended Report <br><hr>');
@@ -199,76 +122,10 @@ $(document).ready(function(){
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			
-			var table = $('#PRS').DataTable({
-				"width": "100%", 
-				//"scrollY": "50%",
-				"sScrollX": true,
-				"bScrollCollapse": true, 
-				"autoWidth": true, 
-				"bSort" : true,
-				"paging": true,				
-				"iDisplayLength": 5,
-                 "columnDefs": [ { "visible": false,  "targets": [ 9,10,11,12,13,21,22,23,24,25,26,27,28,29,33 ] }
-                         		],
-				"order": [[ 2, "des" ]],
-				select: {
-		            style: 'os',
-		            //blurable: true
-		        },
-			    dom: 'Bfrtip',
-			    
-				buttons: [
-							{
-							    extend: 'csvHtml5',
-							    text: 'Export CSV & Metadata',
-							    footer: false,
-							},
-							{
-							    extend: 'print',
-							    text: 'Print Report',
-							    footer: false,
-							    exportOptions: {
-							    	stripHtml: false,
-							    	stripNewlines: false,
-							    	columns: ':visible'
-							    }
-							}
-				        ],
-	        language: {
-				buttons: {
-					copyTitle: '<p><b>Copy to clipboard</b></p>',
-					copySuccess: {
-						0: "No row was copied",
-						1: "Copied one row to clipboard",
-						_: "Copied %d rows to clipboard"
-					},
-				}
-			}		
-			} );
+			tableProperties.hiddenCols = [ 9,10,11,12,13,21,22,23,24,25,26,27,28,29,33 ];
+			table = buildDatatables();
 			
-			
-			$( ".dt-buttons" ).css( "float", "right");
-		    $( ".dt-buttons" ).css( "margin-bottom", "1em");
-		    $.contextMenu({
-	            selector: '#RT tbody tr', 
-	            callback: function(key, options) {
-	                $(".buttons-copy").click();
-	                //alert($('#ToolTables_RT_2').attr('id'));
-	            },
-	            items: {
-	                "copy": {name: "Copy Selected Rows", icon: "copy"}
-	            }
-	        });
-		    $( ".buttons-copy" ).hide();
-		    $(document).keydown(function(e) {
-		        if (e.keyCode == 67 && e.ctrlKey) {
-		        	$(".buttons-copy").click();
-		        }
-		    });
-			
-			
-		
-		    $('#PRS tbody').on('click', 'td.details-control', function () {
+		    $('#RT tbody').on('click', 'td.details-control', function () {
 		    		var tr = $(this).parents('tr');
 			        var row = table.row( tr );
 			        var col = table.column( tr );
@@ -289,7 +146,6 @@ $(document).ready(function(){
 		    
 	    	function format8 ( arg ){
 				var rowData = Array.prototype.slice.call(arg);
-	    		//var results = '<p id="PRSAmenities"></p>;
 	    		 var html = '<table cellpadding="0" cellspacing="0" border="0" class="display" align="center">'+
 	    		'<th>Restroom</th>'+
 				'<th>Benches</th>'+
@@ -312,7 +168,6 @@ $(document).ready(function(){
 	    		
 	    		function fun(s){
 	    			if ( s.indexOf("Yes")>-1 || s.indexOf("yes")>-1 || s.indexOf("YES")>-1)	// if s contains "yes"
-	    				/* return '<img src="http://www.veryicon.com/icon/ico/System/Pretty%20Office%208/Accept.ico" height="40" width="40" alt="Yes">'; */
 	    				return '<img src="images/tick.ico" height="40" width="40" alt="Yes">';
 	    			else if ( s.indexOf("No") > -1 || s.indexOf("no") > -1 || s.indexOf("NO") > -1)  // if s contains "no"
 	    				return '<img src="images/error.png" height="40" width="40" alt="No">';
@@ -370,36 +225,9 @@ $(document).ready(function(){
 		            html+='</table>';
 		        return html;
 		    }
-		  
-		    //$('#RT_wrapper').css("width", $('#RT').css("width"));
-		    $('#PRS_wrapper').css("margin", "auto");
-			$("#PRS_length").remove();
-		    $("#PRS_filter").insertBefore("#PRS_info");
-		    $( ".dataTables_filter" ).css( "float", "left");
-		    $( ".dataTables_filter" ).before( "<br>" );
-    }});
+    	}
+	});
 });
-
-$(".export").on('click', function (event) {    
-	exportbutton.apply(this, ['export.csv']);
-});
-
-function reloadC(){
-	var tmpR = (parseFloat(document.getElementById("Sradius").value)).toString();	
-	if (exceedsMaxRadius(tmpR)){	// Checks if the entered search radius exceeds the maximum.			var tmpR = (parseFloat(document.getElementById("radiusInput").value)).toString();	
-		alert('Enter a number less than ' + maxRadius + ' miles for Transit Service Search Radius Search Radius.');		
-		return 0;		
-	}
-	history.pushState("", "", document.URL.replace('radius='+radius, 'radius='+tmpR));
-	location.reload();
-}
-
-function exportbutton(){
-	var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20ParknRide%3D%22Extended%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
-	window.open(uri, 'ParknRideSummaryReport.csv');
-}
-
-
 </script>
 
 
@@ -412,8 +240,8 @@ function exportbutton(){
 			</div>
 			
 			<div class="headerR">
-				<select id='dbselect' onchange='setURIParameter(this,"dbindex",dbindex)'></select>
-				<input type="button" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+				<select id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
 		<table id="controls">
@@ -426,8 +254,8 @@ function exportbutton(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" >
-			  	Transit Service Search Radius (miles) <input id="Sradius" type="text" value="0.25" style="width:5em" name="Sradius" class="tbox" onkeypress="return isNumber(event)"/>
-			    	<input type="button" onclick="reloadC()" title="Refresh Report"  value="Submit" class="button" /> 		    	    	
+			  	Transit Service Search Radius (miles) <input id="Sradius" name="x" type="text" style="width:5em" class="input radius tbox" onkeypress="return isNumber(event)"/>
+			    	<input type="button" onclick="reloadPage()" title="Refresh Report"  value="Submit" class="button" /> 		    	    	
 		    	</div>
 			  </td>
 			</tr>

@@ -93,9 +93,11 @@ function progressBar() {
 			success : function(item) {
 				progVal = parseInt(item.progVal);
 				if (progVal == 0) {
-					progVal = false;
-					if (prog) {
+					if(prog){
+						progVal=100;
 						clearTimeout(timeVar);
+					}else{
+						progVal=false;
 					}
 				} else {
 					prog = true;
@@ -117,8 +119,9 @@ function pad(s) {
 function buildDatatables() {
 	var table = $('#RT').DataTable(
 			{
+				"responsive": "true",
 				"scrollX": "100%",
-				"width": "100%",	
+				/*"width": "100%",*/	
 				"ordering": tableProperties.ordering,
 				"paging" : tableProperties.paging,
 				"bAutoWidth" : tableProperties.bAutoWidth,
@@ -232,9 +235,6 @@ function buildDatatables() {
 			$(".buttons-copy").click();
 		}
 	});
-	
-	$('#RT_wrapper').css("width", $('#RT').css("width"));
-	$('#RT_wrapper').css("margin", "auto");
 	$("#RT_length").remove();
 	$("#RT_filter").insertBefore("#RT_info");
 	$(".dataTables_filter").css("float", "left");

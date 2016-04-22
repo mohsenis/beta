@@ -5,61 +5,38 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>Employment Report</title>
 	
-	<script src="js/lib/jquery-1.11.1.min.js"></script>
-	<script src="js/lib/jstree.min.js"></script>
-	<script src="js/jQueryContent.js"></script>
-	<script src="js/lib/jquery-ui.js"></script>
-	<!-- <script src="js/lib/sorttable.js"></script> -->
-	<script src="js/lib/slidebars.min.js"></script>
-	<!-- <script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
-	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script> -->
-	<script src="js/jQueryContent.js"></script>
-	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
-	<script src="js/lib/date.js"></script>
-	<script src="js/EmpJstree.js"></script>
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
-	<!-- <link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" /> -->
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
-	<link rel="stylesheet" type="text/css" href="report.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/slidebars.min.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery.qtip.min.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/jstree-themes/default/style.min.css" />
-	<link rel="stylesheet" type="text/css" href="report.css" />
-	
-	<link rel="stylesheet" type="text/css" href="js/lib/contextMenu/jquery.contextMenu.css" />
-	<script src="js/lib/contextMenu/jquery.contextMenu.js"></script>
-	<script src="js/lib/contextMenu/jquery.ui.position.js"></script>
-	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
 	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<!-- <script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.min.js"></script> -->
+	<script src="http://plugins.adchsm.me/slidebars/scripts/slidebars/slidebars.min.js"></script>
+	<script src="https://static.jstree.com/3.3.0/assets/dist/jstree.min.js"></script>
+	<script src="js/lib/date.js"></script>
+	<script src="Phase4/JSMethods.js"></script>
+	<script src="Phase4/EmpMethods.js"></script>
+	<script src="js/EmpJstree.js"></script>
+		
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/tabletools/2.2.1/css/dataTables.tableTools.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
-	<style>
-	.navicon-line{
-		width:25px;
-		height:4px;
-		border:1px solid #565656; 
-		background-color:white; 
-		margin:4px;
-		}
+	<link rel="stylesheet" href="http://plugins.adchsm.me/slidebars/scripts/slidebars/slidebars.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+	<link rel="stylesheet" type="text/css" href="report.css" />
 	
-	</style>
 	<script>
-	var reportName = "kjh";
-	var boo;
-	var progVal = 0; 
-	var maxRadius = 5;
-	var dbindex = parseInt(getURIParameter("dbindex"));;
-	var key = Math.random();
-	var keyName = getURIParameter("n");
+	
 	var w_qstringd = getDates(keyName);
-	var w_qstringx = $('#Sradius').val();
+	w_qstringx = $('#Sradius').val();
 	if (w_qstringx == null) {w_qstringx = 0.25};
 	var mySlidebar;
 	var wacBool = true;
@@ -68,7 +45,7 @@
 	var racData = {};
 	var html = "";
 	var tmp = "";
-	var showPrompt = true; // detemines whether to show the meta data prompt box.
+	var showPrompt = true; // determines whether to show the meta data prompt box.
 	
 	$(function() {
 	    $( "#dialog-confirm" ).dialog({
@@ -96,638 +73,26 @@
 	(function($) {
 	    $(document).ready(function() {	    	
 	    	$('.sb-slidebar').css('width', '35%');
-	    	$.ajax({
-	    		type: 'GET',
-	    		datatype: 'json',
-	    		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',
-	    		async: false,
-	    		success: function(d){	
-	    			var select = document.getElementById("dbselect");
-	    			select.options.length = 0;
-	    		    var menusize = 0;
-	    		    $.each(d.DBelement, function(i,item){
-	    		    	var option = document.createElement('option');
-	    		        option.text = item;
-	    		        option.value = i;
-	    		        select.add(option, i);		    	
-	    		    	menusize++;
-	    		    });		    		    
-	    		    if (dbindex<0 || dbindex>menusize-1){
-	    		    	dbindex = 0;
-	    		    	history.pushState('data', '', document.URL.split("dbindex")[0]+'dbindex=0');
-	    		    }
-	    		    select.options.size = menusize;
-	    		    select.selectedIndex = dbindex;		    				    
-	    		}			
-	    	});
-	    	gos(key);
+	    	loadDBList();
+	    	updateToolTips();
+	    	go(key);
+	    	$('.selectedDate').css("text-align", "center");
 	    	$('.ui-accordion-content').css('padding', '0px 0px');
-	    	$('#ui-accordion-accordion-header-0').css({'width':'80%','font-size':'80%','margin':'auto','text-align':'center'});
+	    	$('.ui-accordion-header').css({'width':'90%','font-size':'80%','margin':'auto','text-align':'center'});
 	    	$('.ui-widget').css('font-size', '100%');
 	    	$('.ui-datepicker-inline').css('margin','auto');
-	    	
 	    	$('#bePatient').hide();
 	    	$('#dialogPreLoader').hide();
 	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Employment Report <span style="font-size:small;margin-left:1em">(For description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf">here</a></span>.)');
 	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
-	    	mySlidebar.slidebars.open('left'); // Open the Slidebar
-	    	    	
+	    	mySlidebar.slidebars.open('left'); // Open the Slidebar	    	    	
 	    });
 	  }) (jQuery);
 	
 	$(function () {
 		$('#jstree').jstree(default_jstree);
 		bindEvents();		
-	});
-	
-	function racWacAjax(){
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&projection=' + $('#projectionYear').val() + '&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
-			async: true,
-			success: function(d){
-				var temp = d.EmpDataList;
-				racData.metadata = d.metadata;
-				racData.EmpDataList2 = [];
-				temp.forEach(function(i, ind, arr){
-					racData.EmpDataList2.push(i);
-				});
-				$.ajax({
-					type: 'GET',
-					datatype: 'json',
-					url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&projection=' + $('#projectionYear').val() + '&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
-					async: true,
-					success: function(d){
-						var temp = d.EmpDataList;
-						wacData.metadata = d.metadata;
-						wacData.EmpDataList2 = [];
-						temp.forEach(function(i, ind, arr){
-							wacData.EmpDataList2.push(i);
-						});
-						openReport2();
-					}
-				});
-			}
-		});
-	}
-	
-	function racAjax(){
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_rac&projection=' + $('#projectionYear').val() + '&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
-			async: true,
-			success: function(d){
-				var temp = d.EmpDataList;
-				racData.metadata = d.metadata;
-				racData.EmpDataList2 = [];
-				temp.forEach(function(i, ind, arr){
-					racData.EmpDataList2.push(i);
-				});
-				openReport2();
-			}
-		});
-	}
-	
-	function wacAjax(){
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/emp?&dataSet=lodes_blocks_wac&projection=' + $('#projectionYear').val() + '&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
-			async: true,
-			success: function(d){
-				var temp = d.EmpDataList;
-				wacData.metadata = d.metadata;
-				wacData.EmpDataList2 = [];
-				temp.forEach(function(i, ind, arr){
-					wacData.EmpDataList2.push(i);
-				});
-				openReport2();
-			}
-		});
-	}
-	
-	function toggleCheckbox(checkbox){	
-		//var tree= $('#jstree').jstree(true);
-		if (checkbox.checked){
-		tree.select_all();
-		}else{
-		tree.deselect_all();
-		}	
-	}
-
-	function getTableHeaders(){
-		var nodesList = [];
-		var tree = $('#jstree').jstree(true);
-		$('.jstree-node').each(function(){
-			if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#' && tree.get_parent($(this)).indexOf('Category') == -1)
-					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null) && tree.get_parent($(this)).indexOf('Category') == -1) {
-				nodesList.push($(this));
-			}
-		});
-		var y = "";
-		if (racBool && wacBool){
-			if ($('#reportType').val() == 'Agencies'){
-				y += '<th>Number of employees served by agnecy (RAC)</th>'+
-				'<th>Number of employees served by agnecy (WAC)</th>';
-			}else{
-				y += '<th>Number of employees residing in the area (RAC)</th>'+
-				'<th>Number of employees working in the area (WAC)</th>';
-			}
-			 
-			nodesList.forEach (function (item, index, array){
-				var node = tree.get_node(item.attr('id'));
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ node.data.title +' (RAC)<em title="Total '+node.data.title+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y +='<th>'+ node.data.title +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+node.data.title+' employees living within X distance of any stop. This metric is date independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ node.data.title+' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+node.data.title+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ node.data.title +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+node.data.title+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ node.data.title +' (WAC)<em title="Total '+node.data.title+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y += '<th>'+ node.data.title +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+node.data.title+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ node.data.title +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+node.data.title+' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ node.data.title +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+node.data.title+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-			});
-		}else if (racBool){
-			if ($('#reportType').val() == 'Agencies'){
-				y += '<th>Number of employees served by agnecy (RAC)</th>';
-			}else{
-				y += '<th>Number of employees residing in the area (RAC)</th>';
-			}
-			
-			nodesList.forEach (function (item, index, array){	
-				var node = tree.get_node(item.attr('id'));
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ node.data.title +' (RAC)<em title="Total '+node.data.title+' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y +='<th>'+ node.data.title +' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '+node.data.title+' employees living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ node.data.title +' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+node.data.title+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ node.data.title +' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '+node.data.title+' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-			});	
-		}else{
-			if ($('#reportType').val() == 'Agencies'){
-				y += '<th>Number of employees served by agnecy (WAC)</th>';
-			}else{
-				y += '<th>Number of employees working in the area (WAC)</th>';
-			}
-			nodesList.forEach (function (item, index, array){	
-				var node = tree.get_node(item.attr('id'));
-				if ($('#reportType').val() != 'Agencies') y += '<th>'+ node.data.title +' (WAC)<em title="Total '+node.data.title+' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-				y += '<th>'+ node.data.title +' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '+node.data.title+' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ node.data.title +' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '+node.data.title+' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-				+'<th>'+ node.data.title +' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '+node.data.title+' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-			});
-		}
-		return y;
-	} 
-	
-	function clearReport(){
-		document.getElementById('displayReport').innerHTML = "";
-		$('#initialText').show();
-	}
-	
-	function datasetChange(e){
-		if (e.value == 'lodes_blocks_wac'){
-			racBool = false;
-			wacBool = true;
-		}else if (e.value == 'lodes_blocks_rac'){
-			racBool = true;
-			wacBool = false;
-		}else{
-			racBool = true;
-			wacBool = true
-		}
-	}
-	
-	$(".export").on('click', function (event) {    
-		exportbutton.apply(this, ['export.csv']);
-	});
-
-	function exportbutton(){
-		var uri = 'data:application/csv;charset=utf-8;headers=Content-Disposition%3A%20attachment%3B%20Agency%3D%22Summary%20Report.csv%22%0D%0AContent-Language%3A%20en;base64,'+ window.btoa(csvfile);
-		window.open(uri, 'EmploymentReport.csv');
-	}
-	
-	function selectFunction(){
-		$('#reportTitle').html($('#reportType').val());
-	}
-	
-	function updateProjection(){
-		$('#jstree').jstree(true).destroy();
-		if ($('#projectionYear').val() == 'current'){
-			$('#jstree').jstree(default_jstree);
-			$('#dataSet').removeAttr('disabled');
-			/* $('#promptText').html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>'
-					+'This report is generated based on the "Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics (LODES) Dataset Structure'
-					+' Format Version 7.0 - 2013" provided by US Census bureau.<br><br>   Do you want to prevent this message box from popping up?'); */
-			$("#checkbox").removeAttr("disabled");
-
-		}			
-			
-		else{
-			$('#jstree').jstree(new_jstree);
-			
-			bindEvents();
-			$('#dataSet').attr('disabled', 'disabled');;
-			$('#dataSet').val('lodes_blocks_rac');
-			$('#promptText').html(/* '<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' */''
-			    +'<span style="line-height: 150%;">The future employment figures provided by this report were estimated using a linear projection '
-			    +'that used county-level employment for 2010 and employment estimates for the years 2015 and 2025 as a basis.</span>'
-			    +'<br><br><input type="checkbox" id="showMSG">Do not show this message again');
-			$("#checkbox").attr("disabled", true);  
-			$('#checkbox').attr('checked', false);
-			racBool = true;
-			wacBool = false;			
-		}			
-	}
-	
-	function sectorPercentage(x){
-		if (x.indexOf('.')>-1){
-			return '0'+ x.slice(-3);			
-		}
-		else return 1;
-	}
-	
-	function getTrimmedNodeID(x){
-		var y = ($(x).attr('id')).toLowerCase()
-		if (y.indexOf('_.')>-1) return y.substring(0,y.length-4);
-		else return y;
-	}
-	
-	/**
-	* return the leaf nodes of a given node.
-	*/
-	function getLeaves(x){
-		var y = [x];
-		var hasLeaf = true;
-		var nodesToAdd = new Array();
-		var nodesToRemove = new Array();
-		tree = $('#jstree').jstree(true);				
-		while (hasLeaf){
-			hasLeaf = false;
-			nodesToAdd = [];
-			nodesToRemove = [];
-			for (var i = 0; i < y.length; i++){
-				var node = y[i];
-				if (tree.is_parent(node)) {
-					hasLeaf = true;
-					nodesToRemove.push(node);
-					nodesToAdd.push.apply(nodesToAdd, tree.get_children_dom(node));				
-				}
-			}
-			// removing nodesToRemove from y
-			for (var k=0;k<nodesToRemove.length;k++){
-				var index = y.indexOf(nodesToRemove[k]);
-				if (index > -1)	y.splice(index,1);
-			}
-			y.push.apply(y,nodesToAdd);
-		}
-	return y;
-	}
-	
-	function bindEvents(){
-		tree = $('#jstree').jstree(true);				
-		$(document).on("dnd_stop.vakata", function (e, data) { 
-			$('.jstree-node').each(function(){
-				if (!$('#jstree').jstree(true).is_disabled(this)) $('#jstree').jstree(true).deselect_node(this);
-			})	
-		});
-		
-		$("#jstree").bind("rename_node.jstree", function (e, data) {
-			data.node.data.title = data.text;
-		});
-		
-		/* $("#jstree").bind("changed.jstree", function (e, data) {
-			$('.jstree-leaf').each(function(){
-				$(this).attr('title', description[$(this).attr('id')]); 
-			});
-		}); 
-		
-		$("#jstree").bind("ready.jstree", function (e, data){
-			$('.jstree-leaf').each(function(){
-				$(this).attr('title', description[$(this).attr('id')]);			
-			});
-		});*/
-	}
-	</script>
-
-	<!-- Beginning of the datatable -->
-	<script type="text/javascript">
-	
-	function openReport(){
-		clearReport();
-		if (exceedsMaxRadius($('#Sradius').val())){	// Checks if the entered search radius exceeds the maximum.
-			alert('Enter a number less than ' + maxRadius + ' miles for the population search radius.');
-			return 0;
-		}
-		
-		if ($('#jstree').jstree(true).get_selected()==""){
-			alert('At least select 1 category');
-			return 0;
-		}
-		
-		// prompt for showing meta-data
-		if (showPrompt && $('#projectionYear').val() != 'current') $('#dialog-confirm').dialog('open');
-		$('.ui-dialog').css("opacity","1");
-		
-		// update dates
-		var dates = $('#datepicker').multiDatesPicker('getDates');
-		if(dates.length==0){
-			$( "#datepicker" ).multiDatesPicker({
-				addDates: [new Date()]
-			});
-		}
-		w_qstringd = dates.join(",");
-		
-		// close slidebar
-		mySlidebar.slidebars.close();		
-		$("#initialText").hide();
-		$('#bePatient').show();
-		$('#dialogPreLoader').show();
-		
-		document.getElementById('displayReport').innerHTML = "";
-		html = '<table id="Emp" class="display" align="center">';
-		if ($('#reportType').val() == 'Agencies'){
-			tmp = 	'<tr><th id="tableid">Agency ID</em></th>'+
-				'<th id="tablename">Agency Name</em></th>';
-		}else{
-			tmp = 	'<tr><th id="tableid">Area ID</em></th>'+
-			'<th id="tablename">Area Name</em></th>';
-		}
-		tmp += getTableHeaders() +
-				'<th>MetaData</th></tr>';
-		html += '<thead>'+tmp+'</thead><tbody>';
-		if(racBool && wacBool) racWacAjax();
-		else if (racBool) racAjax();
-		else wacAjax();
-		$('#bePatient').hide();
-	}
-	
-	function openReport2(){
-		// making a 2D array based on the selected categories and aggregated categories
-		var tableContent = [];
-		var rootList = [];
-		var tree = $('#jstree').jstree(true);
-		$('.jstree-node').each(function(){
-		  if ((tree.is_selected($(this)) && tree.get_parent($(this)).indexOf('_aggregate') < 0 && tree.get_parent($(this)) != '#' && tree.get_parent($(this)).indexOf('Category') == -1)
-					|| ($(this).attr('id').indexOf('_aggregate') > -1 && tree.get_children_dom($(this)) != null && tree.get_parent($(this)).indexOf('Category') == -1) ){
-			 	rootList.push(this);
-			 }
-		});
-		
-		tree.open_all();
-		rootList.forEach (function (item, index, array){
-			var parentID = $(item).attr('id');
-			if (tree.is_parent(item)){						
-				var children = getLeaves(item);
-				var childrenIDs = [];
-				$.each(children, function(ind,obj){
-					if (tree.is_selected(obj)){
-						childrenIDs.push($(obj).attr('id'));  // You should push the leaf nodes not the Category nodes.
-					}							
-				});
-				tableContent.push([parentID,childrenIDs]);
-			}else{
-				var childrenIDs = [parentID];
-				tableContent.push([parentID,childrenIDs]);
-			}
-		});
-		// Filling in the first 3 columns of the datatable and making a hashmap of the query results 
-		if (racBool && wacBool){
-			for (var i=0; i<racData.EmpDataList2.length;i++){
-				html += '<tr><td>'+ racData.EmpDataList2[i].id + '</a></td>'+
-				'<td>' + racData.EmpDataList2[i].name + '</td>';
-				if ($('#reportType').val() == "Agencies"){
-					html += '<td>' + numWithCommas(racData.EmpDataList2[i].c000served) + '</td>'+
-					'<td>' + numWithCommas(wacData.EmpDataList2[i].c000served) + '</td>';
-				}else{
-					html +='<td>' + numWithCommas(racData.EmpDataList2[i].c000) + '</td>'+
-					'<td>' + numWithCommas(wacData.EmpDataList2[i].c000) + '</td>'; 
-				}
-				
-				
-				var resultSetRac = {};
-				var resultSetWac = {};
-				$('.jstree-leaf').each(function(){
-					if ($('#reportType').val() != 'Agencies') resultSetRac[$(this).attr('id')] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
-					resultSetRac[$(this).attr('id')+'los'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
-					resultSetRac[$(this).attr('id')+'within'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
-					resultSetRac[$(this).attr('id')+'served'] = racData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
-				});
-				$('.jstree-leaf').each(function(){
-					if ($('#reportType').val() != 'Agencies') resultSetWac[$(this).attr('id')] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
-					resultSetWac[$(this).attr('id')+'los'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
-					resultSetWac[$(this).attr('id')+'within'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
-					resultSetWac[$(this).attr('id')+'served'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
-				});
-				
-				// filling in the other columns of the datatable
-				for (var index in tableContent){
-					var racSummation = 0;
-					var racPopServedSummation = 0;
-					var racPopAtLOSSummation = 0;
-					var racServedByServiceSummation = 0;
-					var wacSummation = 0;
-					var wacPopServedSummation = 0;
-					var wacPopAtLOSSummation = 0;
-					var wacServedByServiceSummation = 0;
-					tableContent[index][1].forEach(function(j, ind, arr){
-						
-						var node = $('#jstree').find("[id='"+j+"']");
-						if (tree.is_selected(node)){
-							if ($('#reportType').val() != 'Agencies') {
-								racSummation += resultSetRac[j];
-								wacSummation += resultSetWac[j];
-								}
-							racPopServedSummation += resultSetRac[j+'within'];
-							racPopAtLOSSummation += resultSetRac[j+'los'];
-							racServedByServiceSummation += resultSetRac[j+'served'];
-							
-							wacPopServedSummation += resultSetWac[j+'within'];
-							wacPopAtLOSSummation += resultSetWac[j+'los'];
-							wacServedByServiceSummation += resultSetWac[j+'served'];
-						}							
-					});
-					if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(racSummation) + '</td>';
-					html += '<td>' + numWithCommas(racPopServedSummation) + '</td>'
-					+ '<td>' + numWithCommas(racPopAtLOSSummation) + '</td>'
-					+ '<td>' + numWithCommas(racServedByServiceSummation) + '</td>';
-					if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(wacSummation) + '</td>';
-					html += '<td>' + numWithCommas(wacPopServedSummation) + '</td>'
-					+ '<td>' + numWithCommas(wacPopAtLOSSummation) + '</td>'
-					+ '<td>' + numWithCommas(wacServedByServiceSummation) + '</td>';
-				}
-				html += '<td>' + racData.metadata + '</td></tr>';
-			};
-		}else if (racBool){
-			var resultSetRac = {};
-			
-			$.each(racData.EmpDataList2, function(i,item){
-				$('.jstree-leaf').each(function(){
-					var sectorPercent = sectorPercentage($(this).attr('id')); 
-					if ($('#reportType').val() != 'Agencies') resultSetRac[$(this).attr('id')] = Math.round(sectorPercent * racData.EmpDataList2[i][getTrimmedNodeID(this)]);
-					resultSetRac[$(this).attr('id')+'los'] = Math.round(sectorPercent * racData.EmpDataList2[i][getTrimmedNodeID(this)+'los']);
-					resultSetRac[$(this).attr('id')+'within'] = Math.round(sectorPercent * racData.EmpDataList2[i][getTrimmedNodeID(this)+'within']);
-					resultSetRac[$(this).attr('id')+'served'] = Math.round(sectorPercent * racData.EmpDataList2[i][getTrimmedNodeID(this)+'served']);
-				});
-				
-				html += '<tr><td>'+ item.id + '</a></td>'+
-				'<td>' + item.name + '</td>' ;				
-				if ($('#reportType').val() == 'Agencies') html += '<td>' + numWithCommas(item.c000served) + '</td>';
-				else html += '<td>' + numWithCommas(item.c000) + '</td>';
-			
-			
-			// filling in the other columns of the datatable
-			for (var index in tableContent){
-				var racSummation = 0;
-				var racPopServedSummation = 0;
-				var racPopAtLOSSummation = 0;
-				var racServedByServiceSummation = 0;
-				tableContent[index][1].forEach(function(j, ind, arr){
-					var node = $('#jstree').find("[id='"+j+"']");
-					if (tree.is_selected(node)){
-						if ($('#reportType').val() != 'Agencies') racSummation += resultSetRac[j];
-						racPopServedSummation += resultSetRac[j+'within'];
-						racPopAtLOSSummation += resultSetRac[j+'los'];
-						racServedByServiceSummation += resultSetRac[j+'served'];	
-					}							
-				});
-				if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(racSummation) + '</td>';
-				html += '<td>' + numWithCommas(racPopServedSummation) + '</td>'
-				+ '<td>' + numWithCommas(racPopAtLOSSummation) + '</td>'
-				+ '<td>' + numWithCommas(racServedByServiceSummation) + '</td>';
-			}
-			html += '<td>' + racData.metadata + '</td></tr>';
-			});
-		}else{
-			var resultSetWac = {};
-			$.each(wacData.EmpDataList2, function(i,item){
-				$('.jstree-leaf').each(function(){
-					if ($('#reportType').val() != 'Agencies') resultSetWac[$(this).attr('id')] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()];
-					resultSetWac[$(this).attr('id')+'los'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'los'];
-					resultSetWac[$(this).attr('id')+'within'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'within'];
-					resultSetWac[$(this).attr('id')+'served'] = wacData.EmpDataList2[i][($(this).attr('id')).toLowerCase()+'served'];
-				});
-				html += '<tr><td>'+ item.id + '</td>'+
-						'<td>'+ item.name + '</td>';
-						if ($('#reportType').val() == 'Agencies') html += '<td>' + numWithCommas(item.c000served) + '</td>';
-						else html += '<td>' + numWithCommas(item.c000) + '</td>';
-					
-				// filling in the other columns of the datatable
-				for (var index in tableContent){
-					var wacSummation = 0;
-					var wacPopServedSummation = 0;
-					var wacPopAtLOSSummation = 0;
-					var wacServedByServiceSummation = 0;
-					tableContent[index][1].forEach(function(j, ind, arr){
-						var node = $('#jstree').find("[id='"+j+"']");
-						if (tree.is_selected(node)){
-							if ($('#reportType').val() != 'Agencies') wacSummation += resultSetWac[j];
-							wacPopServedSummation += resultSetWac[j+'within'];
-							wacPopAtLOSSummation += resultSetWac[j+'los'];
-							wacServedByServiceSummation += resultSetWac[j+'served'];	
-						}							
-					});
-					if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(wacSummation) + '</td>';
-					html += '<td>' + numWithCommas(wacPopServedSummation) + '</td>'
-					+ '<td>' + numWithCommas(wacPopAtLOSSummation) + '</td>'
-					+ '<td>' + numWithCommas(wacServedByServiceSummation) + '</td>';
-					
-				}
-				html += '<td>' + wacData.metadata + '</td></tr>';
-			});
-		}
-		
-		
-		var html2 = '<tfoot>'+tmp+'</tfoot>';
-		html +='</tbody>'+html2+'</table>';
-		$('#displayReport').append($(html));
-		$('#dialogPreLoader').hide();
-		
-    var table = $('#Emp').DataTable({
-			
-			"bSort" : true,
-			"paging": true,	
-			"scrollX": true,
-			"iDisplayLength": 10,
-			"aoColumnDefs": [{"visible": false, "targets": [$('#Emp thead th').length - 1]}],
-			"order": [[ 0, "asc" ]],
-			select: {
-	            style: 'os',
-	            //blurable: true
-	        },
-		    dom: 'Bfrtip',
-		    
-			buttons: [
-						{
-						    extend: 'csvHtml5',
-						    text: 'Export to CSV',
-						    footer: false,
-						},
-						{
-						    extend: 'print',
-						    text: 'Print Report',
-						    footer: false,
-						    exportOptions: {
-						    	stripHtml: false,
-						    	stripNewlines: false,
-						    	columns: ':visible'
-						    }
-						},
-			            {
-			                extend: 'copyHtml5',
-		                    text: 'Copy selected',
-			                exportOptions: {
-			                    modifier: {
-			                        selected: true
-			                    }
-			                }
-			            },
-			            {
-			            	text: "Metadata",
- 		                    toolTip: "Sources of the data and description of the metrics",
- 		                    action: function ( e, dt, node, config ) {
-			                    //alert('Button activated');
-			                }
- 		                },
-			        ],
-			        language: {
-						buttons: {
-							copyTitle: '<p><b>Copy to clipboard</b></p>',
-							copySuccess: {
-								0: "No row was copied",
-								1: "Copied one row to clipboard",
-								_: "Copied %d rows to clipboard"
-							},
-						}
-					},
-			
-		} );
-		
-		
-		$( ".dt-buttons" ).css( "float", "right");
-	    $( ".dt-buttons" ).css( "margin-bottom", "1em");
-	    $.contextMenu({
-            selector: '#Emp tbody tr', 
-            callback: function(key, options) {
-                $(".buttons-copy").click();
-                //alert($('#ToolTables_RT_2').attr('id'));
-            },
-            items: {
-                "copy": {name: "Copy Selected Rows", icon: "copy"}
-            }
-        });
-	    $( ".buttons-copy" ).hide();
-	    $(document).keydown(function(e) {
-	        if (e.keyCode == 67 && e.ctrlKey) {
-	        	$(".buttons-copy").click();
-	        }
-	    });
-	 
-	    $('#Emp_wrapper').css("margin", "auto");
-		$("#Emp_length").remove();
-	    $("#Emp_filter").insertBefore("#Emp_info");	    
-	    $( ".dataTables_filter" ).css( "float", "left");
-	    $( ".dataTables_filter" ).before( "<br>" );	    
-		$(".jstree-anchor").css("font-size","80%");
-	}
+	});	
 	</script>
 </head>
 
@@ -744,8 +109,8 @@
 		</div>	
 			
 		<div class="headerR">
-			<select id='dbselect' onchange='setURIParameter(this,"dbindex",dbindex)'></select>
-			<input type="button" style="margin:3px" onclick="closebutton()" title="Close Report"  value="Close Report" class="button" />
+			<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+			<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			
 		</div>
 	</div>
@@ -764,7 +129,7 @@
 			<br><p style="text-align: center; margin-top:80px; line-height: 70vh;"><b>This might take a few minutes.</b></p>
 		</div>
 	</div>
-</div> 
+</div>
 	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="25%" style="height:100vh; overflow:auto; border-style:groove; background-color:white; border-width:5px;">
 		<button type="button" class="Button" onclick="openReport();" style="width:53%; height:30px;  background-color: #87F786; border-color:#4F964F; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Generate Report</button>
 		<button type="button" class="Button" onclick="clearReport();" style="; width:45%; height:30px; border-radius: 6px; background-color: #FF7373; border-color:#FB0303;"><i class="glyphicon glyphicon-asterisk"></i>Clear Report</button>
