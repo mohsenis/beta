@@ -7,6 +7,7 @@
   * [Software Architecture](architecture.md)  
   * [Video Tutorials](videos.md)
   * [User Manual](manual.md)
+  * [V.3 Final Report](reportV3.md)
   
   
 [Features]()

@@ -1189,8 +1189,8 @@ $mylist
 		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
 		    		'<ul>'+
 		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Networks Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Agencies Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Transit Networks Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Transit Agencies Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
 		    		'</ul></li>'+
 		    		'<li role="presentation" onclick="return;"><a id="Emp" href="#" style="cursor:default"><b>Employment Reports</b></a>'+
