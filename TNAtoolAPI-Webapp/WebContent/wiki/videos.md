@@ -1,4 +1,4 @@
-Transit Network Analysis (TNA) Software Tool - Video Tutorials
+Video Tutorials
 =========
 <table id='videoTable'>
 	<tr><th>#
