@@ -35,8 +35,7 @@ tmp = 	'<tr><th id="an"">County ID <em title="County ID conforming to the census
 			'<th>County Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 			'<th>Total number of P&R lots<em title="Total number of park and ride lots in the county"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 			'<th>Total parking spaces <em title="Total number of parking spaces in the county"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>Total accessible parking spaces <em title="Total number of handicap parking spaces in the county"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+			'<th>Total accessible parking spaces <em title="Total number of handicap parking spaces in the county"><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 html2 = '<tfoot>'+tmp+'</tfoot>';
 
@@ -50,17 +49,16 @@ $(document).ready(function(){
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/CountiesPnR?&key='+ key+'&dbindex='+dbindex,
 		async: true,
-		success: function(d){			
+		success: function(d){	
+			docMetadata = d.metadata;
 			$('h2').append('Park & Ride Summary Report <br><hr>');
 			$.each(d.PnrCountiesList, function(i,item){
 				html += '<tr><td><a href="#" type"XR" id='+item.countyId+'>'+ item.countyId + '</a></td>'+
 							'<td>' + item.cname + '</td>'+
 							'<td>' + item.count + '</td>'+
 							'<td>' + item.spaces + '</td>'+
-							'<td>' + item.accessibleSpaces + '</td>'+
-							'<td>' + d.metadata + '</td></tr>';							   			
+							'<td>' + item.accessibleSpaces + '</td></tr>';							   			
 			});
-			html +='</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));
 			progressbar.remove();
 
@@ -69,7 +67,7 @@ $(document).ready(function(){
 		    		window.open('/TNAtoolAPI-Webapp/ParkRideXReport.html'+'?&countyid='+id+ '&x=0.25&dbindex='+dbindex);    		
 			});
 			
-			tableProperties.hiddenCols = [5];
+			tableProperties.iDisplayLength = 20;
 			table = buildDatatables();
     	}
 	});
@@ -84,7 +82,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<select id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	

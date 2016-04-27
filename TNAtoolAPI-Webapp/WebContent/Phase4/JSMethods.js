@@ -21,8 +21,9 @@ var popYear = parseInt(getURIParameter("popYear"));
 var ajaxURL;
 var progVal = 0;
 var d = new Date();
-var html, html2, temp;
+var html, temp;
 var table;
+var docMetadata = '';
 var tableProperties = {
 	ordering : true,
 	hiddenCols : [],
@@ -121,7 +122,6 @@ function buildDatatables() {
 			{
 				"responsive": "true",
 				"scrollX": "100%",
-				/*"width": "100%",*/	
 				"ordering": tableProperties.ordering,
 				"paging" : tableProperties.paging,
 				"bAutoWidth" : tableProperties.bAutoWidth,
@@ -170,7 +170,7 @@ function buildDatatables() {
 								}
 								var zip = new JSZip();
 								zip.file($(document).find("title").text()
-										+ "-metaData.txt", "test\n");
+										+ "-metaData.txt", getToolTips());
 								zip.file($(document).find("title").text()
 										+ ".csv", output, {
 									type : 'text/csv' + charset
@@ -329,11 +329,49 @@ function reloadPage() {
  * report in a text file to be exported.
  */
 function getToolTips() {
-	$("th").each(
+	
+	/*
+	 * Appending metadata
+	 */
+	var output = 		   'Metadata\r\n';
+	output = output.concat('--------------------\r\n');
+	output = output.concat('Title: ' + $('h2').text() + '\r\n');
+	output = output.concat('Time & Date: ' + Date() + '\r\n');
+	output = output.concat('Tool Version: ' + getVersion());
+	
+	/*
+	 * Appending report parameters
+	 */ 
+	output = output.concat('\r\n\r\n\r\nReport Parameters\r\n');
+	output = output.concat('--------------------\r\n');	
+	$(".input").each(function(index, object) {
+		if ($(object).is('select'))
+				output = output.concat(object.dataset.label + ': ' + $("#" + $(object).attr('id') + " option[value='"+ object.value +"']").text() + '\r\n');
+		else
+			output = output.concat(object.dataset.label + ': ' + object.value + '\r\n');
+	});
+	if (keyName != null) output = output.concat('Selected Service Dates : ' + getDates(keyName));
+	
+	/*
+	 * Appeding Metric Defenitions
+	 */ 
+	output = output.concat('\r\n\r\n\r\nMetric Definitions\r\n');
+	output = output.concat('--------------------\r\n');
+	$("#RT th").each(
 			function(index, object) {
-				console.log($(object).text() + ': '
-						+ $(object).find("em").attr("title"));
+				if ($(object).find("em").find("img").attr("alt") == 'tooltip'){
+					output = output.concat($(object).text() + ': '
+							+ $(object).find("em").attr("title") + '\r\n');
+				}
 			});
+	$("td").each(
+			function(index, object) {
+				if ($(object).find("em").find("img").attr("alt") == 'tooltip'){
+					output = output.concat($(object).text() + ': '
+							+ $(object).find("em").attr("title") + '\r\n');
+				}
+			});
+	return output;
 }
 
 function setURIParameter(url, param, newValue, currentValue) {
@@ -346,6 +384,20 @@ function setURIParameter(url, param, newValue, currentValue) {
 		return URL[0] + "&" + param + "=" + newValue + last;
 	} else
 		return url;
+}
+
+function getVersion(){
+	var version = "";
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getVersion",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	version = d.DBError;
+        }
+	});	
+	return version;
 }
 
 function getURIParameter(param, asArray) {
@@ -500,11 +552,6 @@ function getSession() {
 		}
 	});
 	return username;
-}
-
-function hideLastCol(table) {
-	var column = table.column($('#RT thead th').length - 1);
-	column.visible(!column.visible());
 }
 
 function dateRemove(e, d) {

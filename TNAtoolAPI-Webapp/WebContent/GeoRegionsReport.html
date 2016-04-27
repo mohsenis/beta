@@ -41,10 +41,8 @@ tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with 
 '<th>Total Agencies <em title="Total number of transit agencies operating in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Routes <em title="Total number of routes serving stops in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Counties <em title="List of Counties within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+'<th>Counties <em title="List of Counties within the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
-html2 = '<tfoot>'+tmp+'</tfoot>';
 
 $(document).ready(function(){
 	setPopOptions();
@@ -63,6 +61,7 @@ $(document).ready(function(){
 		url: url,
 		async: true,
 		success: function(d){
+			docMetadata = d.metadata;
 			if (agencyId!=null){
 				nameString ='For '+d.agencyName;
 			}
@@ -77,9 +76,8 @@ $(document).ready(function(){
 					html+='<td><a href="#" type="AC" id="'+item.id+'">'+item.AgenciesCount+'</a></td>';
 				}
 				html+='<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
-				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td><td>'+item.CountiesCount+'</td><td>'+d.metadata+'</td></tr>' ;								   			
+				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td><td>'+item.CountiesCount+'</td></tr>' ;								   			
 			});		
-			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			$('a').click(function(e){
@@ -118,7 +116,6 @@ $(document).ready(function(){
 			    };
 			});
 			
-			tableProperties.hiddenCols = [9];
 			table = buildDatatables();
 			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
@@ -172,8 +169,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	

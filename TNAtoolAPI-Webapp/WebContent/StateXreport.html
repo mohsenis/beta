@@ -55,8 +55,7 @@ tmp = '<tr><th id="an">State <em title="Name of the state"><img src="images/tool
 '<th>Average Fare<em title="Fare average for the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Median Fare<em title="Fare median for the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Min Fare<em title="Minimum fare for the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Max Fare<em title="Maximum fare for the given state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>Max Fare<em title="Maximum fare for the given state."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 var fAverage = new Array();
 var fMedian = new Array();
@@ -77,7 +76,8 @@ $(document).ready(function(){
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/stateXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&popYear='+popYear+'&username='+getSession(),
 		async: true,
-		success: function(item){			
+		success: function(item){	
+			docMetadata = item.metadata;
 			$('h2').append(item.AreaName+' Extended Report <br><hr>');	
 			html = html + '<tr><td>' + item.AreaName 
 			+'</td><td class="details-control"></td><td>' + numberconv(item.RouteMiles) 
@@ -102,8 +102,7 @@ $(document).ready(function(){
 			+ '</td><td>$'+item.AverageFare 
 			+ '</td><td>$'+item.MedianFare
 			+ '</td><td>$'+item.MinFare
-			+ '</td><td>$'+item.MaxFare 
-			+ '</td><td>'+item.metadata+'</td>';
+			+ '</td><td>$'+item.MaxFare+'</td>';
 			
 			fAverage.push(item.AverageFare);
 			fMedian.push(item.MedianFare);
@@ -114,7 +113,7 @@ $(document).ready(function(){
 			progressbar.remove();
 			
 			tableProperties.paging = false;
-			tableProperties.hiddenCols = [21, 22, 23, 24, 25];
+			tableProperties.hiddenCols = [21, 22, 23, 24];
 			table = buildDatatables();
 			
 			// Adding control details
@@ -163,8 +162,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">				
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
@@ -198,9 +197,9 @@ $(document).ready(function(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" class="input radius tbox" name="x" id="Sradius"onkeypress="return isNumber(event)"/>			    	
+			    	Population Search Radius (miles) <input type="text" id="Sradius" name="x" data-label="Population Search Radius (miles)" class="input radius tbox"onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
-			    	Minimum Level of Service (times) <input type="text" class="input tbox" name="l" id="LoS"  onkeypress="return isWholeNumber(event)"/>		    	    	
+			    	Minimum Level of Service (times) <input type="text" name="l" id="LoS" data-label="Minimum Level of Service (times)" class="input tbox" onkeypress="return isWholeNumber(event)"/>		    	    	
 		    	</div>
 			  </td>
 			</tr>

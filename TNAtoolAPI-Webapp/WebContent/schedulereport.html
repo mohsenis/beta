@@ -3,21 +3,7 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Transit Agency Schedule Report</title>
-	<!-- <script src="js/lib/jquery-1.9.1.min.js"></script>
-	<script src="js/lib/jquery-ui.js"></script>
-	<script src="js/lib/date.js"></script>
-	<script src="js/jQueryContent.js"></script>
-	<script src="js/lib/sorttable.js"></script>
-	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
-	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
-	<script src="js/lib/DataTables/js/dataTables.colVis.js"></script>
-	
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
-	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.colVis.css" />
-	<link rel="stylesheet" type="text/css" href="report.css" /> -->
+
 	<script src="js/jQueryContent.js"></script>
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
@@ -336,7 +322,7 @@ function reload(){
 			<div class="headerR">
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
-				<select disabled id='dbselect' name='dbindex' class='input' onchange='reloadPage()'></select>
+				<select disabled id='dbselect' data-label='GTFS Source' name='dbindex' class='input' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

@@ -32,13 +32,11 @@ tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in t
 '<th id="an">Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Number of Connected Agenies<em title="Number of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Connected Agency Names<em title="Name of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
-
+'<th>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
-html2 = '<tfoot>'+tmp+'</tfoot>';
+
 $(document).ready(function(){
-	$("#Sradius").val(gap);
+	$("#Sradius").val(w_qstringx);
 	loadDBList();
 	updateToolTips();
 	progressBar();	
@@ -46,36 +44,35 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenSR?&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenSR?&x='+w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
-		success: function(d){			
+		success: function(d){
+			docMetadata = d.metadata;
 			$('h2').append('Connected Transit Agencies Summary Report <br><hr>');
 			$.each(d.ClusterR, function(i,item){
 				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +item.name+'</td><td>' +item.size +
-				'</td><td>' +item.names +'</td><td>'+item.ids+'</td><td>'+d.metadata+'</td></tr>';
+				'</td><td>' +item.names +'</td><td>'+item.ids+'</td></tr>';
 			});		
-			html = html + '</tbody>'+html2+'</table>'
+			html = html + '</tbody></table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			$('a').click(function(e){
 				if($(this).attr('type')=="XR"){
 		    		qstring = $(this).attr('id');		    		
 					var keyName = setDates(qstringd);			    		
-		    		window.open('/TNAtoolAPI-Webapp/ConAgenXReport.html?&gap='+gap+'&agency='+qstring+'&dbindex='+dbindex);
+		    		window.open('/TNAtoolAPI-Webapp/ConAgenXReport.html?&x='+w_qstringx+'&agency='+qstring+'&dbindex='+dbindex);
 				}				
 			});			
 			
-			tableProperties.hiddenCols = [5];
-			tableProperties.unsortableCols = [3,4,5];
-			tableProperties.colsToExport = [ 0, 1, 2, 3, 4, 5];
+			tableProperties.unsortableCols = [3,4];
+			tableProperties.colsToExport = [ 0, 1, 2, 3, 4 ];
 			table = buildDatatables();
 			orderTable(table, 1, 'asc');
     	}
 	});	
 });
-
-
 </script>
+
 </head>
 <body>
 		<div class="container">
@@ -84,7 +81,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<select id='dbselect' onchange='reloadPage()' name='dbindex' class='input dropDown'></select>
+				<select id='dbselect' data-label='GTFS Source' onchange='reloadPage()' name='dbindex' class='input dropDown'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
@@ -98,7 +95,7 @@ $(document).ready(function(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Maximum Spatial Gap (miles) <input type="text" name="gap" id="Sradius" class="input radius tbox" onkeypress="return isNumber(event)"/>
+			    	Maximum Spatial Gap (miles) <input type="text" name="x" id="Sradius" data-label='Maximum Spatial Gap (miles)' class="input radius tbox" onkeypress="return isNumber(event)"/>
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
 		    	</div>
 			  </td>

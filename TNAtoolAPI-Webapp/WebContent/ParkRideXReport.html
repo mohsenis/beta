@@ -62,10 +62,8 @@ tmp = 	'<tr><th>P&R ID</th>'+
 			'<th>Park&Ride Signage</th>'+
 			'<th>Lot Surface</th>'+
 			'<th>Property Owner</th>'+
-			'<th>Local Expert</th>' +
-			'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+			'<th>Local Expert</th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
-html2 = '<tfoot>'+tmp+'</tfoot>';
 
 $(document).ready(function(){
 	$("#Sradius").val(w_qstringx);
@@ -78,7 +76,8 @@ $(document).ready(function(){
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/pnrsInCounty?&key=' + key + '&countyId=' + countyId + '&radius=' + w_qstringx + '&dbindex=' + dbindex + '&username=' + getSession(),
 		async: true,
-		success: function(d){			
+		success: function(d){	
+			docMetadata = d.metadata;
 			$('h2').append('Park & Ride Extended Report <br><hr>');
 			if (d.PnrCountiesList[0].county != null)
 				$('#PnrXReportCounty').append( d.PnrCountiesList[0].county + "  County - ");
@@ -115,14 +114,12 @@ $(document).ready(function(){
 							'<td>' + item.pnrsignage + '</td>'+
 							'<td>' + item.lotsurface + '</td>'+
 							'<td>' + item.propertyowner + '</td>'+
-							'<td>' + item.localexpert + '</td>'+
-							'<td>' + d.metadata + '</td></tr>';							   			
+							'<td>' + item.localexpert + '</td></tr>';							   			
 			});
-			html +='</tbody>'+html2+'</table>';
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			
-			tableProperties.hiddenCols = [ 9,10,11,12,13,21,22,23,24,25,26,27,28,29,33 ];
+			tableProperties.hiddenCols = [9,10,11,12,13,21,22,23,24,25,26,27,28,29];
 			table = buildDatatables();
 			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
@@ -240,7 +237,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<select id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
@@ -254,7 +251,7 @@ $(document).ready(function(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" >
-			  	Transit Service Search Radius (miles) <input id="Sradius" name="x" type="text" style="width:5em" class="input radius tbox" onkeypress="return isNumber(event)"/>
+			  		Transit Service Search Radius (miles) <input id="Sradius" name="x" data-label="Transit Service Search Radius (miles)" type="text" style="width:5em" class="input radius tbox" onkeypress="return isNumber(event)"/>
 			    	<input type="button" onclick="reloadPage()" title="Refresh Report"  value="Submit" class="button" /> 		    	    	
 		    	</div>
 			  </td>

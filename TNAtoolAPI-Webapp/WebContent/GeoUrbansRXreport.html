@@ -57,8 +57,7 @@ tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with 
 '<th>Hours of Service<em title="Earliest and latest arrival and departure times of all transit stops within the given geographic area"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Average Fare<em title="If available, this field points to the fare average for the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Median Fare<em title="If available, this field points to the fare median for the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Communities <em title="List of geographic areas of the same type that are connected to the area of interest through routes."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+'<th>Connected Communities <em title="List of geographic areas of the same type that are connected to the area of interest through routes."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 
 
@@ -77,14 +76,15 @@ $(document).ready(function(){
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/UrbanrXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&popYear='+popYear+'&username='+getSession(),
 		async: true,
-		success: function(item){			
+		success: function(item){
+			docMetadata = item.metadata;
 			$('h2').append('Aggregated Urban Area Extended Report <br><hr>');	
 			html = html + '<tr><td>' + item.AreaId +'</td><td>' + item.AreaName +'</td><td class="details-control"></td><td class="details-control-cc"></td><td>' + numberconv(item.RouteMiles) +'</td><td>'+ numberconv(item.StopsPersqMile) 
 			+'</td><td class="serviceCol">' + numberconv(item.StopPerServiceMile) +'</td><td class="serviceCol">'+ numberconv(item.ServiceHours) +'</td><td class="serviceCol">'+ numberconv(item.ServiceMiles)+'</td><td  class="serviceCol">'
 			+ numberconv(item.ServiceMilesPersqMile) +'</td><td  class="serviceCol">'+numberconv(item.MilesofServicePerCapita)+'</td><td class="serviceCol">' + numberconv(item.PopWithinX) 
 			+'</td><td class="serviceCol">' + addPercent(numberconv(item.PopServed))+'</td><td class="serviceCol">' + addPercent(numberconv(item.PopServedAtLoService))+'</td><td class="serviceCol">' + addPercent(numberconv(item.PopUnServed))+'</td><td class="serviceCol">'+
 			numberconv(item.ServiceStops)+'</td><td class="serviceCol">' + numberconv(item.PopServedByService)+'</td><td class="serviceCol">'+ item.ServiceDays+'</td><td class="serviceCol">'
-			+ item.HoursOfService+'</td><td>'+showDollarSign(item.AverageFare)+'</td><td>'+showDollarSign(item.MedianFare)+'</td><td>'+item.ConnectedCommunities+'</td><td>'+item.metadata+'</td>';
+			+ item.HoursOfService+'</td><td>'+showDollarSign(item.AverageFare)+'</td><td>'+showDollarSign(item.MedianFare)+'</td><td>'+item.ConnectedCommunities+'</td>';
 			fAverage.push(item.AverageFare);
 			fMedian.push(item.MedianFare);
 			connectedcommunities = item.ConnectedCommunities;
@@ -92,7 +92,7 @@ $(document).ready(function(){
 			$('#displayReport').append($(html));	
 			progressbar.remove();
 			
-			tableProperties.hiddenCols = [19,20,21,22];
+			tableProperties.hiddenCols = [19,20,21];
 			table = buildDatatables();
 			
 			$('#RT tbody').on('click', 'td.details-control-cc', function () {
@@ -142,8 +142,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button buttonClose" />
 			</div>
 		</div>	
@@ -178,11 +178,11 @@ $(document).ready(function(){
 			  <td id="td3">
 			   <div class="RHScontrols">			  	
 			  	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br> 
-			    <input type="text" name="Sradius" id="Sradius" class="tbox" onkeypress="return isNumber(event)"/><br>			    	
-			    <input type="text" name="LoS" id="LoS" class="tbox" onkeypress="return isWholeNumber(event)"/>
+			    <input type="text" name="Sradius" id="Sradius" data-label="Population Search Radius (miles)" class="input tbox" onkeypress="return isNumber(event)"/><br>			    	
+			    <input type="text" name="LoS" id="LoS" data-label="Minimum Level of Service (times)" class="input tbox" onkeypress="return isWholeNumber(event)"/>
 			  	</div>
 			  	<div class="LHScontrols">
-			  	Urban Population Filter <input type="text" name="pop" id="Upop" class="input utbox" onkeypress="return isWholeNumber(event)"/><br>
+			  	Urban Population Filter <input type="text" name="pop" id="Upop" data-label="Urban Population Filter" class="input utbox" onkeypress="return isWholeNumber(event)"/><br>
 			  	Population Search Radius (miles)<br>
 			  	Minimum Level of Service (times)
 			  	</div>			  				  	

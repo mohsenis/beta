@@ -65,8 +65,8 @@ function racWacAjax() {
 						+ '&username=' + getSession(),
 				async : true,
 				success : function(d) {
+					docMetadata = d.metadata;
 					var temp = d.EmpDataList;
-					racData.metadata = d.metadata;
 					racData.EmpDataList2 = [];
 					temp.forEach(function(i, ind, arr) {
 						racData.EmpDataList2.push(i);
@@ -90,8 +90,8 @@ function racWacAjax() {
 										+ dbindex + '&username=' + getSession(),
 								async : true,
 								success : function(d) {
+									docMetadata = d.metadata;
 									var temp = d.EmpDataList;
-									wacData.metadata = d.metadata;
 									wacData.EmpDataList2 = [];
 									temp.forEach(function(i, ind, arr) {
 										wacData.EmpDataList2.push(i);
@@ -124,8 +124,8 @@ function racAjax() {
 						+ '&username=' + getSession(),
 				async : true,
 				success : function(d) {
+					docMetadata = d.metadata;
 					var temp = d.EmpDataList;
-					racData.metadata = d.metadata;
 					racData.EmpDataList2 = [];
 					temp.forEach(function(i, ind, arr) {
 						racData.EmpDataList2.push(i);
@@ -156,8 +156,8 @@ function wacAjax() {
 						+ '&username=' + getSession(),
 				async : true,
 				success : function(d) {
+					docMetadata = d.metadata;				
 					var temp = d.EmpDataList;
-					wacData.metadata = d.metadata;
 					wacData.EmpDataList2 = [];
 					temp.forEach(function(i, ind, arr) {
 						wacData.EmpDataList2.push(i);
@@ -424,7 +424,7 @@ function openReport() {
 		tmp = '<tr><th id="tableid">Area ID</em></th>'
 				+ '<th id="tablename">Area Name</em></th>';
 	}
-	tmp += getTableHeaders() + '<th>MetaData</th></tr>';
+	tmp += getTableHeaders() + '</tr>';
 	html += '<thead>' + tmp + '</thead><tbody>';
 	if (racBool && wacBool)
 		racWacAjax();
@@ -572,9 +572,7 @@ function openReport2() {
 						+ '</td>' + '<td>'
 						+ numWithCommas(wacServedByServiceSummation) + '</td>';
 			}
-			html += '<td>' + racData.metadata + '</td></tr>';
-		}
-		;
+		};
 	} else if (racBool) {
 		var resultSetRac = {};
 
@@ -653,7 +651,6 @@ function openReport2() {
 										+ numWithCommas(racServedByServiceSummation)
 										+ '</td>';
 							}
-							html += '<td>' + racData.metadata + '</td></tr>';
 						});
 	} else {
 		var resultSetWac = {};
@@ -730,12 +727,9 @@ function openReport2() {
 										+ '</td>';
 
 							}
-							html += '<td>' + wacData.metadata + '</td></tr>';
 						});
 	}
 
-	var html2 = '<tfoot>' + tmp + '</tfoot>';
-	html += '</tbody>' + html2 + '</table>';
 	$('#displayReport').append($(html));
 	$('#dialogPreLoader').hide();
 	

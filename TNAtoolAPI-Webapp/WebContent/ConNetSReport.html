@@ -34,25 +34,22 @@ html = '<table id="RT" class="display" align="center">';
 tmp = '<tr><th id="aid">Cluster ID<em title="Transit network cluster ID."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Network Cluster Size<em title="Number of transit agencies that have at least one stop within the specified distance of at least one transit agency in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Agency Names<em title="List of transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
-
+'<th>Connected Agency Names<em title="List of transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
-html2 = '<tfoot>'+tmp+'</tfoot>';
-
 
 $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
-	$("#Sradius").val(gap);
+	$("#Sradius").val(w_qstringx);
 	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/ConNetSR?&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConNetSR?&x='+w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
-		success: function(d){			
+		success: function(d){
+			docMetadata = d.metadata;
 			$('h2').append('Connected Transit Networks Summary Report <br><hr>');
 			$.each(d.ClusterR, function(i,item){
 				html += '<tr><td>' + item.id+'</td><td>' +item.size+'</td><td>';
@@ -67,7 +64,7 @@ $(document).ready(function(){
 						names+="; ";
 					}
 				}
-				html+= '</td>'+names+'</td><td>'+d.metadata+'</td></tr>';			
+				html+= '</td>'+names+'</td></tr>';			
 			});		
 			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
@@ -75,13 +72,12 @@ $(document).ready(function(){
 			$('a').click(function(e){
 				if($(this).attr('type')=="XR"){
 		    		qstring = $(this).attr('id');			    		
-		    		window.open('/TNAtoolAPI-Webapp/ConAgenXReport.html?&gap='+gap+'&agency='+qstring+'&dbindex='+dbindex);
+		    		window.open('/TNAtoolAPI-Webapp/ConAgenXReport.html?&x='+w_qstringx+'&agency='+qstring+'&dbindex='+dbindex);
 				}				
 			});
 			
-			tableProperties.hiddenCols = [4];
 			tableProperties.unsortableCols = [2,3];
-			tableProperties.colsToExport = [ 0, 1, 2, 3, 4 ];
+			tableProperties.colsToExport = [ 0, 1, 2, 3 ];
 			table = buildDatatables();
 			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
@@ -122,7 +118,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<select id='dbselect' onchange='reloadPage()' name='dbindex' class='input dropDown'></select>
+				<select id='dbselect' data-label='GTFS Source' onchange='reloadPage()' name='dbindex' class='input dropDown'></select>
 				<input type="button" onclick="window.exit()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
@@ -136,7 +132,7 @@ $(document).ready(function(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Maximum Spatial Gap (miles) <input type="text" name="gap" id="Sradius" class="input radius tbox" onkeypress="return isNumber(event)"/>
+			    	Maximum Spatial Gap (miles) <input type="text" name="x" id="Sradius" data-label='Maximum Spatial Gap (miles)' class="input radius tbox" onkeypress="return isNumber(event)"/>
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
 		    	</div>
 			  </td>

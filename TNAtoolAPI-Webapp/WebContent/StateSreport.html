@@ -43,8 +43,7 @@ tmp = '<tr><th id="aid">State <em title="Name of the state"><img src="images/too
 '<th>ODOT Transit Regions Count <em title="Count of ODOT transit regions within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Census Places Count <em title="Count of census designated places within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Counties Count <em title="Count of Counties within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Tracts Count <em title="Count of census tracts within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>Census Tracts Count <em title="Count of census tracts within the state."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -58,7 +57,8 @@ $(document).ready(function(){
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/stateSR?key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
 		async: true,
-		success: function(d){				
+		success: function(d){	
+			docMetadata = d.metadata;
 			$('h2').append('Statewide Summary Report <br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html +='<tr><td>' + '<a href="#" type="SXR" id="'+item.Name+'">'+item.Name+'</a></td>'+ '<td>' + numberconv(item.landArea) +'</td>'+
@@ -66,7 +66,7 @@ $(document).ready(function(){
 				'<td><a href="#" type="ASR">' + item.AgenciesCount +'</a></td>'+ '<td>' + numberconv(item.RoutesCount) +'</td>'+ '<td>'+ numberconv(item.StopsCount) +'</td>'+
 				'<td><a href="#" type="USR">' + item.UrbansCount +'</a></td>'+'<td><a href="#" type="CDSR">' + item.CongDistsCount +'</a></td>'+
 				'<td><a href="#" type="OSR">' + item.RegionsCount +'</a></td>'+'<td><a href="#" type="CPSR">' + item.PlacesCount +'</a></td>'+
-				'<td><a href="#" type="CSR">' + item.CountiesCount +'</a></td>'+'<td>' + item.TractsCount +'</td><td>'+d.metadata+'</td></tr>';				   			
+				'<td><a href="#" type="CSR">' + item.CountiesCount +'</a></td>'+'<td>' + item.TractsCount +'</td></tr>';				   			
 			});		
 			html += '</tbody></table>';
 			$('#displayReport').append($(html));
@@ -95,9 +95,6 @@ $(document).ready(function(){
 			});
 			
 			table = buildDatatables();
-			
-			// Hide the last column in the table (Metadata)
-			hideLastCol(table);
 			
 			// Detail controls
 		    $('#RT tbody').on('click', 'td.details-control', function () {
@@ -151,8 +148,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button buttonClose" />
 			</div>
 		</div>	

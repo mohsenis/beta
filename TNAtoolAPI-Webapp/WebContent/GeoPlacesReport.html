@@ -39,12 +39,8 @@ tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with 
 '<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Agencies <em title="Total number of transit agencies operating in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Total Routes <em title="Total number of routes serving stops in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';		
+'<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';		
 html += '<thead>'+tmp+'</thead><tbody>';
-html2 = '<tfoot>'+tmp+'</tfoot>';
-
-
 
 $(document).ready(function(){
 	setPopOptions();
@@ -77,9 +73,9 @@ $(document).ready(function(){
 					html+='<td><a href="#" type="AC" id="'+item.id+'">'+item.AgenciesCount+'</a></td>';
 				}
 				html+='<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
-				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td><td>'+d.metadata+'</td></tr>';								   			
+				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td></tr>';								   			
 			});		
-			html +='</tbody>'+html2+'</table>'
+			html +='</tbody></table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			$('a').click(function(e){
@@ -118,7 +114,6 @@ $(document).ready(function(){
 			    };
 			});
 			
-			tableProperties.hiddenCols = [8];
 			tableProperties.bAutoWidth = false;
 			table = buildDatatables();
 						
@@ -171,8 +166,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	

@@ -56,10 +56,8 @@ tmp = '<tr><th>Agency ID <em title="Identification number reported in the transi
 '<th>Service Miles <em title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific date or a set of dates specified using the calendar."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Service Hours <em title="Total hours a transit agency spends on serving all round trips of a route. Service hours may be calculated for a specific date or a set of dates specified using the calendar."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>More.. <em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Route Description<em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>Route Description<em title="If available, this field contains a description of the route (the value is null otherwise)."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
-html2 = '<tfoot>'+tmp+'</tfoot>';
 
 $(document).ready(function(){
 	$('#Sradius').val(w_qstringx);
@@ -115,11 +113,10 @@ $(document).ready(function(){
 				+'</td><td class="serviceCol">'+numberconv(item.ServiceMiles)
 				+'</td><td class="serviceCol">'+numberconv(item.ServiceHours)
 				+'</td><td class="details-control">'
-				+'</td><td>'+((item.RouteDesc!=null)?item.RouteDesc:"-")
-				+'</td><td>'+d.metadata+'</td></tr>';
+				+'</td><td>'+((item.RouteDesc!=null)?item.RouteDesc:"-") + '</tr>';				
 				description.push(((item.RouteDesc!=null)?item.RouteDesc:"-"));					    
 			});		
-			html = html + '</tbody>'+html2+'</table>';
+			html = html + '</tbody></table>';
 			$('#displayReport').append($(html));	
 			progressbar.remove();			
 			$('.stopreport').click(function(e){
@@ -142,7 +139,7 @@ $(document).ready(function(){
 				    window.open('/TNAtoolAPI-Webapp/schedulereport.html?&agency='+$(this).attr('aid') + '&route=' + $(this).attr('id')+'&n='+keyName+'&dbindex='+dbindex);
 			}});
 			
-			tableProperties.hiddenCols = [21,22];
+			tableProperties.hiddenCols = [21];
 			tableProperties.unsortableCols = [ 20 ];
 			tableProperties.colsToExport = [0,1,2,3,4,5,6,7,8,9,10,11,12,14,16,17];
 			table = buildDatatables();
@@ -183,8 +180,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select disabled id='dbselect' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select disabled id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
@@ -218,7 +215,7 @@ $(document).ready(function(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" name="x" id="Sradius" class="input radius tbox" onkeypress="return isNumber(event)"/>
+			    	Population Search Radius (miles) <input type="text" name="x" id="Sradius" data-label="Population Search Radius (miles)" class="input radius tbox" onkeypress="return isNumber(event)"/>
 			    	<input type="button" onclick="reload()" title="Click submit to refresh the report"  value="Submit" class="button" />
 		    	    	
 		    	</div>

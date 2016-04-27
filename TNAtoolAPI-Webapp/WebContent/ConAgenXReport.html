@@ -43,15 +43,13 @@ tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in t
 '<th>DestStopNames<em title="List of other transit agency stop names within the specified distance of the specified transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>SourceStopCoordinates<em title="List of the specified transit agency stop coordinates within the specified distance of other transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>DestStopCoordinatess<em title="List of other transit agency stop coordiates within the specified distance of the specified transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Min Gaps<em title="List of distances between stops of the specified transit agency and other transit agencies in ft"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
-
+'<th>Min Gaps<em title="List of distances between stops of the specified transit agency and other transit agencies in ft"><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
-html2 = '<tfoot>'+tmp+'</tfoot>';
+
 var connections = [];
 
 $(document).ready(function(){
-	$("#Sradius").val(gap);
+	$("#Sradius").val(w_qstringx);
 	loadDBList();
 	updateToolTips();
 	progressBar();	
@@ -59,9 +57,10 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+agency+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+agency+'&x='+w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){
+			docMetadata = d.metadata;
 			var cons = [];
 			var con = new Object();
 			$('h2').append('Connected Transit Agencies Extended Report for '+d.agency+'<br><hr>');
@@ -88,17 +87,15 @@ $(document).ready(function(){
 					sgaps += inst.minGap+" ; ";
 					cons.push(con);
 				});
-				html += '<td>'+SSnames.slice(0,-3)+'</td><td>'+DSnames.slice(0,-3)+'</td><td>'+SScoords.slice(0,-3)+'</td><td>'+DScoords.slice(0,-3)+'</td><td>'+sgaps.slice(0,-3)+
-				'</td><td>'+d.metadata+'</td></tr>';				 
+				html += '<td>'+SSnames.slice(0,-3)+'</td><td>'+DSnames.slice(0,-3)+'</td><td>'+SScoords.slice(0,-3)+'</td><td>'+DScoords.slice(0,-3)+'</td><td>'+sgaps.slice(0,-3)+'</tr>';				 
 				connections.push(cons);				
 			});		
-			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			
-			tableProperties.hiddenCols = [7,8,9,10,11,12];
+			tableProperties.hiddenCols = [7,8,9,10,11];
 			tableProperties.unsortableCols = [6];
-			tableProperties.colsToExport = [ 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12];
+			tableProperties.colsToExport = [ 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
 			table = buildDatatables();
 			orderTable(table, 1, 'asc');
 			
@@ -151,7 +148,7 @@ $(document).ready(function(){
 
 			<td id="td3">
 				<div class="headerBR">
-					Maximum Spatial Gap (miles) <input type="text" name="gap" id="Sradius" class="input radius utbox" onkeypress="return isNumber(event)" /> 
+					Maximum Spatial Gap (miles) <input type="text" name="x" id="Sradius" data-label='Maximum Spatial Gap (miles)' class="input radius utbox" onkeypress="return isNumber(event)" /> 
 					<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report" value="Submit" class="button" />
 				</div>
 			</td>

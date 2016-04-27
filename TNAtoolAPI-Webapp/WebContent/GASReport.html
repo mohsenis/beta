@@ -64,8 +64,7 @@ tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in t
 '<th>Feed Name<em title="Name of the GTFS feed file."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Feed Version<em title="Version of the GTFS feed file."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Feed Publisher Name<em title="Name of the GTFS feed file publisher."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Feed Publisher URL<em title="URL of the GTFS feed file publisher."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+'<th>Feed Publisher URL<em title="URL of the GTFS feed file publisher."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 html2 = '<tfoot>'+tmp+'</tfoot>';
 
@@ -80,6 +79,7 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&type='+type+'&areaid='+areaId+'&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
 		async: true,
 		success: function(d){
+			docMetadata = d.metadata;
 			$('h2').append('Transit Agency Summary Report for '+d.areaName+'<br><hr>');			
 			$.each(d.agencySR, function(i,item){
 				agencytxt = "null";
@@ -91,7 +91,7 @@ $(document).ready(function(){
 				+ item.AgencyId+'">'+item.RoutesCount+'</a></td>'+ '<td><a href="#" type="SC" id="'+item.AgencyId+'">'+item.StopsCount
 				+'</a></td>'+'<td class="details-control" type="FA"></td><td>'+item.MinFare+'</td><td>'+item.AverageFare+'</td><td>'+item.MedianFare
 				+'</td><td>'+item.MaxFare+'</td><td>'+item.FareURL+'</td><td>'+item.FeedStartDate+'</td><td>'+item.FeedEndDate+'</a></td><td class="details-control" type="FE"></td><td>'
-				+item.FeedName+'</td><td>'+item.FeedVersion+'</td><td>'+item.FeedPublisherName+'</td><td>'+item.FeedPublisherUrl+'</td><td>'+d.metadata+'</td></tr>';
+				+item.FeedName+'</td><td>'+item.FeedVersion+'</td><td>'+item.FeedPublisherName+'</td><td>'+item.FeedPublisherUrl+'</td></tr>';
 				counties.push(item.CountiesCount);
 				cplaces.push(item.PlacesCount);
 				uareas.push(item.UrbansCount);
@@ -141,9 +141,9 @@ $(document).ready(function(){
 			}		
 			SetEvents();
 			
-			tableProperties.hiddenCols = [6,7,8,9,10,14,15,16,17,18];
+			tableProperties.hiddenCols = [6,7,8,9,10,14,15,16,17];
 			tableProperties.unsortableCols = [2,5,13];
-			tableProperties.colsToExport = [0,1,2,3,4,6,7,8,9,10,11,12,14,15,16,17,18];
+			tableProperties.colsToExport = [0,1,2,3,4,6,7,8,9,10,11,12,14,15,16,17];
 			table = buildDatatables();
 			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
@@ -205,7 +205,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	

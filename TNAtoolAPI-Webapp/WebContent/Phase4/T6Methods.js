@@ -109,8 +109,7 @@ function toggleCheckbox(checkbox){
 			tmp = 	'<tr><th>Area ID</em></th>'+
 			'<th>Area Name</em></th>';
 		}
-		tmp += getTableHeaders() +
-				'<th>MetaData</th></tr>';
+		tmp += getTableHeaders() + '</tr>';
 		html += '<thead>'+tmp+'</thead><tbody>';
 		
 		$.ajax({
@@ -119,8 +118,8 @@ function toggleCheckbox(checkbox){
 			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?emp?&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
 			async: true,
 			success: function(d){// making a hashmap of the query results.\
+				docMetadata = d.metadata;
 				var temp = d.TitleVIDataList;
-				t6.metadata = d.metadata;
 				t6.TitleVIDataList = [];
 				temp.forEach(function(i, ind, arr){
 					t6.TitleVIDataList.push(i);
@@ -156,10 +155,8 @@ function toggleCheckbox(checkbox){
 						+ '<td>' + numWithCommas(PopAtLOSSummation) + '</td>'
 						+ '<td>' + numWithCommas(ServedByServiceSummation) + '</td>';
 					}
-					html += '<td>' + t6.metadata + '</td></tr>';
+					html += '</tr>';
 				}
-				var html2 = '<tfoot>'+tmp+'</tfoot>';
-				html +='</tbody>'+html2+'</table>';
 				$('#displayReport').append($(html));
 				$('#dialogPreLoader').hide();
 				
