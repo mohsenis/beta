@@ -550,6 +550,7 @@ var Layers = 0;
 function getdata(type,agency,route,variant,k,callback,popup,node) {	
 	switch (type){
 	case 1:
+		alert('case 1');
 		var points = [];
 		$.ajax({
 			type: 'GET',
@@ -557,20 +558,21 @@ function getdata(type,agency,route,variant,k,callback,popup,node) {
 			url: '/TNAtoolAPI-Webapp/queries/transit/stops?&agency='+agency+"&dbindex="+dbindex,
 			success: function(d){		
 			$.each(d.stops, function(i,stop){        	
-				points.push([new L.LatLng(Number(stop.stopLat), Number(stop.stopLon)),stop.stopName]);							
+				points.push([new L.LatLng(Number(stop.lat), Number(stop.lon)),stop.StopName]);							
 	        });				
 			if (points.length!=0) callback("A"+agency,k,points,popup,node);
 	    }});
 		break;
 	case 2:
 		var points = [];
+		alert('case 2');
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/stopsbyroute?&agency='+agency+'&route='+route+"&dbindex="+dbindex,
 			success: function(d){		
 			$.each(d.stops, function(i,stop){        	
-				points.push([new L.LatLng(Number(stop.stopLat), Number(stop.stopLon)),stop.stopName]);				 			
+				points.push([new L.LatLng(Number(stop.lat), Number(stop.lon)),stop.stopName]);				 			
 	        });				
 			if (points.length!=0) callback("R"+agency+route,k,points,popup,node);
 	    }});
@@ -581,6 +583,7 @@ function getdata(type,agency,route,variant,k,callback,popup,node) {
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/shape?&agency='+agency+'&trip='+variant+"&dbindex="+dbindex,
 			success: function(d){
+				alert('case 3');
 			if (d.points!= null) callback(k,d,"V"+agency+route+variant,node);
 	    }});
 		break;
@@ -1258,18 +1261,18 @@ $mylist
 		    		//var keyName = Math.random();
 		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport2.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.25';
-			    	window.open('/TNAtoolAPI-Webapp/report.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if(casestring=="CSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CPSR"){
