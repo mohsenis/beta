@@ -19,7 +19,7 @@ public class SpatialEventManager {
 		String query;
 		if (lat.length==1) // If selected area is a circle
 			query = "SELECT * FROM parknride "
-				+ " WHERE ST_DWITHIN(parknride.geom,ST_transform(ST_setsrid(ST_MakePoint(" + lon + ", " + lat + "),4326), 2993), " + radius + ")";
+				+ " WHERE ST_DWITHIN(parknride.geom,ST_transform(ST_setsrid(ST_MakePoint(" + lon[0] + ", " + lat[0] + "),4326), 2993), " + radius + ")";
 		else{	// If selected area is a polygon or rectangle
 			query = "SELECT * FROM parknride " + 
 					" WHERE ST_CONTAINS( ST_transform(st_geometryfromtext('POLYGON((";
@@ -29,6 +29,7 @@ public class SpatialEventManager {
 			query = query += lon[0] + " " + lat[0]; //Closing the polygon loop 
 			query += "))', 4326),2993), parknride.geom)";
 		}
+		System.out.println(query);
 		stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(query);
 		while(rs.next()){

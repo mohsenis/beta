@@ -1,7 +1,7 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>Connected Networks Summary Report</title>
+	<title>Connected Agencies Summary Report</title>	
 
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
@@ -27,94 +27,53 @@
 	
 <script type="text/javascript">
 
-var algDesc = "1. For each agency A, a list of all other agencies that have at least one stop within the user defined radius of any stop of A is derived.\r\n"
-+ "2. An arbitrary agency X is selected."; 
-
-var netNames = new Array();
-var minDistances = new Array();
-maxRadius = 1; // maximum search radius in miles.
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th id="aid">Cluster ID<em title="Transit network cluster ID."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th><span class="IOSym">⊕ </span>Network Cluster Size<em title="Number of transit agencies that have at least one stop within the specified distance of at least one transit agency in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th><span class="IOSym">⊕ </span>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th><span class="IOSym">⊕ </span>Connected Agency Names<em title="List of transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed." style=""><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th id="an">Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Number of Connected Agenies<em title="Number of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency Names<em title="Name of transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of the transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
-	loadDBList();	
-	
-	progressBar();
 	$("#Sradius").val(w_qstringx);
+	loadDBList();
+	updateToolTips();
+	progressBar();	
 	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/ConNetSR?&x='+w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenSR?&x='+w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){
 			docMetadata = d.metadata;
-			$('h2').append('Connected Transit Networks Summary Report <br><hr>');
+			$('h2').append('Connected Transit Agencies Summary Report <br><hr>');
 			$.each(d.ClusterR, function(i,item){
-				html += '<tr><td>' + item.id+'</td><td>' +item.size+'</td><td>';
-				var names = '<td>';
-				var aidlist = item.ids.split(';');
-				var anamelist = item.names.split(';');
-				for (i=0; i<aidlist.length; i++){
-					html+= '<a href="#" type="XR" id="'+aidlist[i]+'">'+ aidlist[i]+'</a>';
-					names +='<a href="#" type="XR" id="'+aidlist[i]+'">'+ anamelist[i]+'</a>';
-					if (i<aidlist.length-1){
-						html+="; ";
-						names+="; ";
-					}
-				}
-				html+= '</td>'+names+'</td></tr>';			
+				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +item.name+'</td><td>' +item.size +
+				'</td><td>' +item.names +'</td><td>'+item.ids+'</td></tr>';
 			});		
+			html = html + '</tbody></table>'
 			$('#displayReport').append($(html));
-			progressbar.remove();			
+			progressbar.remove();
 			$('a').click(function(e){
 				if($(this).attr('type')=="XR"){
-		    		qstring = $(this).attr('id');			    		
+		    		qstring = $(this).attr('id');		    		
+					var keyName = setDates(qstringd);			    		
 		    		window.open('/TNAtoolAPI-Webapp/ConAgenXReport.html?&x='+w_qstringx+'&agency='+qstring+'&dbindex='+dbindex);
 				}				
-			});
+			});			
 			
-			tableProperties.unsortableCols = [2,3];
-			tableProperties.colsToExport = [ 0, 1, 2, 3 ];
+			tableProperties.unsortableCols = [3,4];
+			tableProperties.colsToExport = [ 0, 1, 2, 3, 4 ];
 			table = buildDatatables();
-			
-		    $('#RT tbody').on('click', 'td.details-control', function () {
-		        var tr = $(this).parents('tr');
-		        var row = table.row( tr );
-		        var pos = row.index();
-		        if ( row.child.isShown() ) {
-		            row.child.hide("slow");
-		            tr.removeClass('shown');
-		        }
-		        else {
-		            row.child(format(pos)).show();
-		            tr.addClass('shown');
-		        }
-		    } );
-		    
-		    function format ( p ) {
-		        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
-		            '<tr>'+
-		                '<td>Connected Agency Names: </td>'+
-		                '<td>'+netNames[p]+'</td>'+
-		            '</tr>'+
-		            '<tr>'+
-		                '<td>Connected Agency Min Spatial Gaps (ft.): </td>'+
-		                '<td>'+minDistances[p]+'</td>'+
-		            '</tr>'+		            
-		        '</table>';
-		    }		     
-		   addIOeffects(); //This method has to be call after initializing the datatable.
-	    }
+			orderTable(table, 1, 'asc');
+    	}
 	});	
 });
 </script>
-</head>
 
+</head>
 <body>
 		<div class="container">
 			<div class="headerL">
@@ -122,8 +81,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' onchange='reloadPage()' name='dbindex' class='input dropDown'></select>
-				<input type="button" onclick="window.exit()" title="Close Report"  value="Close Report" class="button closeButton" />
+				<select id='dbselect' data-label='GTFS Source' onchange='reloadPage()' name='dbindex' class='input dropDown'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
 		<table id="controls">
@@ -136,12 +95,13 @@ $(document).ready(function(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	<span class="IOSym">⊕</span> Maximum Spatial Gap (miles) <input type="text" name="x" id="Sradius" data-label='Maximum Spatial Gap (miles)' class="input radius tbox" onkeypress="return isNumber(event)"/>
+			    	Maximum Spatial Gap (miles) <input type="text" name="x" id="Sradius" data-label='Maximum Spatial Gap (miles)' class="input radius tbox" onkeypress="return isNumber(event)"/>
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
 		    	</div>
 			  </td>
 			</tr>
-		</table>				
+		</table>		
+		
 		
 		<p id="displayReport"><br></p>
 		<br>
