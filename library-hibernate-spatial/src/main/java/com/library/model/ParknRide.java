@@ -1,44 +1,136 @@
 package com.library.model;
 
-import java.util.List;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.vividsolutions.jts.geom.Point;
 
+@XmlRootElement(name = "ParknRide")
 public class ParknRide {
+	@XmlAttribute
+	@JsonSerialize
+	public int pnrid;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public double lat;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public double lon;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String lotname;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String location;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String city;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public int zipcode;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String countyid;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String county;
 
-	private int pnrid;
-	private double lat;
-	private double lon;
-	private String lotname;
-	private String location;
-	private String city;
-	private int zipcode;
-	private String countyid;
-	private String county;
-	private int spaces;
-	private int accessiblespaces;
-	private int bikerackspaces;
-	private int bikelockerspaces;
-	private int electricvehiclespaces;
-	private String carsharing;
-	private String transitservice;
-	private String availability;
-	private String timelimit;
-	private String restroom;
-	private String benches;
-	private String shelter;
-	private String indoorwaitingarea;
-	private String trashcan;
-	private String lighting;
-	private String securitycameras;
-	private String sidewalks;
-	private String pnrsignage;
-	private String lotsurface; 
-	private String propertyowner; 
-	private String localexpert;
-	private Point geom;
-//	private List<GeoStop> stops;
-//	private List<GeoStopRouteMap> routes;
+	@XmlAttribute
+	@JsonSerialize
+	public int spaces;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public int accessiblespaces;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public int bikerackspaces;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public int bikelockerspaces;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public int electricvehiclespaces;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String carsharing;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String transitservice;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String availability;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String timelimit;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String restroom;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String benches;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String shelter;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String indoorwaitingarea;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String trashcan;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String lighting;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String securitycameras;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String sidewalks;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String pnrsignage;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String lotsurface; 
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String propertyowner; 
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String localexpert;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public Point geom;
 	
 	public ParknRide(){
 		
@@ -339,5 +431,4 @@ public class ParknRide {
 	public Point getGeom(){
 		return geom;
 	}
-
 }

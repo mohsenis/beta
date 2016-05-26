@@ -18,14 +18,13 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.webapp.api.model.StopType;
+import com.library.model.StopR;
 
 
 @XmlRootElement(name="StopList")
 public class StopList {
 	
 	@XmlElement(name="stops")	
-    public List<StopType> stops = new ArrayList<StopType>();
-    //public Collection<Stop> stops;
+    public List<StopR> stops = new ArrayList<StopR>();
 
 }

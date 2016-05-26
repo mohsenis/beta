@@ -16,7 +16,7 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<script src="js/lib/date.js"></script>
+	<script src="js/lib/date.js"></script><script src="Phase4/Datasources.js"></script>
 	<script src="Phase4/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -34,28 +34,34 @@ var w_qstringx = parseFloat(getURIParameter("x1"));
 var w_qstringx2 = parseFloat(getURIParameter("x2"));
 var w_qstringx3 = parseFloat(getURIParameter("x3"));
 var stops = [];
+var algDesc = "1. For each stop, a list of all the stops located within its \"Stop Cluster Radius\" is identified. Let's call each of these entries a cluster.\r\n" +
+"   For example,suppose that stop A is connected to stops A, B, C and D. This entry is an initial cluster \"A\" with stops {A,B,C,D}.\r\n" + 
+"2. The stops for initial clusters \"B\", \"C\" and \"D\" are added to the stops for cluster \"A\" and initial clusters \"B\", \"C\" and \"D\" are removed from the list prepared in (1).\r\n" + 
+"3. Step (2) is recursively repeated untill there is not common stops in the between the remaining entries of the list. This final list contains the transit hubs clusters.\r\n" +
+"4. The clusters' centroids are computed as the average latitude and longitude of its stops.\r\n" + 
+"5. Service related metrics such as number of stops, routes, visits, population served and etc. are computed as summation of the said metric over all the stops within the cluster.";
 
 html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based on its importance. Lower ID number means higher cluster importance."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Cluster Centroid Latitude<em title="Latitude of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Cluster Centroid Longitude<em title="Longitude of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Stops Count <em title="Total number of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Routes Count <em title="Total number of routes that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Agencies Count <em title="Total number of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Visits Count <em title="Total number of times all stops in the cluster are served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Park and Ride Lots Count <em title="Total number of park and ride lots within X distance of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Counties Count <em title="Total number of counties that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Places Count <em title="Total number of census places that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population Served<em title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Urban Population <em title="Sum of the population of urban areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Transit Agencies <em title="Unduplicated list of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Stops <em title="Detailed list of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Routes <em title="Unduplicated detailed list of routes in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Park and Ride Lots <em title="Detailed list of park and ride lots within the X radius of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Places <em title="Census places that stops in the cluster are locate in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Counties <em title="Counties that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Urban Areas <em title="Areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>ODOT Transit Regions <em title="ODOT transit regions that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Cluster Centroid Latitude<span class="IOSym">(1)</span><em title="Latitude of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Cluster Centroid Longitude<span class="IOSym">(1)</span><em title="Longitude of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Stops Count<span class="IOSym">(1)</span><em title="Total number of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Routes Count<span class="IOSym">(1)</span><em title="Total number of routes that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Agencies Count<span class="IOSym">(1)</span><em title="Total number of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Visits Count<span class="IOSym">(1)(4)</span><em title="Total number of times all stops in the cluster are served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Park and Ride Lots Count<span class="IOSym">(1)(3) </span><em title="Total number of park and ride lots within X distance of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Counties Count<span class="IOSym">(1)</span><em title="Total number of counties that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Census Places Count<span class="IOSym">(1)</span><em title="Total number of census places that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Population Served<span class="IOSym">(1)(2) </span><em title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban Population<span class="IOSym">(1)(2) </span><em title="Sum of the population of urban areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Transit Agencies<span class="IOSym">(1)</span><em title="Unduplicated list of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Stops<span class="IOSym">(1)</span><em title="Detailed list of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Routes<span class="IOSym">(1)</span><em title="Unduplicated detailed list of routes in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Park and Ride Lots<span class="IOSym">(1)(3) </span><em title="Detailed list of park and ride lots within the X radius of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Census Places<span class="IOSym">(1)</span><em title="Census places that stops in the cluster are locate in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Counties<span class="IOSym">(1)</span><em title="Counties that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>Urban Areas<span class="IOSym">(1)</span><em title="Areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th>ODOT Transit Regions<span class="IOSym">(1)</span><em title="ODOT transit regions that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
 '<th>Stops IDs</th>'+
 '<th>Stops Agencies</th>'+
 '<th>Stops Agencies Names</th>'+
@@ -81,12 +87,12 @@ $(document).ready(function(){
 	$('#Sradius').val(w_qstringx);
 	$('#PopSradius').val(w_qstringx2);
 	$('#PnrSradius').val(w_qstringx3);
-	
 	setPopOptions();
 	loadDBList();
 	updateToolTips();
 	progressBar();
 	go(key);
+	$('#ui-id-1').html($('#ui-id-1').text()+'<span class="IOSym" style="font-size:10">(4)</span>');
 	
 	$.ajax({
 		type: 'GET',
@@ -100,18 +106,18 @@ $(document).ready(function(){
 			$('h2').append('Transit Hubs Summary Report <br><hr>');			
 			$.each(d.Clusters, function(i,item){
 				html+= 
-				'<tr><td>' + ID++ 
+				'<tr><td>' + ID++
 				+'</td><td>' + trimLat(item.lat) 
 				+'</td><td>' + trimLon(item.lon) 
-				+'</td><td>'+ item.stopscount 
-				+'</td><td>'+ item.routescount 
-				+'</td><td>'+ item.agenciescount 
-				+'</td><td>'+ item.visits
-				+'</td><td>'+ item.pnrcount 
-				+'</td><td>'+ item.countiescount
-				+'</td><td>'+ item.placescount
-				+'</td><td>'+ numberconv(item.pop) 
-				+'</td><td>'+ numberconv(item.urbanareaspop) 
+				+'</td><td>' + item.stopscount 
+				+'</td><td>' + item.routescount 
+				+'</td><td>' + item.agenciescount 
+				+'</td><td>' + item.visits
+				+'</td><td>' + item.pnrcount 
+				+'</td><td>' + item.countiescount
+				+'</td><td>' + item.placescount
+				+'</td><td>' + numberconv(item.pop) 
+				+'</td><td>' + numberconv(item.urbanareaspop) 
 				+'</td><td>' + item.agenciesNames 
 				+'</td><td class="details-control">'
 				+'</td><td class="details-control">'
@@ -290,6 +296,7 @@ $(document).ready(function(){
 		        subTable+='</table>';
 		        return subTable;
 		    }
+			addIOeffects(); //This method has to be call after initializing the datatable.
 		}
 	});	
 });	
@@ -338,7 +345,7 @@ $(document).ready(function(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Stop Cluster Radius(miles) <input type="text" name="x1" id="Sradius" data-label="Stop Cluster Radius(miles)" class="input radius tbox" onkeypress="return isNumber(event)"/>			    	
+			    	Stop Cluster Radius(miles)<span class="IOSym">(1) </span><input type="text" name="x1" id="Sradius" data-IOMap="1" data-label="Stop Cluster Radius(miles)" class="input radius tbox" onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
 		    	</div>
 			  </td>
@@ -347,10 +354,10 @@ $(document).ready(function(){
 				<td></td>
 				<td></td>
 				<td><div style="float:right;"> 
-			    	Population Search Radius(miles) <input type="text" name="x2" id="PopSradius" data-label="Population Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
+			    	Population Search Radius(miles)<span class="IOSym">(2) </span><input type="text" name="x2" id="PopSradius" data-IOMap="2" data-label="Population Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
 			    	</div><br>
 			    	<div style="float:right;margin-top:2px;"> 
-			    	Park & Ride Search Radius(miles) <input type="text" name="x3" id="PnrSradius" data-label="Park & Ride Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
+			    	Park & Ride Search Radius(miles)<span class="IOSym">(3)  </span><input type="text" name="x3" id="PnrSradius" data-IOMap="3" data-label="Park & Ride Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
 			    	</div>
 			    </td>			    
 			</tr>

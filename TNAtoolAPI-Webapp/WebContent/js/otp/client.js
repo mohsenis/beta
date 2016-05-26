@@ -550,6 +550,7 @@ var Layers = 0;
 function getdata(type,agency,route,variant,k,callback,popup,node) {	
 	switch (type){
 	case 1:
+		alert('case 1');
 		var points = [];
 		$.ajax({
 			type: 'GET',
@@ -557,20 +558,21 @@ function getdata(type,agency,route,variant,k,callback,popup,node) {
 			url: '/TNAtoolAPI-Webapp/queries/transit/stops?&agency='+agency+"&dbindex="+dbindex,
 			success: function(d){		
 			$.each(d.stops, function(i,stop){        	
-				points.push([new L.LatLng(Number(stop.stopLat), Number(stop.stopLon)),stop.stopName]);							
+				points.push([new L.LatLng(Number(stop.lat), Number(stop.lon)),stop.StopName]);							
 	        });				
 			if (points.length!=0) callback("A"+agency,k,points,popup,node);
 	    }});
 		break;
 	case 2:
 		var points = [];
+		alert('case 2');
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/stopsbyroute?&agency='+agency+'&route='+route+"&dbindex="+dbindex,
 			success: function(d){		
 			$.each(d.stops, function(i,stop){        	
-				points.push([new L.LatLng(Number(stop.stopLat), Number(stop.stopLon)),stop.stopName]);				 			
+				points.push([new L.LatLng(Number(stop.lat), Number(stop.lon)),stop.stopName]);				 			
 	        });				
 			if (points.length!=0) callback("R"+agency+route,k,points,popup,node);
 	    }});
@@ -581,6 +583,7 @@ function getdata(type,agency,route,variant,k,callback,popup,node) {
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/shape?&agency='+agency+'&trip='+variant+"&dbindex="+dbindex,
 			success: function(d){
+				alert('case 3');
 			if (d.points!= null) callback(k,d,"V"+agency+route+variant,node);
 	    }});
 		break;

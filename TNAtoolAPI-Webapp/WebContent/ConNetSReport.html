@@ -15,7 +15,7 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<script src="js/lib/date.js"></script>
+	<script src="js/lib/date.js"></script><script src="Phase4/Datasources.js"></script>
 	<script src="Phase4/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -27,19 +27,22 @@
 	
 <script type="text/javascript">
 
+var algDesc = "1. For each agency A, a list of all other agencies that have at least one stop within the user defined radius of any stop of A is derived.\r\n"
++ "2. An arbitrary agency X is selected."; 
+
 var netNames = new Array();
 var minDistances = new Array();
 maxRadius = 1; // maximum search radius in miles.
 html = '<table id="RT" class="display" align="center">';
 tmp = '<tr><th id="aid">Cluster ID<em title="Transit network cluster ID."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Network Cluster Size<em title="Number of transit agencies that have at least one stop within the specified distance of at least one transit agency in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connected Agency Names<em title="List of transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+'<th><span class="IOSym">⊕ </span>Network Cluster Size<em title="Number of transit agencies that have at least one stop within the specified distance of at least one transit agency in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th><span class="IOSym">⊕ </span>Connected Agency IDs<em title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+'<th><span class="IOSym">⊕ </span>Connected Agency Names<em title="List of transit agencies that have at least one stop within the specified distance of any other agencies in the list."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
-	loadDBList();
-	updateToolTips();
+	loadDBList();	
+	
 	progressBar();
 	$("#Sradius").val(w_qstringx);
 	
@@ -66,7 +69,6 @@ $(document).ready(function(){
 				}
 				html+= '</td>'+names+'</td></tr>';			
 			});		
-			html = html + '</tbody>'+html2+'</table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();			
 			$('a').click(function(e){
@@ -105,12 +107,14 @@ $(document).ready(function(){
 		                '<td>'+minDistances[p]+'</td>'+
 		            '</tr>'+		            
 		        '</table>';
-		    }
-    }});	
+		    }		     
+		   addIOeffects(); //This method has to be call after initializing the datatable.
+	    }
+	});	
 });
-
 </script>
 </head>
+
 <body>
 		<div class="container">
 			<div class="headerL">
@@ -118,7 +122,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<select id='dbselect' data-label='GTFS Source' onchange='reloadPage()' name='dbindex' class='input dropDown'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' onchange='reloadPage()' name='dbindex' class='input dropDown'></select>
 				<input type="button" onclick="window.exit()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
@@ -132,13 +136,12 @@ $(document).ready(function(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Maximum Spatial Gap (miles) <input type="text" name="x" id="Sradius" data-label='Maximum Spatial Gap (miles)' class="input radius tbox" onkeypress="return isNumber(event)"/>
+			    	<span class="IOSym">⊕</span> Maximum Spatial Gap (miles) <input type="text" name="x" id="Sradius" data-label='Maximum Spatial Gap (miles)' class="input radius tbox" onkeypress="return isNumber(event)"/>
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
 		    	</div>
 			  </td>
 			</tr>
-		</table>		
-		
+		</table>				
 		
 		<p id="displayReport"><br></p>
 		<br>

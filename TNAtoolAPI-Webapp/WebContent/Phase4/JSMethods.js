@@ -134,11 +134,7 @@ function buildDatatables() {
 					"visible" : false,
 					"targets" : tableProperties.hiddenCols
 				} ],
-				select : {
-					style : 'os',
-				},
 				dom : 'Bfrtip',
-
 				buttons : [
 						{
 							className : 'buttons-csv-meta buttons-html5',
@@ -170,7 +166,7 @@ function buildDatatables() {
 								}
 								var zip = new JSZip();
 								zip.file($(document).find("title").text()
-										+ "-metaData.txt", getToolTips());
+										+ "-metaData.txt", getMetadata());
 								zip.file($(document).find("title").text()
 										+ ".csv", output, {
 									type : 'text/csv' + charset
@@ -191,50 +187,11 @@ function buildDatatables() {
 								stripNewlines : false,
 								columns : ':visible'
 							}
-						}, {
-							extend : 'copyHtml5',
-							text : 'Copy selected',
-							exportOptions : {
-								columns : tableProperties.colsToExport,
-								modifier : {
-									selected : true
-								}
-							}
 						},
-
-				],
-				language : {
-					buttons : {
-						copyTitle : '<p><b>Copy to clipboard</b></p>',
-						copySuccess : {
-							0 : "No row was copied",
-							1 : "Copied one row to clipboard",
-							_ : "Copied %d rows to clipboard"
-						},
-					}
-				},
-
+				]
 			});
 	$(".dt-buttons").css("float", "right");
 	$(".dt-buttons").css("margin-bottom", "1em");
-	$.contextMenu({
-		selector : '#RT tbody tr',
-		callback : function(key, options) {
-			$(".buttons-copy").click();
-		},
-		items : {
-			"copy" : {
-				name : "Copy Selected Rows",
-				icon : "copy"
-			}
-		}
-	});
-	$(".buttons-copy").hide();
-	$(document).keydown(function(e) {
-		if (e.keyCode == 67 && e.ctrlKey) {
-			$(".buttons-copy").click();
-		}
-	});
 	$("#RT_length").remove();
 	$("#RT_filter").insertBefore("#RT_info");
 	$(".dataTables_filter").css("float", "left");
@@ -289,6 +246,18 @@ function updateToolTips() {
 			}, 1000);
 		}
 	});
+	
+	// Add title attribute to the I/O relationship symbols.
+	addIOeffects();
+}
+
+/**
+ * Add title attribute to the I/O relationship symbols
+ */
+function addIOeffects(){
+	$('.IOSym').each(function(index,object){
+		$(object).attr('title','The number(s) shows the inputs on which the metric depends');
+	});
 }
 
 function reloadPage() {
@@ -328,7 +297,7 @@ function reloadPage() {
  * This method is implemented to be used for gathering the metadata of the
  * report in a text file to be exported.
  */
-function getToolTips() {
+function getMetadata() {
 	
 	/*
 	 * Appending metadata
@@ -338,6 +307,37 @@ function getToolTips() {
 	output = output.concat('Title: ' + $('h2').text() + '\r\n');
 	output = output.concat('Time & Date: ' + Date() + '\r\n');
 	output = output.concat('Tool Version: ' + getVersion());
+	
+	/*
+	 * Appending data sources
+	 */
+	var counter = 1;
+	output = output.concat('\r\n\r\n\r\nData Sources\r\n');
+	output = output.concat('--------------------\r\n');
+	$.each( datasources, function(dataset, datasetInfo){
+	    if (datasetInfo.common.flag && $.inArray($(document).attr('title'), datasetInfo.common.exceptions)<0){
+	    	output = output.concat(counter++ + ')\r\n');
+	    	if (datasetInfo.survey != null) output = output.concat('Survey: ' + datasetInfo.survey + '\r\n');
+	    	if (datasetInfo.dataset != null) output = output.concat('Dataset: ' + datasetInfo.dataset + '\r\n');
+	    	if (datasetInfo.table != null) output = output.concat('Table: ' + datasetInfo.table + '\r\n');
+	    	output = output.concat('\r\n');
+	    }else if (!datasetInfo.common.flag && $.inArray($(document).attr('title'), datasetInfo.reports)>-1){
+	    	output = output.concat(counter++ + ')\r\n');
+	    	if (datasetInfo.survey != null) output = output.concat('Survey: ' + datasetInfo.survey + '\r\n');
+	    	if (datasetInfo.dataset != null) output = output.concat('Dataset: ' + datasetInfo.dataset + '\r\n');
+	    	if (datasetInfo.table != null) output = output.concat('Table: ' + datasetInfo.table + '\r\n');
+	    	output = output.concat('\r\n');
+	    }	    	
+	});
+	
+	/*
+	 * Appending algortihm for ran to generate the report, if any.
+	 */
+	if (typeof algDesc !== 'undefined') {
+		output = output.concat('\r\n\r\n\r\nAlgorithm\r\n');
+		output = output.concat('--------------------\r\n');	
+		output = output.concat(algDesc);
+	}
 	
 	/*
 	 * Appending report parameters
@@ -369,8 +369,18 @@ function getToolTips() {
 				if ($(object).find("em").find("img").attr("alt") == 'tooltip'){
 					output = output.concat($(object).text() + ': '
 							+ $(object).find("em").attr("title") + '\r\n');
-				}
+				}				
 			});
+	output = output.concat('\r\n');
+	
+	// Adding description of the footnotes that map inputs and metrics
+	$(".input").each(function(index, object) {
+		if (!$(object).is('select')){
+			output = output.concat(object.dataset.iomap + '. '  + object.dataset.label + '\r\n');
+		}	
+	});
+	if (keyName != null) output = output.concat('4. Selected Service Dates');
+	
 	return output;
 }
 
