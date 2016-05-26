@@ -65,7 +65,7 @@ import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+//import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
 import org.onebusaway.gtfs.impl.Databases;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -87,9 +87,8 @@ import com.webapp.api.model.UserSession;
  */
 @MultipartConfig
 public class FileUpload extends HttpServlet {
-
-	private final static String basePath = "C:/Users/tnatool/Development/Repository/test/";
-	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/";
+	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
+	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private static final long serialVersionUID = 1L;
 	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
@@ -252,7 +251,7 @@ public class FileUpload extends HttpServlet {
 		}else if(email!=null){// send confirmation email
 		      String to = email;
 		      final String emailUser = "tnatooltech";
-		      final String emailPass = "OSUteam007@gmail";
+		      final String emailPass = "***";
 		      String host = "smtp.gmail.com";
 		 
 		      Properties properties = System.getProperties();
@@ -726,7 +725,7 @@ public class FileUpload extends HttpServlet {
 		
 		boolean b = true;
 		try{
-			GtfsDatabaseLoaderMain.main(args);
+//			GtfsDatabaseLoaderMain.main(args);
 			b = false;
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
