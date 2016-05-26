@@ -27,6 +27,7 @@ import java.util.TreeSet;
 
 import javax.swing.JOptionPane;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -241,12 +242,13 @@ public class Queries {
 	
 	/**
     * Generates The on map report
+	 * @throws SQLException 
     *  
     */
    @GET
    @Path("/onmapreport")
    @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-   public Object getOnMapReport(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException { 
+   public Object getOnMapReport(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException { 
    	if (Double.isNaN(x) || x <= 0) {
            x = 0;
        }
@@ -282,19 +284,7 @@ public class Queries {
    	response.MapG = blocks;
    	MapPnR pnr=new MapPnR();
    	List<ParknRide> PnRs=new ArrayList<ParknRide>();
-	try {
-		if (lat.length==1){
-			PnRs=EventManager.getPnRs(x, lat[0], lon[0], dbindex);
-		}else{
-			PnRs=EventManager.getPnRs(lat, lon, dbindex);
-	   	}		
-	} catch (FactoryException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (TransformException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+   	PnRs=SpatialEventManager.getPnRs(lat, lon, x, dbindex);
 	
 	Map<String,List<MapPnrRecord>> mapPnr= new HashMap<String, List<MapPnrRecord>>(); 
 	List<MapPnrCounty> mapPnrCounties=new ArrayList<MapPnrCounty>();
@@ -448,20 +438,32 @@ public class Queries {
     
     	/**
      * Return a list of all stops for a given agency in the database
+    	 * @throws SQLException 
      */	
     @GET
     @Path("/stops")
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object dbstopsforagency(@QueryParam("agency") String agency, @QueryParam("dbindex") Integer dbindex){
+    public Object dbstopsforagency(@QueryParam("agency") String agencyid, @QueryParam("dbindex") Integer dbindex) throws SQLException{
     	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
-    	StopList response = new StopList();    			
-		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency, dbindex);		
-		for (Stop stop : stops){
-			  response.stops.add(new StopType(stop, false));
-		  } 		
-		return response;
+    	StopList response = new StopList();
+    	Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		String query;
+		query = "SELECT stops.* FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map"
+				+ " ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def"
+				+ " WHERE map.agencyid = '" + agencyid + "'";
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()){
+			StopR e = new StopR();
+			e.StopId = rs.getString("id");
+			e.StopName = rs.getString("name");
+			e.lat = rs.getString("lat");
+			e.lon = rs.getString("lon");
+			response.stops.add(e);
+		}
+    	return response;
     }
     
  	/**
@@ -515,25 +517,32 @@ public class Queries {
     
     /**
      * Return a list of all stops for a given route id in the database
+     * @throws SQLException 
      */	
     @GET
     @Path("/stopsbyroute")
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object dbstopsforroute(@QueryParam("agency") String agency,@QueryParam("route") String route, @QueryParam("dbindex") Integer dbindex){
+    public Object dbstopsforroute(@QueryParam("agency") String agencyid,@QueryParam("route") String routeid, @QueryParam("dbindex") Integer dbindex) throws SQLException{
     	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
     	StopList response = new StopList();
-		AgencyAndId routeandid = new AgencyAndId();
-		routeandid.setAgencyId(agency);
-		routeandid.setId(route);
-    	//StopList response = new StopList();		
-		List<Stop> stops = GtfsHibernateReaderExampleMain.QueryStopsbyRoute(routeandid, dbindex);
-		
-		for (Stop stop : stops){
-			  response.stops.add(new StopType(stop, false));
-		  } 		
-		return response;
+    	Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		String query;
+		query = "SELECT stops.* FROM gtfs_stops AS stops INNER JOIN gtfs_stop_route_map AS map"
+				+ " ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def"
+				+ " WHERE map.agencyid = '" + agencyid + "' AND map.routeid = '" + routeid + "'";
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()){
+			StopR e = new StopR();
+			e.StopId = rs.getString("id");
+			e.StopName = rs.getString("name");
+			e.lat = rs.getString("lat");
+			e.lon = rs.getString("lon");
+			response.stops.add(e);
+		}
+    	return response;
     }
     
     /**
@@ -549,7 +558,7 @@ public class Queries {
        	return progress;
     	
     }
-    
+        
     static Map <Double, Integer> progVal = new HashMap<Double, Integer>();
     public void setprogVal(double key, int val){
     	progVal.put(key, val);
@@ -2701,9 +2710,7 @@ Loop:  	for (Trip trip: routeTrips){
 								+ "	CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop"
 								+ "	CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount"
 								+ "	CROSS JOIN pnrarray CROSS JOIN placesarray";
-	//					System.out.println(query);			
-					
-						
+//						System.out.println(query);	
 						ResultSet rs = stmt.executeQuery(query);
 							
 						while(rs.next()){

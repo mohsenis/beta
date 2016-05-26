@@ -58,7 +58,7 @@ static{
 /**
  * returns ParknRides within a circle
  */
-	public static List<ParknRide> getPnRs(double d, double lat, double lon, int sessionindex) throws FactoryException, TransformException {
+	/*public static List<ParknRide> getPnRs(double radius, double lat, double lon, int sessionindex, int dbindex) throws FactoryException, TransformException {
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
@@ -68,20 +68,21 @@ static{
 		point = targetGeometry.getCentroid();
 		point.setSRID(2993);	
 		session[sessionindex].beginTransaction();
+		
 		Query q = session[sessionindex].getNamedQuery("PARKNRIDE_WITHIN_CIRCLE");
 		Type geomType = GeometryUserType.TYPE;
 		q.setParameter("point", point, geomType);
-		q.setParameter("radius", d);
+		q.setParameter("radius", radius);
 		@SuppressWarnings("unchecked")
 		List<ParknRide> results = (List<ParknRide>) q.list();
         Hutil.getSessionFactory()[sessionindex].close();
         return results;
-    }
+    }*/
 	
 /**
  * returns ParknRides within a rectangle
  */	
-	public static List<ParknRide> getPnRs(double[] lat, double[] lon, int sessionindex) throws FactoryException, TransformException {			
+	/*public static List<ParknRide> getPnRs(double[] lat, double[] lon, int sessionindex) throws FactoryException, TransformException {			
 
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
@@ -111,7 +112,7 @@ static{
 //        List<ParknRide> results=new ArrayList<ParknRide>();
         
         return results;
-    }	
+    }*/	
 
 /**
  * returns population centroids

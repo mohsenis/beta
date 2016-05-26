@@ -1,0 +1,181 @@
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Transit Network Analysis Tool</title>
+	<script src="js/lib/jquery-1.9.1.min.js"></script>
+	<script src="js/lib/leaflet-0.7/leaflet-src.js"></script>
+	<script src="js/lib/jstree-v.pre1.0/jquery.jstree.js"></script>
+    <script type="text/javascript" src="js/lib/tile.stamen.js"></script>
+    <script src="js/lib/jquery-ui.js"></script>	
+	<script src="js/jQueryContent.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/bootstrap-dropdown.js"></script>
+	<script src="js/lib/Polylinencoded.js"></script>
+	<script src="js/lib/simple-expand.min.js"></script>
+	<script src="js/lib/MarkerCluster/leaflet_markercluster-src.js"></script>
+	<script src="js/lib/jquery_dialogextend.js"></script>
+	<script src="js/lib/leaflet-0.7/Control.MiniMap.js"></script>
+	<script src="js/lib/leaflet-0.7/leaflet.contextmenu.js"></script>
+	<script type="text/javascript" src="js/otp/shapes.js"></script>	
+	<script src="js/lib/date.js"></script><script src="Phase4/Datasources.js"></script>
+	<script src="js/lib/leaflet-0.7/leaflet.draw.js"></script>
+	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
+	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
+	<script src="js/lib/leaflet-0.7/minimap/html2canvas.js"></script>
+	<script src="js/lib/leaflet-0.7/search/Control.Geocoder.js"></script>
+	<script src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+	<script src="js/lib/leaflet-0.7/Google.js"></script>
+	<script src="js/onMapReport.js"></script>	
+	
+	<link rel="stylesheet" href="js/lib/jquery-ui.css" />
+	<link rel="stylesheet" href="js/lib/leaflet-0.7/leaflet.css" /> 
+	<link rel="stylesheet" href="js/lib/bootstrap.css" />
+	<link rel="stylesheet" href="js/lib/MarkerCluster/MarkerCluster.css" />
+	<link rel="stylesheet" href="js/lib/MarkerCluster/MarkerCluster.styles.css" />
+	<link rel="stylesheet" href="js/lib/MarkerCluster/MarkerCluster.Default.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui.multidatespicker.css">
+	<link rel="stylesheet" href="js/lib/leaflet-0.7/leaflet.draw.css" />
+	<link rel="stylesheet" href="js/lib/leaflet-0.7/Control.MiniMap.css" />
+	<link rel="stylesheet" href="js/lib/leaflet-0.7/leaflet.contextmenu.css" /> 
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="client.css" />	
+	<link rel="stylesheet" href="js/lib/leaflet-0.7/search/Control.Geocoder.css" />
+	
+<!-- Google Analytics Tracking -->	
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-64807119-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+</head>
+
+<body style="display:none">
+	<div id="overlay"></div>
+	<div id='list' class='list'>
+	</div>
+	
+			<div id="connectedAgencies-form" title="On-Map Connected Agencies Report" style="text-size=50%">
+	<p style="font-size:80%"> Maximum Spatial Gap (miles) <input type="number" name="Sradius" id="Sradius" class="utbox" required min="0.1" value='0.1' step="0.1" onkeypress='return isNumber(event)'/>
+			    	<input id="submit" type="button" onclick="reloadDialog2(document.getElementById('Sradius').value)" title="Click submit to refresh the report"  value="Submit" class="button" /></p>		    			    	    	
+	<p><br><span>Agencies connected to: <b><br>- <span style="font-size:80%; align:center;" id="dialogSelectedAgency"></span></b></span><br>
+	<p id="displayConAgenciesTable"></p>
+	<img id="dialogPreLoader2" src="images/287.GIF" alt="Page Loading" width="85" height="85" style="margin:100px" >
+	</div>
+	
+	<div id="dialog-form" title="On-Map Report">
+	  <p><b>Centroid</b>:<br>
+    	<span style="padding-left:3em">Latitude: <span style="padding-left:1.5em" id="dialogLat"></span></span><br>
+    	<span style="padding-left:3em">Longitude: <span id="dialogLng"></span></span>
+      </p>
+      <p><b>Area</b>:<span id="dialogArea" style="padding-left:1em"></span> Square Miles
+      </p>
+      <p><b>Date</b>: <input readonly type="text" id="dialogDate">
+      </p>
+      <input  type="text" autofocus style="visibility:hidden">
+	  <div id="tabs">
+		  <ul>
+		    <li><a href="#transit">Transit Agencies</a></li>
+		    <li><a href="#geography">Census</a></li>
+		    <li><a href="#parknride">Park and Ride</a></li>
+		  </ul>
+		  <div id="transit">
+		  	<b>Show Transit: </b><input type="radio" name="transitShow" id="stopsCheck" value="stops" style="margin-left:2em" onclick="transitRadio(this)">Stops
+		  				 <input type="radio" name="transitShow" id="routeCheck" value="routes" style="margin-left:1em" onclick="transitRadio(this)">Routes
+		  				 <input type="radio" name="transitShow" class="bothCheck" value="both" style="margin-left:1em" checked onclick="transitRadio(this)">Both<br><br>
+		  	<table id="stopRoute" style="border:none; font-size:100%">
+		  		<tr>
+		  			<td><b>Number of Stops:</b></td>
+		  			<td class="onMapdata" id="ts"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Number of Routes:</b></td>
+		  			<td class="onMapdata" id="tr"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Average Fare:</b></td>
+		  			<td class="onMapdata" id="af"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Median Fare:</b></td>
+		  			<td class="onMapdata" id="mff"></td>
+		  		</tr>
+		  	</table>
+		  	<!-- <br>
+		  	<br>
+		  	<br> -->
+		  	<p id="displayTransitReport"></p>
+		  </div>
+		  <div id="geography">
+		  	<b>Show Census: </b><input type="radio" name="censusShow" id="blocksCheck" value="blocks" style="margin-left:2em" onclick="geoRadio(this)">Blocks
+		  						<input type="radio" name="censusShow" id="tractsCheck" value="tracts" style="margin-left:1em" onclick="geoRadio(this)">Tracts
+		  				 		<input type="radio" name="censusShow" class="bothCheck" value="both" style="margin-left:1em" checked onclick="geoRadio(this)">Both<br><br>
+		  	<table id="blockTract" style="border:none; font-size:100%">
+		  		<tr>
+		  			<td><b>Urban Population (2010):</b></td>
+		  			<td class="onMapdata" id="tpu"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Rural Population (2010):</b></td>
+		  			<td class="onMapdata" id="tpr"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Number of Census Blocks:</b></td>
+		  			<td class="onMapdata" id="tb"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Number of Census Tracts:</b></td>
+		  			<td class="onMapdata" id="tt"></td>
+		  		</tr>
+		  	</table>
+		  	<!-- <br>
+		  	<br> -->		  	
+		  	<p id="displayGeoReport"></p>
+		  </div>
+		  
+		  <div id="parknride">
+		  	<table id="parknrideInfo" style="border:none; font-size:100%">
+		  		<tr>
+		  			<td><b>Number of P&R Lots:</b></td>
+		  			<td class="onMapdata" id="npnr"></td>
+		  		</tr>
+		  		<tr>
+		  			<td><b>Number of Available Spaces:</b></td>
+		  			<td class="onMapdata" id="nspc"></td>
+		  		</tr>
+		  	</table>
+		  	<br>
+		  	<p id="displayPnrCounties"></p>
+		  </div>
+		  
+	  </div>
+      <img id="dialogPreLoader" src="images/287.GIF" alt="Page Loading" style="margin:9em;margin-top:22em" >	
+      <!-- <label><i>Select the report you want to be displayed</i></label>
+      <div style="border:1px solid grey;margin:10px auto;padding:5px">
+	      <p>
+	      	Stops from <select id="stopselect" class="dialogSel" style="width:105px;margin-left:1em"><option value='all'>All Agencies</option></select>
+	      	<input id="stopRadio" type="radio" name="onMapRep" value="stops" style="display:inline; margin-left:3em"><br>
+	      </p>
+	      <p>
+	      	Routes from <select id="routeselect" class="dialogSel" style="width:105px;margin-left:0.45em"><option value='all'>All Agencies</option></select>
+	      	<input id="routeRadio" type="radio" name="onMapRep" value="routes" style="display:inline; margin-left:3em"><br>
+	      </p>
+	      <p>
+	      	Population (Census Blocks)
+	      	<input id="popRadio" type="radio" name="onMapRep" value="popupation" style="display:inline; margin-left:4.3em" checked="checked"><br>
+	      </p>
+      </div> -->     
+    </div>
+    <div id="dialogResults" title="Report Results">
+	</div>
+    <div id="map"> </div>
+		<script type="text/javascript" src="js/otp/client.js"></script>
+	
+</body>
+</html>

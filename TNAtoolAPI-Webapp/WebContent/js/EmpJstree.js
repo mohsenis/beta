@@ -369,7 +369,7 @@ var new_jstree = {
 				"valid_children" : ["CNS", "CNS_default", "CNS_default_2"]					
 			},
 			"CNS_default_2" : {
-				"icon" : "js/lib/images/folder_closed-go.ico",
+				"icon" : "js/lib/images/arrow-right.ico",
 				"valid_children" : ["CNS"]					
 			},
 			"CNS" : {

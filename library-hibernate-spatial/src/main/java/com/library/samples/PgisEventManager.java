@@ -3196,7 +3196,7 @@ public class PgisEventManager {
 				+ "		group by stop_agencyid, stop_id), "
 				+ "stopservices as (select * from stopservices0 UNION ALL select * from stopservices1)"
 				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices USING(aid)";
-		//System.out.println("visit frequency: " + mainquery);
+		System.out.println("visit frequency: " + mainquery);
 			try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
@@ -3308,8 +3308,8 @@ public class PgisEventManager {
 				+ " stops2 AS (SELECT stops1.* FROM stops1 INNER JOIN aids ON agencyid2 IN (aids.aid)),"
 				+ " stops3 AS (SELECT stops2.* FROM stops2 INNER JOIN gtfs_stop_service_map AS map ON stop1=map.stopid AND stops2.agencyid1=map.agencyid_def),"
 				+ " stops4 AS (SELECT stops3.* FROM stops3 INNER JOIN gtfs_stop_service_map AS map ON stop2=map.stopid AND stops3.agencyid2=map.agencyid_def)"
-				+ " SELECT stops4.clusterid, array_agg(stop) AS stops FROM stops4 GROUP BY clusterid"; 
-		//System.out.println(query);
+				+ " SELECT stops4.clusterid, array_agg(stop) stops, cardinality(array_agg(stop)) AS stops FROM stops4 GROUP BY clusterid ORDER BY cardinality(array_agg(stop)) ASC"; 
+//		System.out.println(query);
 		Statement stmt = null;
 		try {
 			Connection connection = makeConnection(dbindex);			
@@ -3650,6 +3650,7 @@ public class PgisEventManager {
 		dropConnection(connection);
 		return response;
 	}
+	
 	/**
 	 *Queries the census part of the on map report	  
 	 */
