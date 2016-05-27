@@ -228,8 +228,8 @@ function exceedsMaxRadius(x){
 function updateToolTips() {
 	$(document).tooltip({
 		position : {
-			my : "left bottom",
-			at : "right bottom",
+			my : "bottom",
+			at : "center top+12"
 		}
 	});
 	
@@ -359,11 +359,12 @@ function getMetadata() {
 	output = output.concat('--------------------\r\n');
 	$("#RT th").each(
 			function(index, object) {
-				if ($(object).find("em").find("img").attr("alt") == 'tooltip'){
+				/*if ($(object).find("em").find("img").attr("alt") == 'tooltip'){
 					output = output.concat($(object).text() + ': '
-							+ $(object).find("em").attr("title") + '\r\n');
+							+ $(object).find("em").attr("title") + '\r\n');*/
+				output = output.concat($(object).text() + ': ' + $(object).attr("title") + '\r\n');					
 				}
-			});
+			);
 	$("td").each(
 			function(index, object) {
 				if ($(object).find("em").find("img").attr("alt") == 'tooltip'){
@@ -376,10 +377,10 @@ function getMetadata() {
 	// Adding description of the footnotes that map inputs and metrics
 	$(".input").each(function(index, object) {
 		if (!$(object).is('select')){
-			output = output.concat(object.dataset.iomap + '. '  + object.dataset.label + '\r\n');
+			output = output.concat('(' + object.dataset.iomap + ') '  + object.dataset.label + '\r\n');
 		}	
 	});
-	if (keyName != null) output = output.concat('4. Selected Service Dates');
+	if (keyName != null && $('h2').text()=="Transit Hubs Summary Report ") output = output.concat('(4) Selected Service Dates');
 	
 	return output;
 }
@@ -488,7 +489,7 @@ function go(key) {
 							.html(
 									$('#datepicker').multiDatesPicker(
 											'getDates').length
-											+ " day(s) selected");
+											+ " day(s) selected<span class='IOSym' style='font-size:10'>(4)</span>");
 					$('.selectedDate').css("text-align", "center");
 					$('.ui-accordion-header').css({'width':'90%','font-size':'80%','margin':'auto','text-align':'center'});
 				}
@@ -508,7 +509,7 @@ function go(key) {
 	});
 	$("#accordion").accordion("refresh");
 	$("#accordion > h3")
-			.html(w_qstringd.split(",").length + " day(s) selected");
+			.html(w_qstringd.split(",").length + " day(s) selected<span class='IOSym' style='font-size:10'>(4)</span>");
 	$('.selectedDate').css("text-align", "center");
 	$('.ui-accordion-header').css({'width':'100%','font-size':'80%','margin':'auto','text-align':'center'});
 }
@@ -569,7 +570,7 @@ function dateRemove(e, d) {
 	$("#datepicker").multiDatesPicker('removeDates', d);
 	$("#accordion > h3").html(
 			$('#datepicker').multiDatesPicker('getDates').length
-					+ " day(s) selected");
+					+ " day(s) selected<span class='IOSym' style='font-size:10'>(4)</span>");
 	$("#submit").trigger('mouseenter');
 }
 

@@ -42,26 +42,26 @@ var algDesc = "1. For each stop, a list of all the stops located within its \"St
 "5. Service related metrics such as number of stops, routes, visits, population served and etc. are computed as summation of the said metric over all the stops within the cluster.";
 
 html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
-tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based on its importance. Lower ID number means higher cluster importance."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Cluster Centroid Latitude<span class="IOSym">(1)</span><em title="Latitude of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Cluster Centroid Longitude<span class="IOSym">(1)</span><em title="Longitude of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Stops Count<span class="IOSym">(1)</span><em title="Total number of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Routes Count<span class="IOSym">(1)</span><em title="Total number of routes that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Agencies Count<span class="IOSym">(1)</span><em title="Total number of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Visits Count<span class="IOSym">(1)(4)</span><em title="Total number of times all stops in the cluster are served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Park and Ride Lots Count<span class="IOSym">(1)(3) </span><em title="Total number of park and ride lots within X distance of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Counties Count<span class="IOSym">(1)</span><em title="Total number of counties that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Places Count<span class="IOSym">(1)</span><em title="Total number of census places that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population Served<span class="IOSym">(1)(2) </span><em title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Urban Population<span class="IOSym">(1)(2) </span><em title="Sum of the population of urban areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Transit Agencies<span class="IOSym">(1)</span><em title="Unduplicated list of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Stops<span class="IOSym">(1)</span><em title="Detailed list of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Routes<span class="IOSym">(1)</span><em title="Unduplicated detailed list of routes in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Park and Ride Lots<span class="IOSym">(1)(3) </span><em title="Detailed list of park and ride lots within the X radius of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Places<span class="IOSym">(1)</span><em title="Census places that stops in the cluster are locate in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Counties<span class="IOSym">(1)</span><em title="Counties that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Urban Areas<span class="IOSym">(1)</span><em title="Areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>ODOT Transit Regions<span class="IOSym">(1)</span><em title="ODOT transit regions that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+tmp = '<tr><th id="an" title="ID number assigned to the cluster based on its importance. Lower ID number means higher cluster importance.">ID</th>'+
+'<th title="Latitude of the transit hub centroid.">Cluster Centroid Latitude<span class="IOSym">(1)</span></th>'+
+'<th title="Longitude of the transit hub centroid.">Cluster Centroid Longitude<span class="IOSym">(1)</span></th>'+
+'<th title="Total number of stops in the cluster.">Stops Count<span class="IOSym">(1)</span></th>'+
+'<th title="Total number of routes that serve stops in the cluster.">Routes Count<span class="IOSym">(1)</span></th>'+
+'<th title="Total number of transit agencies that serve stops in the cluster.">Agencies Count<span class="IOSym">(1)</span></th>'+
+'<th title="Total number of times all stops in the cluster are served.">Visits Count<span class="IOSym">(1)(4)</span></th>'+
+'<th title="Total number of park and ride lots within X distance of the cluster centroid.">Park and Ride Lots Count<span class="IOSym">(1)(3)</span></th>'+
+'<th title="Total number of counties that the cluster is located in.">Counties Count<span class="IOSym">(1)</span></th>'+
+'<th title="Total number of census places that the cluster is located in.">Census Places Count<span class="IOSym">(1)</span></th>'+
+'<th title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent.">Population Served<span class="IOSym">(1)(2)</span></th>'+
+'<th title="Sum of the population of urban areas that stops in the cluster are located in.">Urban Population<span class="IOSym">(1)(2)</span></th>'+
+'<th title="Unduplicated list of transit agencies that serve stops in the cluster.">Transit Agencies<span class="IOSym">(1)</span></th>'+
+'<th title="Detailed list of stops in the cluster.">Stops<span class="IOSym">(1)</span></th>'+
+'<th title="Unduplicated detailed list of routes in the cluster.">Routes<span class="IOSym">(1)</span></th>'+
+'<th title="Detailed list of park and ride lots within the X radius of the cluster centroid.">Park and Ride Lots<span class="IOSym">(1)(3)</span></th>'+
+'<th title="Census places that stops in the cluster are locate in.">Census Places<span class="IOSym">(1)</span></th>'+
+'<th title="Counties that stops in the cluster are located in.">Counties<span class="IOSym">(1)</span></th>'+
+'<th title="Areas that stops in the cluster are located in.">Urban Areas<span class="IOSym">(1)</span></th>'+
+'<th title="ODOT transit regions that stops in the cluster are located in.">ODOT Transit Regions<span class="IOSym">(1)</span></th>'+
 '<th>Stops IDs</th>'+
 '<th>Stops Agencies</th>'+
 '<th>Stops Agencies Names</th>'+
@@ -92,7 +92,6 @@ $(document).ready(function(){
 	updateToolTips();
 	progressBar();
 	go(key);
-	$('#ui-id-1').html($('#ui-id-1').text()+'<span class="IOSym" style="font-size:10">(4)</span>');
 	
 	$.ajax({
 		type: 'GET',
