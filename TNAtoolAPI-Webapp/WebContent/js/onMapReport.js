@@ -73,8 +73,7 @@ function onMapSubmit(){
 	//$('#blocksCheck').prop('checked', true);
 	$("#dialogDate").datepicker( "setDate", currentDate);
 	$("#tabs").hide();
-	$('#dialogPreLoader').show();
-	//alert(currentDate);
+	$('#dialogPreLoader').show();	
 	showOnMapReport(currentLats, currentLngs, currentDate, currentX);
 }
 
@@ -139,8 +138,10 @@ function doNotDelete(){
 };
 
 function showOnMapReport(lat, lon, date, x){
-	lat = lat.join(",");
-	lon = lon.join(",");
+	if (!typeof lat === 'number'){
+		lat = lat.join(",");
+		lon = lon.join(",");
+	}	
 	var key =1;
 	var d0;
 	var d1;
@@ -173,6 +174,7 @@ function showOnMapReport(lat, lon, date, x){
 	$('#displayGeoReport').empty();
 	$('#displayPnrCounties').empty();
 	$("#overlay").show();	
+	console.log('/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession());
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',

@@ -82,7 +82,7 @@
 			}
 
 			L.DomEvent.disableClickPropagation(container);
-
+			
 			return container;
 		},
 
@@ -122,11 +122,42 @@
 
 			L.DomUtil.addClass(this._container, 'leaflet-control-geocoder-throbber');
 			this._clearResults();
-			this.options.geocoder.geocode(this._input.value, this._geocodeResult, this);
+			// Implemented method to handle latitude and longitude.
+			if (this._isCoordinate(this._input.value)) {				
+				var latLng = this._input.value;
+				latLng = latLng.replace(/ /g,'');
+				latLng = latLng.split(',');
+				myMethod(latLng);
+				this._collapse();
+				L.DomUtil.removeClass(this._container, 'leaflet-control-geocoder-throbber');
+			} else
+				this.options.geocoder.geocode(this._input.value, this._geocodeResult, this);
 
 			return false;
 		},
-
+		
+		/**
+		 * Checks to see if the input is a valid coordinate
+		 */
+		_isCoordinate: function(input) {
+			input = input.replace(/ /g,'');
+			var latLng = input.split(',');
+			var lat = input.split(',')[0];
+			var lon = input.split(',')[1];
+			
+			if (typeof lat === "undefined" || typeof lon === "undefined" || isNaN(lat) || isNaN(lon)) {
+				return false;
+			}else{
+				if (lat < -90 || lat > 90 || lon < -180 || lon > 180 ) {
+					L.DomUtil.addClass(this._errorElement, 'leaflet-control-geocoder-error');
+			        return false;
+			    }
+			    else {
+			    	return true;
+			    }
+			}
+		},
+		
 		_geocodeResultSelected: function(result) {
 			if (this.options.collapsed) {
 				this._collapse();
