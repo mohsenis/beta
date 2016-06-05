@@ -145,17 +145,20 @@
 			var lat = input.split(',')[0];
 			var lon = input.split(',')[1];
 			
-			if (typeof lat === "undefined" || typeof lon === "undefined" || isNaN(lat) || isNaN(lon)) {
-				return false;
-			}else{
-				if (lat < -90 || lat > 90 || lon < -180 || lon > 180 ) {
-					L.DomUtil.addClass(this._errorElement, 'leaflet-control-geocoder-error');
-			        return false;
-			    }
-			    else {
-			    	return true;
-			    }
-			}
+			if (	typeof lat === "undefined" || 
+					typeof lon === "undefined" || 
+					isNaN(lat) || 
+					isNaN(lon) || 
+					latLng.length > 2 || 
+					lat < -90 || 
+					lat > 90 || 
+					lon < -180 || 
+					lon > 180	) {
+			return false;
+		    }
+		    else {
+		    	return true;
+		    }
 		},
 		
 		_geocodeResultSelected: function(result) {
