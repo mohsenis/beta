@@ -47,7 +47,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.library.samples.*;
 import com.library.util.Types;
 import com.library.model.*;
-
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FareRule;
@@ -2490,74 +2489,8 @@ Loop:  	for (Trip trip: routeTrips){
 	/**
 	 * Generates The multimodal hubs report
 	 */
-/*	    
 	@GET
-	@Path("/hubsR")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object gethubsR(@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
-		if (Double.isNaN(x) || x <= 0) {
-            x = STOP_SEARCH_RADIUS;
-        }       			
-		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
-       	dbindex = default_dbindex;
-        }		
-		String[] dates = date.split(",");
-    	String[][] datedays = daysOfWeekString(dates);
-    	String[] fulldates = datedays[0];
-    	String[] days = datedays[1];
-    	int index = 0;
-    	int progress = 0;
-    	HubRList response = new HubRList();    	
-    	response.metadata = "Report Type:Transit Hubs Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	"Selected Database:" +Databases.dbnames[dbindex]+";Stop Cluster Radius(miles):"+String.valueOf(x) + ";" + DbUpdate.VERSION;
-    	x = x * 1609.34;
-    	setprogVal(key, 5);
-    	TreeSet<StopCluster> clusterList = new TreeSet<StopCluster>();  
-    	clusterList = PgisEventManager.stopClusters(fulldates, days, username, x, dbindex);  
-    	setprogVal(key, 40);
-    	int totalLoad = clusterList.size();
-    	int ctn =  clusterList.size();
-    	while (!clusterList.isEmpty()){     		
-    		StopCluster instance = clusterList.pollLast();    		
-    		progress++;
-    		if (instance.stops.size()>0){    			
-	    		index++;	
-	    		HubR res = new HubR();
-	    		instance.syncOtherParams();
-	    		res.addCluster(instance, index);
-	    		response.HubR.add(res);
-	    		TreeSet<StopCluster> tempClusterList =  new TreeSet<StopCluster>(); 
-	    		Iterator<StopCluster> iter = clusterList.iterator();
-	    		while(iter.hasNext()){
-	    			StopCluster temp = iter.next();
-	    			boolean result = temp.removeStops(instance.getStops());    			
-	    			if (result){
-	    				//System.out.println("Cluster # "+index+ " Result is "+result);
-	    				iter.remove();
-	    				if (temp.stops.size()>0){
-	    					temp.syncParams();
-	    					tempClusterList.add(temp);
-	    				}	    				
-	    			}
-	    		}
-	    		clusterList.addAll(tempClusterList);
-    		}
-    		ctn = clusterList.size();
-    		setprogVal(key, 40+((int) Math.round(progress*60/totalLoad)));
-    	}         
-        try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}        
-        progVal.remove(key);		
-		return response;
-		
-    }
-	*/
-
-	@GET
-	@Path("/hubsR2")
+	@Path("/hubs")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object getHubs(@QueryParam("x1") double x1, @QueryParam("x2") double x2, @QueryParam("popYear") String popYear, @QueryParam("x3") double x3, @QueryParam("key") double key, @QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException {
 		if(popYear==null||popYear.equals("null")){
@@ -2588,13 +2521,6 @@ Loop:  	for (Trip trip: routeTrips){
 		response = getClusterData(y, fulldates, days, dbindex, x2, x3, username, key, popYear);
 		response.metadata = "Report Type:Transit Hubs Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
 		    	"Selected Database:" +Databases.dbnames[dbindex]+";Stop Cluster Radius(miles):"+String.valueOf(x1) + ";"+";Pop. Search Radius(miles):"+String.valueOf(x2) + ";" + DbUpdate.VERSION;
-		/*List<HubCluster> head = new ArrayList<HubCluster>();//response.Clusters.subList(0, 10);
-		for(int i=0;i<10;i++){
-			head.add(response.Clusters.get(i));
-		}
-		response.Clusters = new ArrayList<HubCluster>();
-		response.Clusters.addAll(head);
-		System.out.println(response.Clusters.size());*/
 		return response;
 	}
 	
@@ -2603,10 +2529,7 @@ Loop:  	for (Trip trip: routeTrips){
     	int progress = 0;
     	setprogVal(key, 5);
 		final HashMap<String, Integer> serviceMap = PgisEventManager.stopFrequency(null, dates, days, username, dbindex);
-		//String query = new String();
-		//Connection connection = PgisEventManager.makeConnection(dbindex);
-		//Statement stmt = null;
-		//stmt = connection.createStatement();
+		
 		setprogVal(key, 10);
     	int totalLoad = x.entrySet().size();
     	HashMap<String, HashSet<String>> first = new HashMap<String, HashSet<String>>();
@@ -2710,7 +2633,9 @@ Loop:  	for (Trip trip: routeTrips){
 								+ "	CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop"
 								+ "	CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount"
 								+ "	CROSS JOIN pnrarray CROSS JOIN placesarray";
-//						System.out.println(query);	
+	//					System.out.println(query);			
+					
+						
 						ResultSet rs = stmt.executeQuery(query);
 							
 						while(rs.next()){
@@ -2830,6 +2755,70 @@ Loop:  	for (Trip trip: routeTrips){
 		}
 		return y;
 	}
+	
+	@GET
+    @Path("/connectivityGraph")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object connectivityGraph(@QueryParam("x") Double x, @QueryParam("username") String session, @QueryParam("dbindex") Integer dbindex) throws SQLException{
+		// Making connection to DB
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		
+		//Retrieving the list of agencies and putting the IDs into an array.
+		HashMap<String, String> agencies = SpatialEventManager.getAllAgencies(session, dbindex);
+		
+		ConGraphObjSet response = new ConGraphObjSet();
+		Set<ConGraphObj> e = new HashSet<ConGraphObj>();
+		for (Entry<String, String> i : agencies.entrySet()){
+			System.out.println(i.getKey());
+			e = SpatialEventManager.getConGraphObj(i.getKey(), i.getValue(), x, stmt);
+			response.set.addAll(e);
+		}
+		for (ConGraphObj i : response.set){
+			System.out.println(i.a1ID + "," + i.a2ID + "," + i.connections.size);
+		}
+		connection.close();
+		return response;
+	}
+	
+	@GET
+    @Path("/agencyCentriods")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getAgencyCentroids(@QueryParam("dbindex") Integer dbindex) throws SQLException{
+		// Making connection to DB
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		ConGraphAgencyCentroidsList response = new ConGraphAgencyCentroidsList();
+		String query = "WITH temp AS (SELECT map.agencyid, AVG(stops.lat)::TEXT||','||AVG(stops.lon)::TEXT AS coordinate "
+				+ "	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map "
+				+ "	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id "
+				+ "	GROUP BY map.agencyid) "
+				+ "SELECT agencyid, ARRAY_AGG(coordinate) AS coordinate FROM temp GROUP BY agencyid";
+		System.out.println(query);
+		try{
+			ResultSet rs = stmt.executeQuery(query);			
+			String[] point;
+			String lat;
+			String lng;
+			while(rs.next()){
+				ConGraphAgencyCentroids instance = new ConGraphAgencyCentroids();
+				point = (String[]) rs.getArray("coordinate").getArray();
+				for ( int i = 0 ; i < point.length ; i++ ){
+					lat = point[i].split(",")[0];
+					lng = point[i].split(",")[1];
+					instance.coordinates.add(new com.library.model.Coordinate(Double.parseDouble(lat), Double.parseDouble(lng)));
+				}
+				instance.key = rs.getString("agencyid");
+				response.ConGraphAgencyCentroidsList.add(instance);
+			}
+		}catch(SQLException e){
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		connection.close();
+		return response;
+	}
+	
 	
 	/**
      * Get calendar range for a set of agencies

@@ -1305,7 +1305,7 @@ $mylist
 			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if(casestring=="CSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CPSR"){
@@ -1568,3 +1568,8 @@ function updateListDialog(agenciesIds){
 		}									
 	}
 }
+
+/*
+ * Connectivity Graph
+ */
+$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control" class="leaflet-control ui-widget-content"><button id="con-graph-button" onclick="toggleConGraphDialog()">G</button></div>');

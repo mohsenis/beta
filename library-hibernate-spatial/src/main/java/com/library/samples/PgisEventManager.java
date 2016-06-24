@@ -2377,7 +2377,7 @@ public class PgisEventManager {
 				+ "gtfs_routes routes left join fare on routes.agencyid = fare.aid and routes.id = fare.routeid group by routes.agencyid) select id, name, fareurl, phone, url, "
 				+ "feedname, version, startdate, enddate, publishername, publisherurl, fprices, routes, stops, places, counties, odotregions, urbans, congdists from agencies "
 				+ "inner join stops on agencies.id=stops.aid inner join froutes on stops.aid = froutes.aid";		
-		System.out.println("agency sr: " + mainquery);
+//		System.out.println("agency sr: " + mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();			

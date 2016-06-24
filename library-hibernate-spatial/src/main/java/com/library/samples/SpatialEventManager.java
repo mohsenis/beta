@@ -5,34 +5,43 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.library.model.ConGraphAgencyCentroids;
+import com.library.model.ConGraphObj;
+import com.library.model.Coordinate;
+import com.library.model.TransitConnection;
 import com.library.model.ParknRide;
-import com.vividsolutions.jts.geom.Point;
 
 public class SpatialEventManager {
 
-	public static List<ParknRide> getPnRs(double[] lat, double[] lon, double radius, int dbindex) throws SQLException{
+	public static List<ParknRide> getPnRs(double[] lat, double[] lon,
+			double radius, int dbindex) throws SQLException {
 		List<ParknRide> output = new ArrayList<ParknRide>();
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = null;
 		String query;
-		if (lat.length==1) // If selected area is a circle
+		if (lat.length == 1) // If selected area is a circle
 			query = "SELECT * FROM parknride "
-				+ " WHERE ST_DWITHIN(parknride.geom,ST_transform(ST_setsrid(ST_MakePoint(" + lon[0] + ", " + lat[0] + "),4326), 2993), " + radius + ")";
-		else{	// If selected area is a polygon or rectangle
-			query = "SELECT * FROM parknride " + 
-					" WHERE ST_CONTAINS( ST_transform(st_geometryfromtext('POLYGON((";
-			for (int i =0 ; i <lat.length ; i++){
+					+ " WHERE ST_DWITHIN(parknride.geom,ST_transform(ST_setsrid(ST_MakePoint("
+					+ lon[0] + ", " + lat[0] + "),4326), 2993), " + radius
+					+ ")";
+		else { // If selected area is a polygon or rectangle
+			query = "SELECT * FROM parknride "
+					+ " WHERE ST_CONTAINS( ST_transform(st_geometryfromtext('POLYGON((";
+			for (int i = 0; i < lat.length; i++) {
 				query += lon[i] + " " + lat[i] + ",";
 			}
-			query = query += lon[0] + " " + lat[0]; //Closing the polygon loop 
+			query = query += lon[0] + " " + lat[0]; // Closing the polygon loop
 			query += "))', 4326),2993), parknride.geom)";
 		}
 		System.out.println(query);
 		stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(query);
-		while(rs.next()){
+		while (rs.next()) {
 			ParknRide i = new ParknRide();
 			i.pnrid = rs.getInt("pnrid");
 			i.lat = rs.getDouble("lat");
@@ -61,12 +70,91 @@ public class SpatialEventManager {
 			i.securitycameras = rs.getString("securitycameras");
 			i.sidewalks = rs.getString("sidewalks");
 			i.pnrsignage = rs.getString("pnrsignage");
-			i.lotsurface = rs.getString("lotsurface"); 
-			i.propertyowner = rs.getString("propertyowner"); 
+			i.lotsurface = rs.getString("lotsurface");
+			i.propertyowner = rs.getString("propertyowner");
 			i.localexpert = rs.getString("localexpert");
 			output.add(i);
 		}
 		return output;
 	}
 
+	public static HashMap<String, String> getAllAgencies ( String username, int dbindex ) throws SQLException {
+		HashMap<String,String> response = new HashMap<String, String>();
+		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.id IN (SELECT DISTINCT agency_id AS aid "
+				+ "FROM gtfs_selected_feeds WHERE username='" + username + "')";
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery(query);
+		
+		while ( rs.next() )
+			response.put(rs.getString("id"), rs.getString("name"));
+		
+		connection.close();
+		return response;
+	}
+	
+	public static Set<ConGraphObj> getConGraphObj(String agencyID, String agencyName, double radius, Statement stmt) throws SQLException{
+		Set<ConGraphObj> response = new HashSet<ConGraphObj>();
+		String query = "WITH a1stops AS (SELECT map.agencyid, agencies.name AS agencyname, stops.location, stops.lat, stops.lon, stops.name " +
+				"	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map " +
+				"	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id " + 
+				"	INNER JOIN gtfs_agencies AS agencies ON map.agencyid = agencies.id " +
+				"	WHERE map.agencyid = '" + agencyID + "'), " +
+				" " +
+				"a2stops AS (SELECT a1stops.agencyid AS a1id, a1stops.agencyname AS a1name, map.agencyid AS a2id, agencies.name AS a2name, stops.location,  " +
+				"	stops.lat, stops.lon, stops.name,ST_DISTANCE(stops.location, a1stops.location)::NUMERIC AS dist " +
+				"	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map  " +
+				"	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id  " +
+				"	INNER JOIN a1stops ON ST_DISTANCE(stops.location, a1stops.location) < " + radius + " " +
+				"	INNER JOIN gtfs_agencies AS agencies ON map.agencyid = agencies.id " +
+				"	WHERE map.agencyid != '" + agencyID + "'   " +
+				"	), " +
+				" " +
+				"a1coordinates AS (SELECT a1stops.agencyid AS a1id, AVG(a1stops.lat)::TEXT||','||AVG(a1stops.lon)::TEXT AS a1coordinate FROM a1stops GROUP BY a1id), " +
+				" " +
+				"a2coordinates AS (SELECT a2stops.a2id AS a2id, AVG(a2stops.lat)::TEXT||','||AVG(a2stops.lon)::TEXT AS a2coordinate FROM a2stops GROUP BY a2id) " +
+				" " +
+				"select a1id, a1name, ARRAY_AGG(DISTINCT a1coordinate) AS a1coordinate, a2id, a2name, ARRAY_AGG(DISTINCT a2coordinate) AS a2coordinate, COUNT(dist) AS size " +
+				"	FROM a2stops JOIN a1coordinates USING(a1id) " +
+				"	JOIN a2coordinates USING(a2id) " +
+				"	GROUP BY a1id, a1name, a2id, a2name";
+//		System.out.println(query);
+		
+		try{
+			ResultSet rs = stmt.executeQuery(query);
+			
+			// Initialize a ConGraphObj for isolated agencies. 
+			if (!rs.next()){
+				System.out.println("Isolated Agency: " + agencyID);
+				ConGraphObj instance = new ConGraphObj();
+				instance.a1ID = agencyID;
+				instance.a1name = agencyName;
+				instance.a2ID = "";
+				instance.a2name = "";
+				instance.connections = new TransitConnection(0);
+				response.add(instance);
+			}
+			
+			// Initialize ConGraphObj for the agency connections. 
+			while (rs.next()){
+				ConGraphObj instance = new ConGraphObj();
+				// Getting the agency IDs
+				instance.a1ID = rs.getString("a1id");
+				instance.a1name = rs.getString("a1name");
+				instance.a2ID = rs.getString("a2id");
+				instance.a2name = rs.getString("a2name");
+				
+				// Getting the edge properties.
+				instance.connections = new TransitConnection(rs.getInt("size"));
+				response.add(instance);		
+//				System.out.println(instance.a1ID +"-"+instance.a2ID+"-"+instance.connections.size);
+			}
+		}catch(SQLException e){
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//		System.out.println("response size: " + response.size());
+		return response;
+	}
+	
 }
