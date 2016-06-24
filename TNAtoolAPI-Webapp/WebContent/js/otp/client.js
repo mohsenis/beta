@@ -1572,4 +1572,4 @@ function updateListDialog(agenciesIds){
 /*
  * Connectivity Graph
  */
-$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control" class="leaflet-control ui-widget-content"><button id="con-graph-button" onclick="toggleConGraphDialog()">G</button></div>');
+//$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control" class="leaflet-control ui-widget-content"><button id="con-graph-button" onclick="toggleConGraphDialog()">G</button></div>');
