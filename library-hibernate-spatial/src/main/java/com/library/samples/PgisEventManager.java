@@ -3557,8 +3557,8 @@ public class PgisEventManager {
 				stp.Lng = String.valueOf(location[1]);				
 				if (!(aid.equals(cid))){
 					if (i>0){
-						instance.MapRoutes = Routes;
-						instance.MapStops = Stops;
+						instance.MapRL = Routes;
+						instance.MapSL = Stops;
 						instance.ServiceStop = ServiceStops;
 						instance.RoutesCount = RouteIdList.size();
 						agencies.add(instance);
@@ -3577,8 +3577,8 @@ public class PgisEventManager {
 				String[] stoproutes = (String[]) rs.getArray("routes").getArray();
 				for (int j = 0; j<stoproutes.length; j++){
 					String[] routeinfo = stoproutes[j].split(Character.toString((char)196), 7);
-					if (!stp.RouteIds.contains(routeinfo[1]))
-							stp.RouteIds.add(routeinfo[1]);
+					if (!stp.MapRI.contains(routeinfo[1]))
+							stp.MapRI.add(routeinfo[1]);
 					if (!RouteIdList.contains(cid+routeinfo[1])){
 							RouteIdList.add(cid+routeinfo[1]);							
 					}
@@ -3620,13 +3620,13 @@ public class PgisEventManager {
 				Stops.add(stp);
 				i++;
 		        }		
-			instance.MapRoutes = Routes;
-			instance.MapStops = Stops;
+			instance.MapRL = Routes;
+			instance.MapSL = Stops;
 			instance.ServiceStop = ServiceStops;
 			instance.RoutesCount = RouteIdList.size();
 			agencies.add(instance);
 			TotalStops +=Stops.size();
-			response.MapAgencies = agencies;
+			response.MapAL = agencies;
 			response.TotalStops = String.valueOf(TotalStops);
 			response.TotalRoutes = String.valueOf(AllRouteIds.size());
 			if (Fares.size()>0){
@@ -3652,7 +3652,7 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 *Queries the census part of the on map report	  
+	 *Queries the census and title vi parts of the on map report	  
 	 */
 	public static MapGeo onMapBlocks(double d, double[] lat, double[] lon, int dbindex) {
 		CoordinateReferenceSystem sourceCRS = null;
@@ -3701,7 +3701,7 @@ public class PgisEventManager {
 			}
 			point = targetGeometry.getCentroid();
 			point.setSRID(2993);
-			mainquery += "with block as (select blockid, poptype as btype, landarea as barea, population as bpop, array[block.lat, block.lon] as blocation"
+			mainquery += "with block as (select blockid, poptype as btype, landarea as barea, round((population2010/((landarea+waterarea)*3.86102e-7)),2) as density ,population as bpop, array[block.lat, block.lon] as blocation"
 					+ " from census_blocks block where "
 					+ "st_dwithin(ST_Transform(ST_SetSRID(ST_MakePoint(block.lon, block.lat),4326), 2993),ST_GeomFromText('"+point+"',2993), "+String.valueOf(d)+")=true),"
 					+ "county as (select countyid, cname from census_counties), tract as (select tractid, population as tpop, landarea as tarea, array[tract.lat, tract.lon] as tlocation "
@@ -3727,16 +3727,16 @@ public class PgisEventManager {
 				e.printStackTrace();
 			}
 			targetGeometry.setSRID(2993);
-			mainquery += "with block as (select blockid, poptype as btype, landarea as barea, population as bpop, array[block.lat, block.lon] as blocation"
+			mainquery += "with block as (select blockid, poptype as btype, landarea as barea, round((population2010/((landarea+waterarea)*3.86102e-7)),2) as density , population as bpop, array[block.lat, block.lon] as blocation"
 					+ " from census_blocks block where "
 					+ "st_within(ST_Transform(ST_SetSRID(ST_MakePoint(block.lon, block.lat),4326), 2993),ST_GeomFromText('"+targetGeometry+"',2993))=true),"
 					+ "county as (select countyid, cname from census_counties), tract as (select tractid, population as tpop, landarea as tarea, array[tract.lat, tract.lon] as tlocation "
 					+ "from census_tracts tract where "
 					+ "st_within(ST_Transform(ST_SetSRID(ST_MakePoint(tract.lon, tract.lat),4326), 2993),ST_GeomFromText('"+targetGeometry+"',2993))=true), ";						
 		}
-		mainquery+= "blockcounty as (select blockid, btype, barea, bpop, blocation, cname from block inner join county on left(blockid,5)= countyid), "
-				+ "blocktract as (select blockid, btype, barea, bpop, blocation, cname, tpop, tarea, tlocation from blockcounty left join tract on left(blockid,11)= tractid) "
-				+ "select * from blocktract order by blockid";
+		mainquery+= "blockcounty as (select blockid, btype, barea, density, bpop, blocation, cname from block inner join county on left(blockid,5)= countyid), "
+				+ "blocktract as (select blockid, btype, barea, density, bpop, blocation, cname, tpop, tarea, tlocation from blockcounty left join tract on left(blockid,11)= tractid) "
+				+ "select * from blocktract left join title_vi_blocks_float t6 on blocktract.blockid=t6.blockid order by blocktract.blockid";
 		//System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
@@ -3746,21 +3746,65 @@ public class PgisEventManager {
 			//System.out.println("Query was ran successfully.");
 			int i = 0;
 			MapBlock blk;
+			TitleVIDataFloat T6;		
+			TitleVIDataFloat title6 = new TitleVIDataFloat();
 			while (rs.next()) {
 				cname = rs.getString("cname");
 				blk = new MapBlock();
 				blk.County = cname;
 				blk.ID = rs.getString("blockid");
 				blk.LandArea = rs.getLong("barea");
+				blk.Density = rs.getLong("density");
 				Double[] location = (Double[]) rs.getArray("blocation").getArray();
 				blk.Lat = location[0];
 				blk.Lng = location[1];
 				blk.Population = rs.getLong("bpop");
 				blk.Type = rs.getString("btype");
+				T6 = new TitleVIDataFloat();		
+				T6.id = rs.getString("blockid");		
+				T6.english = rs.getFloat("english");		
+				T6.spanish = rs.getFloat("spanish");		
+				T6.spanishverywell = rs.getFloat("spanishverywell");		
+				T6.spanishwell = rs.getFloat("spanishwell");		
+				T6.spanishnotwell = rs.getFloat("spanishnotwell");		
+				T6.spanishnotatall = rs.getFloat("spanishnotatall");		
+				T6.indo_european = rs.getFloat("indo_european");		
+				T6.indo_europeanverywell = rs.getFloat("indo_europeanverywell");		
+				T6.indo_europeanwell = rs.getFloat("indo_europeanwell");		
+				T6.indo_europeannotwell = rs.getFloat("indo_europeannotwell");		
+				T6.indo_europeannotatall = rs.getFloat("indo_europeannotatall");		
+				T6.asian_and_pacific_island = rs.getFloat("asian_and_pacific_island");		
+				T6.asian_and_pacific_islandverywell = rs.getFloat("asian_and_pacific_islandverywell");		
+				T6.asian_and_pacific_islandwell = rs.getFloat("asian_and_pacific_islandwell");		
+				T6.asian_and_pacific_islandnotwell = rs.getFloat("asian_and_pacific_islandnotwell");		
+				T6.asian_and_pacific_islandnotatall = rs.getFloat("asian_and_pacific_islandnotatall");		
+				T6.other_languages = rs.getFloat("other_languages");		
+				T6.other_languagesverywell = rs.getFloat("other_languagesverywell");		
+				T6.other_languageswell = rs.getFloat("other_languageswell");		
+				T6.other_languagesnotwell = rs.getFloat("other_languagesnotwell");		
+				T6.other_languagesnotatall = rs.getFloat("other_languagesnotatall");		
+				T6.below_poverty = rs.getFloat("below_poverty");		
+				T6.above_poverty = rs.getFloat("above_poverty");		
+				T6.with_disability = rs.getFloat("with_disability");		
+				T6.without_disability = rs.getFloat("without_disability");		
+				T6.from5to17 = rs.getFloat("from5to17");		
+				T6.from18to64 = rs.getFloat("from18to64");		
+				T6.above65 = rs.getFloat("above65");		
+				T6.black_or_african_american = rs.getFloat("black_or_african_american");		
+				T6.american_indian_and_alaska_native = rs.getFloat("american_indian_and_alaska_native");		
+				T6.asian = rs.getFloat("asian");		
+				T6.native_hawaiian_and_other_pacific_islander = rs.getFloat("native_hawaiian_and_other_pacific_islander");		
+				T6.other_races = rs.getFloat("other_races");		
+				T6.two_or_more = rs.getFloat("two_or_more");		
+				T6.white = rs.getFloat("white");		
+				T6.hispanic_or_latino = rs.getFloat("hispanic_or_latino");		
+						
+				//blk.Title6 = T6;		
+				addTitle6(title6,T6);
 				if (!(ccname.equals(cname))){
 					if (i>0){
-						instance.MapBlocks = Blocks;
-						instance.MapTracts = Tracts;
+						instance.MapBL = Blocks;
+						instance.MapTL = Tracts;
 						instance.UrbanPopulation = CountyUrbanPop;
 						instance.RuralPopulation = CountyRuralPop;
 						TotalUrbanPop += CountyUrbanPop;
@@ -3799,8 +3843,8 @@ public class PgisEventManager {
 				Blocks.add(blk);
 				i++;
 		        }
-			instance.MapBlocks = Blocks;
-			instance.MapTracts = Tracts;
+			instance.MapBL = Blocks;
+			instance.MapTL = Tracts;
 			instance.UrbanPopulation = CountyUrbanPop;
 			instance.RuralPopulation = CountyRuralPop;
 			TotalUrbanPop += CountyUrbanPop;
@@ -3808,12 +3852,13 @@ public class PgisEventManager {
 			TotalBlocks += Blocks.size();
 			TotalTracts += Tracts.size();
 			Counties.add(instance);			
-			response.MapCounties = Counties;
+			response.MapCL = Counties;
 			response.RuralPopulation = TotalRuralPop;
 			response.UrbanPopulation = TotalUrbanPop;
 			response.TotalBlocks = TotalBlocks;
 			response.TotalLandArea = TotalLandArea;
-			response.TotalTracts = TotalTracts;					
+			response.TotalTracts = TotalTracts;		
+			response.TitleVI = title6;
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
@@ -3880,7 +3925,9 @@ public class PgisEventManager {
 			String rlname = "";
 			String uid = "";
 			String tsname = "";
-			String thsign = "";			
+			String thsign = "";	
+			int freq = 0;		
+			int maxfreq = 0;
 			ArrayList<String> tripuids = new ArrayList<String>();			
 			//System.out.println("Query was ran successfully.");
 			int agencies_cntr = 0;
@@ -3941,33 +3988,44 @@ public class PgisEventManager {
 	                routes_cntr++;
 	                tripuids = new ArrayList<String>();
 	                }
-	        		uid = rs.getString("uid");
-	        		if (!tripuids.contains(uid)){
-	        			tripuids.add(uid);
-	        			tinstance = new VariantListm();
-	        			tinstance.state = "leaf";
-	        			attribute = new Attr();
-	        			attribute.type = "variant";
-	        			attribute.id = rs.getString("tripid");
-	        			thsign = rs.getString("sign");	        				        					
-                    	if (thsign!=null && !thsign.equals("")) {
-                    		tinstance.data = thsign;  
-                    		tsname = rs.getString("sname");
-                    	}else {
-                    		if (tsname!=null && !tsname.equals("")){
-                    			tinstance.data = tsname;                    			
-                    		}else{
-                    			tinstance.data = "From "+ rs.getString("stop_name_origin") + " to "+ rs.getString("stop_name_destination");
-                    		}
-                    	}
-                    	attribute.longest = (trips_cntr > 0 )? 0:1;                    		
-    	                tinstance.attr = attribute;       			
-	        			rinstance.children.add(tinstance);
-	        			trips_cntr++;
-	        		}					
-	        	}
+	        	uid = rs.getString("uid");
+        		if (!tripuids.contains(uid)){
+        			freq = 1;
+        			tripuids.add(uid);
+        			tinstance = new VariantListm();
+        			tinstance.state = "leaf";
+        			
+        			attribute = new Attr();
+        			attribute.type = "variant";
+        			attribute.id = rs.getString("tripid");
+        			attribute.freq = freq+"";
+        			thsign = rs.getString("sign");	        				        					
+                	if (thsign!=null && !thsign.equals("")) {
+                		tinstance.data = thsign;  
+                		tsname = rs.getString("sname");
+                	}else {
+                		if (tsname!=null && !tsname.equals("")){
+                			tinstance.data = tsname;                    			
+                		}else{
+                			tinstance.data = "From "+ rs.getString("stop_name_origin") + " to "+ rs.getString("stop_name_destination");
+                		}
+                	}
+                	attribute.longest = (trips_cntr > 0 )? 0:1;                    		
+	                tinstance.attr = attribute;       			
+        			rinstance.children.add(tinstance);
+        			trips_cntr++;
+        		}else{
+        			freq++;
+        			if(freq>maxfreq){
+        				maxfreq = freq;
+        			}
+        			((ArrayList<VariantListm>) rinstance.children).get(rinstance.children.size()-1).attr.freq=freq+"";
+        		}
+        		
+        	}
 			instance.children.add(rinstance);
 			response.data.add(instance);
+			response.maxFreq = maxfreq+"";
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
@@ -4029,6 +4087,49 @@ public class PgisEventManager {
 		}else{
 			return ""+c;
 		}
+	}
+	
+	/**
+	 * Adds up title vi data for on map reports	  
+	 */
+	public static void addTitle6(TitleVIDataFloat all, TitleVIDataFloat single){
+		all.id += single.id;
+		all.english += single.english;
+		all.spanish += single.spanish;
+		all.spanishverywell += single.spanishverywell;
+		all.spanishwell += single.spanishwell;
+		all.spanishnotwell += single.spanishnotwell;
+		all.spanishnotatall += single.spanishnotatall;
+		all.indo_european += single.indo_european;
+		all.indo_europeanverywell += single.indo_europeanverywell;
+		all.indo_europeanwell += single.indo_europeanwell;
+		all.indo_europeannotwell += single.indo_europeannotwell;
+		all.indo_europeannotatall += single.indo_europeannotatall;
+		all.asian_and_pacific_island += single.asian_and_pacific_island;
+		all.asian_and_pacific_islandverywell += single.asian_and_pacific_islandverywell;
+		all.asian_and_pacific_islandwell += single.asian_and_pacific_islandwell;
+		all.asian_and_pacific_islandnotwell += single.asian_and_pacific_islandnotwell;
+		all.asian_and_pacific_islandnotatall += single.asian_and_pacific_islandnotatall;
+		all.other_languages += single.other_languages;
+		all.other_languagesverywell += single.other_languagesverywell;
+		all.other_languageswell += single.other_languageswell;
+		all.other_languagesnotwell += single.other_languagesnotwell;
+		all.other_languagesnotatall += single.other_languagesnotatall;
+		all.below_poverty += single.below_poverty;
+		all.above_poverty += single.above_poverty;
+		all.with_disability += single.with_disability;
+		all.without_disability += single.without_disability;
+		all.from5to17 += single.from5to17;
+		all.from18to64 += single.from18to64;
+		all.above65 += single.above65;
+		all.black_or_african_american += single.black_or_african_american;
+		all.american_indian_and_alaska_native += single.american_indian_and_alaska_native;
+		all.asian += single.asian;
+		all.native_hawaiian_and_other_pacific_islander += single.native_hawaiian_and_other_pacific_islander;
+		all.other_races += single.other_races;
+		all.two_or_more += single.two_or_more;
+		all.white += single.white;
+		all.hispanic_or_latino += single.hispanic_or_latino;
 	}
 }
 

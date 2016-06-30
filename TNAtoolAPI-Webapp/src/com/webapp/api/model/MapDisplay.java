@@ -11,7 +11,7 @@ import com.library.model.MapTransit;
 public class MapDisplay {
 	
 	@XmlElement(name="MapTR")	
-	public MapTransit MapTr;
+	public MapTransit MapTR;
 	
 	@XmlElement(name="MapG")	
 	public MapGeo MapG;

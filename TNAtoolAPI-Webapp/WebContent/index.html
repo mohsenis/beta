@@ -18,7 +18,9 @@
 	<script src="js/lib/leaflet-0.7/Control.MiniMap.js"></script>
 	<script src="js/lib/leaflet-0.7/leaflet.contextmenu.js"></script>
 	<script type="text/javascript" src="js/otp/shapes.js"></script>	
-	<script src="js/lib/date.js"></script><script src="Phase4/Datasources.js"></script>
+	<script type="text/javascript" src="js/otp/tractsShape.js"></script>
+	<script src="js/lib/date.js"></script>
+	<script src="Phase4/Datasources.js"></script>
 	<script src="js/lib/leaflet-0.7/leaflet.draw.js"></script>
 	<script src="js/lib/DataTables/js/jquery.dataTables.js"></script>
 	<script src="js/lib/DataTables/js/dataTables.tableTools.js"></script>
@@ -86,13 +88,14 @@
 		  <ul>
 		    <li><a href="#transit">Transit Agencies</a></li>
 		    <li><a href="#geography">Census</a></li>
+		    <li><a href="#title6">Title VI</a></li>
 		    <li><a href="#parknride">Park and Ride</a></li>
 		  </ul>
 		  <div id="transit">
 		  	<b>Show Transit: </b><input type="radio" name="transitShow" id="stopsCheck" value="stops" style="margin-left:2em" onclick="transitRadio(this)">Stops
 		  				 <input type="radio" name="transitShow" id="routeCheck" value="routes" style="margin-left:1em" onclick="transitRadio(this)">Routes
 		  				 <input type="radio" name="transitShow" class="bothCheck" value="both" style="margin-left:1em" checked onclick="transitRadio(this)">Both<br><br>
-		  	<table id="stopRoute" style="border:none; font-size:100%">
+		  	<table id="stopRoute" style="border:none; font-size:100%; width:90%"">
 		  		<tr>
 		  			<td><b>Number of Stops:</b></td>
 		  			<td class="onMapdata" id="ts"></td>
@@ -119,7 +122,7 @@
 		  	<b>Show Census: </b><input type="radio" name="censusShow" id="blocksCheck" value="blocks" style="margin-left:2em" onclick="geoRadio(this)">Blocks
 		  						<input type="radio" name="censusShow" id="tractsCheck" value="tracts" style="margin-left:1em" onclick="geoRadio(this)">Tracts
 		  				 		<input type="radio" name="censusShow" class="bothCheck" value="both" style="margin-left:1em" checked onclick="geoRadio(this)">Both<br><br>
-		  	<table id="blockTract" style="border:none; font-size:100%">
+		  	<table id="blockTract" style="border:none; font-size:100%; width:90%"">
 		  		<tr>
 		  			<td><b>Urban Population (2010):</b></td>
 		  			<td class="onMapdata" id="tpu"></td>
@@ -141,7 +144,164 @@
 		  	<br> -->		  	
 		  	<p id="displayGeoReport"></p>
 		  </div>
-		  
+		  <div id="title6">
+		  	<table style="width:100%; font-size:100%">
+		  		<tr>
+		  			<td><b>Percent of Population Disabled:</b></td>
+		  			<td class="onMapdata" id="pd"></td>
+		  		</tr>
+		  		<tr><td><br></td></tr>
+		  		<tr>
+		  			<td><b>Percent of Population Below Poverty:</b></td>
+		  			<td class="onMapdata" id="pp"></td>
+		  		</tr>
+		  	</table>
+		  	<br>
+		  	<p><b>Ethnicity:</b><br></p>
+		  	<table style="font-size:95%;width:100%">
+		  		<tr>
+		  			<td>American Indian or Alaska Native:</td>
+		  			<td class="onMapdata" id="pei"></td>
+		  		</tr>
+		  		<tr>
+		  			<td>Asian:</td>
+		  			<td class="onMapdata" id="pea"></td>
+		  		</tr>
+		  		<tr>
+		  			<td>Black or African American:</td>
+		  			<td class="onMapdata" id="peb"></td>
+		  		</tr>
+		  		<tr>
+		  			<td>Hispanic or Latino:</td>
+		  			<td class="onMapdata" id="peh"></td>
+		  		</tr>
+		  		<tr>
+		  			<td>Native Hawaiian and Other Pacific Islander:</td>
+		  			<td class="onMapdata" id="pen"></td>
+		  		</tr>
+		  		<tr>
+		  			<td>White:</td>
+		  			<td class="onMapdata" id="pew"></td>
+		  		</tr>
+		  		<tr>
+		  			<td>Two or More Races:</td>
+		  			<td class="onMapdata" id="pet"></td>
+		  		</tr>
+		  		<tr>
+		  			<td>Other Races:</td>
+		  			<td class="onMapdata" id="peo"></td>
+		  		</tr>
+		  	</table>
+		  	<br>
+		  	<p><b>Age:</b></p>
+		  	<table style="font-size:95%;width:100%">
+		  		<tr>
+		  			<td>5 to 17 years old:</td>
+		  			<td class="onMapdata" id="pa5"></td>
+		  		</tr>
+		  		<tr>
+		  			<td>18 to 64 years old:</td>
+		  			<td class="onMapdata" id="pa18"></td>
+		  		</tr>
+		  		<tr>
+		  			<td>65 years old and above:</td>
+		  			<td class="onMapdata" id="pa64"></td>
+		  		</tr>
+		  	</table>	
+		  	<br>
+		  	<p><b>Language Spoken:</b></p>
+		  	<table style="font-size:95%;width:100%">
+		  		<tr>
+		  			<td>English:</td>
+		  			<td class="onMapdata" id="plse"></td>
+		  		</tr>
+		  	</table><br>
+		  	<table style="font-size:95%;width:100%">	
+		  		<tr>
+		  			<td>Spanish:</td>
+		  			<td class="onMapdata" id="plss"></td>
+		  		</tr>
+		  	</table>
+		  	<p>English Proficiency:</p>
+		  	<table class="LEP" style="font-size:95%;width:100%">
+		  		<tr>
+		  			<td>very well</td>
+		  			<td>well</td>
+		  			<td>not well</td>
+		  			<td>not at all</td>
+		  		</tr>
+		  		<tr>
+		  			<td id="plss1"></td>
+		  			<td id="plss2"></td>
+		  			<td id="plss3"></td>
+		  			<td id="plss4"></td>
+		  		</tr>
+		  	</table><br>
+		  		
+		  	<table style="font-size:95%;width:100%">
+		  		<tr>
+		  			<td>Asian & Pacific Islander:</td>
+		  			<td class="onMapdata" id="plsa"></td>
+		  		</tr>
+		  	</table>
+		  	<p>English Proficiency:</p>
+		  	<table class="LEP" style="font-size:95%;width:100%">
+		  		<tr>
+		  			<td>very well</td>
+		  			<td>well</td>
+		  			<td>not well</td>
+		  			<td>not at all</td>
+		  		</tr>
+		  		<tr>
+		  			<td id="plsa1"></td>
+		  			<td id="plsa2"></td>
+		  			<td id="plsa3"></td>
+		  			<td id="plsa4"></td>
+		  		</tr>
+		  	</table><br>
+		  	<table style="font-size:95%;width:100%">
+		  		<tr>
+		  			<td>Indo European:</td>
+		  			<td class="onMapdata" id="plsi"></td>
+		  		</tr>
+		  	</table>
+		  	<p>English Proficiency:</p>
+		  	<table class="LEP" style="font-size:95%;width:100%">
+		  		<tr>
+		  			<td>very well</td>
+		  			<td>well</td>
+		  			<td>not well</td>
+		  			<td>not at all</td>
+		  		</tr>
+		  		<tr>
+		  			<td id="plsi1"></td>
+		  			<td id="plsi2"></td>
+		  			<td id="plsi3"></td>
+		  			<td id="plsi4"></td>
+		  		</tr>
+		  	</table><br>
+		  	<table style="font-size:95%;width:100%">
+		  		<tr>
+		  			<td>Other Languages:</td>
+		  			<td class="onMapdata" id="plso"></td>
+		  		</tr>
+		  	</table>
+		  	<p>English Proficiency</p>
+		  	<table class="LEP" style="font-size:95%;width:100%">
+		  		<tr>
+		  			<td>very well</td>
+		  			<td>well</td>
+		  			<td>not well</td>
+		  			<td>not at all</td>
+		  		</tr>
+		  		<tr>
+		  			<td id="plso1"></td>
+		  			<td id="plso2"></td>
+		  			<td id="plso3"></td>
+		  			<td id="plso4"></td>
+		  		</tr>
+		  	</table><br>
+		  </div>
 		  <div id="parknride">
 		  	<table id="parknrideInfo" style="border:none; font-size:100%">
 		  		<tr>

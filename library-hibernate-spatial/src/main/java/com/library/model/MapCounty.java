@@ -28,8 +28,8 @@ public class MapCounty {
 	public long RuralPopulation;
 	
 	@XmlElement(name = "MapTL")
-    public Collection<MapTract> MapTracts = new ArrayList<MapTract>();
+    public Collection<MapTract> MapTL = new ArrayList<MapTract>();
 
 	@XmlElement(name = "MapBL")
-    public Collection<MapBlock> MapBlocks = new ArrayList<MapBlock>();
+    public Collection<MapBlock> MapBL = new ArrayList<MapBlock>();
 }

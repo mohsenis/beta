@@ -28,5 +28,5 @@ public class MapTransit {
 	public String MedianFare;
 	
 	@XmlElement(name = "MapAL")
-    public Collection<MapAgency> MapAgencies = new ArrayList<MapAgency>();
+    public Collection<MapAgency> MapAL = new ArrayList<MapAgency>();
 }

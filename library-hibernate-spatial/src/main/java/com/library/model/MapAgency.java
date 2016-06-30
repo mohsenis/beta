@@ -28,8 +28,8 @@ public class MapAgency {
 	public int RoutesCount=0;
 	
 	@XmlElement(name = "MapRL")
-    public Collection<MapRoute> MapRoutes = new ArrayList<MapRoute>();
+    public Collection<MapRoute> MapRL = new ArrayList<MapRoute>();
 
 	@XmlElement(name = "MapSL")
-    public Collection<MapStop> MapStops = new ArrayList<MapStop>();
+    public Collection<MapStop> MapSL = new ArrayList<MapStop>();
 }

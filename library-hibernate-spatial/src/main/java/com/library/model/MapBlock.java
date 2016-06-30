@@ -25,6 +25,10 @@ public class MapBlock {
 	
 	@XmlAttribute
 	@JsonSerialize
+	public long Density;
+	
+	@XmlAttribute
+	@JsonSerialize
 	public double Lat;
 	
 	@XmlAttribute
@@ -34,5 +38,9 @@ public class MapBlock {
 	@XmlAttribute
 	@JsonSerialize
 	public String County;
+	
+	/*@XmlAttribute
+	@JsonSerialize
+	public TitleVIDataFloat Title6;*/
 	
 }

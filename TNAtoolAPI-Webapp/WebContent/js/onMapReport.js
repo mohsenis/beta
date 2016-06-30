@@ -74,6 +74,7 @@ function onMapSubmit(){
 	$("#dialogDate").datepicker( "setDate", currentDate);
 	$("#tabs").hide();
 	$('#dialogPreLoader').show();	
+	$('.ui-tabs .ui-tabs-nav li a').css("padding",".5em 0.5em");
 	showOnMapReport(currentLats, currentLngs, currentDate, currentX);
 }
 
@@ -161,7 +162,7 @@ function showOnMapReport(lat, lon, date, x){
 	onMapCluster.addLayer(onMapPnrCluster);
 	onMapCluster.addLayer(onMapPnrStopCluster);
 	onMapCluster.addLayer(onMapPnrRouteCluster);
-	onMapCluster.addLayer(onMapTractCluster);
+	//onMapCluster.addLayer(onMapTractCluster);
 	map.addLayer(onMapCluster);
 	stopCluster = new Array();
 	routeCluster = new Array();
@@ -181,10 +182,10 @@ function showOnMapReport(lat, lon, date, x){
 		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(data){
-			$('#ts').html(numberWithCommas(data.MapTr.TotalStops));
-			$('#tr').html(numberWithCommas(data.MapTr.TotalRoutes));
-			$('#af').html('$'+Math.round(data.MapTr.AverageFare*100)/100);
-			$('#mff').html('$'+data.MapTr.MedianFare);
+			$('#ts').html(numberWithCommas(data.MapTR.TotalStops));
+			$('#tr').html(numberWithCommas(data.MapTR.TotalRoutes));
+			$('#af').html('$'+Math.round(data.MapTR.AverageFare*100)/100);
+			$('#mff').html('$'+data.MapTR.MedianFare);
 			var html = '<table id="transitTable" class="display" align="center">';
 			var tmp = '<th>Agency Name</th>'+
 			'<th>Routes</th>'+
@@ -193,10 +194,10 @@ function showOnMapReport(lat, lon, date, x){
 			html += '<thead>'+tmp+'</thead><tbody>';
 			var html2 = '<tfoot>'+tmp+'</tfoot>';
 			var popupOptions = {'offset': L.point(0, -8)};
-			$.each(data.MapTr.MapAgencies, function(i,item){
+			$.each(data.MapTR.MapAL, function(i,item){
 				html += '<td>'+item.Name+'</td>'+
 						'<td>'+numberWithCommas(item.RoutesCount)+'</td>'+
-						'<td>'+numberWithCommas(item.MapStops.length)+'</td>'+
+						'<td>'+numberWithCommas(item.MapSL.length)+'</td>'+
 						'<td>'+numberWithCommas(item.ServiceStop)+'</td></tr>';
 				//var tmpStopCluster = new L.FeatureGroup();
 				var tmpRouteCluster = new L.FeatureGroup();
@@ -207,13 +208,21 @@ function showOnMapReport(lat, lon, date, x){
 					iconCreateFunction: function (cluster) {
 						return new L.DivIcon({ html: cluster.getChildCount(), className: colorArray[c], iconSize: new L.Point(30, 30) });
 					},
-					spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+					spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
 				});
-				$.each(item.MapStops, function(j,jtem){
+				$.each(item.MapSL, function(j,jtem){
 					
-					var marker = L.marker([jtem.Lat,jtem.Lng]/*, {icon: onMapIcon}*/);
+					//var marker = L.marker([jtem.Lat,jtem.Lng]/*, {icon: onMapIcon}*/);
+					var marker = new L.CircleMarker([jtem.Lat,jtem.Lng], {		
+						radius: 8,		
+				        fillColor: colorset[c],		
+				        color: "#333333",		
+				        weight: 2,		
+				        opacity: 1,		
+				        fillOpacity: 0.8,		
+				    });
 					pophtml='<br><b>Serving Routes ID(s):</b>';
-					$.each(jtem.RouteIds, function(h,htem){
+					$.each(jtem.MapRI, function(h,htem){
 						pophtml+='<br><span style="margin-left:2em">'+htem+'</span>';
 					});
 					marker.bindPopup('<b>Stop ID:</b> '+jtem.Id+
@@ -223,7 +232,7 @@ function showOnMapReport(lat, lon, date, x){
 					tmpStopCluster.addLayer(marker);
 				});
 				stopCluster.push(tmpStopCluster);
-				$.each(item.MapRoutes, function(k,ktem){
+				$.each(item.MapRL, function(k,ktem){
 					if(ktem.hasDirection){
 						d0 = L.PolylineUtil.decode(ktem.Shape0);
 						d1 = L.PolylineUtil.decode(ktem.Shape1);
@@ -288,34 +297,51 @@ function showOnMapReport(lat, lon, date, x){
 			'<th>Rural Population (2010)</th></tr>';	
 			html += '<thead>'+tmp+'</thead><tbody>';
 			var popupOptions = {'offset': L.point(0, -8)};
-			$.each(data.MapG.MapCounties, function(i,item){
+			$.each(data.MapG.MapCL, function(i,item){
 				html += '<td>'+item.Name.replace(' County','')+'</td>'+
-						'<td>'+numberWithCommas(item.MapTracts.length)+'</td>'+
-						'<td>'+numberWithCommas(item.MapBlocks.length)+'</td>'+
+						'<td>'+numberWithCommas(item.MapTL.length)+'</td>'+
+						'<td>'+numberWithCommas(item.MapBL.length)+'</td>'+
 						'<td>'+numberWithCommas(item.UrbanPopulation)+'</td>'+
 						'<td>'+numberWithCommas(item.RuralPopulation)+'</td></tr>';				
-				var tmpBlockCluster = new L.MarkerClusterGroup({
-					/*maxClusterRadius: 120,*/
+				/*var tmpBlockCluster = new L.MarkerClusterGroup({
+					maxClusterRadius: 120,
 					iconCreateFunction: function (cluster) {
 						return new L.DivIcon({ html: cluster.getChildCount(), className: GcolorArray[0], iconSize: new L.Point(25, 25) });						
 					},
 					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
-				});
+				});*/
+				var tmpBlockCluster = new L.FeatureGroup();
 				var tmpTractCluster = new L.MarkerClusterGroup({
 					maxClusterRadius: 80,
 					iconCreateFunction: function (cluster) {
 						return new L.DivIcon({ html: cluster.getChildCount(), className: GcolorArray[1], iconSize: new L.Point(30, 30) });						
 					},
-					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true
+					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: false
 				});
-				$.each(item.MapBlocks, function(j,jtem){						
-						var marker = L.marker([jtem.Lat,jtem.Lng]/*, {icon: onMapIcon}*/);						
+				$.each(item.MapBL, function(j,jtem){						
+						//var marker = L.marker([jtem.Lat,jtem.Lng]/*, {icon: onMapIcon}*/);	
+						var marker = new L.CircleMarker([jtem.Lat,jtem.Lng], {		
+							radius: 6,		
+							fillColor: getColor(jtem.Density),		
+					        color: "#333333",		
+					        weight: 0,		
+					        opacity: 1,		
+					        fillOpacity: 0.8,		
+					    });
 						marker.bindPopup('<b>Block ID:</b> '+jtem.ID+'<br><b>Type:</b> '+jtem.Type+'<br><b>Population:</b> '+numberWithCommas(jtem.Population)+'<br><b>County:</b> '+jtem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>',popupOptions);
 						tmpBlockCluster.addLayer(marker);				
 				});
 				blockCluster.push(tmpBlockCluster);				
-				$.each(item.MapTracts, function(k,ktem){
-					var tractmarker = L.marker([ktem.Lat,ktem.Lng]/*, {icon: onMapIcon}*/);
+				$.each(item.MapTL, function(k,ktem){
+					//var tractmarker = L.marker([ktem.Lat,ktem.Lng]/*, {icon: onMapIcon}*/);
+					var tractmarker = new L.CircleMarker([ktem.Lat,ktem.Lng], {		
+						radius: 8,		
+				        fillColor: "#0000FF",		
+				        color: "#333333",		
+				        weight: 2,		
+				        opacity: 1,		
+				        fillOpacity: 0.8,		
+				    });
 					tractmarker.bindPopup('<b>Tract ID:</b> '+ktem.ID+'<br><b>Population:</b> '+numberWithCommas(ktem.Population)+'<br><b>County:</b> '+ktem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(ktem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>',popupOptions);
 					tmpTractCluster.addLayer(tractmarker);
 				});
@@ -347,7 +373,48 @@ function showOnMapReport(lat, lon, date, x){
 		    		onMapTractCluster.addLayer(tractCluster[$(this).index()]);
 		    	}
 		    });		    
-		    
+		  //Title VI		
+		    var title6 = data.MapG.TitleVI;		
+		    $('#pd').html(addPercent((100*title6.with_disability/(title6.with_disability+title6.without_disability)).toFixed(2)));		
+		    $('#pp').html(addPercent((100*title6.below_poverty/(title6.below_poverty+title6.above_poverty)).toFixed(2)));		
+		    		
+		    $('#pew').html(numWithCommas(title6.white.toFixed(0)));		
+		    $('#peh').html(numWithCommas(title6.hispanic_or_latino.toFixed(0)));		
+		    $('#peb').html(numWithCommas(title6.black_or_african_american.toFixed(0)));		
+		    $('#pei').html(numWithCommas(title6.american_indian_and_alaska_native.toFixed(0)));		
+		    $('#pea').html(numWithCommas(title6.asian.toFixed(0)));		
+		    $('#pen').html(numWithCommas(title6.native_hawaiian_and_other_pacific_islander.toFixed(0)));		
+		    $('#pet').html(numWithCommas(title6.two_or_more.toFixed(0)));		
+		    $('#peo').html(numWithCommas(title6.other_races.toFixed(0)));		
+		    		
+		    $('#pa5').html(numWithCommas(title6.from5to17.toFixed(0)));		
+		    $('#pa18').html(numWithCommas(title6.from18to64.toFixed(0)));		
+		    $('#pa64').html(numWithCommas(title6.above65.toFixed(0)));		
+		    		
+		    $('#plse').html(numWithCommas(title6.english.toFixed(0)));		
+		    $('#plss').html(numWithCommas(title6.spanish.toFixed(0)));		
+		    $('#plss1').html(numWithCommas(title6.spanishverywell.toFixed(0)));		
+		    $('#plss2').html(numWithCommas(title6.spanishwell.toFixed(0)));		
+		    $('#plss3').html(numWithCommas(title6.spanishnotwell.toFixed(0)));		
+		    $('#plss4').html(numWithCommas(title6.spanishnotatall.toFixed(0)));		
+		    		
+		    $('#plsa').html(numWithCommas(title6.asian_and_pacific_island.toFixed(0)));		
+		    $('#plsa1').html(numWithCommas(title6.asian_and_pacific_islandverywell.toFixed(0)));		
+		    $('#plsa2').html(numWithCommas(title6.asian_and_pacific_islandwell.toFixed(0)));		
+		    $('#plsa3').html(numWithCommas(title6.asian_and_pacific_islandnotwell.toFixed(0)));		
+		    $('#plsa4').html(numWithCommas(title6.asian_and_pacific_islandnotatall.toFixed(0)));		
+		    		
+		    $('#plsi').html(numWithCommas(title6.indo_european.toFixed(0)));		
+		    $('#plsi1').html(numWithCommas(title6.indo_europeanverywell.toFixed(0)));		
+		    $('#plsi2').html(numWithCommas(title6.indo_europeanwell.toFixed(0)));		
+		    $('#plsi3').html(numWithCommas(title6.indo_europeannotwell.toFixed(0)));		
+		    $('#plsi4').html(numWithCommas(title6.indo_europeannotatall.toFixed(0)));		
+		    		
+		    $('#plso').html(numWithCommas(title6.other_languages.toFixed(0)));		
+		    $('#plso1').html(numWithCommas(title6.other_languagesverywell.toFixed(0)));		
+		    $('#plso2').html(numWithCommas(title6.other_languageswell.toFixed(0)));		
+		    $('#plso3').html(numWithCommas(title6.other_languagesnotwell.toFixed(0)));		
+		    $('#plso4').html(numWithCommas(title6.other_languagesnotatall.toFixed(0)));
 		    //Beginning point of the Park n Ride table
 		    $('#npnr').html(numberWithCommas(data.MapPnR.totalPnR));
 			$('#nspc').html(numberWithCommas(data.MapPnR.totalSpaces));

@@ -21,7 +21,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @XmlRootElement(name = "attr")
 public class Attr {
-	
+	@XmlAttribute
+    @JsonSerialize
+	public String freq;
 	
 	@XmlAttribute
     @JsonSerialize
