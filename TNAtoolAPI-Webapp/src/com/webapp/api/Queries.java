@@ -279,7 +279,7 @@ public class Queries {
    	MapDisplay response = new MapDisplay();
    	MapTransit stops = PgisEventManager.onMapStops(fulldates,days,username, x, lat, lon, dbindex);
    	MapGeo blocks = PgisEventManager.onMapBlocks(x, lat, lon, dbindex);
-   	response.MapTr = stops;
+   	response.MapTR = stops;
    	response.MapG = blocks;
    	MapPnR pnr=new MapPnR();
    	List<ParknRide> PnRs=new ArrayList<ParknRide>();
