@@ -15,6 +15,10 @@ public class HubsClusterList {
     @JsonSerialize
     public String metadata;
 	
+	@XmlAttribute
+    @JsonSerialize
+    public List<String> keyAgecies;
+	
 	@XmlElement(name = "Clusters")
 	public List<HubCluster> Clusters = new ArrayList<HubCluster>();
 

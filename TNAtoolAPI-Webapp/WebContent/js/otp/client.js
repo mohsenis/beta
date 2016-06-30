@@ -441,6 +441,7 @@ function editCancel(){
 	currentCircleCenterTmp=currentCircleCenter;
 }
 function pad(s) { return (s < 10) ? '0' + s : s; }
+
 map.on('draw:created', function (e) {
 	currentLats = new Array();
 	currentLngs = new Array();
@@ -448,6 +449,7 @@ map.on('draw:created', function (e) {
 	layer = e.layer;
 	currentLayer = layer;
 	map.fitBounds(layer.getBounds().pad(0.5));
+	var radius='';
 	if (type === 'circle') {		
 		currentCircleCenter = layer.getLatLng();
 		currentCircleCenterTmp= layer.getLatLng();
@@ -457,6 +459,7 @@ map.on('draw:created', function (e) {
 		currentLngs.push((Math.round(drawCentroid[1] * 1000000) / 1000000).toString());
 		currentX = layer.getRadius();		
 		area = Math.pow(layer.getRadius()*0.000621371,2)*Math.PI;
+		radius='<p><b>Radius:</b> <input type="number" value="' + (currentX*0.000621371).toFixed(2) + '" min="0.01" step="0.01" id="POPradius"> miles</p>';
 	}else{
 		area = L.GeometryUtil.geodesicArea(layer.getLatLngs())*0.000000386102;
 		drawCentroid = getCentroid(layer.getLatLngs());
@@ -489,10 +492,33 @@ map.on('draw:created', function (e) {
 			'<p><b>Centroid:</b><br>'+
 			'<span style="padding-left:1em">Latitude: <span id="POPlat" style="padding-left:1.5em">'+drawCentroid[0]+'</span></span><br>'+
 	    	'<span style="padding-left:1em">Longitude: <span id="POPlon">'+drawCentroid[1]+'</span></span>'+
+	    	radius+
 			'<p><b>Area:</b> <span id="POParea">'+area+'</span> mi<sup>2</sup></p>'+
 			'<p><b>Date</b>: <input readonly type="text" class="POPcal" id="POPdatepicker"></p>'+
 			'<p><button type="button" style="width:100%" id="POPbutton" onclick="onMapSubmit()">Generate Report</button></p>'
-	,{closeOnClick:false,draggable:true}).openPopup();	
+	,{closeOnClick:false,draggable:true}).openPopup();		
+});
+map.on('popupopen',function (e) {
+	try{
+		// Checks to see if the popup is for a circle drawn around a stop or a coordinate.
+		if (e.popup._content.indexOf('POPradius')>-1){
+			
+			// updates the radius and area on the popup based on the current size of the circle
+			$('#POPradius').html(layer.getRadius()/1609.344);
+			$('#POParea').html((Math.pow(layer.getRadius()*0.000621371,2)*Math.PI).toFixed(2));
+			
+			// Changes the radius of the drawn circle by changing the radius in the popup and current radius update.
+			$('#POPradius').on('keyup change wheel', function(e) {
+				layer.setRadius(this.value*1609.344);		
+				currentX = this.value*1609.344;
+				area = (Math.pow(layer.getRadius()*0.000621371,2)*Math.PI).toFixed(2);
+				$('#POParea').html(area);
+				layer.pop
+			});
+		}
+	}catch (e) {
+		console.log(e);
+	}		
 });
 setDialog();
 function circleMove(latlng){
@@ -510,7 +536,6 @@ map.on('draw:editstart', function (e) {
 });
 map.on('draw:edited', function (e) {
 	$('#circleRadius1').css('visibility','hidden');
-	
 	var layers = e.layers;
     layers.eachLayer(function (layer) {
     	currentLats = new Array();
@@ -524,7 +549,7 @@ map.on('draw:edited', function (e) {
     		currentLngs.push((Math.round(drawCentroid[1] * 1000000) / 1000000).toString());
     		area = Math.pow(layer.getRadius()*0.000621371,2)*Math.PI;
     		currentCircleCenter = layer.getLatLng();
-    		currentCircleCenterTmp= layer.getLatLng();
+    		currentCircleCenterTmp= layer.getLatLng();    	    			
         }catch(err){
         	area = L.GeometryUtil.geodesicArea(layer.getLatLngs())*0.000000386102;
     		drawCentroid = getCentroid(layer.getLatLngs());
@@ -538,6 +563,10 @@ map.on('draw:edited', function (e) {
     	drawCentroid[1]= (Math.round(drawCentroid[1] * 1000000) / 1000000).toString();
     	area = Math.round(area * 100) / 100;
     	layer.openPopup();
+    	try{
+    		$('#POPradius').val((currentX*0.000621371).toFixed(2));
+    	}catch (e) {
+		}
     	$('#POPlat').html(drawCentroid[0]);
     	$('#POPlon').html(drawCentroid[1]);
     	$('#POParea').html(area);
@@ -883,9 +912,13 @@ var searchControl = L.Control.geocoder().addTo(map);
 }).addTo(map);*/
 map.on('click', function(){
 	if (searchControl._geocodeMarker) {
-		searchControl._map.removeLayer(searchControl._geocodeMarker);
+		searchControl._map.removeLayer(searchControl._geocodeMarker);		
 	}
 });
+
+/*function myFunction(){
+	alert('myFunction ran');
+}*/
 
 osmLayer.on('load', function(e) {
 	ggb = false;    
@@ -1269,10 +1302,10 @@ $mylist
 			    	window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if(casestring=="CSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CPSR"){
@@ -1535,3 +1568,11 @@ function updateListDialog(agenciesIds){
 		}									
 	}
 }
+<<<<<<< HEAD
+=======
+
+/*
+ * Connectivity Graph
+ */
+//$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control" class="leaflet-control ui-widget-content"><button id="con-graph-button" onclick="toggleConGraphDialog()">G</button></div>');
+>>>>>>> refs/remotes/choose_remote_name/master
