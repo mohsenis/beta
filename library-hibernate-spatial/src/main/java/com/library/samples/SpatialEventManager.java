@@ -10,11 +10,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.library.model.ConGraphAgencyCentroids;
-import com.library.model.ConGraphObj;
-import com.library.model.Coordinate;
 import com.library.model.TransitConnection;
 import com.library.model.ParknRide;
+import com.library.model.agencyCluster;
+import com.library.model.congrapph.AgencyCentroid;
+import com.library.model.congrapph.ConGraphAgencyGraph;
+import com.library.model.congrapph.ConGraphCluster;
+import com.library.model.congrapph.ConGraphObj;
+import com.library.model.congrapph.Coordinate;
 
 public class SpatialEventManager {
 
@@ -80,7 +83,7 @@ public class SpatialEventManager {
 
 	public static HashMap<String, String> getAllAgencies ( String username, int dbindex ) throws SQLException {
 		HashMap<String,String> response = new HashMap<String, String>();
-		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.id IN (SELECT DISTINCT agency_id AS aid "
+		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.defaultid IN (SELECT DISTINCT agency_id AS aid "
 				+ "FROM gtfs_selected_feeds WHERE username='" + username + "')";
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
@@ -155,6 +158,72 @@ public class SpatialEventManager {
 		}
 //		System.out.println("response size: " + response.size());
 		return response;
+	}
+	
+	/**
+	 * 
+	 * @param agencyID
+	 * @param stmt
+	 * @return
+	 * @throws SQLException 
+	 */
+	public static ConGraphAgencyGraph getAgencyCentroids(String agencyID, Statement stmt, double RADIUS) throws SQLException{
+//		ConGraphAgencyGraph response = new ConGraphAgencyGraph(new HashSet<Coordinate[]>());
+		String query = "SELECT name, lat, lon FROM gtfs_stops WHERE agencyid='" + agencyID + "' ORDER BY lat, lon";;
+		ResultSet rs = stmt.executeQuery(query);
+		List<ConGraphCluster> clusters = new ArrayList<ConGraphCluster>();
+		List<Coordinate> points = new ArrayList<Coordinate>();
+		System.out.println("agency:"+agencyID);
+		while (rs.next()){
+			Coordinate c = new Coordinate(rs.getDouble("lat"), rs.getDouble("lon"));
+			points.add(c);
+		}
+		
+		while (!points.isEmpty()){
+			Set<Coordinate> clusterPoints = new HashSet<Coordinate>();
+			Coordinate currenPoint = points.remove(0);
+			clusterPoints.add(currenPoint);
+			
+			for ( Coordinate p : points ){
+				if (ConGraphAgencyGraph.getDistance(currenPoint, p) < RADIUS){
+					clusterPoints.add(p);
+				}
+			}
+			
+			ConGraphCluster c = new ConGraphCluster( clusterPoints );
+			points.removeAll(clusterPoints);
+			clusters.add(c); 
+		}
+		
+		ConGraphAgencyGraph response = new ConGraphAgencyGraph(clusters);
+		response.ID = agencyID;
+				
+		return response;
+		
+	}
+	
+	/**
+	 * 
+	 * @param agencyID
+	 * @param stmt
+	 * @return
+	 * @throws SQLException 
+	 */
+	public static AgencyCentroid getAgencyCentroids2(String agencyID, Statement stmt) throws SQLException{
+//		ConGraphAgencyGraph response = new ConGraphAgencyGraph(new HashSet<Coordinate[]>());
+		String query = "SELECT AVG(lat) AS lat, AVG(lon) AS lng "
+				+ " FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
+				+ " ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def WHERE map.agencyid='"+agencyID+"'";;
+		ResultSet rs = stmt.executeQuery(query);
+		AgencyCentroid response = new AgencyCentroid();
+		while (rs.next()){
+			response.id = agencyID;
+			response.lat = rs.getDouble("lat");
+			response.lng = rs.getDouble("lng");
+		}
+		
+		return response;
+		
 	}
 	
 }

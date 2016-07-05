@@ -1,4 +1,4 @@
-package com.library.model;
+package com.library.model.congrapph;
 
 import java.util.HashSet;
 import java.util.Set;

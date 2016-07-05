@@ -1,4 +1,4 @@
-package com.library.model;
+package com.library.model.congrapph;
 /*
  * This object is used to store the connections for
  * a given agency to all the other agencies. The object
@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.library.model.TransitConnection;
 
 @XmlRootElement( name = "ConGraphObj")
 public class ConGraphObj {
