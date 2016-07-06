@@ -3652,7 +3652,7 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 *Queries the census and title vi parts of the on map report	  
+	 *Queries the census population, employment, and title vi parts of the on map report	  
 	 */
 	public static MapGeo onMapBlocks(double d, double[] lat, double[] lon, int dbindex) {
 		CoordinateReferenceSystem sourceCRS = null;
@@ -3677,8 +3677,12 @@ public class PgisEventManager {
 		ArrayList<MapTract> Tracts = new ArrayList<MapTract>();
 		long TotalUrbanPop = 0;
 		long TotalRuralPop = 0;
+		long TotalRac = 0;
+		long TotalWac = 0;
 		long CountyUrbanPop = 0;
 		long CountyRuralPop = 0;
+		long CountyRac = 0;
+		long CountyWac = 0 ;
 		long TractArea = 0;
 		long TotalLandArea = 0;
 		int TotalBlocks = 0;
@@ -3701,7 +3705,7 @@ public class PgisEventManager {
 			}
 			point = targetGeometry.getCentroid();
 			point.setSRID(2993);
-			mainquery += "with block as (select blockid, poptype as btype, landarea as barea, round((population2010/((landarea+waterarea)*3.86102e-7)),2) as density ,population as bpop, array[block.lat, block.lon] as blocation"
+			mainquery += "with block as (select blockid, poptype as btype, waterarea as warea, landarea as barea, round((population2010/((landarea+waterarea)*3.86102e-7)),2) as density ,population as bpop, array[block.lat, block.lon] as blocation"
 					+ " from census_blocks block where "
 					+ "st_dwithin(ST_Transform(ST_SetSRID(ST_MakePoint(block.lon, block.lat),4326), 2993),ST_GeomFromText('"+point+"',2993), "+String.valueOf(d)+")=true),"
 					+ "county as (select countyid, cname from census_counties), tract as (select tractid, population as tpop, landarea as tarea, array[tract.lat, tract.lon] as tlocation "
@@ -3727,17 +3731,19 @@ public class PgisEventManager {
 				e.printStackTrace();
 			}
 			targetGeometry.setSRID(2993);
-			mainquery += "with block as (select blockid, poptype as btype, landarea as barea, round((population2010/((landarea+waterarea)*3.86102e-7)),2) as density , population as bpop, array[block.lat, block.lon] as blocation"
+			mainquery += "with block as (select blockid, poptype as btype, waterarea as warea, landarea as barea, round((population2010/((landarea+waterarea)*3.86102e-7)),2) as density , population as bpop, array[block.lat, block.lon] as blocation"
 					+ " from census_blocks block where "
 					+ "st_within(ST_Transform(ST_SetSRID(ST_MakePoint(block.lon, block.lat),4326), 2993),ST_GeomFromText('"+targetGeometry+"',2993))=true),"
 					+ "county as (select countyid, cname from census_counties), tract as (select tractid, population as tpop, landarea as tarea, array[tract.lat, tract.lon] as tlocation "
 					+ "from census_tracts tract where "
 					+ "st_within(ST_Transform(ST_SetSRID(ST_MakePoint(tract.lon, tract.lat),4326), 2993),ST_GeomFromText('"+targetGeometry+"',2993))=true), ";						
 		}
-		mainquery+= "blockcounty as (select blockid, btype, barea, density, bpop, blocation, cname from block inner join county on left(blockid,5)= countyid), "
-				+ "blocktract as (select blockid, btype, barea, density, bpop, blocation, cname, tpop, tarea, tlocation from blockcounty left join tract on left(blockid,11)= tractid) "
-				+ "select * from blocktract left join title_vi_blocks_float t6 on blocktract.blockid=t6.blockid order by blocktract.blockid";
-		//System.out.println(mainquery);
+		mainquery+= "blockcounty as (select blockid, btype, warea, barea, density, bpop, blocation, cname from block inner join county on left(blockid,5)= countyid), "
+				+ "blocktract as (select blockid, btype, warea, barea, density, bpop, blocation, cname, tpop, tarea, tlocation from blockcounty left join tract on left(blockid,11)= tractid), "
+				+ "blocktractrac as (select blocktract.*, c000 as brac, round((c000/((barea+warea)*3.86102e-7)),2) as racdensity from blocktract left join lodes_blocks_rac emprac on blocktract.blockid=emprac.blockid), "
+				+ "blocktractracwac as (select blocktractrac.*, c000 as bwac, round((c000/((barea+warea)*3.86102e-7)),2) as wacdensity from blocktractrac left join lodes_blocks_wac empwac on blocktractrac.blockid=empwac.blockid) "
+				+ "select * from blocktractracwac left join title_vi_blocks_float t6 on blocktractracwac.blockid=t6.blockid order by blocktractracwac.blockid";
+		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();	
@@ -3755,10 +3761,14 @@ public class PgisEventManager {
 				blk.ID = rs.getString("blockid");
 				blk.LandArea = rs.getLong("barea");
 				blk.Density = rs.getLong("density");
+				blk.RacDensity = rs.getLong("racdensity");
+				blk.WacDensity = rs.getLong("wacdensity");
 				Double[] location = (Double[]) rs.getArray("blocation").getArray();
 				blk.Lat = location[0];
 				blk.Lng = location[1];
 				blk.Population = rs.getLong("bpop");
+				blk.Rac = rs.getLong("brac");
+				blk.Wac = rs.getLong("bwac");
 				blk.Type = rs.getString("btype");
 				T6 = new TitleVIDataFloat();		
 				T6.id = rs.getString("blockid");		
@@ -3807,8 +3817,12 @@ public class PgisEventManager {
 						instance.MapTL = Tracts;
 						instance.UrbanPopulation = CountyUrbanPop;
 						instance.RuralPopulation = CountyRuralPop;
+						instance.Rac = CountyRac;
+						instance.Wac = CountyWac;
 						TotalUrbanPop += CountyUrbanPop;
 						TotalRuralPop += CountyRuralPop;
+						TotalRac += CountyRac;
+						TotalWac += CountyWac;
 						TotalBlocks += Blocks.size();
 						TotalTracts += Tracts.size();
 						Counties.add(instance);
@@ -3817,6 +3831,8 @@ public class PgisEventManager {
 						Tracts = new ArrayList<MapTract>();
 						CountyUrbanPop = 0;
 						CountyRuralPop = 0;
+						CountyRac = 0;
+						CountyWac = 0;
 					}					
 					ccname = cname;				
 					instance.Name = cname;
@@ -3828,6 +3844,8 @@ public class PgisEventManager {
 				} else {
 					CountyRuralPop +=blk.Population;
 				}
+				CountyRac += blk.Rac;
+				CountyWac += blk.Wac;
 				TractArea = rs.getLong("tarea");
 				tinstance = new MapTract();
 				tinstance.ID = blk.ID.substring(0,11);
@@ -3847,14 +3865,20 @@ public class PgisEventManager {
 			instance.MapTL = Tracts;
 			instance.UrbanPopulation = CountyUrbanPop;
 			instance.RuralPopulation = CountyRuralPop;
+			instance.Rac = CountyRac;
+			instance.Wac = CountyWac;
 			TotalUrbanPop += CountyUrbanPop;
-			TotalRuralPop += CountyRuralPop;	
+			TotalRuralPop += CountyRuralPop;
+			TotalRac += CountyRac;
+			TotalWac += CountyWac;
 			TotalBlocks += Blocks.size();
 			TotalTracts += Tracts.size();
 			Counties.add(instance);			
 			response.MapCL = Counties;
 			response.RuralPopulation = TotalRuralPop;
 			response.UrbanPopulation = TotalUrbanPop;
+			response.Rac = TotalRac;
+			response.Wac = TotalWac;
 			response.TotalBlocks = TotalBlocks;
 			response.TotalLandArea = TotalLandArea;
 			response.TotalTracts = TotalTracts;		

@@ -27,6 +27,14 @@ public class MapCounty {
 	@JsonSerialize
 	public long RuralPopulation;
 	
+	@XmlAttribute
+	@JsonSerialize
+	public long Rac;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long Wac;
+	
 	@XmlElement(name = "MapTL")
     public Collection<MapTract> MapTL = new ArrayList<MapTract>();
 

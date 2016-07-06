@@ -45,7 +45,7 @@ var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
 var minimalLayer = new L.StamenTileLayer("toner");
 
-var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> '+getVersion()+' beta';
+var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/beta" target="_blank">TNA Software Tool</a> '+getVersion()+' beta';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
 /*var osmLayer = new L.TileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', 
@@ -341,7 +341,7 @@ var dialogAgenciesId = new Array();
 var dialog = $( "#dialog-form" ).dialog({
     autoOpen: false,
     height: dialogheight,
-    width: 420,
+    width: 500,
     modal: false,
     draggable: false,
     resizable: false,
@@ -368,6 +368,43 @@ var dialog = $( "#dialog-form" ).dialog({
     	  miniMap._minimize();
       }
   });
+
+//making the blocks legend
+var blockDensityValue;
+(function () {
+	var html = $('#blocksLengend');		
+    var grades = [-1, 0, 20, 100, 500, 1000, 5000, 10000];	
+    // loop through our density intervals and generate a label with a colored square for each interval		
+    html =  '<p><input type="radio" name="blocksDensity" value="pop" checked>Population Density</p>'+
+    		'<p><input type="radio" name="blocksDensity" value="rac">Employment Density</p>'+
+    		'<p><input type="radio" name="blocksDensity" value="wac">Employee Density</p></br>';	
+    
+    for (var i = 0; i < grades.length; i++) {		
+        html += '<i style="background:' + getColorBlocks(grades[i] + 1) + '"></i> ';
+        if(i==0){
+        	html +=  '0<br>';
+        }else if(i==1){
+        	html += "0.01"+ (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');	
+        }else{
+        	html += grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');		
+    	}
+    }		
+    $('#blocksLengend').html(html);
+    
+    $('#blocksLengend > p').css("margin-bottom","0px");
+    $('#blocksLengend > p > input').css({"vertical-align":"text-bottom","margin-right":"3px"});
+    
+    $('#blocksLengend').hide();
+    
+    blockDensityValue = "pop";
+    
+    $( "input[name='blocksDensity']" ).each(function() {
+    	  $( this ).click(function() {
+    		  //alert( $( this ).val() );
+    		  changeDensityStyle($( this ).val());
+    	  });
+    });
+})();
 
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
@@ -661,12 +698,12 @@ function style(feature) {
 }
 function styleU(feature) {
     return {
-        fillColor: 'orange',
+        fillColor: 'red',
         weight: 2,
         opacity: 1,
-        color: 'white',
-        dashArray: '3',
-        fillOpacity: 0.3
+        color: 'black',
+        dashArray: '',
+        fillOpacity: 0.4
     };
 }
 function zoomToFeature(e) {
@@ -695,7 +732,8 @@ function highlightFeature(e) {
 function resetHighlightU(e) {	
 	var layer = e.target;
     layer.setStyle({              
-        fillOpacity: 0.3
+        fillOpacity: 0.4,
+        color: 'black',
     });
     info.update();
 }
@@ -719,8 +757,9 @@ var routes = new L.LayerGroup().addTo(map);
 var county = L.geoJson(countyshape, {style: style, onEachFeature: onEachFeature});
 var tract = L.geoJson(tractshape, {style: style, onEachFeature: onEachFeature});
 var odot = L.geoJson(odotregionshape, {style: style, onEachFeature: onEachFeature}); 
-var urban = L.geoJson(urbanshapes, {style: styleU, onEachFeature: onEachFeatureU});
 var congdist = L.geoJson(congdistshape, {style: style, onEachFeature: onEachFeature});
+var urban50k = L.geoJson(urban50shapes, {style: styleU, onEachFeature: onEachFeatureU});
+var urban25k = L.geoJson(urban25shapes, {style: styleU, onEachFeature: onEachFeatureU});
 function getColor(d) {
     return d > 1000 ? '#800026' :
            d > 500  ? '#BD0026' :
@@ -730,6 +769,16 @@ function getColor(d) {
            d > 20   ? '#FEB24C' :
            d > 10   ? '#FED976' :
                       '#FFEDA0';
+}
+function getColorBlocks(d) {
+    return d > 10000 ? '#800026' :
+           d > 5000  ? '#BD0026' :
+           d > 1000  ? '#E31A1C' :
+           d > 500   ? '#FC4E2A' :
+           d > 100   ? '#FD8D3C' :
+           d > 20    ? '#FEB24C' :
+           d > 0     ? '#FED976' :
+                       '#FFEDA0';
 }
 var colorset = ["#6ECC39","#FF33FF","#006DFF","#FE0A0A", "#7A00F5", "#CC6600"];
 function disponmap2(layerid,k,points,popup){	
@@ -1047,14 +1096,15 @@ var overlayMaps = {
 		"Counties": county,
 		"Tracts": tract,
 		"ODOT Transit Regions": odot,
-		"Urbanized Areas 50k+": urban,
-		"Congressional Districts": congdist		
+		"Congressional Districts": congdist,
+		"Urbanized Areas 50k+": urban50k,
+		"Urbanized Areas 25k+": urban25k
 	};
 
 map.addControl(new L.Control.Layers(baseMaps,overlayMaps));
 info.addTo(map);
 var overlaysLayers = 0;		
-for(var i=3;i<=4;i++){		
+for(var i=3;i<=6;i++){		
 	$('div.leaflet-control-layers-overlays > label:nth-child('+i+') > input').change(function() {		
 		if($(this).is(":checked")) {		
 			if(overlaysLayers==0){		

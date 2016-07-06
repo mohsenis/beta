@@ -21,6 +21,14 @@ public class MapGeo {
 	
 	@XmlAttribute
 	@JsonSerialize
+	public long Rac;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long Wac;
+	
+	@XmlAttribute
+	@JsonSerialize
 	public int TotalBlocks;
 	
 	@XmlAttribute

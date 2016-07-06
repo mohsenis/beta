@@ -138,6 +138,41 @@ function doNotDelete(){
     //DONT DELETE
 };
 
+function changeDensityStyle(densityType){
+	if(blockDensityValue!=densityType){
+		blockDensityValue = densityType;
+		switch (densityType) {
+	    case "pop":
+	    	//alert(onMapBlockCluster.getLayers().length);
+	    	for(var i=0; i<blockCluster.length; i++){
+	    		blockCluster[i].eachLayer(function (layer) {
+		    	    layer.setStyle({
+		            	fillColor: getColorBlocks(layer.popDensity)
+		            });
+		    	});
+	    	}
+	        break;
+	    case "rac":
+	    	for(var i=0; i<blockCluster.length; i++){
+	    		blockCluster[i].eachLayer(function (layer) {
+		    	    layer.setStyle({
+		            	fillColor: getColorBlocks(layer.racDensity)
+		            });
+		    	});
+	    	}
+	        break;
+	    case "wac":
+	    	for(var i=0; i<blockCluster.length; i++){
+	    		blockCluster[i].eachLayer(function (layer) {
+		    	    layer.setStyle({
+		            	fillColor: getColorBlocks(layer.wacDensity)
+		            });
+		    	});
+	    	}
+	    }
+	}
+}
+
 function showOnMapReport(lat, lon, date, x){
 	if (!typeof lat === 'number'){
 		lat = lat.join(",");
@@ -170,18 +205,24 @@ function showOnMapReport(lat, lon, date, x){
 	tractCluster = new Array();
 	pnrCluster = new Array();	
 	
+	var blocksLegendFlag = 0;
+	
 	var GcolorArray=['blockscluster', 'tractscluster'];
 	$('#displayTransitReport').empty();
 	$('#displayGeoReport').empty();
 	$('#displayPnrCounties').empty();
 	$("#overlay").show();	
-	console.log('/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession());
+	//console.log('/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession());
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession(),
+		//url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',				//delete
 		async: true,
 		success: function(data){
+			//localStorage.setItem('myStorage', JSON.stringify(data));	//delete
+			data = JSON.parse(localStorage.getItem('myStorage'));		//delete
+			//console.log(data);
 			$('#ts').html(numberWithCommas(data.MapTR.TotalStops));
 			$('#tr').html(numberWithCommas(data.MapTR.TotalRoutes));
 			$('#af').html('$'+Math.round(data.MapTR.AverageFare*100)/100);
@@ -287,14 +328,18 @@ function showOnMapReport(lat, lon, date, x){
 		    
 			$('#tpu').html(numberWithCommas(data.MapG.UrbanPopulation));
 			$('#tpr').html(numberWithCommas(data.MapG.RuralPopulation));
+			$('#tee').html(numberWithCommas(data.MapG.Wac));
+			$('#tem').html(numberWithCommas(data.MapG.Rac));
 			$('#tb').html(numberWithCommas(data.MapG.TotalBlocks));
 			$('#tt').html(numberWithCommas(data.MapG.TotalTracts));					
 			html = '<table id="geoTable" class="display" align="center">';
 			tmp = '<th>County Name</th>'+
 			'<th>Tracts</th>'+
 			'<th>Blocks</th>'+
-			'<th>Urban Population (2010)</th>'+
-			'<th>Rural Population (2010)</th></tr>';	
+			'<th>Urban Pop. (2010)</th>'+
+			'<th>Rural Pop. (2010)</th>'+
+			'<th>Employee (2013)</th>'+
+			'<th>Employment (2013)</th></tr>';
 			html += '<thead>'+tmp+'</thead><tbody>';
 			var popupOptions = {'offset': L.point(0, -8)};
 			$.each(data.MapG.MapCL, function(i,item){
@@ -302,7 +347,9 @@ function showOnMapReport(lat, lon, date, x){
 						'<td>'+numberWithCommas(item.MapTL.length)+'</td>'+
 						'<td>'+numberWithCommas(item.MapBL.length)+'</td>'+
 						'<td>'+numberWithCommas(item.UrbanPopulation)+'</td>'+
-						'<td>'+numberWithCommas(item.RuralPopulation)+'</td></tr>';				
+						'<td>'+numberWithCommas(item.RuralPopulation)+'</td>'+
+						'<td>'+numberWithCommas(item.Wac)+'</td>'+	
+						'<td>'+numberWithCommas(item.Rac)+'</td></tr>';	
 				/*var tmpBlockCluster = new L.MarkerClusterGroup({
 					maxClusterRadius: 120,
 					iconCreateFunction: function (cluster) {
@@ -322,13 +369,18 @@ function showOnMapReport(lat, lon, date, x){
 						//var marker = L.marker([jtem.Lat,jtem.Lng]/*, {icon: onMapIcon}*/);	
 						var marker = new L.CircleMarker([jtem.Lat,jtem.Lng], {		
 							radius: 6,		
-							fillColor: getColor(jtem.Density),		
+							fillColor: getColorBlocks(jtem.Density),		
 					        color: "#333333",		
 					        weight: 0,		
 					        opacity: 1,		
 					        fillOpacity: 0.8,		
 					    });
-						marker.bindPopup('<b>Block ID:</b> '+jtem.ID+'<br><b>Type:</b> '+jtem.Type+'<br><b>Population:</b> '+numberWithCommas(jtem.Population)+'<br><b>County:</b> '+jtem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>',popupOptions);
+						marker.popDensity = jtem.Density;
+						marker.racDensity = jtem.RacDensity;
+						marker.wacDensity = jtem.WacDensity;
+						marker.bindPopup('<b>Block ID:</b> '+jtem.ID+'<br><b>Type:</b> '+jtem.Type+'<br><b>Population:</b> '+numberWithCommas(jtem.Population)
+								+'<br><b>Employees:</b> '+numberWithCommas(jtem.Wac)+'<br><b>Employment:</b> '+numberWithCommas(jtem.Rac)
+								+'<br><b>County:</b> '+jtem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>',popupOptions);
 						tmpBlockCluster.addLayer(marker);				
 				});
 				blockCluster.push(tmpBlockCluster);				
@@ -368,9 +420,16 @@ function showOnMapReport(lat, lon, date, x){
 		    	if($(this).hasClass('selected')){		    		
 		    		onMapBlockCluster.removeLayer(blockCluster[$(this).index()]);
 		    		onMapTractCluster.removeLayer(tractCluster[$(this).index()]);
+		    		blocksLegendFlag--;
 		    	}else{		    		
 		    		onMapBlockCluster.addLayer(blockCluster[$(this).index()]);
 		    		onMapTractCluster.addLayer(tractCluster[$(this).index()]);
+		    		blocksLegendFlag++;
+		    	}
+		    	if(blocksLegendFlag==0){
+		    		$('#blocksLengend').hide();
+		    	}else{
+		    		$('#blocksLengend').show();
 		    	}
 		    });		    
 		  //Title VI		

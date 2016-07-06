@@ -17,6 +17,14 @@ public class MapBlock {
 	
 	@XmlAttribute
 	@JsonSerialize
+	public long Rac;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long Wac;
+	
+	@XmlAttribute
+	@JsonSerialize
 	public String Type;
 	
 	@XmlAttribute
@@ -26,6 +34,14 @@ public class MapBlock {
 	@XmlAttribute
 	@JsonSerialize
 	public long Density;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long RacDensity;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long WacDensity;
 	
 	@XmlAttribute
 	@JsonSerialize
