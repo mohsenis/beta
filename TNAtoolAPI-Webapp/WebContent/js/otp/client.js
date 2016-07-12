@@ -45,7 +45,7 @@ var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
 var minimalLayer = new L.StamenTileLayer("toner");
 
-var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/test" target="_blank">TNA Software Tool</a> '+getVersion()+' beta';
+var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/beta" target="_blank">TNA Software Tool</a> '+getVersion()+' beta';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
 /*var osmLayer = new L.TileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', 
@@ -341,7 +341,7 @@ var dialogAgenciesId = new Array();
 var dialog = $( "#dialog-form" ).dialog({
     autoOpen: false,
     height: dialogheight,
-    width: 420,
+    width: 500,
     modal: false,
     draggable: false,
     resizable: false,
@@ -368,6 +368,43 @@ var dialog = $( "#dialog-form" ).dialog({
     	  miniMap._minimize();
       }
   });
+
+//making the blocks legend
+var blockDensityValue;
+(function () {
+	var html = $('#blocksLengend');		
+    var grades = [-1, 0, 20, 100, 500, 1000, 5000, 10000];	
+    // loop through our density intervals and generate a label with a colored square for each interval		
+    html =  '<p><input type="radio" name="blocksDensity" value="pop" checked>Population Density</p>'+
+    		'<p><input type="radio" name="blocksDensity" value="rac">Employment Density</p>'+
+    		'<p><input type="radio" name="blocksDensity" value="wac">Employee Density</p></br>';	
+    
+    for (var i = 0; i < grades.length; i++) {		
+        html += '<i style="background:' + getColorBlocks(grades[i] + 1) + '"></i> ';
+        if(i==0){
+        	html +=  '0<br>';
+        }else if(i==1){
+        	html += "0.01"+ (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');	
+        }else{
+        	html += grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');		
+    	}
+    }		
+    $('#blocksLengend').html(html);
+    
+    $('#blocksLengend > p').css("margin-bottom","0px");
+    $('#blocksLengend > p > input').css({"vertical-align":"text-bottom","margin-right":"3px"});
+    
+    $('#blocksLengend').hide();
+    
+    blockDensityValue = "pop";
+    
+    $( "input[name='blocksDensity']" ).each(function() {
+    	  $( this ).click(function() {
+    		  //alert( $( this ).val() );
+    		  changeDensityStyle($( this ).val());
+    	  });
+    });
+})();
 
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
@@ -575,7 +612,8 @@ map.on('draw:edited', function (e) {
 	dialog.dialog( "close" );	
 }); 
 ////////*************************************/////////////////////
-var Layers = 0;
+//var Layers = 0;
+var colorIndex;
 function getdata(type,agency,route,variant,k,callback,popup,node) {	
 	switch (type){
 	case 1:
@@ -626,28 +664,43 @@ info.onAdd = function (map) {
 info.update = function (props) {
     this._div.innerHTML = (props ?
 
-        '<div id="box"><b>Name: </b>' + props.name + ' <br/>' + '<b>Area: </b>'+ props.area + ' mi<sup>2</sup></div>' 
+        '<div id="box"><b>Name: </b>' + props.name + ' <br/>' + '<b>Area: </b>'+ props.area + ' mi<sup>2</sup><br/><b>Population (2010): </b>'+ props.population+'</div>' 
         :'');
+};
+
+var legend = L.control({position: 'bottomright'});		
+legend.onAdd = function (map) {		
+    var div = L.DomUtil.create('div', 'legend'),		
+        grades = [0, 10, 20, 50, 100, 200, 500, 1000],		
+        labels = [];		
+    // loop through our density intervals and generate a label with a colored square for each interval		
+    div.innerHTML = '<p>Population Density</p>';		
+    for (var i = 0; i < grades.length; i++) {		
+        div.innerHTML +=		
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +		
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');		
+    }		
+    return div;		
 };
 
 function style(feature) {
     return {
-        fillColor: 'orange',
-        weight: 2,
+        fillColor: getColor(feature.properties.density),
+        weight: 0.5,
         opacity: 1,
         color: 'white',
-        dashArray: '3',
-        fillOpacity: 0.1
+        dashArray: '',
+        fillOpacity: 0.5
     };
 }
 function styleU(feature) {
     return {
-        fillColor: 'orange',
+        fillColor: 'red',
         weight: 2,
         opacity: 1,
-        color: 'white',
-        dashArray: '3',
-        fillOpacity: 0.3
+        color: 'black',
+        dashArray: '',
+        fillOpacity: 0.4
     };
 }
 function zoomToFeature(e) {
@@ -656,21 +709,28 @@ function zoomToFeature(e) {
 function resetHighlight(e) {	
 	var layer = e.target;
     layer.setStyle({              
-        fillOpacity: 0.1
+        fillOpacity: 0.5,
+        weight: 0.5,		
+        dashArray: '3',
     });
     info.update();
 }
 function highlightFeature(e) {
     var layer = e.target;
     layer.setStyle({              
-        fillOpacity: 0
+        fillOpacity: 0.6,
+        weight: 2,		
+        opacity: 1,		
+        color: 'white',		
+        dashArray: '',
     });    
     info.update(layer.feature.properties);    
 }
 function resetHighlightU(e) {	
 	var layer = e.target;
     layer.setStyle({              
-        fillOpacity: 0.3
+        fillOpacity: 0.4,
+        color: 'black',
     });
     info.update();
 }
@@ -692,11 +752,32 @@ var stops = new L.LayerGroup().addTo(map);
 var routes = new L.LayerGroup().addTo(map);
 
 var county = L.geoJson(countyshape, {style: style, onEachFeature: onEachFeature});
+var tract = L.geoJson(tractshape, {style: style, onEachFeature: onEachFeature});
 var odot = L.geoJson(odotregionshape, {style: style, onEachFeature: onEachFeature}); 
-var urban = L.geoJson(urbanshapes, {style: styleU, onEachFeature: onEachFeatureU});
 var congdist = L.geoJson(congdistshape, {style: style, onEachFeature: onEachFeature});
-
-var colorset = ["#6ECC39","#FF33FF","#05FAFC","#FE0A0A", "#7A00F5", "#CC6600"];
+var urban50k = L.geoJson(urban50shapes, {style: styleU, onEachFeature: onEachFeatureU});
+var urban25k = L.geoJson(urban25shapes, {style: styleU, onEachFeature: onEachFeatureU});
+function getColor(d) {
+    return d > 1000 ? '#800026' :
+           d > 500  ? '#BD0026' :
+           d > 200  ? '#E31A1C' :
+           d > 100  ? '#FC4E2A' :
+           d > 50   ? '#FD8D3C' :
+           d > 20   ? '#FEB24C' :
+           d > 10   ? '#FED976' :
+                      '#FFEDA0';
+}
+function getColorBlocks(d) {
+    return d > 10000 ? '#800026' :
+           d > 5000  ? '#BD0026' :
+           d > 1000  ? '#E31A1C' :
+           d > 500   ? '#FC4E2A' :
+           d > 100   ? '#FD8D3C' :
+           d > 20    ? '#FEB24C' :
+           d > 0     ? '#FED976' :
+                       '#FFEDA0';
+}
+var colorset = ["#6ECC39","#FF33FF","#006DFF","#FE0A0A", "#7A00F5", "#CC6600"];
 function disponmap2(layerid,k,points,popup){	
 	var geojsonMarkerOptions = {
 		    radius: 5,
@@ -751,7 +832,7 @@ function disponmap(layerid,k,points,popup,node){
 			iconCreateFunction: function (cluster) {
 			return new L.DivIcon({ html: cluster.getChildCount(), className: 'gcluster', iconSize: new L.Point(30, 30) });
 		},
-		spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+		spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
 	});
 	break;
 	case 1:
@@ -802,7 +883,16 @@ function disponmap(layerid,k,points,popup,node){
 	}	
 	for (var i = 0; i < points.length; i++) {
 		var p = points[i];
-		var marker = new L.Marker(p[0],{title:popup});
+		//var marker = new L.Marker(p[0],{title:popup});
+		var marker = new L.CircleMarker(p[0], {		
+			title: popup,		
+	        radius: 8,		
+	        fillColor: colorset[k],		
+	        color: "#333333",		
+	        weight: 2,		
+	        opacity: 1,		
+	        fillOpacity: 0.8,		
+	    });
 		var marLat = (Math.round(marker.getLatLng().lat * 1000000) / 1000000).toString().replace('.','').replace('-','');
 		var marLng = (Math.round(marker.getLatLng().lng * 1000000) / 1000000).toString().replace('.','').replace('-','');
 		marker.on('popupopen', function(e) {
@@ -861,18 +951,62 @@ function onMapBeforeSubmit(lat,lng,mlat,mlng){
 	onMapSubmit();
 }
 
+var maxFreq;		
+var zoomToRouteShapeFlag = true;		
+var frequencyFlag = true;		
+$('.jstree-checkbox').click(function(){		
+	zoomToRouteShapeFlag = true;		
+});		
+function scaledFreq(freq){		
+	var weight = Math.ceil(Math.log2(freq));		
+	if(weight==1){		
+		return 2;		
+	}else{		
+		return weight;		
+	}		
+}
 
 function dispronmap(k,d,name,node){	
-	var polyline = L.Polyline.fromEncoded(d.points, {	
-		weight: 5,
-		color: colorset[k],
-		opacity: .5,
-		smoothFactor: 9
+	var popHtml = '<b>Agency Name:</b> '+d.agencyName+ '<br><b>Agency ID:</b> '+d.agency+'<br><b>Route Head Sign:</b> '+d.headSign;
+	if(frequencyFlag){
+		var freq = node.attr("freq");
+		popHtml+='<br><b>Frequency:</b> '+freq;
+		if(freq==1){
+			freq++;
+		}
+		var polyline = L.Polyline.fromEncoded(d.points, {	
+			weight: scaledFreq(freq),
+			color: colorset[k],
+			//color: "#006DFF",
+			opacity: .5,
+			smoothFactor: 9
 		});	
-		polyline.bindPopup('<b>Agency Name:</b> '+d.agencyName+ '<br><b>Agency ID:</b> '+d.agency+'<br><b>Trip Name:</b> '+d.headSign);
-		polyline._leaflet_id = name;	
-		routes.addLayer(polyline);
-		$.jstree._reference($mylist).set_type("default", $(node));
+		if(zoomToRouteShapeFlag){
+			map.fitBounds(polyline.getBounds());
+		}
+		polyline.bindPopup(popHtml,{autoPan:false});
+		
+		polyline.on("mouseover", function (e) {
+			polyline.setStyle({opacity: .9, color: "#B50045"});
+			polyline.openPopup();
+		});
+		
+		polyline.on("mouseout", function (e) {
+			polyline.setStyle({opacity: .5, color: colorset[k]});
+			polyline.closePopup();
+		});
+	}else{
+		var polyline = L.Polyline.fromEncoded(d.points, {	
+			weight: 5,
+			color: colorset[(k+Math.floor(Math.random() * 6))%6],
+			opacity: .5,
+			smoothFactor: 9
+		});	
+		polyline.bindPopup(popHtml);
+	}
+	polyline._leaflet_id = name;	
+	routes.addLayer(polyline);
+	$.jstree._reference($mylist).set_type("default", $(node));
 };
 var dateID;
 function addDate(date){
@@ -957,13 +1091,31 @@ var overlayMaps = {
 		"Stops": stops,
 		"Routes": routes,
 		"Counties": county,
+		"Tracts": tract,
 		"ODOT Transit Regions": odot,
-		"Urbanized Areas 50k+": urban,
-		"Congressional Districts": congdist		
+		"Congressional Districts": congdist,
+		"Urbanized Areas 50k+": urban50k,
+		"Urbanized Areas 25k+": urban25k
 	};
 
 map.addControl(new L.Control.Layers(baseMaps,overlayMaps));
 info.addTo(map);
+var overlaysLayers = 0;		
+for(var i=3;i<=6;i++){		
+	$('div.leaflet-control-layers-overlays > label:nth-child('+i+') > input').change(function() {		
+		if($(this).is(":checked")) {		
+			if(overlaysLayers==0){		
+				legend.addTo(map);		
+			}		
+			overlaysLayers++;		
+		}else{		
+			if(overlaysLayers==1){		
+				legend.removeFrom(map);		
+			}		
+			overlaysLayers--;		
+		}		
+	});		
+}
 var $mylist = $("#list");
 var popYear = 2010;
 $mylist
@@ -984,6 +1136,10 @@ $mylist
                 		dialogAgencies.push(item.data);
                 		dialogAgenciesId.push(item.attr.id);
                 	});
+            		maxFreq = ops.maxFreq;		
+            		if(w_qstringd==null){		
+            			frequencyFlag=false;		
+            		}
             	}
             	catch(err) {
             		console.log("error");
@@ -1032,6 +1188,7 @@ $mylist
                     "label" : "Show Route Shapes",
                     "action" : function (node) { 
                     	//alert(node.attr("type"));
+                    	zoomToRouteShapeFlag = false;
                     	if ($.jstree._reference($mylist)._is_loaded(node)){
                     			$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
                     				if ($.jstree._reference($mylist)._is_loaded(child)){
@@ -1098,7 +1255,7 @@ $mylist
                             "label" : "Show Route Shapes",
                             "action" : function (node) { 
                             	//alert(node.attr("type"));
-                            	
+                            	zoomToRouteShapeFlag = true;
                             		if ($.jstree._reference($mylist)._is_loaded(node)){
         	                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
         	                    		$.jstree._reference($mylist).change_state(child, true);
@@ -1410,11 +1567,12 @@ $mylist
 	    				$(listItem).css("background-color","");	    				
 	    				$.jstree._reference($mylist).uncheck_node($(listItem));
     				};
-                 });    			
+                 });    
+    			colorIndex = dialogAgenciesId.indexOf(node.attr("id"));
     			node.css("opacity", "1");
-    			node.css("background-color", colorset[Layers%6]);    			
-    			getdata(1,node.attr("id"),"","",Layers%6,disponmap,$.jstree._reference($mylist).get_text(node),node);
-    			Layers = Layers + 1;    			
+    			node.css("background-color", colorset[colorIndex%6]);    			
+    			getdata(1,node.attr("id"),"","",colorIndex%6,disponmap,$.jstree._reference($mylist).get_text(node),node);
+    			//Layers = Layers + 1;    			
     		} else {    			
     			node.css("background-color","");
     			if ((($($mylist).jstree("get_checked",node,true)).length)>0) node.css("opacity", "0.6");
@@ -1438,10 +1596,11 @@ $mylist
     				rparent.css("background-color","");    				
     				$.jstree._reference($mylist).uncheck_node(rparent);
     			}
-    			node.css("background-color", colorset[Layers%6]); 
+    			colorIndex = dialogAgenciesId.indexOf(rparent.attr("id"));
+    			node.css("background-color", colorset[colorIndex%6]); 
     			rparent.css("opacity", "0.6");
-    			getdata(2,rparent.attr("id"),node.attr("id"),"",Layers%6,disponmap,$.jstree._reference($mylist).get_text(node),node);
-    			Layers = Layers + 1;    			
+    			getdata(2,rparent.attr("id"),node.attr("id"),"",colorIndex%6,disponmap,$.jstree._reference($mylist).get_text(node),node);
+    			//Layers = Layers + 1;    			
     		} else {    			
     			if ((($($mylist).jstree("get_checked",rparent,true)).length)==0) rparent.css("opacity", "1");
     			node.css("background-color","");    			    			
@@ -1453,14 +1612,16 @@ $mylist
     		}
     		break;
     	case "variant":
-    		vparent = $.jstree._reference($mylist)._get_parent(node);    		
+    		vparent = $.jstree._reference($mylist)._get_parent(node);  
+    		rvparent = $.jstree._reference($mylist)._get_parent(vparent); 
+    		colorIndex = dialogAgenciesId.indexOf(rvparent.attr("id"));
     		if ($.jstree._reference($mylist).is_checked(node)){
     			$.jstree._reference($mylist).set_type("disabled", $(node));    			
-    			node.css("background-color", colorset[Layers%6]);
+    			node.css("background-color", colorset[colorIndex%6]);
     			vparent.css("font-weight", "bold");
     			$.jstree._reference($mylist)._get_parent(vparent).css("opacity", "0.6");
-    			getdata(3,d.inst._get_parent((d.inst._get_parent(node))).attr("id"),(d.inst._get_parent(node)).attr("id"),node.attr("id"),Layers%6,dispronmap,node.attr("id"),node);
-    			Layers = Layers + 1;    			
+    			getdata(3,d.inst._get_parent((d.inst._get_parent(node))).attr("id"),(d.inst._get_parent(node)).attr("id"),node.attr("id"),colorIndex%6,dispronmap,node.attr("id"),node);
+    			//Layers = Layers + 1;     			
     		} else {    			
     			node.css("background-color","");
     			if ((($($mylist).jstree("get_checked",vparent,true)).length)==0) {
@@ -1569,8 +1730,8 @@ function updateListDialog(agenciesIds){
 		}									
 	}
 }
-
 /*
  * Connectivity Graph
  */
 $('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="con-graph-button" style="border-radius:5px; background-color:#FFF" onclick="toggleConGraphDialog()">G</button></div>');
+

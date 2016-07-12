@@ -5,8 +5,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@XmlRootElement(name = "TitleVIData")
-public class TitleVIData {
+@XmlRootElement(name = "TitleVIDataFloat")
+public class TitleVIDataFloat {
 	@XmlAttribute
 	@JsonSerialize
 	public String id;
@@ -17,147 +17,147 @@ public class TitleVIData {
 
 	@XmlAttribute
 	@JsonSerialize
-	public int english;
+	public float english = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int spanish;
+	public float spanish = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int spanishverywell;
+	public float spanishverywell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int spanishwell;
+	public float spanishwell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int spanishnotwell;
+	public float spanishnotwell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int spanishnotatall;
+	public float spanishnotatall = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int indo_european;
+	public float indo_european = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int indo_europeanverywell;
+	public float indo_europeanverywell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int indo_europeanwell;
+	public float indo_europeanwell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int indo_europeannotwell;
+	public float indo_europeannotwell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int indo_europeannotatall;
+	public float indo_europeannotatall = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_and_pacific_island;
+	public float asian_and_pacific_island = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_and_pacific_islandverywell;
+	public float asian_and_pacific_islandverywell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_and_pacific_islandwell;
+	public float asian_and_pacific_islandwell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_and_pacific_islandnotwell;
+	public float asian_and_pacific_islandnotwell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_and_pacific_islandnotatall;
+	public float asian_and_pacific_islandnotatall = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int other_languages;
+	public float other_languages = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int other_languagesverywell;
+	public float other_languagesverywell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int other_languageswell;
+	public float other_languageswell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int other_languagesnotwell;
+	public float other_languagesnotwell = 0;
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int other_languagesnotatall;
+	public float other_languagesnotatall = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int below_poverty;
+	public float below_poverty = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int above_poverty;
+	public float above_poverty = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int with_disability;
+	public float with_disability = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int without_disability;
+	public float without_disability = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int from5to17;
+	public float from5to17 = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int from18to64;
+	public float from18to64 = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int above65;
+	public float above65 = 0;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public float black_or_african_american = 0;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public float american_indian_and_alaska_native = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int black_or_african_american;
+	public float asian = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int american_indian_and_alaska_native;
+	public float native_hawaiian_and_other_pacific_islander = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int asian;
+	public float other_races = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int native_hawaiian_and_other_pacific_islander;
+	public float two_or_more = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int other_races;
+	public float white = 0;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int two_or_more;
-
-	@XmlAttribute
-	@JsonSerialize
-	public int white;
-
-	@XmlAttribute
-	@JsonSerialize
-	public int hispanic_or_latino;
+	public float hispanic_or_latino = 0;
 
 	@XmlAttribute
 	@JsonSerialize
@@ -241,83 +241,83 @@ public class TitleVIData {
 	
 	@XmlAttribute
 	@JsonSerialize
-	public int english_withinx;
+	public float english_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int spanish_withinx;
+	public float spanish_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int indo_european_withinx;
+	public float indo_european_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_and_pacific_island_withinx;
+	public float asian_and_pacific_island_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int other_languages_withinx;
+	public float other_languages_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int below_poverty_withinx;
+	public float below_poverty_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int above_poverty_withinx;
+	public float above_poverty_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int with_disability_withinx;
+	public float with_disability_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int without_disability_withinx;
+	public float without_disability_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int from5to17_withinx;
+	public float from5to17_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int from18to64_withinx;
+	public float from18to64_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int above65_withinx;
+	public float above65_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int black_or_african_american_withinx;
+	public float black_or_african_american_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int american_indian_and_alaska_native_withinx;
+	public float american_indian_and_alaska_native_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int asian_withinx;
+	public float asian_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int native_hawaiian_and_other_pacific_islander_withinx;
+	public float native_hawaiian_and_other_pacific_islander_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int other_races_withinx;
+	public float other_races_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int two_or_more_withinx;
+	public float two_or_more_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int white_withinx;
+	public float white_withinx;
 
 	@XmlAttribute
 	@JsonSerialize
-	public int hispanic_or_latino_withinx;
+	public float hispanic_or_latino_withinx;
 	
 	@XmlAttribute
 	@JsonSerialize

@@ -27,6 +27,7 @@ public class VariantListm {
     @JsonSerialize
 	public String data;
 	
+	
 	@XmlElement(name = "attr")	
 	@JsonSerialize
 	public Attr attr;

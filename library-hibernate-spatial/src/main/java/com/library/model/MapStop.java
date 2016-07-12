@@ -32,7 +32,7 @@ public class MapStop {
 	public String AgencyId;
 	
 	@XmlElement(name = "MapRI")
-    public Collection<String> RouteIds = new ArrayList<String>();
+    public Collection<String> MapRI = new ArrayList<String>();
 	
 	@XmlAttribute
 	@JsonSerialize

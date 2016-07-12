@@ -17,11 +17,31 @@ public class MapBlock {
 	
 	@XmlAttribute
 	@JsonSerialize
+	public long Rac;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long Wac;
+	
+	@XmlAttribute
+	@JsonSerialize
 	public String Type;
 	
 	@XmlAttribute
 	@JsonSerialize
 	public long LandArea;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long Density;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long RacDensity;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long WacDensity;
 	
 	@XmlAttribute
 	@JsonSerialize
@@ -34,5 +54,9 @@ public class MapBlock {
 	@XmlAttribute
 	@JsonSerialize
 	public String County;
+	
+	/*@XmlAttribute
+	@JsonSerialize
+	public TitleVIDataFloat Title6;*/
 	
 }

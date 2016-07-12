@@ -21,6 +21,14 @@ public class MapGeo {
 	
 	@XmlAttribute
 	@JsonSerialize
+	public long Rac;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long Wac;
+	
+	@XmlAttribute
+	@JsonSerialize
 	public int TotalBlocks;
 	
 	@XmlAttribute
@@ -31,6 +39,10 @@ public class MapGeo {
 	@JsonSerialize
 	public long TotalLandArea;
 	
+	@XmlAttribute
+	@JsonSerialize
+	public TitleVIDataFloat TitleVI;
+	
 	@XmlElement(name = "MapCL")
-    public Collection<MapCounty> MapCounties = new ArrayList<MapCounty>();
+    public Collection<MapCounty> MapCL = new ArrayList<MapCounty>();
 }

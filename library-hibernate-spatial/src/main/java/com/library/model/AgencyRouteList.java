@@ -17,13 +17,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 
+
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 
 @XmlRootElement(name = "data")
 public class AgencyRouteList {
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String maxFreq;
 
-@XmlElement(name = "data")
-public Collection<AgencyRoute> data = new ArrayList<AgencyRoute>();
+	@XmlElement(name = "data")
+	public Collection<AgencyRoute> data = new ArrayList<AgencyRoute>();
 }

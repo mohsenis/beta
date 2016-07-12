@@ -25,6 +25,24 @@ div#box {
     background: rgba(255,255,255,0.7);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
 }
+.legend, #blocksLengend {		
+	padding: 6px 8px;		
+    font: 14px/16px Arial, Helvetica, sans-serif;		
+    background: white;		
+    background: rgba(255,255,255,0.8);		
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);		
+    border-radius: 5px;		
+    line-height: 18px;		
+    color: #555;		
+}		
+.legend i, #blocksLengend i {		
+    width: 18px;		
+    height: 18px;		
+    float: left;		
+    margin-left: 10%;		
+    margin-right: 10%;		
+    opacity: 0.7;		
+}
 .info {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;     
@@ -156,13 +174,23 @@ form span.timeEntry select {
 div.ui-dialog{font-size: 85%;}
 div.ui-dialog.ui-draggable{font-size: 100%}
 
-#stopRoute td, #blockTract td{
+#stopRoute td, #blockTract td, #parknrideInfo td{
 	padding-bottom: 8px;
 	
 }
 
 .onMapData{
-	padding-left: 30px;	
+	padding-left: 30%;
+	float: right;		
+}		
+.LEP td{		
+	border:1px solid;		
+	width:25%;		
+    text-align: center;		
+}		
+.LEP > tbody > tr:nth-child(1){		
+	font-weight:bold;		
+	font-style:italic;		
 }
 
 #transitTable tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
