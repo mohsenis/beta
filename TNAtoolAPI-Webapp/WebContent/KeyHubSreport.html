@@ -36,26 +36,26 @@ var w_qstringx3 = parseFloat(getURIParameter("x3"));
 var stops = [];
 
 html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
-tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based on its importance. Lower ID number means higher cluster importance."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Cluster Centroid Latitude<em title="Latitude of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Cluster Centroid Longitude<em title="Longitude of the transit hub centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Stops Count <em title="Total number of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Routes Count <em title="Total number of routes that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>All Agencies Count <em title="Total number of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Visits Count <em title="Total number of times all stops in the cluster are served."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Park and Ride Lots Count <em title="Total number of park and ride lots within X distance of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Counties Count <em title="Total number of counties that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Places Count <em title="Total number of census places that the cluster is located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population Served<em title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Urban Population <em title="Sum of the population of urban areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Transit Agencies <em title="Unduplicated list of transit agencies that serve stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Stops <em title="Detailed list of stops in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Routes <em title="Unduplicated detailed list of routes in the cluster."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Park and Ride Lots <em title="Detailed list of park and ride lots within the X radius of the cluster centroid."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Places <em title="Census places that stops in the cluster are locate in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Counties <em title="Counties that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Urban Areas <em title="Areas that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>ODOT Transit Regions <em title="ODOT transit regions that stops in the cluster are located in."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
+tmp = '<tr><th title="ID number assigned to the cluster based on its importance. Lower ID number means higher cluster importance." id="an">ID</th>'+
+'<th title="Latitude of the transit hub centroid.">Cluster Centroid Latitude <span class="IOSym">(1)</span></th>'+
+'<th title="Longitude of the transit hub centroid.">Cluster Centroid Longitude <span class="IOSym">(1)</span></th>'+
+'<th title="Total number of stops in the cluster.">Stops Count <span class="IOSym">(1)</span></th>'+
+'<th title="Total number of routes that serve stops in the cluster.">Routes Count <span class="IOSym">(1)</span></th>'+
+'<th title="Total number of transit agencies that serve stops in the cluster.">All Agencies Count <span class="IOSym">(1)</span></th>'+
+'<th title="Total number of times all stops in the cluster are served.">Visits Count <span class="IOSym">(1)(4)</span></th>'+
+'<th title="Total number of park and ride lots within X distance of the cluster centroid.">Park and Ride Lots Count <span class="IOSym">(1)(3)</span></th>'+
+'<th title="Total number of counties that the cluster is located in.">Counties Count <span class="IOSym">(1)</span></th>'+
+'<th title="Total number of census places that the cluster is located in.">Census Places Count <span class="IOSym">(1)</span></th>'+
+'<th title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent.">Population Served <span class="IOSym">(1)(2)</span></th>'+
+'<th title="Sum of the population of urban areas that stops in the cluster are located in.">Urban Population <span class="IOSym">(1)(2)</span></th>'+
+'<th title="Unduplicated list of transit agencies that serve stops in the cluster.">Transit Agencies <span class="IOSym">(1)</span></th>'+
+'<th title="Detailed list of stops in the cluster.">Stops <span class="IOSym">(1)</span></th>'+
+'<th title="Unduplicated detailed list of routes in the cluster.">Routes <span class="IOSym">(1)</span></th>'+
+'<th title="Detailed list of park and ride lots within the X radius of the cluster centroid.">Park and Ride Lots <span class="IOSym">(1)(3)</span></th>'+
+'<th title="Census places that stops in the cluster are locate in.">Census Places <span class="IOSym">(1)</span></th>'+
+'<th title="Counties that stops in the cluster are located in.">Counties <span class="IOSym">(1)</span></th>'+
+'<th title="Areas that stops in the cluster are located in.">Urban Areas <span class="IOSym">(1)</span></th>'+
+'<th title="ODOT transit regions that stops in the cluster are located in.">ODOT Transit Regions <span class="IOSym">(1)</span></th>'+
 '<th>Stops IDs</th>'+
 '<th>Stops Agencies</th>'+
 '<th>Stops Agencies Names</th>'+
@@ -74,10 +74,8 @@ tmp = '<tr><th id="an">ID <em title="ID number assigned to the cluster based on 
 '<th>P&R Latitudes</th>'+
 '<th>P&R Longitudes</th>'+
 '<th>Census Places IDs</th>'+
-'<th>Census Places Names</th>'+
-'<th>MetaData<em title="Report Metadata."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+'<th>Census Places Names</th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
-html2 = '<tfoot>'+tmp+'</tfoot>';
 
 $(document).ready(function(){
 	$('#Sradius').val(w_qstringx);

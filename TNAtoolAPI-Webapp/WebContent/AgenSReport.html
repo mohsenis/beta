@@ -45,30 +45,30 @@ var feedPubUrl = new Array();
 var agencyIds = new Array();
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th id="an">Agency Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Phone # <em title="Phone number to contact the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Routes <em title="Total number of routes operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Stops <em title="Total number of stops operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Geographic Areas <em title="Count of geographic areas that the transit agency operates within."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Counties <em title="Count of counties that the transit agency operates within."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Census Places <em title="Count of census places that the transit agency operates within."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Urban Areas <em title="Count of urban areas that the transit agency operates within."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Congressional Districts <em title="Count of congressional districts that the transit agency operates within."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total ODOT Transit Regions <em title="Count of ODOT transit regions that the transit agency operates within."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Fare<em title="If available, this field points to the fare information published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Minimum Fare<em title="If available, this field points to the minimum fare price published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Average Fare<em title="If available, this field points to the average fare price published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Median Fare<em title="If available, this field points to the median fare price published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Maximum Fare<em title="If available, this field points to the maximum fare price published by the transit agency on its web site."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Fare URL<em title="If available, this field points to the URL where fare information is published by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Service Start Date<em title="The earliest service date specified in the transit agency feed in YYYYMMDD format."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Service End Date<em title="The latest service date specified in the transit agency feed in YYYYMMDD format."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Feed Information<em title="If available, this field points to the feed information such as name, version, publisher name and publisher URL."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Feed Name<em title="Name of the GTFS feed file."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Feed Version<em title="Version of the GTFS feed file."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Feed Publisher Name<em title="Name of the GTFS feed file publisher."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Feed Publisher URL<em title="URL of the GTFS feed file publisher."><img src="images/tooltip.png" alt="tooltip"></em></th>';	
+tmp = '<tr><th class="metric" title="Identification number reported in the transit agency GTFS feed." id="aid">Agency ID</th>'+
+'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
+'<th class="metric" title="Phone number to contact the transit agency.">Phone #</th>'+
+'<th class="metric" title="Total number of routes operated by the transit agency.">Total Routes</th>'+
+'<th class="metric" title="Total number of stops operated by the transit agency.">Total Stops</th>'+
+'<th class="metric" title="Count of geographic areas that the transit agency operates within.">Geographic Areas</th>'+
+'<th class="metric" title="Count of counties that the transit agency operates within.">Total Counties</th>'+
+'<th class="metric" title="Count of census places that the transit agency operates within.">Total Census Places</th>'+
+'<th class="metric" title="Count of urban areas that the transit agency operates within.">Total Urban Areas</th>'+
+'<th class="metric" title="Count of congressional districts that the transit agency operates within.">Total Congressional Districts</th>'+
+'<th class="metric" title="Count of ODOT transit regions that the transit agency operates within.">Total ODOT Transit Regions</th>'+
+'<th class="metric" title="If available, this field points to the fare information published by the transit agency on its web site.">Fare</th>'+
+'<th class="metric" title="If available, this field points to the minimum fare price published by the transit agency on its web site.">Minimum Fare</th>'+
+'<th class="metric" title="If available, this field points to the average fare price published by the transit agency on its web site.">Average Fare</th>'+
+'<th class="metric" title="If available, this field points to the median fare price published by the transit agency on its web site.">Median Fare</th>'+
+'<th class="metric" title="If available, this field points to the maximum fare price published by the transit agency on its web site.">Maximum Fare</th>'+
+'<th class="metric" title="If available, this field points to the URL where fare information is published by the transit agency.">Fare URL</th>'+
+'<th class="metric" title="The earliest service date specified in the transit agency feed in YYYYMMDD format.">Service Start Date</th>'+
+'<th class="metric" title="The latest service date specified in the transit agency feed in YYYYMMDD format.">Service End Date</th>'+
+'<th class="metric" title="If available, this field points to the feed information such as name, version, publisher name and publisher URL.">Feed Information</th>'+
+'<th class="metric" title="Name of the GTFS feed file.">Feed Name</th>'+
+'<th class="metric" title="Version of the GTFS feed file.">Feed Version</th>'+
+'<th class="metric" title="Name of the GTFS feed file publisher.">Feed Publisher Name</th>'+
+'<th class="metric" title="URL of the GTFS feed file publisher.">Feed Publisher URL</th>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){

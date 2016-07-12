@@ -35,11 +35,11 @@ tmp = 	'<tr><th>P&R ID</th>'+
 			'<th>City</th>'+
 			'<th>Location</th>'+
 			'<th>Zipcode</th>'+
-			'<th>Spaces</th>'+
-			'<th>Accessible Spaces<em title="Number of handicap parking spaces"><img src="images/tooltip.png" alt="tooltip"></em> </th>'+
-			'<th>Transit Services<em title="Transit routes accessible from the lot"><img src="images/tooltip.png" alt="tooltip"></em> </th>'+
-			'<th>Amenities</th>'+
-			'<th>Connected Agencies</th>'+
+			'<th class="metric" title="Number of parking spaces in the lot.">Spaces</th>'+
+			'<th class="metric" title="Number of handicap parking spaces.">Accessible Spaces</th>'+
+			'<th class="metric" title="Transit routes accessible from the lot.">Transit Services <span class="IOSym">(1)</span></th>'+
+			'<th class="metric" title="Amenities available in the park and ride lot.">Amenities</th>'+
+			'<th class="metric" title="Transit agencies that have a stop within the X miles of the park and ride lot.">Connected Agencies</th>'+
 			'<th>Connected Stops IDs</th>'+
 			'<th>Connected Stops</th>'+
 			'<th>Connected Routes IDs</th>'+
@@ -136,7 +136,6 @@ $(document).ready(function(){
 			        		row.child(format7(row.data())).show();
 			        	else if (pos == 8)
 			        		row.child(format8(row.data())).show();
-			        	
 			            tr.addClass('shown');
 			        }
 		    });
@@ -251,7 +250,7 @@ $(document).ready(function(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" >
-			  		Transit Service Search Radius (miles) <input id="Sradius" name="x" data-label="Transit Service Search Radius (miles)" type="text" style="width:5em" class="input radius tbox" onkeypress="return isNumber(event)"/>
+			  		Transit Service Search Radius (miles)<span class="IOSym">(1) </span><input id="Sradius" name="x" data-iomap="1" data-label="Transit Service Search Radius (miles)" type="text" style="width:5em" class="input radius tbox" onkeypress="return isNumber(event)"/>
 			    	<input type="button" onclick="reloadPage()" title="Refresh Report"  value="Submit" class="button" /> 		    	    	
 		    	</div>
 			  </td>

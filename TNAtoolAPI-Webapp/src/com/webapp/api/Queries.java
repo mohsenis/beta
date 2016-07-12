@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.JOptionPane;
+import javax.swing.text.html.parser.Entity;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -47,6 +48,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.library.samples.*;
 import com.library.util.Types;
 import com.library.model.*;
+import com.library.model.congrapph.AgencyCentroid;
+import com.library.model.congrapph.AgencyCentroidList;
+import com.library.model.congrapph.ConGraphAgencyGraph;
+import com.library.model.congrapph.ConGraphAgencyGraphList;
+import com.library.model.congrapph.ConGraphObj;
+import com.library.model.congrapph.ConGraphObjSet;
+
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FareRule;
@@ -2504,12 +2512,12 @@ Loop:  	for (Trip trip: routeTrips){
 		x1 *= 1609.34;
 		x2 *= 1609.34;
 		x3 *= 1609.34;
-		HashMap<String, HashSet<String>> y = PgisEventManager.getClusters(x1, dbindex, username);
-				
-		HashMap<String, HashSet<String>> counter = new HashMap<String, HashSet<String>>(y);
-		for (Entry<String, HashSet<String>> entry:counter.entrySet()){
+		HashMap<String, KeyClusterHashMap> y = PgisEventManager.getClusters(x1, dbindex, username);				
+		HashMap<String, KeyClusterHashMap> counter = new HashMap<String, KeyClusterHashMap>(y);
+		
+		for (Entry<String, KeyClusterHashMap> entry:counter.entrySet()){
 			if (y.containsKey(entry.getKey())){
-				HashSet<String> counter2 = new HashSet<String>(entry.getValue());
+				HashSet<String> counter2 = new HashSet<String>(entry.getValue().values);
 				for (String stopID: counter2){
 					if (!entry.getKey().equals(stopID)){
 						y = recurse(y, entry, stopID);
@@ -2524,7 +2532,98 @@ Loop:  	for (Trip trip: routeTrips){
 		return response;
 	}
 	
-	public HubsClusterList getClusterData(HashMap<String, HashSet<String>> x, String[] dates, String[] days, final int dbindex, final double popRadius, final double pnrRadius, String username, final double key, final String popYear) throws SQLException{
+	@GET
+	@Path("/keyHubs")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getKeyHubs(@QueryParam("x1") double x1, @QueryParam("x2") double x2, @QueryParam("popYear") String popYear, @QueryParam("x3") double x3, @QueryParam("key") double key, @QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException {
+		if(popYear==null||popYear.equals("null")){
+			popYear="2010";
+		}
+
+		HubsClusterList response = new HubsClusterList();
+		
+		String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = datedays[0];
+    	String[] days = datedays[1];
+		x1 *= 1609.34;
+		x2 *= 1609.34;
+		x3 *= 1609.34;
+		
+		HashMap<String, KeyClusterHashMap> y = PgisEventManager.getClusters(x1, dbindex, username);		
+		HashMap<String, KeyClusterHashMap> counter = new HashMap<String, KeyClusterHashMap>(y);
+		for (Entry<String, KeyClusterHashMap> entry:counter.entrySet()){
+			if (y.containsKey(entry.getKey())){
+				HashSet<String> counter2 = new HashSet<String>(entry.getValue().values);
+				for (String stopID: counter2){
+					if (!entry.getKey().equals(stopID)){
+						y = recurse(y, entry, stopID);
+					}						
+				}
+			}		
+		}
+		
+		HashMap<String, KeyClusterHashMap> y1 = new HashMap<String,KeyClusterHashMap>();
+		for (Entry<String, KeyClusterHashMap> entry:y.entrySet()){
+			if (entry.getValue().keyAgencyIDs.size()>=3){ 
+				y1.put(entry.getKey(), entry.getValue());
+			}			
+		}
+		
+		HashMap<String, KeyClusterHashMap> h = new HashMap<String, KeyClusterHashMap>();
+		for (Entry<String, KeyClusterHashMap> entry:y1.entrySet()){
+			if (entry.getValue().keyAgencyIDs.size() >= 3){
+				
+				ArrayList<String> tempKeyAgencies = new ArrayList<String>();
+				tempKeyAgencies.addAll(entry.getValue().keyAgencyIDs);
+				entry.getValue().keyAgencyIDs.clear();
+				entry.getValue().keyAgencyIDs.addAll(Agencycontainlist(tempKeyAgencies, dbindex));
+				if (entry.getValue().keyAgencyIDs.size() >= 3)
+					h.put(entry.getKey(), entry.getValue());
+				
+			}
+		}
+		response = getClusterData(h, fulldates, days, dbindex, x2, x3, username, key, popYear);
+		return response;
+    }
+	
+	private ArrayList<String> Agencycontainlist(ArrayList<String> agencies,
+			int dbindex) {
+
+		List<String> c_a = new ArrayList<String>();
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+
+		for (int i = 0; i < agencies.size(); i++) {
+			String query = " Select * from agencymapping WHERE agencyID= '"
+					+ agencies.get(i) + "'";
+			try {
+				Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery(query);
+				while (rs.next()) {
+					String[] con_a;
+					con_a = (String[]) rs.getArray("contained_agencies")
+							.getArray();
+					c_a.addAll(Arrays.asList(con_a));
+					c_a.remove(agencies.get(i));
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		ArrayList<String> na = new ArrayList<String>();
+		for (String string : new ArrayList<String>(agencies)) {
+			if (!c_a.contains(string)) {
+				na.add(string);
+
+			}
+		}
+		PgisEventManager.dropConnection(connection);
+		return na;
+	}
+	
+	public HubsClusterList getClusterData(HashMap<String, KeyClusterHashMap> x, String[] dates, String[] days, final int dbindex, final double popRadius, final double pnrRadius, String username, final double key, final String popYear) throws SQLException{
 		HubsClusterList output = new HubsClusterList();
     	int progress = 0;
     	setprogVal(key, 5);
@@ -2532,12 +2631,12 @@ Loop:  	for (Trip trip: routeTrips){
 		
 		setprogVal(key, 10);
     	int totalLoad = x.entrySet().size();
-    	HashMap<String, HashSet<String>> first = new HashMap<String, HashSet<String>>();
-    	HashMap<String, HashSet<String>> second = new HashMap<String, HashSet<String>>();
-    	HashMap<String, HashSet<String>> third = new HashMap<String, HashSet<String>>();
-    	HashMap<String, HashSet<String>> forth = new HashMap<String, HashSet<String>>();
+    	HashMap<String, KeyClusterHashMap> first = new HashMap<String, KeyClusterHashMap>();
+    	HashMap<String, KeyClusterHashMap> second = new HashMap<String, KeyClusterHashMap>();
+    	HashMap<String, KeyClusterHashMap> third = new HashMap<String, KeyClusterHashMap>();
+    	HashMap<String, KeyClusterHashMap> forth = new HashMap<String, KeyClusterHashMap>();
     	int b = 0;
-    	for (Entry<String, HashSet<String>> e: x.entrySet()) {
+    	for (Entry<String, KeyClusterHashMap> e: x.entrySet()) {
     	  if (b==0)
     		  first.put(e.getKey(), e.getValue());
     	  else if(b==1)
@@ -2554,14 +2653,14 @@ Loop:  	for (Trip trip: routeTrips){
     	class fillClusters implements Runnable {
     		private Thread t;
     		private String threadName;
-    		private HashMap<String, HashSet<String>> threadSet;
+    		private HashMap<String, KeyClusterHashMap> threadSet;
     		HubsClusterList tOutput;
     		
     		public boolean bool = true;
     		public int threadProgress=0;
     		
 		   
-    		fillClusters(String name, HashMap<String, HashSet<String>> set, HubsClusterList output){
+    		fillClusters(String name, HashMap<String, KeyClusterHashMap> set, HubsClusterList output){
     			threadName = name;
     			threadSet = set;
     			tOutput = output;
@@ -2572,13 +2671,13 @@ Loop:  	for (Trip trip: routeTrips){
 				Connection connection = PgisEventManager.makeConnection(dbindex);
 				try {
 					Statement stmt = connection.createStatement();
-					for (Entry<String, HashSet<String>> entry : threadSet.entrySet()){
+					for (Entry<String, KeyClusterHashMap> entry : threadSet.entrySet()){
 						threadProgress++;
 						HubCluster response = new HubCluster();
 						List<String> agencyids = new ArrayList<String>();
 						List<String> stopids = new ArrayList<String>();
 						int visits = 0;
-						for(String instance : entry.getValue()){
+						for(String instance : entry.getValue().values){
 							String[] temp = instance.split(":");
 							stopids.add(temp[0]);
 							agencyids.add(temp[1]);
@@ -2633,8 +2732,7 @@ Loop:  	for (Trip trip: routeTrips){
 								+ "	CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop"
 								+ "	CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount"
 								+ "	CROSS JOIN pnrarray CROSS JOIN placesarray";
-	//					System.out.println(query);			
-					
+	//					System.out.println(query);	
 						
 						ResultSet rs = stmt.executeQuery(query);
 							
@@ -2743,10 +2841,12 @@ Loop:  	for (Trip trip: routeTrips){
 		return output;
 	}
 	
-	private HashMap<String, HashSet<String>> recurse(HashMap<String, HashSet<String>> y, Entry<String, HashSet<String>> entry, String stopID){
+	private HashMap<String, KeyClusterHashMap> recurse(HashMap<String, KeyClusterHashMap> y, Entry<String, KeyClusterHashMap> entry, String stopID){
 		if (y.containsKey(stopID)){
-			HashSet<String> tmpStopsSet = y.get(stopID); 
-			y.get(entry.getKey()).addAll(tmpStopsSet);
+			HashSet<String> tmpStopsSet = y.get(stopID).values;
+			HashSet<String> tmpAgencyIDs = y.get(stopID).keyAgencyIDs;
+			y.get(entry.getKey()).values.addAll(tmpStopsSet);
+			y.get(entry.getKey()).keyAgencyIDs.addAll(tmpAgencyIDs);
 			y.remove(stopID);
 			for (String x: tmpStopsSet){
 				if(!entry.getKey().equals(x))
@@ -2765,18 +2865,15 @@ Loop:  	for (Trip trip: routeTrips){
 		Statement stmt = connection.createStatement();
 		
 		//Retrieving the list of agencies and putting the IDs into an array.
-		HashMap<String, String> agencies = SpatialEventManager.getAllAgencies(session, dbindex);
+		HashMap<String, com.library.model.congrapph.Agency> agencies = SpatialEventManager.getAllAgencies(session, dbindex);
 		
 		ConGraphObjSet response = new ConGraphObjSet();
 		Set<ConGraphObj> e = new HashSet<ConGraphObj>();
-		for (Entry<String, String> i : agencies.entrySet()){
-			System.out.println(i.getKey());
-			e = SpatialEventManager.getConGraphObj(i.getKey(), i.getValue(), x, stmt);
+		for (Entry<String, com.library.model.congrapph.Agency> i : agencies.entrySet()){
+			e = SpatialEventManager.getConGraphObj(i.getKey(), i.getValue().name, x, stmt);
 			response.set.addAll(e);
 		}
-		for (ConGraphObj i : response.set){
-			System.out.println(i.a1ID + "," + i.a2ID + "," + i.connections.size);
-		}
+		
 		connection.close();
 		return response;
 	}
@@ -2784,41 +2881,61 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
     @Path("/agencyCentriods")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getAgencyCentroids(@QueryParam("dbindex") Integer dbindex) throws SQLException{
+    public Object getAgencyCentroids(@QueryParam("username") String username, @QueryParam("dbindex") Integer dbindex) throws SQLException{
 		// Making connection to DB
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
-		ConGraphAgencyCentroidsList response = new ConGraphAgencyCentroidsList();
-		String query = "WITH temp AS (SELECT map.agencyid, AVG(stops.lat)::TEXT||','||AVG(stops.lon)::TEXT AS coordinate "
-				+ "	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map "
-				+ "	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id "
-				+ "	GROUP BY map.agencyid) "
-				+ "SELECT agencyid, ARRAY_AGG(coordinate) AS coordinate FROM temp GROUP BY agencyid";
-		System.out.println(query);
-		try{
-			ResultSet rs = stmt.executeQuery(query);			
-			String[] point;
-			String lat;
-			String lng;
-			while(rs.next()){
-				ConGraphAgencyCentroids instance = new ConGraphAgencyCentroids();
-				point = (String[]) rs.getArray("coordinate").getArray();
-				for ( int i = 0 ; i < point.length ; i++ ){
-					lat = point[i].split(",")[0];
-					lng = point[i].split(",")[1];
-					instance.coordinates.add(new com.library.model.Coordinate(Double.parseDouble(lat), Double.parseDouble(lng)));
-				}
-				instance.key = rs.getString("agencyid");
-				response.ConGraphAgencyCentroidsList.add(instance);
+		ConGraphAgencyGraphList response = new ConGraphAgencyGraphList();
+		
+		Map<String,com.library.model.congrapph.Agency> agencies = SpatialEventManager.getAllAgencies(username, dbindex);
+		for (Entry<String,com.library.model.congrapph.Agency> e : agencies.entrySet() ){
+			if (!e.getValue().centralized){
+				ConGraphAgencyGraph i = SpatialEventManager.getAgencyCentroids(e.getKey(), stmt, 100);
+				i.centralized = e.getValue().centralized;
+				response.list.add(i);
+			}else {
+				ConGraphAgencyGraph i = SpatialEventManager.getAgencyCentroids(e.getKey(), stmt, 100);
+				i.centralized = e.getValue().centralized;
+				response.list.add(i);
 			}
-		}catch(SQLException e){
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		connection.close();
 		return response;
 	}
 	
+	@GET
+    @Path("/agencyCentriods2")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getAgencyCentroids2(@QueryParam("username") String username, @QueryParam("dbindex") Integer dbindex) throws SQLException{
+		// Making connection to DB
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		AgencyCentroidList response = new AgencyCentroidList();
+		
+		Map<String,com.library.model.congrapph.Agency> agencies = SpatialEventManager.getAllAgencies(username, dbindex);
+		for (Entry<String,com.library.model.congrapph.Agency> e : agencies.entrySet() ){
+			
+				AgencyCentroid i = SpatialEventManager.getAgencyCentroid(e.getKey(), stmt);
+//				if (i.lat!=0.0)
+					response.list.add(i);
+			}
+		
+		connection.close();
+		return response;
+	}
+	
+	@GET
+    @Path("/allAgencies")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getAllAgencies(@QueryParam("username") String username, @QueryParam("dbindex") Integer dbindex) throws SQLException{
+		HashMap<String,com.library.model.congrapph.Agency> response = new HashMap<String, com.library.model.congrapph.Agency>();
+		try{
+			response = SpatialEventManager.getAllAgencies(username, dbindex);
+		}catch(SQLException e){
+			System.out.println(e);
+		}
+		return response;
+	}
 	
 	/**
      * Get calendar range for a set of agencies

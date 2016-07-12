@@ -33,14 +33,14 @@ var fMedian = new Array();
 var upop = parseInt(getURIParameter("pop"));
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th id="aid">Geo ID <em title="Identification number associated with the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th id="an">Name <em title="Name of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Population  <em title="Total population of the geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Land Area <em title="Total land area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Water Area <em title="Total water area of the geographic area in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Urban Areas <em title="Total number of urbanized areas aggregated to generate this report."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Routes <em title="Total number of routes serving stops in the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Total Stops <em title="Total number of stops within the given geographic area."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+tmp = '<tr><th class="metric" title="Identification number associated with the geographic area." id="aid">Geo ID</th>'+
+'<th class="metric" title="Name of the geographic area." id="an">Name</th>'+
+'<th class="metric" title="Total population of the geographic area.">Population<span class="IOSym">(1) </span></th>'+
+'<th class="metric" title="Total land area of the geographic area in square miles.">Land Area<span class="IOSym">(1) </span></th>'+
+'<th class="metric" title="Total water area of the geographic area in square miles.">Water Area<span class="IOSym">(1) </span></th>'+
+'<th class="metric" title="Total number of urbanized areas aggregated to generate this report.">Urban Areas<span class="IOSym">(1) </span></th>'+
+'<th class="metric" title="Total number of routes serving stops in the given geographic area.">Total Routes<span class="IOSym">(1) </span></th>'+
+'<th class="metric" title="Total number of stops within the given geographic area.">Total Stops<span class="IOSym">(1) </span></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -149,7 +149,7 @@ $(document).ready(function(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Urban Population Filter <input type="text" name="pop" id="Upop" data-label="Urban Population Filter" class="input utbox" onkeypress="return isWholeNumber(event)"/>
+			    	Urban Population Filter <span class="IOSym">(1) </span><input type="text" name="pop" id="Upop" data-iomap="1" data-label="Urban Population Filter" class="input utbox" onkeypress="return isWholeNumber(event)"/>
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
 		    	</div>
 			  </td>

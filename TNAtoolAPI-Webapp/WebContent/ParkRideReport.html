@@ -29,13 +29,12 @@
 <script type="text/javascript">
 
 html = '<table id="RT" class="display" align="center">';
-tmp = 	'<tr><th id="an"">County ID <em title="County ID conforming to the census data"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>County Name<em title="County name"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>Total number of P&R lots<em title="Total number of park and ride lots in the county"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>Total parking spaces <em title="Total number of parking spaces in the county"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-			'<th>Total accessible parking spaces <em title="Total number of handicap parking spaces in the county"><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';
+tmp = 	'<tr><th class="metric" title="County ID conforming to the census data." id="an">County ID</th>'+
+			'<th class="metric" title="County name.">County Name</th>'+
+			'<th class="metric" title="Total number of park and ride lots in the county.">Total number of P&R lots</th>'+
+			'<th class="metric" title="Total number of parking spaces in the county.">Total parking spaces</th>'+
+			'<th class="metric" title="Total number of handicap parking spaces in the county.">Total accessible parking spaces</th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
-html2 = '<tfoot>'+tmp+'</tfoot>';
 
 $(document).ready(function(){
 	loadDBList();

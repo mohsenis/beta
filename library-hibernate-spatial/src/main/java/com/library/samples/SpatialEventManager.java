@@ -13,6 +13,7 @@ import java.util.Set;
 import com.library.model.TransitConnection;
 import com.library.model.ParknRide;
 import com.library.model.agencyCluster;
+import com.library.model.congrapph.Agency;
 import com.library.model.congrapph.AgencyCentroid;
 import com.library.model.congrapph.ConGraphAgencyGraph;
 import com.library.model.congrapph.ConGraphCluster;
@@ -81,16 +82,21 @@ public class SpatialEventManager {
 		return output;
 	}
 
-	public static HashMap<String, String> getAllAgencies ( String username, int dbindex ) throws SQLException {
-		HashMap<String,String> response = new HashMap<String, String>();
+	public static HashMap<String, Agency> getAllAgencies ( String username, int dbindex ) throws SQLException {
+		HashMap<String,Agency> response = new HashMap<String, Agency>();
 		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.defaultid IN (SELECT DISTINCT agency_id AS aid "
-				+ "FROM gtfs_selected_feeds WHERE username='" + username + "')";
+				+ "FROM gtfs_selected_feeds WHERE username='" + username + "')  ORDER BY name";
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(query);
 		
-		while ( rs.next() )
-			response.put(rs.getString("id"), rs.getString("name"));
+		while ( rs.next() ){
+			Agency i = new Agency();
+			i.name = rs.getString("name");
+			i.centralized = rs.getBoolean("centralized");
+			i.id = rs.getString("id");
+			response.put(rs.getString("id"), i);
+		}
 		
 		connection.close();
 		return response;
@@ -128,7 +134,6 @@ public class SpatialEventManager {
 			
 			// Initialize a ConGraphObj for isolated agencies. 
 			if (!rs.next()){
-				System.out.println("Isolated Agency: " + agencyID);
 				ConGraphObj instance = new ConGraphObj();
 				instance.a1ID = agencyID;
 				instance.a1name = agencyName;
@@ -150,13 +155,11 @@ public class SpatialEventManager {
 				// Getting the edge properties.
 				instance.connections = new TransitConnection(rs.getInt("size"));
 				response.add(instance);		
-//				System.out.println(instance.a1ID +"-"+instance.a2ID+"-"+instance.connections.size);
 			}
 		}catch(SQLException e){
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		System.out.println("response size: " + response.size());
 		return response;
 	}
 	
@@ -169,11 +172,13 @@ public class SpatialEventManager {
 	 */
 	public static ConGraphAgencyGraph getAgencyCentroids(String agencyID, Statement stmt, double RADIUS) throws SQLException{
 //		ConGraphAgencyGraph response = new ConGraphAgencyGraph(new HashSet<Coordinate[]>());
-		String query = "SELECT name, lat, lon FROM gtfs_stops WHERE agencyid='" + agencyID + "' ORDER BY lat, lon";;
+		String query = "SELECT name, lat, lon FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
+				+ " ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
+				+ " WHERE map.agencyid='" + agencyID + "' ORDER BY lat, lon";;
 		ResultSet rs = stmt.executeQuery(query);
 		List<ConGraphCluster> clusters = new ArrayList<ConGraphCluster>();
 		List<Coordinate> points = new ArrayList<Coordinate>();
-		System.out.println("agency:"+agencyID);
+//		System.out.println("agency:"+agencyID);
 		while (rs.next()){
 			Coordinate c = new Coordinate(rs.getDouble("lat"), rs.getDouble("lon"));
 			points.add(c);
@@ -195,11 +200,8 @@ public class SpatialEventManager {
 			clusters.add(c); 
 		}
 		
-		ConGraphAgencyGraph response = new ConGraphAgencyGraph(clusters);
-		response.ID = agencyID;
-				
+		ConGraphAgencyGraph response = new ConGraphAgencyGraph(agencyID, clusters);
 		return response;
-		
 	}
 	
 	/**
@@ -209,8 +211,7 @@ public class SpatialEventManager {
 	 * @return
 	 * @throws SQLException 
 	 */
-	public static AgencyCentroid getAgencyCentroids2(String agencyID, Statement stmt) throws SQLException{
-//		ConGraphAgencyGraph response = new ConGraphAgencyGraph(new HashSet<Coordinate[]>());
+	public static AgencyCentroid getAgencyCentroid(String agencyID, Statement stmt) throws SQLException{
 		String query = "SELECT AVG(lat) AS lat, AVG(lon) AS lng "
 				+ " FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
 				+ " ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def WHERE map.agencyid='"+agencyID+"'";;
@@ -220,10 +221,7 @@ public class SpatialEventManager {
 			response.id = agencyID;
 			response.lat = rs.getDouble("lat");
 			response.lng = rs.getDouble("lng");
-		}
-		
+		}		
 		return response;
-		
-	}
-	
+	}	
 }

@@ -17,24 +17,25 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<script src="http://plugins.adchsm.me/slidebars/scripts/slidebars/slidebars.min.js"></script>
 	<script src="https://static.jstree.com/3.3.0/assets/dist/jstree.min.js"></script>
 	<script src="js/lib/date.js"></script><script src="Phase4/Datasources.js"></script>
 	<script src="Phase4/JSMethods.js"></script>
 	<script src="Phase4/EmpMethods.js"></script>
 	<script src="js/EmpJstree.js"></script>
-		
+	<script src="js/lib/slidebars.min.js"></script>
+			
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/tabletools/2.2.1/css/dataTables.tableTools.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
-	<link rel="stylesheet" href="http://plugins.adchsm.me/slidebars/scripts/slidebars/slidebars.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="report.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/slidebars.min.css" />
 	
 	<script>
 	
+	var dateIOnumber = 3; // the number is used to map selected date(s) to the metrics affected by the date(s).
 	var w_qstringd = getDates(keyName);
 	w_qstringx = $('#Sradius').val();
 	if (w_qstringx == null) {w_qstringx = 0.25};
@@ -157,12 +158,12 @@
 				</div>
 			</div>
 			<table style="width:100%">
-			<tr><td><label for="dataSet">Select Data Set:</label></td><td><select name="dataSet" id="dataSet" data-label="Dataset" class="input" onchange=datasetChange(this) style="height:25px;width:95%;">
+			<tr><td><label for="dataSet">Data Set</label></td><td><select name="dataSet" id="dataSet" data-label="Dataset" class="input" onchange=datasetChange(this) style="height:25px;width:95%;">
 					  <option value="lodes_blocks_wac" selected>WAC - Workplace Area Characteristic</option>
 					  <option value="lodes_blocks_rac">RAC - Residence Area Characteristic</option>
 					  <option value="3">WAC & RAC</option>
 				 </select><br></td></tr>
-			 <tr><td><label for="reportType">Select report type:</label></td><td><select name="reportType" id="reportType" class="input" data-label="Report Type" style="height:25px;width:65%;" onchange="selectFunction()">
+			 <tr><td><label for="reportType">Report type </label></td><td><select name="reportType" id="reportType" class="input" data-label="Report Type" style="height:25px;width:65%;" onchange="selectFunction()">
 				  <option value="Counties" selected>Counties</option>
 				  <option value="Census Places">Census Places</option>
 				  <option value="Congressional Districts">Congressional Districts</option>
@@ -170,7 +171,7 @@
 				  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
 				  <option value="Agencies">Agencies</option>
 			 </select><br></td></tr>
-			 <tr><td><label for="projectionYear">Select year:</label></td><td><select name="projectionYear" id="projectionYear" class="input" data-label="Selected Year" style="height:25px;width:65%;" onchange="updateProjection()">
+			 <tr><td><label for="projectionYear">Year </label></td><td><select name="projectionYear" id="projectionYear" class="input" data-label="Selected Year" style="height:25px;width:65%;" onchange="updateProjection()">
 				  <option value="current" selected>2013</option>
 				  <option value="2015">2015 (Projection)</option>
 				  <option value="2020">2020 (Projection)</option>
@@ -181,8 +182,8 @@
 				  <option value="2045">2045 (Projection)</option>
 				  <option value="2050">2050 (Projection)</option>
 			 </select><br></td></tr>
-			<tr><td>Population Search Radius</td><td><input type="text" name="Sradius" class="input radius" id="Sradius" data-label="Population Search Radius" style="text-indent: 2px; height:21px;width:49%;" value="0.25" onkeypress="return isNumber(event)"/><span style="margin-left:4px">miles</span></td></tr>
-			<tr><td>Minimum Level of Service </td><td><input type="text" name="LOS" id="LOS" class="input" data-label="Minimum Level of Service" style="text-indent: 2px; height:21px; width:49%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
+			<tr><td>Employment Search Radius <span class="IOSym">(1) </span></td><td><input type="text" name="Sradius" class="input radius" id="Sradius" data-iomap="1" data-label="Employment Search Radius" style="text-indent: 2px; height:21px;width:49%;" value="0.25" onkeypress="return isNumber(event)"/><span style="margin-left:4px">miles</span></td></tr>
+			<tr><td>Minimum Level of Service  <span class="IOSym">(2) </span></td><td><input type="text" name="LOS" id="LOS" class="input" data-iomap="2" data-label="Minimum Level of Service" style="text-indent: 2px; height:21px; width:49%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
 			</table>
 			<input id="checkbox" type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>

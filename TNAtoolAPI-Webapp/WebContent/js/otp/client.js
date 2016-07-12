@@ -579,7 +579,6 @@ var Layers = 0;
 function getdata(type,agency,route,variant,k,callback,popup,node) {	
 	switch (type){
 	case 1:
-		alert('case 1');
 		var points = [];
 		$.ajax({
 			type: 'GET',
@@ -594,7 +593,6 @@ function getdata(type,agency,route,variant,k,callback,popup,node) {
 		break;
 	case 2:
 		var points = [];
-		alert('case 2');
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
@@ -612,7 +610,6 @@ function getdata(type,agency,route,variant,k,callback,popup,node) {
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/shape?&agency='+agency+'&trip='+variant+"&dbindex="+dbindex,
 			success: function(d){
-				alert('case 3');
 			if (d.points!= null) callback(k,d,"V"+agency+route+variant,node);
 	    }});
 		break;
@@ -1225,6 +1222,7 @@ $mylist
 		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
 		    		'<ul>'+
 		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="KTHR" href="#"><b>Key Transit Hubs Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Transit Networks Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Transit Agencies Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
@@ -1286,15 +1284,22 @@ $mylist
 				if ($(this).attr('id') != undefined) {
 				casestring = $(this).attr('id');
 				}
-				if (casestring=="THR"){var d = new Date();
+				if (casestring=="THR"){
+					var d = new Date();
 					var qstringx = '0.08';	// clustering radius
 					var qstringx2 = '0.25'; // population search radius					
 					var qstringx3 = '2.0'  // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-		    		//var keyName = Math.random();
-		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    }else if (casestring=="KTHR"){
+				    var d = new Date();
+					var qstringx = '0.08';	// clustering radius
+					var qstringx2 = '0.25'; // population search radius					
+					var qstringx3 = '2.0'  // park and ride search radius
+					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+					var keyName = setDates(qstringd);
+			    	window.open('/TNAtoolAPI-Webapp/KeyHubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
@@ -1487,10 +1492,6 @@ function updatepicker(){
 			key="--";
 	}
 	location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
-
-	/*if (w_qstringd!=newdates){
-		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
-	}*/
 }
 
 function updateListDialog(agenciesIds){
@@ -1572,4 +1573,4 @@ function updateListDialog(agenciesIds){
 /*
  * Connectivity Graph
  */
-//$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control" class="leaflet-control ui-widget-content"><button id="con-graph-button" onclick="toggleConGraphDialog()">G</button></div>');
+$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="con-graph-button" style="border-radius:5px; background-color:#FFF" onclick="toggleConGraphDialog()">G</button></div>');

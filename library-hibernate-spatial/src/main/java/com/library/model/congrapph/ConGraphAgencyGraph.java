@@ -12,7 +12,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement( name = "ConGraphAgencyGraph")
 public class ConGraphAgencyGraph {
 	@XmlElement ( name = "agencyID")
-	public static String ID;
+	public String ID;
+	
+	@XmlElement ( name = "centralized")
+	public boolean centralized;
 	
 	@XmlElement ( name = "vertices")
 	public List<Coordinate> vertices = new ArrayList<Coordinate>();
@@ -21,12 +24,13 @@ public class ConGraphAgencyGraph {
 	public Set<Coordinate[]> edges = new HashSet<Coordinate[]>();
 	
 	
-	public ConGraphAgencyGraph(List<ConGraphCluster> clusters){
+	public ConGraphAgencyGraph(String agencyID, List<ConGraphCluster> clusters){
 		for (ConGraphCluster c : clusters){
 			this.vertices.add(c.centroid);
 		}
 		System.out.println("#: "+vertices.size());
 		this.edges = getMST(vertices);
+		this.ID = agencyID;
 	}
 	
 	public ConGraphAgencyGraph(){

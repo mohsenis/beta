@@ -334,8 +334,8 @@ function getMetadata() {
 	 * Appending algortihm for ran to generate the report, if any.
 	 */
 	if (typeof algDesc !== 'undefined') {
-		output = output.concat('\r\n\r\n\r\nAlgorithm\r\n');
-		output = output.concat('--------------------\r\n');	
+//		output = output.concat('\r\n\r\n\r\nAlgorithm\r\n');
+//		output = output.concat('--------------------\r\n');	
 		output = output.concat(algDesc);
 	}
 	
@@ -357,21 +357,9 @@ function getMetadata() {
 	 */ 
 	output = output.concat('\r\n\r\n\r\nMetric Definitions\r\n');
 	output = output.concat('--------------------\r\n');
-	$("#RT th").each(
-			function(index, object) {
-				/*if ($(object).find("em").find("img").attr("alt") == 'tooltip'){
-					output = output.concat($(object).text() + ': '
-							+ $(object).find("em").attr("title") + '\r\n');*/
-				output = output.concat($(object).text() + ': ' + $(object).attr("title") + '\r\n');					
-				}
-			);
-	$("td").each(
-			function(index, object) {
-				if ($(object).find("em").find("img").attr("alt") == 'tooltip'){
-					output = output.concat($(object).text() + ': '
-							+ $(object).find("em").attr("title") + '\r\n');
-				}				
-			});
+	$('.metric').each(function(i,item){
+		output = output.concat($(item).text() + ': ' + item.title + '\r\n')
+		});
 	output = output.concat('\r\n');
 	
 	// Adding description of the footnotes that map inputs and metrics
@@ -380,7 +368,9 @@ function getMetadata() {
 			output = output.concat('(' + object.dataset.iomap + ') '  + object.dataset.label + '\r\n');
 		}	
 	});
-	if (keyName != null && $('h2').text()=="Transit Hubs Summary Report ") output = output.concat('(4) Selected Service Dates');
+	
+	// Adding selected dates if exists.
+	if (keyName != null) output = output.concat('(' + dateIOnumber + ') Selected Service Dates');
 	
 	return output;
 }
@@ -489,7 +479,7 @@ function go(key) {
 							.html(
 									$('#datepicker').multiDatesPicker(
 											'getDates').length
-											+ " day(s) selected<span class='IOSym' style='font-size:10'>(4)</span>");
+											+ " day(s) selected<span class='IOSym' style='font-size:10'>" + dateIOnumber + "</span>");
 					$('.selectedDate').css("text-align", "center");
 					$('.ui-accordion-header').css({'width':'90%','font-size':'80%','margin':'auto','text-align':'center'});
 				}
@@ -509,7 +499,7 @@ function go(key) {
 	});
 	$("#accordion").accordion("refresh");
 	$("#accordion > h3")
-			.html(w_qstringd.split(",").length + " day(s) selected<span class='IOSym' style='font-size:10'>(4)</span>");
+			.html(w_qstringd.split(",").length + " day(s) selected<span class='IOSym' style='font-size:10'>(" + dateIOnumber + ")</span>");
 	$('.selectedDate').css("text-align", "center");
 	$('.ui-accordion-header').css({'width':'100%','font-size':'80%','margin':'auto','text-align':'center'});
 }
