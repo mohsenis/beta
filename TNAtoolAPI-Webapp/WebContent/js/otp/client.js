@@ -43,7 +43,8 @@ var map = new L.Map('map', {
 
 var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
 var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
-var minimalLayer = new L.StamenTileLayer("toner");
+var tonerMap = new L.StamenTileLayer("toner");
+var terrainMap = new L.StamenTileLayer("terrain");
 
 var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/beta" target="_blank">TNA Software Tool</a> '+getVersion()+' beta';
 var osmLayer = new L.TileLayer(OSMURL, 
@@ -54,7 +55,7 @@ var osmLayer = new L.TileLayer(OSMURL,
 var aerialLayer = new L.TileLayer(aerialURL, 
 		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 19, attribution: osmAttrib});
 
-map.addLayer(osmLayer);
+map.addLayer(terrainMap);
 $("body").css("display","");
 $("#overlay").show();
 
@@ -85,7 +86,7 @@ var dialog2=$("#connectedAgencies-form").dialog({
     buttons: {
         },
     close: function() {
-    	miniMap._restore();
+    	//miniMap._restore();
     	connectionMarkers.eachLayer(function (layer) {
 		    connectionMarkers.removeLayer(layer);
 		});
@@ -99,7 +100,7 @@ var dialog2=$("#connectedAgencies-form").dialog({
     	polylines = [];
       },
     open: function(  ) { 	
-    	miniMap._minimize(); 
+    	//miniMap._minimize(); 
     	dialog.dialog( "close" );
     	$('.jstree-checked').each(function() {
     		$( this ).children('a').children('.jstree-checkbox').click();
@@ -111,10 +112,10 @@ var dialog2=$("#connectedAgencies-form").dialog({
       "minimizable" : true,
       "minimizeLocation": "right",
       "minimize" : function() {
-    	  miniMap._restore();
+    	  //miniMap._restore();
       },
       "restore" : function() {
-    	  miniMap._minimize();
+    	  //miniMap._minimize();
       }
   });
 
@@ -350,11 +351,11 @@ var dialog = $( "#dialog-form" ).dialog({
     buttons: {
         },
     close: function() {
-    	miniMap._restore();
+    	//miniMap._restore();
     	map.removeLayer(onMapCluster);
       },
     open: function( event, ui ) {
-    	miniMap._minimize();
+    	//miniMap._minimize();
     	dialog2.dialog('close');
     },
   }).dialogExtend({
@@ -362,10 +363,10 @@ var dialog = $( "#dialog-form" ).dialog({
       "minimizable" : true,
       "minimizeLocation": "right",
       "minimize" : function() {
-    	  miniMap._restore();
+    	  //miniMap._restore();
       },
       "restore" : function() {
-    	  miniMap._minimize();
+    	  //miniMap._minimize();
       }
   });
 
@@ -1054,12 +1055,15 @@ map.on('click', function(){
 osmLayer.on('load', function(e) {
 	ggb = false;    
 });
-minimalLayer.on('load', function(e) {
+tonerMap.on('load', function(e) {
+	ggb = false;	
+});
+terrainMap.on('load', function(e) {
 	ggb = false;	
 });
 var mmRecLat = 0;
 var mmRecLng = 0;
-var miniMap = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"], minZoom: 5, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright',toggleDisplay:true}).addTo(map);
+//var miniMap = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"], minZoom: 5, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright',toggleDisplay:true}).addTo(map);
 $('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'0px'});
 var menucontent = '<ul id="rmenu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">';
 $.ajax({
@@ -1081,8 +1085,8 @@ $.ajax({
 	}			
 });
 var baseMaps = {
-	    "OSM": osmLayer,
-	    "Toner": minimalLayer,
+	    "OSM": terrainMap,
+	    "Toner": tonerMap,
 	    "Google Aerial":ggl,
 	    //"Aerial Photo": aerialLayer
 	};
