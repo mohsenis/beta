@@ -28,7 +28,6 @@ public class ConGraphAgencyGraph {
 		for (ConGraphCluster c : clusters){
 			this.vertices.add(c.centroid);
 		}
-		System.out.println("#: "+vertices.size());
 		this.edges = getMST(vertices);
 		this.ID = agencyID;
 	}

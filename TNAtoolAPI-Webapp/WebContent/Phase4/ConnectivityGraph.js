@@ -36,6 +36,17 @@ agencyStyle['hover'] = {
  * Loads/toggles the connectivity graph dialog box.
  */
 function toggleConGraphDialog(){
+	// remove previously displayed graph from the map
+	$.each(vertices, function(index, item){
+		map.removeLayer(item);
+	});
+	$.each(edges, function(index, item){
+		map.removeLayer(item);
+	});
+	vertices = {};
+	edges = [];
+	
+	// Initializing the connectivity graph dialog box
 	$( "#con-graph-dialog" ).empty();
 	var dialogheight = Math.round((window.innerHeight)*.6); 
 	if (dialogheight > 900)

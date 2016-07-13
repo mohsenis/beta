@@ -10,6 +10,9 @@ var color1 = 'red';	 // color of highlighted graph elements
 var congraphobj;
 
 function openConGraph2(){
+	$( "#con-graph-dialog" ).dialog( "close" );
+	toggleConGraphDialog();
+		
 	var dbindex = getURIParameter("dbindex");
 	var agencyCentroids= {};
 	var loaderHtml = '<img id="conGraphPreLoader" src="images/287.GIF" alt="Page Loading" style="height:80; width:80; margin:120px" >';
