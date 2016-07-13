@@ -338,7 +338,7 @@ $(document).ready(function(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Stop Cluster Radius(miles) <input type="text" name="x1" id="Sradius" class="input tbox" onkeypress="return isNumber(event)"/>			    	
+			    	Stop Cluster Radius(miles) <span class="IOSym">(1) </span><input type="text" name="x1" id="Sradius" data-IOMap="1" data-label="Stop Cluster Radius(miles)" class="input radius tbox" onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
 		    	</div>
 			  </td>
@@ -347,10 +347,10 @@ $(document).ready(function(){
 				<td></td>
 				<td></td>
 				<td><div style="float:right;"> 
-			    	Population Search Radius(miles) <input type="text" name="x2" id="PopSradius" class="input tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
+			    	Population Search Radius(miles)<span class="IOSym">(2) </span><input type="text" name="x2" id="PopSradius" data-IOMap="2" data-label="Population Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
 			    	</div><br>
 			    	<div style="float:right;margin-top:2px;"> 
-			    	Park & Ride Search Radius(miles) <input type="text" name="x3" id="PnrSradius" class="input tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
+			    	Park & Ride Search Radius(miles)<span class="IOSym">(3)  </span><input type="text" name="x3" id="PnrSradius" data-IOMap="3" data-label="Park & Ride Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
 			    	</div>
 			    </td>			    
 			</tr>
