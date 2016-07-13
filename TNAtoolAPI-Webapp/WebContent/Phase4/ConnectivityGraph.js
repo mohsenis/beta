@@ -130,11 +130,11 @@ function callBack(agencyCentroids, dbindex){
 					vertex1.id = item.a1ID;
 					vertex1.bindPopup('<table style="font-size:100%"><tr><td>Agency&nbsp;ID:&nbsp;</td><td nowrap>' + item.a1ID + '</td></tr><tr><td>Agency&nbsp;Name:&nbsp;</td><td nowrap>' + item.a1name + '</td></tr></table>', {autoPan : false});
 					vertex1.on('mouseover',function(e){
-							vertex1.openPopup(); 
+//							vertex1.openPopup(); 
 							vertex1.setStyle({weight:6, opacity:agencyStyle['hover'].opacity});
 						})
 						.on('mouseout',function(e){
-							vertex1.closePopup(); 
+//							vertex1.closePopup(); 
 							vertex1.setStyle({weight:4, opacity:agencyStyle[vertex2.status].opacity});
 						});
 					
@@ -152,11 +152,11 @@ function callBack(agencyCentroids, dbindex){
 						vertex2.id = item.a2ID;
 						vertex2.bindPopup('<table style="font-size:100%"><tr><td>Agency&nbsp;ID:&nbsp;</td><td nowrap>' + item.a2ID + '</td></tr><tr><td>Agency&nbsp;Name:&nbsp;</td><td nowrap>' + item.a2name + '</td></tr></table>', {autoPan : false});
 						vertex2.on('mouseover',function(e){
-								vertex2.openPopup(); 
+//								vertex2.openPopup(); 
 								vertex2.setStyle({weight:6, opacity:agencyStyle['hover'].opacity});
 							})
 							.on('mouseout',function(e){
-								vertex2.closePopup(); 
+//								vertex2.closePopup(); 
 								vertex2.setStyle({weight:4, opacity:agencyStyle[vertex2.status].opacity});
 							});
 						

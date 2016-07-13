@@ -6,7 +6,7 @@
 	
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
 	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
 	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
@@ -30,20 +30,20 @@
 
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th id="aid">State <em title="Name of the state"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th id="an">Land Area <em title="Total Land area of the state in square miles."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th id="an">Total Population <em title="Total population of the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th id="an">Urban Population <em title="Total population of the state living in urbanized areas."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th id="an">Rural Population <em title="Total population of the state living in non-urban areas."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th id="an">Transit Agencies Count <em title="Count of transit agencies operating in the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Routes Count <em title="Total number of routes operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Stops Count <em title="Total number of stops operated by the transit agency."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Urbanized Areas Count <em title="Count of urbanized areas within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Congressional Districts Count <em title="Count of congressional districts within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>ODOT Transit Regions Count <em title="Count of ODOT transit regions within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Places Count <em title="Count of census designated places within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Counties Count <em title="Count of Counties within the state."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Census Tracts Count <em title="Count of census tracts within the state."><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+tmp = '<tr><th class="metric" title="Name of the state" id="aid">State</th>'+
+'<th class="metric" title="Total Land area of the state in square miles." id="an">Land Area</th>'+
+'<th class="metric" title="Total population of the state." id="an">Total Population</th>'+
+'<th class="metric" title="Total population of the state living in urbanized areas." id="an">Urban Population</th>'+
+'<th class="metric" title="Total population of the state living in non-urban areas." id="an">Rural Population</th>'+
+'<th class="metric" title="Count of transit agencies operating in the state." id="an">Transit Agencies Count</th>'+
+'<th class="metric" title="Total number of routes operated by the transit agency.">Routes Count</th>'+
+'<th class="metric" title="Total number of stops operated by the transit agency.">Stops Count</th>'+
+'<th class="metric" title="Count of urbanized areas within the state.">Urbanized Areas Count</th>'+
+'<th class="metric" title="Count of congressional districts within the state.">Congressional Districts Count</th>'+
+'<th class="metric" title="Count of ODOT transit regions within the state.">ODOT Transit Regions Count</th>'+
+'<th class="metric" title="Count of census designated places within the state.">Census Places Count</th>'+
+'<th class="metric" title="Count of Counties within the state.">Counties Count</th>'+
+'<th class="metric" title="Count of census tracts within the state.">Census Tracts Count</th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){

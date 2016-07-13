@@ -6,7 +6,7 @@
 	
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
 	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
 	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
@@ -30,6 +30,7 @@
 
 ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[4],"");
 w_qstringd = getDates(keyName);
+var dateIOnumber = 4;
 var w_qstringx = parseFloat(getURIParameter("x1"));
 var w_qstringx2 = parseFloat(getURIParameter("x2"));
 var w_qstringx3 = parseFloat(getURIParameter("x3"));
@@ -87,7 +88,7 @@ $(document).ready(function(){
 	updateToolTips();
 	progressBar();
 	go(key);
-	alert("Hello! I am an alert box!!");
+
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -144,7 +145,7 @@ $(document).ready(function(){
 				+'</td><td>'+ item.placesNames
 				+'</td><td>' + d.metadata + '</td></tr>';
 			});			
-			html = html + '</tbody>'+html2+'</table>';
+			html = html + '</tbody></table>';
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			
