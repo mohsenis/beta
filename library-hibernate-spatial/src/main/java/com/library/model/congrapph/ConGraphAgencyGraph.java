@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement( name = "ConGraphAgencyGraph")
 public class ConGraphAgencyGraph {
-	@XmlElement ( name = "agencyID")
+	@XmlElement ( name = "ID")
 	public String ID;
 	
 	@XmlElement ( name = "centralized")

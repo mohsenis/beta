@@ -2870,7 +2870,7 @@ Loop:  	for (Trip trip: routeTrips){
 		ConGraphObjSet response = new ConGraphObjSet();
 		Set<ConGraphObj> e = new HashSet<ConGraphObj>();
 		for (Entry<String, com.library.model.congrapph.Agency> i : agencies.entrySet()){
-			e = SpatialEventManager.getConGraphObj(i.getKey(), i.getValue().name, x, stmt);
+			e = SpatialEventManager.getConGraphObj(i.getKey(), i.getValue().name, session, x, stmt);
 			response.set.addAll(e);
 		}
 		

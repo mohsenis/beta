@@ -102,7 +102,7 @@ public class SpatialEventManager {
 		return response;
 	}
 	
-	public static Set<ConGraphObj> getConGraphObj(String agencyID, String agencyName, double radius, Statement stmt) throws SQLException{
+	public static Set<ConGraphObj> getConGraphObj(String agencyID, String agencyName, String username, double radius, Statement stmt) throws SQLException{
 		Set<ConGraphObj> response = new HashSet<ConGraphObj>();
 		String query = "WITH a1stops AS (SELECT map.agencyid, agencies.name AS agencyname, stops.location, stops.lat, stops.lon, stops.name " +
 				"	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map " +
@@ -116,7 +116,7 @@ public class SpatialEventManager {
 				"	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id  " +
 				"	INNER JOIN a1stops ON ST_DISTANCE(stops.location, a1stops.location) < " + radius + " " +
 				"	INNER JOIN gtfs_agencies AS agencies ON map.agencyid = agencies.id " +
-				"	WHERE map.agencyid != '" + agencyID + "'   " +
+				"	WHERE map.agencyid != '" + agencyID + "' AND map.agencyid IN (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"')" +
 				"	), " +
 				" " +
 				"a1coordinates AS (SELECT a1stops.agencyid AS a1id, AVG(a1stops.lat)::TEXT||','||AVG(a1stops.lon)::TEXT AS a1coordinate FROM a1stops GROUP BY a1id), " +
