@@ -10,8 +10,12 @@ var color1 = 'red';	 // color of highlighted graph elements
 var congraphobj;
 
 function openConGraph2(){
+	day = $( '#ConGraphDatepicker' ).val();
+	gap = $( '#con-graph-input' ).val();
 	$( "#con-graph-dialog" ).dialog( "close" );
 	toggleConGraphDialog();
+	$( "#ConGraphDatepicker" ).datepicker( "setDate", day);
+	$( "#con-graph-input" ).val(gap);
 		
 	var dbindex = getURIParameter("dbindex");
 	var agencyCentroids= {};
@@ -36,11 +40,12 @@ function openConGraph2(){
 
 function callBack2(agencyCentroids, dbindex){
 	var result = {};
+
 	// Getting connections
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/connectivityGraph?&x='+$('#con-graph-input').val()*1609.3+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/connectivityGraph?&x='+$('#con-graph-input').val()*1609.3+'&day='+day+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){			
 			localStorage.setItem('myStorage', JSON.stringify(d));	

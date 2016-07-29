@@ -1,4 +1,6 @@
 //var isConGraphDialogOpen = false;
+var day;
+var gap;
 var vertices = {}; // declared to keep track of agencies on the map and avoid adding duplicates.
 var edges = [];
 var vertexEdgesMap = {};  // maps vertices to their edges. A1_lat+A1_lng form the key.
@@ -36,15 +38,6 @@ agencyStyle['hover'] = {
  * Loads/toggles the connectivity graph dialog box.
  */
 function toggleConGraphDialog(){
-	// remove previously displayed graph from the map
-	$.each(vertices, function(index, item){
-		map.removeLayer(item);
-	});
-	$.each(edges, function(index, item){
-		map.removeLayer(item);
-	});
-	vertices = {};
-	edges = [];
 	
 	// Initializing the connectivity graph dialog box
 	$( "#con-graph-dialog" ).empty();
@@ -89,16 +82,30 @@ function toggleConGraphDialog(){
 		$( "#con-graph-dialog" ).dialog( "close" );
 	else{
 		$( "#con-graph-dialog" ).empty;
-		html = '<table style="font-size: 100%;"><td>Connectivity Gap (miles) </td><td><input id="con-graph-input" value="0.1" style="width:5em"></td></table><br><button onclick="openConGraph()">Submit1</button><button onclick="openConGraph2()">Submit2</button><br>';
+		html = '<table style="font-size: 100%;"><td>Connectivity Gap (miles) </td><td><input id="con-graph-input" value="0.1" style="width:5em"></td></table><br>';
+		html += '<p><b>Date</b>: <input readonly type="text" class="POPcal" id="ConGraphDatepicker"></p>';
+		html +='<button onclick="openConGraph()">Submit1</button><button onclick="openConGraph2()">Submit2</button><br>';
 		$( "#con-graph-dialog" ).append(html);
 		$( "#con-graph-dialog" ).dialog( "open" );
-	}
 		
-	
+		$( "#ConGraphDatepicker" ).datepicker({
+		    showButtonPanel: true,
+			onSelect: function (date) {
+				currentDate = date;				
+		    }
+		});
+		$("#ConGraphDatepicker").datepicker( "setDate", new Date());
+	}
 }
 
-
 function openConGraph(){
+	day = $( '#ConGraphDatepicker' ).val();
+	gap = $( '#con-graph-input' ).val();
+	$( "#con-graph-dialog" ).dialog( "close" );
+	toggleConGraphDialog();
+	$( "#ConGraphDatepicker" ).datepicker( "setDate", day);
+	$( "#con-graph-input" ).val(gap);
+	
 	var dbindex = getURIParameter("dbindex");
 	var agencyCentroids= {};
 	var loaderHtml = '<img id="conGraphPreLoader" src="images/287.GIF" align="middle" alt="Page Loading" style="height:80; width:80; margin:120px" >';
@@ -121,11 +128,12 @@ function openConGraph(){
 
 function callBack(agencyCentroids, dbindex){
 	var result = {};
+	
 	// Getting connections
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/connectivityGraph?&x='+$('#con-graph-input').val()*1609.3+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/connectivityGraph?&x=' +  gap*1609.3 + '&day='+day+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){			
 			localStorage.setItem('myStorage', JSON.stringify(d));	

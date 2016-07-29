@@ -2859,7 +2859,15 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
     @Path("/connectivityGraph")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object connectivityGraph(@QueryParam("x") Double x, @QueryParam("username") String session, @QueryParam("dbindex") Integer dbindex) throws SQLException{
+    public Object connectivityGraph(@QueryParam("x") Double x, @QueryParam("day") String date, @QueryParam("username") String session, @QueryParam("dbindex") Integer dbindex) throws SQLException{
+		// Setting date
+		String fulldate = null;
+       	String day = null; 
+		String[] dates = date.split(",");
+       	String[][] datedays = daysOfWeekString(dates);
+       	fulldate = datedays[0][0];
+       	day = datedays[1][0];
+       	
 		// Making connection to DB
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
@@ -2870,7 +2878,7 @@ Loop:  	for (Trip trip: routeTrips){
 		ConGraphObjSet response = new ConGraphObjSet();
 		Set<ConGraphObj> e = new HashSet<ConGraphObj>();
 		for (Entry<String, com.library.model.congrapph.Agency> i : agencies.entrySet()){
-			e = SpatialEventManager.getConGraphObj(i.getKey(), i.getValue().name, session, x, stmt);
+			e = SpatialEventManager.getConGraphObj(i.getKey(), i.getValue().name, fulldate, day, session, x, stmt);
 			response.set.addAll(e);
 		}
 		

@@ -102,31 +102,46 @@ public class SpatialEventManager {
 		return response;
 	}
 	
-	public static Set<ConGraphObj> getConGraphObj(String agencyID, String agencyName, String username, double radius, Statement stmt) throws SQLException{
+	public static Set<ConGraphObj> getConGraphObj(String agencyID, String agencyName, String fulldate, String day, String username, double radius, Statement stmt) throws SQLException{
 		Set<ConGraphObj> response = new HashSet<ConGraphObj>();
-		String query = "WITH a1stops AS (SELECT map.agencyid, agencies.name AS agencyname, stops.location, stops.lat, stops.lon, stops.name " +
-				"	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map " +
-				"	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id " + 
-				"	INNER JOIN gtfs_agencies AS agencies ON map.agencyid = agencies.id " +
-				"	WHERE map.agencyid = '" + agencyID + "'), " +
-				" " +
-				"a2stops AS (SELECT a1stops.agencyid AS a1id, a1stops.agencyname AS a1name, map.agencyid AS a2id, agencies.name AS a2name, stops.location,  " +
-				"	stops.lat, stops.lon, stops.name,ST_DISTANCE(stops.location, a1stops.location)::NUMERIC AS dist " +
-				"	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map  " +
-				"	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id  " +
-				"	INNER JOIN a1stops ON ST_DISTANCE(stops.location, a1stops.location) < " + radius + " " +
-				"	INNER JOIN gtfs_agencies AS agencies ON map.agencyid = agencies.id " +
-				"	WHERE map.agencyid != '" + agencyID + "' AND map.agencyid IN (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"')" +
-				"	), " +
-				" " +
-				"a1coordinates AS (SELECT a1stops.agencyid AS a1id, AVG(a1stops.lat)::TEXT||','||AVG(a1stops.lon)::TEXT AS a1coordinate FROM a1stops GROUP BY a1id), " +
-				" " +
-				"a2coordinates AS (SELECT a2stops.a2id AS a2id, AVG(a2stops.lat)::TEXT||','||AVG(a2stops.lon)::TEXT AS a2coordinate FROM a2stops GROUP BY a2id) " +
-				" " +
-				"select a1id, a1name, ARRAY_AGG(DISTINCT a1coordinate) AS a1coordinate, a2id, a2name, ARRAY_AGG(DISTINCT a2coordinate) AS a2coordinate, COUNT(dist) AS size " +
-				"	FROM a2stops JOIN a1coordinates USING(a1id) " +
-				"	JOIN a2coordinates USING(a2id) " +
-				"	GROUP BY a1id, a1name, a2id, a2name";
+		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'),"
+				+ "svcids as (select serviceid_agencyid, serviceid_id "
+				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = '" + agencyID + "'"
+				+ " 	where startdate::int<=" + fulldate + " and enddate::int>=" + fulldate + " and " + day + "= 1 and serviceid_agencyid||serviceid_id "
+				+ "	not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + fulldate + "' and exceptiontype=2)"
+				+ "	union select serviceid_agencyid, serviceid_id "
+				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = '" + agencyID + "' where date='" + fulldate + "' and exceptiontype=1),"
+				+ " trips AS (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid"
+				+ "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)),"
+				+ " a1stops AS (select stime.trip_agencyid as agencyid, gtfs_agencies.name as agencyname, stime.stop_id as stopid, stop.name as name, stop.lat, stop.lon, stop.location as location"
+				+ "	from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id"
+				+ "	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid"
+				+ "	inner join gtfs_agencies ON stime.trip_agencyid = gtfs_agencies.id"
+				+ "	where stop.agencyid IN (SELECT aid FROM aids)"
+				+ "	group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location, gtfs_agencies.name, stop.name, stop.lat, stop.lon),"
+				+ " svcids1 as (select serviceid_agencyid, serviceid_id"
+				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid"
+				+ "	where startdate::int<=" + fulldate + " and enddate::int>=" + fulldate + " and " + day  + "= 1 and gc.serviceid_agencyid <> '" + agencyID + "'"
+				+ "	and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + fulldate + "' and exceptiontype=2)"
+				+ " union select serviceid_agencyid, serviceid_id"
+				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='" + fulldate + "' and exceptiontype=1 and gcd.serviceid_agencyid <> '" + agencyID + "' ),"
+				+ " trips1 AS (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid"
+				+ " from svcids1 inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)),"
+				+ " a2stops AS (select a1stops.agencyid AS a1id, a1stops.agencyname AS a1name, stime.trip_agencyid as a2id, gtfs_agencies.name as a2name,"
+				+ " stime.stop_id as stopid, stop.name as name, stop.lat, stop.lon, stop.location as location, ST_DISTANCE(stop.location, a1stops.location)::NUMERIC AS dist"
+				+ " from gtfs_stops stop inner join a1stops on ST_DISTANCE(stop.location, a1stops.location) < " + radius 
+				+ "	inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id"
+				+ "	inner join trips1 on stime.trip_agencyid =trips1.aid and stime.trip_id=trips1.tripid"
+				+ "	inner join gtfs_agencies ON stime.trip_agencyid = gtfs_agencies.id"
+				+ "	where stop.agencyid IN (SELECT aid FROM aids)"
+				+ "	group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location, gtfs_agencies.name, stop.name, stop.lat, stop.lon,a1stops.agencyid, a1stops.agencyname,a1stops.location),"
+				+ ""
+				+ " a1coordinates AS (SELECT a1stops.agencyid AS a1id, AVG(a1stops.lat)::TEXT||','||AVG(a1stops.lon)::TEXT AS a1coordinate FROM a1stops GROUP BY a1id),"
+				+ " a2coordinates AS (SELECT a2id, AVG(a2stops.lat)::TEXT||','||AVG(a2stops.lon)::TEXT AS a2coordinate FROM a2stops GROUP BY a2id)"
+				+ " select a1id, a1name, ARRAY_AGG(DISTINCT a1coordinate) AS a1coordinate, a2id, a2name, ARRAY_AGG(DISTINCT a2coordinate) AS a2coordinate, COUNT(dist) AS size"
+				+ "	FROM a2stops JOIN a1coordinates USING(a1id)"
+				+ "	JOIN a2coordinates USING(a2id)"
+				+ "	GROUP BY a1id, a1name, a2id, a2name";
 //		System.out.println(query);
 		
 		try{
