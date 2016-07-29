@@ -216,12 +216,12 @@ function showOnMapReport(lat, lon, date, x){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession(),
-		//url: '/TNAtoolAPI-Webapp/queries/transit/DBList',				//delete
+		//url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',				//delete
 		async: true,
 		success: function(data){
 			//localStorage.setItem('myStorage', JSON.stringify(data));	//delete
-			//data = JSON.parse(localStorage.getItem('myStorage'));		//delete
+			data = JSON.parse(localStorage.getItem('myStorage'));		//delete
 			//console.log(data);
 			$('#ts').html(numberWithCommas(data.MapTR.TotalStops));
 			$('#tr').html(numberWithCommas(data.MapTR.TotalRoutes));
