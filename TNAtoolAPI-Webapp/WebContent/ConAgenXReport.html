@@ -6,7 +6,7 @@
 	
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
 	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
 	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
@@ -33,18 +33,18 @@ var gap = parseFloat(getURIParameter("gap"));
 qstringx = '0.1';
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th id="aid">Agency ID <em title="Identification number reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th id="an">Name <em title="Agency name reported in the transit agency GTFS feed."><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Number of Connections<em title="Number of transit stops that have at least one stop within the specified distance of the specified transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Min Connection distance (ft.)<em title="Smallest distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Max Connection distance (ft.)<em title="Largest distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Average Connection distance (ft.)<em title="Average distance in ft between the transit stops of the specified transit agency with the current transit agency"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Connections<em title="List of transit stops within the specified distance of the specified transit agency stops and the distance between them in ft"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>SourceStopNames<em title="List of the specified transit agency stop names within the specified distance of other transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>DestStopNames<em title="List of other transit agency stop names within the specified distance of the specified transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>SourceStopCoordinates<em title="List of the specified transit agency stop coordinates within the specified distance of other transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>DestStopCoordinatess<em title="List of other transit agency stop coordiates within the specified distance of the specified transit agency stops"><img src="images/tooltip.png" alt="tooltip"></em></th>'+
-'<th>Min Gaps<em title="List of distances between stops of the specified transit agency and other transit agencies in ft"><img src="images/tooltip.png" alt="tooltip"></em></th></tr>';	
+tmp = '<tr title="Identification number reported in the transit agency GTFS feed."><th id="aid">Agency ID</th>'+
+'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Name</th>'+
+'<th class="metric" title="Number of transit stops that have at least one stop within the specified distance of the specified transit agency stops">Number of Connections<span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Smallest distance in ft between the transit stops of the specified transit agency with the current transit agency">Min Connection distance (ft.)</th>'+
+'<th class="metric" title="Largest distance in ft between the transit stops of the specified transit agency with the current transit agency">Max Connection distance (ft.)</th>'+
+'<th class="metric" title="Average distance in ft between the transit stops of the specified transit agency with the current transit agency">Average Connection distance (ft.)</th>'+
+'<th class="metric" title="List of transit stops within the specified distance of the specified transit agency stops and the distance between them in ft">Connections<span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="List of the specified transit agency stop names within the specified distance of other transit agency stops">SourceStopNames</th>'+
+'<th class="metric" title="List of other transit agency stop names within the specified distance of the specified transit agency stops">DestStopNames</th>'+
+'<th class="metric" title="List of the specified transit agency stop coordinates within the specified distance of other transit agency stops">SourceStopCoordinates</th>'+
+'<th class="metric" title="List of other transit agency stop coordiates within the specified distance of the specified transit agency stops">DestStopCoordinatess</th>'+
+'<th class="metric" title="List of distances between stops of the specified transit agency and other transit agencies in ft">Min Gaps</th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -145,7 +145,7 @@ $(document).ready(function(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Maximum Spatial Gap (miles) <input type="text" name="gap" id="Sradius" data-label='Population Search Radius (miles)' class="input radius tbox" onkeypress="return isNumber(event)"/>
+			    	Maximum Spatial Gap (miles) <span class="IOSym">(1) </span><input type="text" name="gap" id="Sradius" data-iomap = "1" data-label='Population Search Radius (miles)' class="input radius tbox" onkeypress="return isNumber(event)"/>
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button " />			    			    	    	
 		    	</div>
 			  </td>

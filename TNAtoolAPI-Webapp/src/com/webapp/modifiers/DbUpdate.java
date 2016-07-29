@@ -80,7 +80,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.examples.GtfsHibernateReaderExampleMain;
-import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+//import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -88,7 +88,7 @@ import org.xml.sax.SAXException;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-	private final static String basePath = "C:/Users/tnatool/Development/Repository/test/";
+	private final static String basePath = "C:/Users/PB/git/TNAtool/";
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/";
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
@@ -1011,7 +1011,7 @@ public class DbUpdate {
 		args[2] = "--username=\""+dbInfo[5]+"\"";
 		args[3] = "--password=\""+dbInfo[6]+"\"";
 		args[4] = feedname;
-		GtfsDatabaseLoaderMain.main(args);	
+//		GtfsDatabaseLoaderMain.main(args);	
 		
 		String[] feedName = feedname.split("/");
 		String fName = feedName[feedName.length-1];

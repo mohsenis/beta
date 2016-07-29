@@ -6,7 +6,7 @@
 	
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
 	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
 	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
@@ -34,34 +34,39 @@ var w_qstringx = parseFloat(getURIParameter("x1"));
 var w_qstringx2 = parseFloat(getURIParameter("x2"));
 var w_qstringx3 = parseFloat(getURIParameter("x3"));
 var stops = [];
-var algDesc = "1. For each stop, a list of all the stops located within its \"Stop Cluster Radius\" is identified. Let's call each of these entries a cluster.\r\n" +
+var dateIOnumber = 4; // the number is used to map the date(s) to metric affected by it.
+var algDesc = "\r\n\r\n\r\nClustering Algorithm\r\n" +
+"--------------------\r\n" +
+"1. For each stop, a list of all the stops located within its \"Stop Cluster Radius\" is identified. Let's call each of these entries a cluster.\r\n" +
 "   For example,suppose that stop A is connected to stops A, B, C and D. This entry is an initial cluster \"A\" with stops {A,B,C,D}.\r\n" + 
 "2. The stops for initial clusters \"B\", \"C\" and \"D\" are added to the stops for cluster \"A\" and initial clusters \"B\", \"C\" and \"D\" are removed from the list prepared in (1).\r\n" + 
 "3. Step (2) is recursively repeated until there is not common stops in the between the remaining entries of the list. This final list contains the transit hubs clusters.\r\n" +
 "4. The cluster centroids are computed as the average latitude and longitude of its stops.\r\n" + 
 "5. Service related metrics such as number of stops, routes, visits, population served and etc. are computed as summation of the said metric over all the stops within the cluster.";
 
+
+
 html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
-tmp = '<tr><th id="an" title="ID number assigned to the cluster based on its importance. Lower ID number means higher cluster importance.">ID</th>'+
-'<th title="Latitude of the transit hub centroid.">Cluster Centroid Latitude<span class="IOSym">(1)</span></th>'+
-'<th title="Longitude of the transit hub centroid.">Cluster Centroid Longitude<span class="IOSym">(1)</span></th>'+
-'<th title="Total number of stops in the cluster.">Stops Count<span class="IOSym">(1)</span></th>'+
-'<th title="Total number of routes that serve stops in the cluster.">Routes Count<span class="IOSym">(1)</span></th>'+
-'<th title="Total number of transit agencies that serve stops in the cluster.">Agencies Count<span class="IOSym">(1)</span></th>'+
-'<th title="Total number of times all stops in the cluster are served.">Visits Count<span class="IOSym">(1)(4)</span></th>'+
-'<th title="Total number of park and ride lots within X distance of the cluster centroid.">Park and Ride Lots Count<span class="IOSym">(1)(3)</span></th>'+
-'<th title="Total number of counties that the cluster is located in.">Counties Count<span class="IOSym">(1)</span></th>'+
-'<th title="Total number of census places that the cluster is located in.">Census Places Count<span class="IOSym">(1)</span></th>'+
-'<th title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent.">Population Served<span class="IOSym">(1)(2)</span></th>'+
-'<th title="Sum of the population of urban areas that stops in the cluster are located in.">Urban Population<span class="IOSym">(1)(2)</span></th>'+
-'<th title="Unduplicated list of transit agencies that serve stops in the cluster.">Transit Agencies<span class="IOSym">(1)</span></th>'+
-'<th title="Detailed list of stops in the cluster.">Stops<span class="IOSym">(1)</span></th>'+
-'<th title="Unduplicated detailed list of routes in the cluster.">Routes<span class="IOSym">(1)</span></th>'+
-'<th title="Detailed list of park and ride lots within the X radius of the cluster centroid.">Park and Ride Lots<span class="IOSym">(1)(3)</span></th>'+
-'<th title="Census places that stops in the cluster are locate in.">Census Places<span class="IOSym">(1)</span></th>'+
-'<th title="Counties that stops in the cluster are located in.">Counties<span class="IOSym">(1)</span></th>'+
-'<th title="Areas that stops in the cluster are located in.">Urban Areas<span class="IOSym">(1)</span></th>'+
-'<th title="ODOT transit regions that stops in the cluster are located in.">ODOT Transit Regions<span class="IOSym">(1)</span></th>'+
+tmp = '<tr><th id="an" title="ID number randomly assigned to the cluster.">ID</th>'+
+'<th class="metric" title="Latitude of the transit hub centroid.">Cluster Centroid Latitude <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Longitude of the transit hub centroid.">Cluster Centroid Longitude <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Total number of stops in the cluster.">Stops Count <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Total number of routes that serve stops in the cluster.">Routes Count <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Total number of transit agencies that serve stops in the cluster.">Agencies Count <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Total number of times all stops in the cluster are served.">Visits Count <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric" title="Total number of park and ride lots within X distance of the cluster centroid.">Park and Ride Lots Count <span class="IOSym">(1)(3)</span></th>'+
+'<th class="metric" title="Total number of counties that the cluster is located in.">Counties Count <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Total number of census places that the cluster is located in.">Census Places Count <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent.">Population Served <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric" title="Sum of the population of urban areas that stops in the cluster are located in.">Urban Population <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric" title="Unduplicated list of transit agencies that serve stops in the cluster.">Transit Agencies <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Detailed list of stops in the cluster.">Stops <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Unduplicated detailed list of routes in the cluster.">Routes <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Detailed list of park and ride lots within the X radius of the cluster centroid.">Park and Ride Lots <span class="IOSym">(1)(3)</span></th>'+
+'<th class="metric" title="Census places that stops in the cluster are locate in.">Census Places <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Counties that stops in the cluster are located in.">Counties <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Areas that stops in the cluster are located in.">Urban Areas <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="ODOT transit regions that stops in the cluster are located in.">ODOT Transit Regions <span class="IOSym">(1)</span></th>'+
 '<th>Stops IDs</th>'+
 '<th>Stops Agencies</th>'+
 '<th>Stops Agencies Names</th>'+
@@ -158,7 +163,7 @@ $(document).ready(function(){
 			tableProperties.colsToExport = [0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,23,24,25,26,27,30,31,32,33,34,35,36,37,38];
 			tableProperties.iDisplayLength = 6;
 			table = buildDatatables();
-			orderTable(table, 3, 'desc');
+			orderTable(table, 0, 'asc');
 			
 			$('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
@@ -344,7 +349,7 @@ $(document).ready(function(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Stop Cluster Radius(miles)<span class="IOSym">(1) </span><input type="text" name="x1" id="Sradius" data-IOMap="1" data-label="Stop Cluster Radius(miles)" class="input radius tbox" onkeypress="return isNumber(event)"/>			    	
+			    	Stop Cluster Radius(miles) <span class="IOSym">(1) </span><input type="text" name="x1" id="Sradius" data-IOMap="1" data-label="Stop Cluster Radius(miles)" class="input radius tbox" onkeypress="return isNumber(event)"/>			    	
 			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
 		    	</div>
 			  </td>

@@ -80,7 +80,7 @@ var datasources = {
 	},	
 	6 :
 	{
-		survey : "United States Census Beureau",
+		survey : "United States Census Bureau",
 		dataset : "LEHD Origin-Destination Employment Statistics (LODES) Dataset Structure Format Version 7.0",
 		table : "Residence Area Characteristics (RAC)",
 		common : {

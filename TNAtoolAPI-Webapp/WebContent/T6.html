@@ -6,7 +6,7 @@
 	
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-	<script src="http://multidatespickr.sourceforge.net/jquery-ui.multidatespicker.js"></script>
+	<script src="js/lib/jquery-ui.multidatespicker.js"></script>
 	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
 	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
 	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
@@ -16,24 +16,25 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<script src="http://plugins.adchsm.me/slidebars/scripts/slidebars/slidebars.min.js"></script>
 	<script src="https://static.jstree.com/3.3.0/assets/dist/jstree.min.js"></script>
 	<script src="js/lib/date.js"></script><script src="Phase4/Datasources.js"></script>
 	<script src="Phase4/JSMethods.js"></script>
 	<script src="Phase4/T6Methods.js"></script>
 	<script src="js/EmpJstree.js"></script>
+	<script src="js/lib/slidebars.min.js"></script>
 		
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/tabletools/2.2.1/css/dataTables.tableTools.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
-	<link rel="stylesheet" href="http://plugins.adchsm.me/slidebars/scripts/slidebars/slidebars.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="report.css" />
+	<link rel="stylesheet" type="text/css" href="js/lib/slidebars.min.css" />
 	
 	<script>
 
+	var dateIOnumber = 3;
 	var t6 = {};
 	var w_qstringx = $('#Sradius').val();
 	if (w_qstringx == null) {w_qstringx = 0.25};
@@ -315,9 +316,9 @@
 						  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
 						  <option value="Agencies">Agencies</option>
 					 </select><br></td></tr>
-			<tr><td>Population Search Radius (miles)</td><td><input type="text" name="Sradius" id="Sradius" class="input radius" data-label="Population Search Radius (miles)" style="text-indent: 2px; height:21px;width:95%;" value="0.25" onkeypress="return isNumber(event)"/></td></tr>
+			<tr><td>Population Search Radius (miles)<span class="IOSym">(1) </span></td><td><input type="text" name="Sradius" id="Sradius" class="input radius" data-iomap="1" data-label="Population Search Radius (miles)" style="text-indent: 2px; height:21px;width:95%;" value="0.25" onkeypress="return isNumber(event)"/></td></tr>
 			
-			<tr><td>Minimum Level of Service</td><td><input type="text" name="LOS" id="LOS" class="input" data-label="Minimum Level of Service" style="text-indent: 2px; height:22px; width:95%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
+			<tr><td>Minimum Level of Service<span class="IOSym">(2) </span></td><td><input type="text" name="LOS" id="LOS" class="input" data-iomap="2" data-label="Minimum Level of Service" style="text-indent: 2px; height:22px; width:95%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
 			</table>
 			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
 		</div>

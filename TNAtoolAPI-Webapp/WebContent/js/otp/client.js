@@ -35,9 +35,10 @@ var map = new L.Map('map', {
 	maxZoom : 19	
 });
 
-var OSMURL    = "https://{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg";
-//var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
-var minimalLayer = new L.StamenTileLayer("toner");
+var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
+var aerialURL = "http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png";
+var tonerMap = new L.StamenTileLayer("toner");
+var terrainMap = new L.StamenTileLayer("terrain");
 
 var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/beta" target="_blank">TNA Software Tool</a> '+getVersion()+' beta';
 var osmLayer = new L.TileLayer(OSMURL, 
@@ -46,7 +47,7 @@ var osmLayer = new L.TileLayer(OSMURL,
 /*var aerialLayer = new L.TileLayer(aerialURL, 
 		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 19, attribution: osmAttrib});*/
 
-map.addLayer(osmLayer);
+map.addLayer(terrainMap);
 $("body").css("display","");
 $("#overlay").show();
 //end
@@ -78,7 +79,7 @@ var dialog2=$("#connectedAgencies-form").dialog({
     buttons: {
         },
     close: function() {
-    	miniMap._restore();
+    	//miniMap._restore();
     	connectionMarkers.eachLayer(function (layer) {
 		    connectionMarkers.removeLayer(layer);
 		});
@@ -92,7 +93,7 @@ var dialog2=$("#connectedAgencies-form").dialog({
     	polylines = [];
       },
     open: function(  ) { 	
-    	miniMap._minimize(); 
+    	//miniMap._minimize(); 
     	dialog.dialog( "close" );
     	$('.jstree-checked').each(function() {
     		$( this ).children('a').children('.jstree-checkbox').click();
@@ -104,10 +105,10 @@ var dialog2=$("#connectedAgencies-form").dialog({
       "minimizable" : true,
       "minimizeLocation": "right",
       "minimize" : function() {
-    	  miniMap._restore();
+    	  //miniMap._restore();
       },
       "restore" : function() {
-    	  miniMap._minimize();
+    	  //miniMap._minimize();
       }
   });
 
@@ -350,11 +351,11 @@ var dialog = $( "#dialog-form" ).dialog({
     buttons: {
         },
     close: function() {
-    	miniMap._restore();
+    	//miniMap._restore();
     	map.removeLayer(onMapCluster);
       },
     open: function( event, ui ) {
-    	miniMap._minimize();
+    	//miniMap._minimize();
     	dialog2.dialog('close');
     },
   }).dialogExtend({
@@ -362,10 +363,10 @@ var dialog = $( "#dialog-form" ).dialog({
       "minimizable" : true,
       "minimizeLocation": "right",
       "minimize" : function() {
-    	  miniMap._restore();
+    	  //miniMap._restore();
       },
       "restore" : function() {
-    	  miniMap._minimize();
+    	  //miniMap._minimize();
       }
   });
 
@@ -619,7 +620,6 @@ var colorIndex;
 function getdata(type,agency,route,variant,k,callback,popup,node) {	
 	switch (type){
 	case 1:
-		//alert('case 1');
 		var points = [];
 		$.ajax({
 			type: 'GET',
@@ -634,7 +634,6 @@ function getdata(type,agency,route,variant,k,callback,popup,node) {
 		break;
 	case 2:
 		var points = [];
-		//alert('case 2');
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
@@ -652,7 +651,6 @@ function getdata(type,agency,route,variant,k,callback,popup,node) {
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/shape?&agency='+agency+'&trip='+variant+"&dbindex="+dbindex,
 			success: function(d){
-				//alert('case 3');
 			if (d.points!= null) callback(k,d,"V"+agency+route+variant,node);
 	    }});
 		break;
@@ -1061,12 +1059,16 @@ map.on('click', function(){
 osmLayer.on('load', function(e) {
 	ggb = false;    
 });
-minimalLayer.on('load', function(e) {
+tonerMap.on('load', function(e) {
+	ggb = false;	
+});
+terrainMap.on('load', function(e) {
 	ggb = false;	
 });
 var mmRecLat = 0;
 var mmRecLng = 0;
-var miniMap = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1-s","otile2-s","otile3-s","otile4-s"], minZoom: 5, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright',toggleDisplay:true}).addTo(map);
+
+//var miniMap = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"], minZoom: 5, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright',toggleDisplay:true}).addTo(map);
 $('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'0px'});
 var menucontent = '<ul id="rmenu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">';
 $.ajax({
@@ -1088,8 +1090,8 @@ $.ajax({
 	}			
 });
 var baseMaps = {
-	    "OSM": osmLayer,
-	    "Toner": minimalLayer,
+	    "OSM": terrainMap,
+	    "Toner": tonerMap,
 	    "Google Aerial":ggl,
 	    //"Aerial Photo": aerialLayer
 	};
@@ -1386,6 +1388,7 @@ $mylist
 		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
 		    		'<ul>'+
 		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="KTHR" href="#"><b>Key Transit Hubs Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Transit Networks Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Transit Agencies Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
@@ -1447,15 +1450,22 @@ $mylist
 				if ($(this).attr('id') != undefined) {
 				casestring = $(this).attr('id');
 				}
-				if (casestring=="THR"){var d = new Date();
+				if (casestring=="THR"){
+					var d = new Date();
 					var qstringx = '0.08';	// clustering radius
 					var qstringx2 = '0.25'; // population search radius					
 					var qstringx3 = '2.0'; // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-		    		//var keyName = Math.random();
-		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    }else if (casestring=="KTHR"){
+				    var d = new Date();
+					var qstringx = '0.08';	// clustering radius
+					var qstringx2 = '0.25'; // population search radius					
+					var qstringx3 = '2.0'  // park and ride search radius
+					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+					var keyName = setDates(qstringd);
+			    	window.open('/TNAtoolAPI-Webapp/KeyHubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
@@ -1652,10 +1662,6 @@ function updatepicker(){
 			key="--";
 	}
 	location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
-
-	/*if (w_qstringd!=newdates){
-		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
-	}*/
 }
 
 function updateListDialog(agenciesIds){
@@ -1736,5 +1742,4 @@ function updateListDialog(agenciesIds){
 /*
  * Connectivity Graph
  */
-//$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control" class="leaflet-control ui-widget-content"><button id="con-graph-button" onclick="toggleConGraphDialog()">G</button></div>');
-
+$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="con-graph-button" style="border-radius:5px; background-color:#FFF" onclick="toggleConGraphDialog()">G</button></div>');

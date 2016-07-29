@@ -195,121 +195,114 @@ function getTableHeaders() {
 	var y = "";
 	if (racBool && wacBool) {
 		if ($('#reportType').val() == 'Agencies') {
-			y += '<th>Number of employees served by agnecy (RAC)</th>'
-					+ '<th>Number of employees served by agnecy (WAC)</th>';
+			y += '<th class="metric" title="Number of employees residing in the area and served by agnecy">Number of employees served (RAC)<span class="IOSym">(1)</span></th>'
+					+ '<th class="metric" title="Number of employees working in the area and served by agnecy">Number of employees served (WAC)<span class="IOSym">(1)</span></th>';
 		} else {
-			y += '<th>Number of employees residing in the area (RAC)</th>'
-					+ '<th>Number of employees working in the area (WAC)</th>';
+			y += '<th class="metric" title="Number of employees residing in the area">Number of employees (RAC)</th>'
+					+ '<th class="metric" title="Number of employees working in the area">Number of employees (WAC)</th>';
 		}
 
 		nodesList
 				.forEach(function(item, index, array) {
 					var node = tree.get_node(item.attr('id'));
 					if ($('#reportType').val() != 'Agencies')
-						y += '<th>'
+						y += '<th class="metric" title="Total ' + node.data.title + ' employees living in the area.">'
 								+ node.data.title
-								+ ' (RAC)<em title="Total '
-								+ node.data.title
-								+ ' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-					y += '<th>'
+								+ ' (RAC)</th>';
+					y += '<th class="metric" title="Employees Served - Unduplicated summation of '
+						+ node.data.title
+						+ ' employees living within X distance of any stop. This metric is date independent.">'
 							+ node.data.title
-							+ ' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '
+							+ ' EMPS (RAC)<span class="IOSym">(1)</span></th>'
+							+ '<th class="metric" title="Employees Served at Level of Service - Unduplicated summation of '
 							+ node.data.title
-							+ ' employees living within X distance of any stop. This metric is date independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-							+ '<th>'
+							+ ' employees that receive the specified minimum level of service. This metric is date dependent.">'
+							+ node.data.title + ' EMPSLOS (RAC)<span class="IOSym">(1)(2)(3)</span></th>'
+							+ '<th class="metric" title="Employees Served by Service - Unduplicated summation of '
 							+ node.data.title
-							+ ' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '
+							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'
 							+ node.data.title
-							+ ' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-							+ '<th>'
-							+ node.data.title
-							+ ' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '
-							+ node.data.title
-							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+							+ ' EMPSS (RAC)<span class="IOSym">(1)(3)</span></th>';
 					if ($('#reportType').val() != 'Agencies')
-						y += '<th>'
+						y += '<th class="metric" title="Total ' + node.data.title + ' employees working in the area.">'
 								+ node.data.title
-								+ ' (WAC)<em title="Total '
-								+ node.data.title
-								+ ' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-					y += '<th>'
+								+ ' (WAC)</th>';
+					y += '<th class="metric" title="Employees Served - Unduplicated summation of ' + node.data.title + ' employees working within X distance of any stop. This metric is date/service independent.">'
 							+ node.data.title
-							+ ' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '
+							+ ' EMPS (WAC)<span class="IOSym">(1)</span></th>'
+							+ '<th class="metric" title="Employees Served at Level of Service - Unduplicated summation of '
 							+ node.data.title
-							+ ' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-							+ '<th>'
+							+ ' employees that receive the specified minimum level of service. This metric is date dependent.">'
 							+ node.data.title
-							+ ' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '
+							+ ' EMPSLOS (WAC)<span class="IOSym">(1)(2)(3)</span></th>'
+							+ '<th class="metric" title="Employees Served by Service -  Unduplicated summation of '
 							+ node.data.title
-							+ ' employees that receive the specified minimum level of service. This metric is date dependent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-							+ '<th>'
+							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'
 							+ node.data.title
-							+ ' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '
-							+ node.data.title
-							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+							+ ' EMPSS (WAC)<span class="IOSym">(1)(3)</span></th>';
 				});
 	} else if (racBool) {
 		if ($('#reportType').val() == 'Agencies') {
-			y += '<th>Number of employees served by agnecy (RAC)</th>';
+			y += '<th class="metric" title="Number of employees residing in the area and served by agnecy">Number of employees served (RAC)<span class="IOSym">(1)</span></th>';
 		} else {
-			y += '<th>Number of employees residing in the area (RAC)</th>';
+			y += '<th class="metric" title="Number of employees residing in the area">Number of employees (RAC)</th>';
 		}
 
 		nodesList
 				.forEach(function(item, index, array) {
 					var node = tree.get_node(item.attr('id'));
 					if ($('#reportType').val() != 'Agencies')
-						y += '<th>'
+						y += '<th class="metric" title="Total '
+							+ node.data.title
+							+ ' employees living in the area.">'
 								+ node.data.title
-								+ ' (RAC)<em title="Total '
-								+ node.data.title
-								+ ' employees living in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-					y += '<th>'
+								+ ' (RAC)</th>';
+					y += '<th class="metric" title="Employees Served: Unduplicated summation of '
+						+ node.data.title
+						+ ' employees living within X distance of any stop.  This metric is date/service independent.">'
 							+ node.data.title
-							+ ' EMPS (RAC)<em title="Employees Served: Unduplicated summation of '
+							+ ' EMPS (RAC)<span class="IOSym">(1)</span></th>'
+							+ '<th class="metric" title="Employees Served at Level of Service -: Unduplicated summation of '
 							+ node.data.title
-							+ ' employees living within X distance of any stop.  This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-							+ '<th>'
+							+ ' employees that receive the specified minimum level of service.">'
 							+ node.data.title
-							+ ' EMPSLOS (RAC)<em title="Employees Served at Level of Service: Unduplicated summation of '
+							+ ' EMPSLOS (RAC)<span class="IOSym">(1)(2)(3)</span></th>'
+							+ '<th class="metric" title="Employees Served by Service - Unduplicated summation of '
 							+ node.data.title
-							+ ' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-							+ '<th>'
+							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'
 							+ node.data.title
-							+ ' EMPSS (RAC)<em title="Employees Served by Service: Unduplicated summation of '
-							+ node.data.title
-							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+							+ ' EMPSS (RAC)<span class="IOSym">(1)(3)</span></th>';
 				});
 	} else {
 		if ($('#reportType').val() == 'Agencies') {
-			y += '<th>Number of employees served by agnecy (WAC)</th>';
+			y += '<th class="metric" title="Number of employees working in the area and served by agnecy">Number of employees served (WAC)<span class="IOSym">(1)</span></th>';
 		} else {
-			y += '<th>Number of employees working in the area (WAC)</th>';
+			y += '<th class="metric" title="Number of employees working in the area">Number of employees (WAC)<span class="IOSym">(3)</span></th>';
 		}
 		nodesList
 				.forEach(function(item, index, array) {
 					var node = tree.get_node(item.attr('id'));
 					if ($('#reportType').val() != 'Agencies')
-						y += '<th>'
+						y += '<th class="metric" title="Total '
+							+ node.data.title
+							+ ' employees working in the area.">'
 								+ node.data.title
-								+ ' (WAC)<em title="Total '
-								+ node.data.title
-								+ ' employees working in the area."><img src="images/tooltip.png" alt="tooltip"></em></th>';
-					y += '<th>'
+								+ ' (WAC)<span class="IOSym">(3)</span></th>';
+					y += '<th class="metric" title="Employees Served - Unduplicated summation of '
+						+ node.data.title
+						+ ' employees working within X distance of any stop. This metric is date/service independent.">'
 							+ node.data.title
-							+ ' EMPS (WAC)<em title="Employees Served: Unduplicated summation of '
+							+ ' EMPS (WAC)<span class="IOSym">(1)</span></th>'
+							+ '<th class="metric" title="Employees Served at Level of Service - Unduplicated summation of '
 							+ node.data.title
-							+ ' employees working within X distance of any stop. This metric is date/service independent."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-							+ '<th>'
+							+ ' employees that receive the specified minimum level of service.">'
 							+ node.data.title
-							+ ' EMPSLOS (WAC)<em title="Employees Served at Level of Service: Unduplicated summation of '
+							+ ' EMPSLOS (WAC)<span class="IOSym">(1)(2)(3)</span></th>'
+							+ '<th class="metric" title="Employees Served by Service - Unduplicated summation of '
 							+ node.data.title
-							+ ' employees that receive the specified minimum level of service."><img src="images/tooltip.png" alt="tooltip"></em></th>'
-							+ '<th>'
+							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'
 							+ node.data.title
-							+ ' EMPSS (WAC)<em title="Employees Served by Service: Unduplicated summation of '
-							+ node.data.title
-							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates."><img src="images/tooltip.png" alt="tooltip"></em></th>';
+							+ ' EMPSS (WAC)<span class="IOSym">(1)(3)</span></th>';
 				});
 	}
 	return y;
