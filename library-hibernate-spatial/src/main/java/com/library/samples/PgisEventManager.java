@@ -3448,7 +3448,7 @@ public class PgisEventManager {
 	public static MapTransit onMapStops(String[] date, String[] day, String username, double d, double[] lat, double[] lon, int dbindex) {
 		CoordinateReferenceSystem sourceCRS = null;
 		CoordinateReferenceSystem targetCRS = null;
-		MathTransform transform = null;;
+		MathTransform transform = null;
 		try {
 			sourceCRS = CRS.decode("EPSG:4326");
 			targetCRS = CRS.decode("EPSG:2993");
