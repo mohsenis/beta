@@ -3,8 +3,8 @@ var day;
 var gap;
 var vertices = {}; // declared to keep track of agencies on the map and avoid adding duplicates.
 var edges = [];
-var vertexEdgesMap = {};  // maps vertices to their edges. A1_lat+A1_lng form the key.
-var edgeVerticesMap = {}; // maps edges to their vertices. A1_lat+A1_lng+A2_lat+A2_lng form the key.
+var vertexEdgesMap = {};  // maps vertices to their edges.
+var edgeVerticesMap = {}; // maps edges to their vertices.
 var congraphobj;
 var edgeStyle = {};	// The object that contains the style setting of edges on the graph.
 edgeStyle['normal'] = {
@@ -154,7 +154,7 @@ function callBack(agencyCentroids, dbindex){
 						})
 						.on('mouseout',function(e){
 //							vertex1.closePopup(); 
-							vertex1.setStyle({weight:4, opacity:agencyStyle[vertex2.status].opacity});
+							vertex1.setStyle({weight:4, opacity:agencyStyle[vertex1.status].opacity});
 						});
 					
 					vertices[item.a1ID] = vertex1;
@@ -219,6 +219,9 @@ function callBack(agencyCentroids, dbindex){
 			// Add markers to the map
 			$.each(vertices, function(index, agencyShape){
 				map.addLayer(agencyShape);
+				
+				// Add isolated agencies to vertexEdgesMap
+//				if ()
 			});
 			
 			///////// loading agency list and check-boxes///////////////////
@@ -392,44 +395,47 @@ function toggleVertexConnections(agencyEdgesMap, edgeVerticesMap, v, agency_styl
 		color:agencyStyle[agency_style].color
 		});
 	v.status = agency_style; 
-		
-	$.each(agencyEdgesMap[v.id], function(index,item){
-		if (item instanceof L.Polyline){
-			if (item.options.opacity != edgeStyle[edge_style].opacity){
-				item.setStyle({opacity:edgeStyle[edge_style].opacity, color:edgeStyle[edge_style].color});
-				item.status = edge_style;
-				$.each(edgeVerticesMap[item.id], function(index, vertex){
-					if(vertex instanceof L.FeatureGroup){
-						$.each(vertex.getLayers(), function(index, item){
-							if (item.options.fillOpacity != agencyStyle[agency_style].opacity){
-								item.setStyle({
-									fillOpacity:agencyStyle[agency_style].opacity, 
-									opacity: agencyStyle[agency_style].opacity, 
-									fillColor:agencyStyle[agency_style].color, 
-									color:agencyStyle[agency_style].color
-									});
-								vertex.status = agency_style;
-								stop = false;
-							}
-							if (!stop){
-								toggleVertexConnections(agencyEdgesMap, edgeVerticesMap, vertex, agency_style, edge_style);
-							}
-						})
-						vertex.status = agency_style;
-					}else if (vertex.options.fillOpacity != agencyStyle[agency_style].opacity){
-						vertex.setStyle({
-							fillOpacity : agencyStyle[agency_style].opacity, 
-							opacity : agencyStyle[agency_style].opacity, 
-							fillColor : agencyStyle[agency_style].color, 
-							color : agencyStyle[agency_style].color
-							});
-						vertex.status = agency_style;
-						toggleVertexConnections(agencyEdgesMap, edgeVerticesMap, vertex, agency_style, edge_style);
-					}
-				})
-			}				
-		}
-	});
+	
+	if (agencyEdgesMap[v.id] != undefined){ 
+		$.each(agencyEdgesMap[v.id], function(index,item){
+			if (item instanceof L.Polyline){
+				if (item.options.opacity != edgeStyle[edge_style].opacity){
+					item.setStyle({opacity:edgeStyle[edge_style].opacity, color:edgeStyle[edge_style].color});
+					item.status = edge_style;
+					$.each(edgeVerticesMap[item.id], function(index, vertex){
+						if(vertex instanceof L.FeatureGroup){
+							$.each(vertex.getLayers(), function(index, item){
+								if (item.options.fillOpacity != agencyStyle[agency_style].opacity){
+									item.setStyle({
+										fillOpacity:agencyStyle[agency_style].opacity, 
+										opacity: agencyStyle[agency_style].opacity, 
+										fillColor:agencyStyle[agency_style].color, 
+										color:agencyStyle[agency_style].color
+										});
+									vertex.status = agency_style;
+									stop = false;
+								}
+								if (!stop){
+									toggleVertexConnections(agencyEdgesMap, edgeVerticesMap, vertex, agency_style, edge_style);
+								}
+							})
+							vertex.status = agency_style;
+						}else if (vertex.options.fillOpacity != agencyStyle[agency_style].opacity){
+							vertex.setStyle({
+								fillOpacity : agencyStyle[agency_style].opacity, 
+								opacity : agencyStyle[agency_style].opacity, 
+								fillColor : agencyStyle[agency_style].color, 
+								color : agencyStyle[agency_style].color
+								});
+							vertex.status = agency_style;
+							toggleVertexConnections(agencyEdgesMap, edgeVerticesMap, vertex, agency_style, edge_style);
+						}
+					})
+				}				
+			}
+		});
+	}
+	
 }
 
 /**
