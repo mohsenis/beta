@@ -3434,7 +3434,7 @@ public class PgisEventManager {
 			}
 			point = targetGeometry.getCentroid();
 			point.setSRID(2993);
-			mainquery+="stops as (select stopids.aid, stopids.routes, stopids.stopid, stop.name, array[stop.lat, stop.lon] as location, stopids.svc from stopids inner join gtfs_stops stop on "
+			mainquery+="stops as (select stopids.aid, stopids.routes, stopids.stopid, stop.name, array[stop.lat, stop.lon] as location, stop.location as loc, stopids.svc from stopids inner join gtfs_stops stop on "
 					+ "st_dwithin(stop.location,ST_GeomFromText('"+point+"',2993), "+String.valueOf(d)+")=true "
 					+ "where stop.id = stopids.stopid and stop.agencyid=stopids.aid_def),";			
 		} else {
@@ -3457,12 +3457,13 @@ public class PgisEventManager {
 				e.printStackTrace();
 			}
 			targetGeometry.setSRID(2993);
-			mainquery+="stops as (select stopids.aid, stopids.routes, stopids.stopid, stop.name, array[stop.lat, stop.lon] as location, stopids.svc from "
+			mainquery+="stops as (select stopids.aid, stopids.routes, stopids.stopid, stop.name, array[stop.lat, stop.lon] as location, stop.location as loc, stopids.svc from "
 					+ "stopids inner join gtfs_stops stop on st_within(stop.location,ST_GeomFromText('"+targetGeometry+"',2993))=true where stop.id = stopids.stopid and stop.agencyid=stopids.aid_def),";			
 		}
-		mainquery+="stopsa as (select agency.name as agency, stops.* from stops inner join gtfs_agencies agency on agency.id = stops.aid order by aid) "
+		mainquery+="stopsas as (select agency.name as agency, stops.* from stops inner join gtfs_agencies agency on agency.id = stops.aid order by aid, stopid), "
+				+ "stopsa as (select stopsas.*, array_agg(blockid) blks from stopsas , census_blocks where st_dwithin(census_blocks.location, loc,403) group by stopsas.agency, stopsas.aid, stopsas.routes, stopsas.stopid, stopsas.name, stopsas.location, stopsas.loc, stopsas.svc)"
 				+ "select * from stopsa";
-		//System.out.println(mainquery);
+		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();	
@@ -3471,7 +3472,17 @@ public class PgisEventManager {
 			//System.out.println("Query was ran successfully.");
 			int i = 0;
 			MapStop stp;
+			HashMap<String,Integer> blockSvc = new HashMap<String, Integer>();
 			while (rs.next()) {
+				String[] blks = (String[]) rs.getArray("blks").getArray();
+				for(String blkid: blks){
+					if(blockSvc.containsKey(blkid)){
+						blockSvc.put(blkid,blockSvc.get(blkid)+1);
+					}else{
+						blockSvc.put(blkid, 1);
+					}
+				}
+				
 				cid = rs.getString("aid");
 				stp = new MapStop();
 				stp.AgencyId = cid;
@@ -3555,6 +3566,8 @@ public class PgisEventManager {
 			response.MapAL = agencies;
 			response.TotalStops = String.valueOf(TotalStops);
 			response.TotalRoutes = String.valueOf(AllRouteIds.size());
+			response.MapBL = blockSvc.keySet();
+			response.MapBLS = blockSvc.values();
 			if (Fares.size()>0){
 				response.AverageFare = String.valueOf(Math.round(FareSum*100.00/Fares.size())/100.00);
 				Collections.sort(Fares);				

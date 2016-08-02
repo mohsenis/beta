@@ -29,4 +29,10 @@ public class MapTransit {
 	
 	@XmlElement(name = "MapAL")
     public Collection<MapAgency> MapAL = new ArrayList<MapAgency>();
+	
+	@XmlElement(name = "MapBL")
+    public Collection<String> MapBL = new ArrayList<String>();
+	
+	@XmlElement(name = "MapBLS")
+    public Collection<Integer> MapBLS = new ArrayList<Integer>();
 }

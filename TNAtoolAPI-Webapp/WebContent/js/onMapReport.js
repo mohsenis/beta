@@ -138,15 +138,44 @@ function doNotDelete(){
     //DONT DELETE
 };
 
+function changeSvc(b, densityValue){
+	if(b){
+		$( "input[name='blocksDensity']" ).each(function() {
+	    	  $( this ).prop( "disabled", true );
+	    });
+		$('#blockLegendDiv').hide();
+		
+		for(var i=0; i<blockCluster.length; i++){
+    		blockCluster[i].eachLayer(function (layer) {
+    			layer.setStyle({
+					radius: layer.svc,
+					weight: 2,
+					fillOpacity: 0.5,
+					fillColor: "#4b85f2",
+	            });
+	    	});
+    	}
+		
+	}else{
+		$( "input[name='blocksDensity']" ).each(function() {
+	    	  $( this ).prop( "disabled", false );
+	    });
+		$('#blockLegendDiv').show();
+		changeDensityStyle(densityValue);
+	}
+}
+
 function changeDensityStyle(densityType){
 	if(blockDensityValue!=densityType){
 		blockDensityValue = densityType;
 		switch (densityType) {
 	    case "pop":
-	    	//alert(onMapBlockCluster.getLayers().length);
 	    	for(var i=0; i<blockCluster.length; i++){
 	    		blockCluster[i].eachLayer(function (layer) {
 		    	    layer.setStyle({
+		    	    	radius: 6,
+						weight: 0,
+						fillOpacity: 0.8,
 		            	fillColor: getColorBlocks(layer.popDensity)
 		            });
 		    	});
@@ -156,6 +185,9 @@ function changeDensityStyle(densityType){
 	    	for(var i=0; i<blockCluster.length; i++){
 	    		blockCluster[i].eachLayer(function (layer) {
 		    	    layer.setStyle({
+		    	    	radius: 6,
+						weight: 0,
+						fillOpacity: 0.8,
 		            	fillColor: getColorBlocks(layer.racDensity)
 		            });
 		    	});
@@ -165,6 +197,9 @@ function changeDensityStyle(densityType){
 	    	for(var i=0; i<blockCluster.length; i++){
 	    		blockCluster[i].eachLayer(function (layer) {
 		    	    layer.setStyle({
+		    	    	radius: 6,
+						weight: 0,
+						fillOpacity: 0.8,
 		            	fillColor: getColorBlocks(layer.wacDensity)
 		            });
 		    	});
@@ -205,7 +240,10 @@ function showOnMapReport(lat, lon, date, x){
 	tractCluster = new Array();
 	pnrCluster = new Array();	
 	
+	var MapBlk;
+	var MapBlkSvc;
 	var blocksLegendFlag = 0;
+	var indx;
 	
 	var GcolorArray=['blockscluster', 'tractscluster'];
 	$('#displayTransitReport').empty();
@@ -216,13 +254,16 @@ function showOnMapReport(lat, lon, date, x){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		//url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession(),
-		url: '/TNAtoolAPI-Webapp/queries/transit/DBList',				//delete
+		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession(),
+		//url: '/TNAtoolAPI-Webapp/queries/transit/DBList',				//delete
 		async: true,
 		success: function(data){
-			//localStorage.setItem('myStorage', JSON.stringify(data));	//delete
-			data = JSON.parse(localStorage.getItem('myStorage'));		//delete
+			localStorage.setItem('myStorage', JSON.stringify(data));	//delete
+			//data = JSON.parse(localStorage.getItem('myStorage'));		//delete
 			//console.log(data);
+			
+			MapBlk = data.MapTR.MapBL;
+			MapBlkSvc = data.MapTR.MapBLS;
 			$('#ts').html(numberWithCommas(data.MapTR.TotalStops));
 			$('#tr').html(numberWithCommas(data.MapTR.TotalRoutes));
 			$('#af').html('$'+Math.round(data.MapTR.AverageFare*100)/100);
@@ -370,11 +411,20 @@ function showOnMapReport(lat, lon, date, x){
 						var marker = new L.CircleMarker([jtem.Lat,jtem.Lng], {		
 							radius: 6,		
 							fillColor: getColorBlocks(jtem.Density),		
-					        color: "#333333",		
+					        color: "#0f3885",		
 					        weight: 0,		
 					        opacity: 1,		
 					        fillOpacity: 0.8,		
 					    });
+						
+						
+						indx = MapBlk.indexOf(jtem.ID);
+						if(indx!=-1){
+							marker.svc = MapBlkSvc[indx];
+						}else{
+							marker.svc = 0;
+						}
+						
 						marker.popDensity = jtem.Density;
 						marker.racDensity = jtem.RacDensity;
 						marker.wacDensity = jtem.WacDensity;

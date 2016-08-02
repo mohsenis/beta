@@ -142,7 +142,7 @@ public class SpatialEventManager {
 				+ "	FROM a2stops JOIN a1coordinates USING(a1id)"
 				+ "	JOIN a2coordinates USING(a2id)"
 				+ "	GROUP BY a1id, a1name, a2id, a2name";
-//		System.out.println(query);
+		System.out.println(query);
 		
 		try{
 			ResultSet rs = stmt.executeQuery(query);

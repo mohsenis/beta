@@ -370,16 +370,18 @@ var dialog = $( "#dialog-form" ).dialog({
       }
   });
 
-//making the blocks legend
+// the blocks legend
 var blockDensityValue;
+var newDensityValue;
 (function () {
 	var html = $('#blocksLengend');		
     var grades = [-1, 0, 20, 100, 500, 1000, 5000, 10000];	
     // loop through our density intervals and generate a label with a colored square for each interval		
-    html =  '<p><input type="radio" name="blocksDensity" value="pop" checked>Population Density</p>'+
+    html =  '<p id="legendFirstP"><input type="checkbox" id="blockSvc" >Level of Service</p>'+
+    		'<p><input type="radio" name="blocksDensity" value="pop" checked>Population Density</p>'+
     		'<p><input type="radio" name="blocksDensity" value="rac">Employment Density</p>'+
     		'<p><input type="radio" name="blocksDensity" value="wac">Employee Density</p></br>';	
-    
+    html+='<div id="blockLegendDiv">';
     for (var i = 0; i < grades.length; i++) {		
         html += '<i style="background:' + getColorBlocks(grades[i] + 1) + '"></i> ';
         if(i==0){
@@ -390,18 +392,32 @@ var blockDensityValue;
         	html += grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');		
     	}
     }		
+    html+='</div>';
     $('#blocksLengend').html(html);
     
     $('#blocksLengend > p').css("margin-bottom","0px");
+    $('#legendFirstP').css("margin-bottom","10px");
     $('#blocksLengend > p > input').css({"vertical-align":"text-bottom","margin-right":"3px"});
     
     $('#blocksLengend').hide();
     
     blockDensityValue = "pop";
     
+    
+    $( "#blockSvc" ).change(function() {
+    	var b = this.checked;
+    	if(b){
+    		newDensityValue = blockDensityValue;
+    	}
+    	
+    	blockDensityValue = "svc";
+		changeSvc(b,newDensityValue);
+	});
+    
     $( "input[name='blocksDensity']" ).each(function() {
     	  $( this ).click(function() {
     		  //alert( $( this ).val() );
+    		  //blockDensityValue = $( this ).val();
     		  changeDensityStyle($( this ).val());
     	  });
     });
